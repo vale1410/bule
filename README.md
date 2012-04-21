@@ -9,12 +9,12 @@ beginning.  The grounder will be entirely programmed in GO!
 Milestones
 ----------
 
-* Grounding as in Gringo with simple facts, only clauses
-* Rules, implications and equivalences
-* Aggregates as in Gringo
-* Cardinality constraints
-* Weight constraints with a selection of different translations
-* Optimization statements - calling solvers parallel with branching on the optimization function
+# Grounding as in Gringo with simple facts, only clauses
+# Rules, implications and equivalences
+# Aggregates as in Gringo
+# Cardinality constraints
+# Weight constraints with a selection of different translations
+# Optimization statements - calling solvers parallel with branching on the optimization function
 
 
 Links
