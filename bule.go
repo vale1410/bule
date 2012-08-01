@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"bytes"
+    "bule_lib"
 )
 
 func main() {
@@ -19,14 +20,4 @@ func main() {
     b :=  bytes.NewBuffer(input.Content)
     fmt.Printf(b.String())
 
-}
-
-type Input struct {
-	Name    string
-	Content []byte
-}
-
-func (p *Input) save() error {
-	filename := p.Name + ".cnf"
-	return ioutil.WriteFile(filename, p.Content, 0600)
 }
