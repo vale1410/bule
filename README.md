@@ -1,4 +1,4 @@
-Bule: A State of the Art CNF Grounder
+Bule: A simple CNF Grounder
 =====================================
 
 A refreshing new CNF grounder - combining features of Gringo and Sugar. The input will be some kind of logic program as

@@ -12,5 +12,7 @@ func TestBule(t *testing.T) {
     for _,s := range input.Lines {
         fmt.Println(s)
     }
+    atoms := ParseAtoms(&input)
+    fmt.Println(atoms)
 }
 

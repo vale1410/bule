@@ -1,9 +1,7 @@
-testa(1). 
- testa(2). 
-testb(3). 
-testb(4). 
-
- hehe(X,Y) <- testa(X), testb(Y).
-
-haha(X,Y), -testa(X), -testb(Y).
+t1(1,2). 
+t1(2). 
+t1(4). 
+t1(34233). 
+t2(4). 
+t1(X),t2(X).
 
