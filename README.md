@@ -22,3 +22,5 @@ Links
 * http://potassco.sourceforge.net/
 * http://bach.istc.kobe-u.ac.jp/sugar/
 * http://golang.org/
+* http://www.cs.utexas.edu/users/vl/tag/SAT-grounders
+
