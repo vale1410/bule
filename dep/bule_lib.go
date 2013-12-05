@@ -36,7 +36,7 @@ type Input struct {
 type itemType int32
 
 const (
-    itemUnknown itemType = iota
+    emUnknown itemType = iota
     itemCNF
     itemAtom
     itemImplication
