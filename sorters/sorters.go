@@ -163,6 +163,78 @@ func (sorter *Sorter) RemoveOutput() {
 	sorter.PropagateBackwards(mapping)
 }
 
+// Normalize
+// renames the ids in the comparators from 1 to |2*comparator|
+// If in is empty, replaces ids by offset, offset+1 ...
+// Replaces In vector with argument
+// Then renames new ids starting with offset
+// Returns last offset + 1
+// All Ids with -1,0,1 in C,D of a comparator are ignored and not renamed
+func (s *Sorter) Normalize(offset int, in []int) (maxId int) {
+
+	mapping := make(map[int]int, len(s.In)+2*len(s.Comparators))
+
+	if len(in) == 0 {
+		in = make([]int, len(s.In))
+		for i, _ := range in {
+			in[i] = offset
+			offset++
+		}
+	}
+
+	if len(s.In) != len(in) {
+		log.Panic("Input vector (1)  and size of sorter (2)  differ:", len(in), len(s.In))
+	}
+
+	if offset < 2 {
+		log.Panic("Offset has to be at least 2 in sorter.Normalize")
+	}
+
+	for i, id := range s.In {
+		mapping[id] = in[i]
+		s.In[i] = in[i]
+	}
+
+	for i, comp := range s.Comparators {
+
+		a, aok := mapping[comp.A]
+		b, bok := mapping[comp.B]
+		_, cok := mapping[comp.C]
+		_, dok := mapping[comp.D]
+
+		if !aok || !bok || cok || dok {
+			log.Panic("Normalize: cannot rename ids",comp)
+		}
+
+		s.Comparators[i].A = a
+		s.Comparators[i].B = b
+
+		if comp.C > 1 {
+			mapping[comp.C] = offset
+			s.Comparators[i].C = offset
+			offset++
+		}
+
+		if comp.D > 1 {
+			mapping[comp.D] = offset
+			s.Comparators[i].D = offset
+			offset++
+		}
+	}
+
+	for i, id := range s.Out {
+		a, aok := mapping[id]
+
+		if !aok {
+			log.Panic("Normalize: cannot rename ids",id,mapping[id])
+		}
+
+		s.Out[i] = a
+	}
+
+	return offset
+}
+
 // PropagateOrdering
 // from 0..cut-1 sorted and from cut .. length-1 sorted
 // propagated and remove comparators

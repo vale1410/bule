@@ -2,6 +2,7 @@ package pb
 
 import (
 	"fmt"
+	"github.com/vale1410/bule/sorters"
 	"math"
 	"strconv"
 	"testing"
@@ -24,29 +25,39 @@ func TestExample(test *testing.T) {
 	t.Print10()
 	t.Print2()
 
-}
+	t.CreateSortingEncoding(sorters.Bitonic)
 
-func TestJapan1(test *testing.T) {
-	t := createJapan1(8)
+	sorters.PrintSorterTikZ(t.Sorter,"tmp/sorterPseudoBoolean.tex")
 
-	t.Print10()
-	t.Print2()
+
 
 }
 
-func TestJapan2(test *testing.T) {
-	t := createJapan2(4)
+//func TestJapan1(test *testing.T) {
+//	t := createJapan1(16)
+//
+//	t.Print10()
+//	t.Print2()
+//
+//	t.CreateBags()
+//
+//}
+//
+//func TestJapan2(test *testing.T) {
+//	t := createJapan2(4)
+//
+//	t.Print10()
+//	t.Print2()
+//
+//	t.CreateBags()
+//}
 
-	t.Print10()
-	t.Print2()
-
-}
-
-func TestBinary(test *testing.T) {
-	fmt.Println()
-	n := int64(10)
-	fmt.Println(binary(n))
-}
+//
+//func TestBinary(test *testing.T) {
+//	fmt.Println()
+//	n := int64(10)
+//	fmt.Println(binary(n))
+//}
 
 // creats a Threshold function of size n (n must be even)
 // given in "Size of OBDDs representing threshold functions"
@@ -102,7 +113,7 @@ func createJapan2(k int) (t Threshold) {
 			x = x * 2
 		}
 		y = y * 2
-        x = int64(1)
+		x = int64(1)
 	}
 
 	t.K = t.K / 2

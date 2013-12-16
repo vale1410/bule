@@ -5,10 +5,9 @@ package sat
 import (
 	"bufio"
 	"fmt"
+	"github.com/vale1410/bule/sorters"
 	"os"
 	"strconv"
-	"testing"
-    "../sorters"
 )
 
 // Create Encoding for Sorting Network

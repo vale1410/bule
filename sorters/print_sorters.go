@@ -27,7 +27,7 @@ func (l pairSlice) Less(i, j int) bool {
 	}
 }
 
-func printSorterTikZ(sorter Sorter, filename string) {
+func PrintSorterTikZ(sorter Sorter, filename string) {
 
 	// group
 

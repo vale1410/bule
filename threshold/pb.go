@@ -2,6 +2,7 @@ package pb
 
 import (
 	"fmt"
+	"github.com/vale1410/bule/sorters"
 	"math"
 )
 
@@ -11,6 +12,7 @@ const (
 	AtMost EquationType = iota
 	AtLeast
 	Equal
+	Optimization
 )
 
 type Entry struct {
@@ -30,6 +32,154 @@ type Threshold struct {
 	Entries []Entry
 	K       int64
 	Typ     EquationType
+	Bags    [][]Literal
+	Sorter  sorters.Sorter
+	LitIn   []Literal //Bags flattened, input to Sorter
+}
+
+func (t *Threshold) CreateSortingEncoding(typ sorters.SortingNetworkType) {
+
+	t.CreateBags()
+
+	//typ := sorters.Pairwise
+
+	layers := make([]sorters.Sorter, len(t.Bags))
+
+	for i, bag := range t.Bags {
+
+		layers[i] = sorters.CreateSortingNetwork(len(bag), -1, typ)
+
+		t.LitIn = append(t.LitIn, bag...)
+	}
+
+	t.Sorter.In = make([]int, 0, len(t.LitIn))
+
+	//collaps all into one sorter, doing the halving ...
+
+	bIn := make([]int, 0)
+
+	offset := 2
+
+	for i, layer := range layers {
+
+		halver := sorters.CreateSortingNetwork(len(bIn), -1, typ)
+
+		offset = halver.Normalize(offset, bIn)
+		t.Sorter.Comparators = append(t.Sorter.Comparators, halver.Comparators...)
+
+		fmt.Println(i, "debug: halver", halver)
+
+		offset = layer.Normalize(offset, []int{})
+		t.Sorter.Comparators = append(t.Sorter.Comparators, layer.Comparators...)
+
+		fmt.Println(i, "debug: layer", layer)
+
+		t.Sorter.In = append(t.Sorter.In, layer.In...)
+
+		size := len(bIn) + len(layers[i].In)
+
+		fmt.Println(i, "debug: size", size)
+
+		combinedOut := make([]int, 0, size)
+		combinedOut = append(combinedOut, halver.Out...)
+		combinedOut = append(combinedOut, layer.Out...)
+
+		fmt.Println(i, "debug: combinedOut", combinedOut)
+
+		combinedSorter := sorters.CreateSortingNetwork(size, len(bIn), typ)
+		offset = combinedSorter.Normalize(offset, combinedOut)
+
+		bIn = make([]int, len(combinedSorter.Out)/2)
+
+		// halving circuit
+
+		mapping := make(map[int]int, size)
+
+		for j, x := range combinedSorter.Out {
+			if j%2 == 1 {
+				bIn[j/2] = x
+			} else {
+				mapping[combinedSorter.Out[j]] = -1
+				combinedSorter.Out[j] = -1
+			}
+		}
+
+		fmt.Println(i, "debug: mapping", mapping)
+
+		combinedSorter.PropagateBackwards(mapping)
+
+		fmt.Println(i, "debug: combinedSorter", combinedSorter)
+
+		t.Sorter.Comparators = append(t.Sorter.Comparators, combinedSorter.Comparators...)
+
+		fmt.Println(i, "debug: tSorter", t.Sorter)
+	}
+
+    offset = t.Sorter.Normalize(2, []int{})
+	t.Sorter.Out = make([]int, 1)
+	t.Sorter.Out[0] = offset - 1
+
+	fmt.Println("final debug: tSorter", t.Sorter)
+	fmt.Println("final debug: t.LitIn", t.LitIn)
+
+}
+
+// transform negative weights
+// check if maximum reaches K at all
+// sort by weight
+func (t *Threshold) Normalize() {
+
+	total := int64(0)
+
+	for _, e := range t.Entries {
+		total += e.Weight
+	}
+
+	if total < t.K {
+		fmt.Println("sum of weights is too low!")
+	}
+
+}
+
+func (t *Threshold) CreateBags() {
+
+	nBags := len(binary(t.K))
+	bins := make([][]int, len(t.Entries))
+	bagPos := make([]int, nBags)
+	bagSize := make([]int, nBags)
+
+	for i, e := range t.Entries {
+		bins[i] = binary(e.Weight)
+
+		for j, x := range bins[i] {
+			bagSize[len(bins[i])-j-1] += x
+		}
+
+	}
+
+	t.Bags = make([][]Literal, len(binary(t.K)))
+
+	for i, _ := range t.Bags {
+		t.Bags[i] = make([]Literal, bagSize[i]+1)
+		t.Bags[i][bagSize[i]] = Literal{true, Atom(100 + i)}
+	}
+
+	for i, e := range t.Entries {
+		for j, x := range bins[i] {
+			pos := len(bins[i]) - j - 1
+			if x == 1 {
+				t.Bags[pos][bagPos[pos]] = e.Lit
+				bagPos[pos]++
+			}
+		}
+	}
+
+	fmt.Println(t.Bags)
+
+}
+
+func (t *Threshold) AddTare() {
+
 }
 
 // binary

@@ -3,22 +3,22 @@ package sat
 // test class, but will eventuall be turned into the sat package :-)
 
 import (
-	"bufio"
-	"fmt"
+	"github.com/vale1410/bule/sorters"
 	"os"
 	"strconv"
 	"testing"
-    "../sorters"
 )
 
 func TestWhichClauses(t *testing.T) {
 
 	//sizes := []int{100,112,128,144,160,176}
-	sizes := []int{500,750,1000}
-    //sizes := []int{}
-	//typs := []sorters.SortingNetworkType{Bubble, Bitonic, OddEven, Pairwise}
+	//sizes := []int{500, 750, 1000}
+	sizes := []int{10, 20, 30}
+	//sizes := []int{}
+	typs := []sorters.SortingNetworkType{sorters.Bubble, sorters.Bitonic, sorters.OddEven, sorters.Pairwise}
 	//typs := []sorters.SortingNetworkType{Bitonic, OddEven, Pairwise}
-	typs := []sorters.SortingNetworkType{OddEven, Pairwise}
+	//typs := []sorters.SortingNetworkType{sorters.OddEven, sorters.Pairwise}
+	//typs := []sorters.SortingNetworkType{sorters.Pairwise}
 	whichT := []int{1, 2, 3, 4}
 	lt := Pred("AtMost")
 	gt := Pred("AtLeast")
@@ -29,8 +29,8 @@ func TestWhichClauses(t *testing.T) {
 				//k := int(0.05 * float64(size))
 				k := size / 4
 				//k := size - size/4
-				sorter1 := sorters.CreateCardinalityNetwork(size, k, AtMost, typ)
-				sorter2 := sorters.CreateCardinalityNetwork(size, k+1, AtLeast, typ)
+				sorter1 := sorters.CreateCardinalityNetwork(size, k, sorters.AtMost, typ)
+				sorter2 := sorters.CreateCardinalityNetwork(size, k+1, sorters.AtLeast, typ)
 				sorter1.RemoveOutput()
 				sorter2.RemoveOutput()
 
@@ -59,10 +59,10 @@ func TestWhichClauses(t *testing.T) {
 
 				clauses := createEncoding(input, which1, []Literal{}, "lt", lt, sorter1)
 				clauses.AddClauseSet(createEncoding(input, which2, []Literal{}, "gt", gt, sorter2))
-	            g := IdGenerator(size * size)
-	            g.GenerateIds(clauses)
-	            g.filename = strconv.Itoa(size) + "_" + strconv.Itoa(k) + "_" + typ.String() + "_" + strconv.Itoa(wh)+".cnf"
-	            g.printClausesDIMACS(clauses)
+				g := IdGenerator(size * size)
+				g.GenerateIds(clauses)
+				g.filename = os.TempDir() + "/" + strconv.Itoa(size) + "_" + strconv.Itoa(k) + "_" + typ.String() + "_" + strconv.Itoa(wh) + ".cnf"
+				g.printClausesDIMACS(clauses)
 			}
 		}
 	}

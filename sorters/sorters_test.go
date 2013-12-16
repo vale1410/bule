@@ -18,12 +18,39 @@ import (
 //
 //}
 
-func TestStuff(t *testing.T) {
+func TestNormalize(t *testing.T) {
 
-	fmt.Println("Print to TeX shit")
-	sorter := CreateSortingNetwork(16,-1,Pairwise)
-	printSorterTikZ(sorter,"pairwise16.tex")
+	fmt.Println("TestNormalization")
+
+	sorter := CreateSortingNetwork(8, -1, Pairwise)
+
+	ids1 := make(map[int]bool, len(sorter.Comparators)*4)
+
+	for _, comp := range sorter.Comparators {
+		ids1[comp.A] = true
+		ids1[comp.B] = true
+		ids1[comp.C] = true
+		ids1[comp.D] = true
+	}
+
+	offset := 100
+
+    var in []int
+
+	max := sorter.Normalize(offset,in)
+
+	if max-offset != len(ids1) {
+		t.Error("Normalize failed")
+	}
+
 }
+
+//func TestStuff(t *testing.T) {
+//
+//	fmt.Println("Print to TeX shit")
+//	sorter := CreateSortingNetwork(16,-1,Pairwise)
+//	PrintSorterTikZ(sorter,"pairwise16.tex")
+//}
 
 // TestCardinality check constraint sum n <= k
 // TestAtLeast check constraint sum n >= k
