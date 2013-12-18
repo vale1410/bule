@@ -33,8 +33,8 @@ type Threshold struct {
 	K       int64
 	Typ     EquationType
 	Bags    [][]Literal
-	Sorter  sorters.Sorter
 	LitIn   []Literal //Bags flattened, input to Sorter
+	Sorter  sorters.Sorter
 }
 
 func (t *Threshold) CreateSortingEncoding(typ sorters.SortingNetworkType) {
@@ -60,6 +60,8 @@ func (t *Threshold) CreateSortingEncoding(typ sorters.SortingNetworkType) {
 
 	offset := 2
 
+	fmt.Println("debug: layers", t.Bags)
+
 	for i, layer := range layers {
 
 		halver := sorters.CreateSortingNetwork(len(bIn), -1, typ)
@@ -80,14 +82,15 @@ func (t *Threshold) CreateSortingEncoding(typ sorters.SortingNetworkType) {
 
 		fmt.Println(i, "debug: size", size)
 
-		combinedOut := make([]int, 0, size)
-		combinedOut = append(combinedOut, halver.Out...)
-		combinedOut = append(combinedOut, layer.Out...)
+		combinedIn := make([]int, 0, size)
+		combinedIn = append(combinedIn, halver.Out...)
+		combinedIn = append(combinedIn, layer.Out...)
 
-		fmt.Println(i, "debug: combinedOut", combinedOut)
-
+		fmt.Println(i, "debug: combinedSorter size,cut", size, len(bIn))
 		combinedSorter := sorters.CreateSortingNetwork(size, len(bIn), typ)
-		offset = combinedSorter.Normalize(offset, combinedOut)
+		fmt.Println(i, "debug: combinedSorter", combinedSorter)
+		fmt.Println(i, "debug: combinedIn", combinedIn)
+		offset = combinedSorter.Normalize(offset, combinedIn)
 
 		bIn = make([]int, len(combinedSorter.Out)/2)
 
@@ -115,13 +118,10 @@ func (t *Threshold) CreateSortingEncoding(typ sorters.SortingNetworkType) {
 		fmt.Println(i, "debug: tSorter", t.Sorter)
 	}
 
-    offset = t.Sorter.Normalize(2, []int{})
+	offset = t.Sorter.Normalize(2, []int{})
 	t.Sorter.Out = make([]int, 1)
 	t.Sorter.Out[0] = offset - 1
-
 	fmt.Println("final debug: tSorter", t.Sorter)
-	fmt.Println("final debug: t.LitIn", t.LitIn)
-
 }
 
 // transform negative weights

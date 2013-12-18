@@ -10,27 +10,53 @@ import (
 
 func TestExample(test *testing.T) {
 
-	weights := []int64{11, 10, 6, 5}
+	//t := createJapan2(2)
 
-	var t Threshold
-	t.Desc = "Simple Test"
-	t.K = 25
-	t.Typ = AtMost
-	t.Entries = make([]Entry, len(weights))
+	//t := createJapan2(3)
+	t := createExample1()
 
-	for i, x := range weights {
-		t.Entries[i] = Entry{Literal{true, Atom(i)}, x}
-	}
+	typ := sorters.OddEven
 
 	t.Print10()
 	t.Print2()
 
-	t.CreateSortingEncoding(sorters.Bitonic)
+	t.CreateSortingEncoding(typ)
 
-	sorters.PrintSorterTikZ(t.Sorter,"tmp/sorterPseudoBoolean.tex")
+	sorters.PrintSorterTikZ(t.Sorter, "tmp/sorterPseudoBoolean.tex")
+}
 
+func createExample1() (t Threshold) {
+	weights := []int64{11, 10, 6, 5}
+	t.K = 25
 
+	t.Desc = "Simple Test"
+	t.Typ = AtMost
+	t.Entries = make([]Entry, len(weights))
 
+	for i := 0; i < len(weights); i++ {
+		t.Entries[i] = Entry{Literal{true, Atom(i)}, weights[i]}
+	}
+	return
+}
+
+func createSimple(n int) (t Threshold) {
+
+	//weights := []int64{11, 10, 6, 5}
+	//t.K = 25
+
+	//weights := []int64{4,4,4,4,4,4,4,4}
+
+	t.K = 2 * int64(n)
+
+	t.Desc = "Simple Test"
+	t.Typ = AtMost
+	t.Entries = make([]Entry, n)
+
+	for i := 0; i < n; i++ {
+		x := int64(5)
+		t.Entries[i] = Entry{Literal{true, Atom(i)}, x}
+	}
+	return
 }
 
 //func TestJapan1(test *testing.T) {

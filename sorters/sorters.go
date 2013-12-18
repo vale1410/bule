@@ -203,7 +203,7 @@ func (s *Sorter) Normalize(offset int, in []int) (maxId int) {
 		_, dok := mapping[comp.D]
 
 		if !aok || !bok || cok || dok {
-			log.Panic("Normalize: cannot rename ids",comp)
+			log.Panic("Normalize: 1 cannot rename ids ", comp)
 		}
 
 		s.Comparators[i].A = a
@@ -226,7 +226,7 @@ func (s *Sorter) Normalize(offset int, in []int) (maxId int) {
 		a, aok := mapping[id]
 
 		if !aok {
-			log.Panic("Normalize: cannot rename ids",id,mapping[id])
+			log.Panic("Normalize: 2 cannot rename ids ", id, mapping[id])
 		}
 
 		s.Out[i] = a
@@ -236,17 +236,28 @@ func (s *Sorter) Normalize(offset int, in []int) (maxId int) {
 }
 
 // PropagateOrdering
+// cut >= 0, cut=-1 means no cut
 // from 0..cut-1 sorted and from cut .. length-1 sorted
 // propagated and remove comparators
 func (sorter *Sorter) PropagateOrdering(cut int) {
 
-	if cut <= 0 || cut >= len(sorter.In) {
+	if cut < 0 { // signal for no cut
 		return
+	} else if cut == 0 || cut == len(sorter.In) {
+        // the stuff is already sorted, remove comparators
+        sorter.Comparators = []Comparator{}
+        copy(sorter.Out,sorter.In)
 	} else {
 
 		mapping := make(map[int]int, len(sorter.Comparators))
-		l := 0
-		s := len(sorter.In)
+		location := make(map[int]bool, len(sorter.Comparators))
+
+		for i, x := range sorter.In {
+			mapping[x] = x
+			location[x] = i >= cut
+		}
+
+		nRemove := 0
 		comparators := sorter.Comparators
 
 		zero := Comparator{0, 0, 0, 0}
@@ -268,28 +279,28 @@ func (sorter *Sorter) PropagateOrdering(cut int) {
 				b = comp.B
 			}
 
-			if a < s && b < s && (a >= sorter.In[cut] || b < sorter.In[cut]) {
+			la, laok := location[comp.A]
+			lb, lbok := location[comp.B]
+
+			if laok && lbok && la == lb {
 				// we have an already sorted input
 				mapping[comp.C] = a
 				mapping[comp.D] = b
+				location[comp.C] = la
+				location[comp.D] = lb
 				comparators[i] = zero
-				l++
+				nRemove++
 			}
 		}
-
 		//remove zeros and then return comparators
-		out := make([]Comparator, 0, l)
+		out := make([]Comparator, 0, len(sorter.Comparators)-nRemove)
 
 		for _, comp := range comparators {
 			if comp != zero {
 				out = append(out, comp)
 			}
 		}
-
-		//log.Println("Propagate Ordering with cut", cut, ", after size ", len(comparators)-l, "sorters")
-
 		sorter.Comparators = out
-
 		return
 	}
 }
