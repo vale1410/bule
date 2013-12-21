@@ -148,6 +148,8 @@ func (t *Threshold) CreateBags() {
 	bagPos := make([]int, nBags)
 	bagSize := make([]int, nBags)
 
+	maxWeight := int64(0)
+
 	for i, e := range t.Entries {
 		bins[i] = binary(e.Weight)
 
@@ -155,13 +157,17 @@ func (t *Threshold) CreateBags() {
 			bagSize[len(bins[i])-j-1] += x
 		}
 
+		if maxWeight < e.Weight {
+			maxWeight = e.Weight
+		}
+
 	}
 
-	t.Bags = make([][]Literal, len(binary(t.K)))
+	t.Bags = make([][]Literal, len(binary(maxWeight)))
 
 	for i, _ := range t.Bags {
 		t.Bags[i] = make([]Literal, bagSize[i]+1)
-		t.Bags[i][bagSize[i]] = Literal{true, Atom(100 + i)}
+		//t.Bags[i][bagSize[i]] = Literal{true, Atom(100 + i)}
 	}
 
 	for i, e := range t.Entries {

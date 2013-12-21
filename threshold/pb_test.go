@@ -25,39 +25,6 @@ func TestExample(test *testing.T) {
 	sorters.PrintSorterTikZ(t.Sorter, "tmp/sorterPseudoBoolean.tex")
 }
 
-func createExample1() (t Threshold) {
-	weights := []int64{11, 10, 6, 5}
-	t.K = 25
-
-	t.Desc = "Simple Test"
-	t.Typ = AtMost
-	t.Entries = make([]Entry, len(weights))
-
-	for i := 0; i < len(weights); i++ {
-		t.Entries[i] = Entry{Literal{true, Atom(i)}, weights[i]}
-	}
-	return
-}
-
-func createSimple(n int) (t Threshold) {
-
-	//weights := []int64{11, 10, 6, 5}
-	//t.K = 25
-
-	//weights := []int64{4,4,4,4,4,4,4,4}
-
-	t.K = 2 * int64(n)
-
-	t.Desc = "Simple Test"
-	t.Typ = AtMost
-	t.Entries = make([]Entry, n)
-
-	for i := 0; i < n; i++ {
-		x := int64(5)
-		t.Entries[i] = Entry{Literal{true, Atom(i)}, x}
-	}
-	return
-}
 
 //func TestJapan1(test *testing.T) {
 //	t := createJapan1(16)
@@ -84,6 +51,64 @@ func createSimple(n int) (t Threshold) {
 //	n := int64(10)
 //	fmt.Println(binary(n))
 //}
+func createExample1() (t Threshold) {
+	weights := []int64{11, 10, 6, 5}
+	t.K = 25
+
+	t.Desc = "Simple Test"
+	t.Typ = AtMost
+	t.Entries = make([]Entry, len(weights))
+
+	for i := 0; i < len(weights); i++ {
+		t.Entries[i] = Entry{Literal{true, Atom(i)}, weights[i]}
+	}
+	return
+}
+
+func createSimple(n int) (t Threshold) {
+
+	t.K = 2 * int64(n)
+
+	t.Desc = "Simple Test"
+	t.Typ = AtMost
+	t.Entries = make([]Entry, n)
+
+	for i := 0; i < n; i++ {
+		x := int64(5)
+		t.Entries[i] = Entry{Literal{true, Atom(i)}, x}
+	}
+	return
+}
+
+func createIgnasi1() (t Threshold) {
+
+	weights := []int64{4, 3, 1, 1, 1, 1}
+	t.K = 14
+
+	t.Desc = "Ignasi 1"
+	t.Typ = AtMost
+	t.Entries = make([]Entry, len(weights))
+
+	for i := 0; i < len(weights); i++ {
+		t.Entries[i] = Entry{Literal{true, Atom(i)}, weights[i]}
+	}
+	return
+}
+
+func createIgnasi2() (t Threshold) {
+
+	weights := []int64{7, 6, 2, 2, 2, 2, 1, 1, 1, 1, 1}
+	t.K = 12
+
+	t.Desc = "Ignasi 2"
+	t.Typ = AtMost
+	t.Entries = make([]Entry, len(weights))
+
+	for i := 0; i < len(weights); i++ {
+		t.Entries[i] = Entry{Literal{true, Atom(i)}, weights[i]}
+	}
+	return
+}
 
 // creats a Threshold function of size n (n must be even)
 // given in "Size of OBDDs representing threshold functions"
