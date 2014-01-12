@@ -10,11 +10,32 @@ import (
 
 func TestExample(test *testing.T) {
 
-	//t := createJapan2(2)
+    //Example 1
+	//t := createCardinality(8,4,1)
+    //filename := "cardinality_8_4_1"
 
-	//t := createJapan2(3)
-	t := createExample1()
+    //Example 2
+	//t := createCardinality(8,16,4)
+    //filename := "cardinality_8_16_4"
 
+    //Example 3
+	//t := createCardinality(8,12,3)
+    //filename := "cardinality_8_12_3"
+
+    //Example 4
+	//t := createExample1()
+    //filename := "example1"
+
+    //Example 5
+	//t := createJapan1(10)
+    //filename := "japan1_10"
+
+    //Example 6
+	t := createJapan2(3)
+    filename := "japan2_3"
+
+
+	//typ := sorters.OddEven
 	typ := sorters.OddEven
 
 	t.Print10()
@@ -22,7 +43,9 @@ func TestExample(test *testing.T) {
 
 	t.CreateSortingEncoding(typ)
 
-	sorters.PrintSorterTikZ(t.Sorter, "tmp/sorterPseudoBoolean.tex")
+    fmt.Println("sorter size comparators", len(t.Sorter.Comparators))
+
+	sorters.PrintSorterTikZ(t.Sorter, "tmp/"+filename+".tex")
 }
 
 
@@ -65,6 +88,21 @@ func createExample1() (t Threshold) {
 	return
 }
 
+func createCardinality(n int,k int64, weight int64) (t Threshold) {
+
+	t.K = k
+
+	t.Desc = "Cardinality Test"
+	t.Typ = AtMost
+	t.Entries = make([]Entry, n)
+
+	for i := 0; i < n; i++ {
+		t.Entries[i] = Entry{Literal{true, Atom(i)}, weight}
+	}
+
+	return
+}
+
 func createSimple(n int) (t Threshold) {
 
 	t.K = 2 * int64(n)
@@ -83,7 +121,7 @@ func createSimple(n int) (t Threshold) {
 func createIgnasi1() (t Threshold) {
 
 	weights := []int64{4, 3, 1, 1, 1, 1}
-	t.K = 14
+	t.K = 5
 
 	t.Desc = "Ignasi 1"
 	t.Typ = AtMost

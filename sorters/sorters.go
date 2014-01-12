@@ -165,8 +165,9 @@ func (sorter *Sorter) RemoveOutput() {
 
 // Normalize
 // renames the ids in the comparators from 1 to |2*comparator|
-// If in is empty, replaces ids by offset, offset+1 ...
-// Replaces In vector with argument
+// If array in is empty, replaces ids by offset, offset+1 ...
+// Otherwise use ides in In array for renaming, and only replace all other ids
+// Then Replaces In array with argument
 // Then renames new ids starting with offset
 // Returns last offset + 1
 // All Ids with -1,0,1 in C,D of a comparator are ignored and not renamed
