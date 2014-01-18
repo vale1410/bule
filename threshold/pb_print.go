@@ -1,14 +1,26 @@
-package sorters
+package threshold
 
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"sort"
+	"strconv"
 )
 
+func (l Literal) ToTex() (s string) {
+	if !l.Sign {
+		s += "\\bar "
+	}
+	s += "x_{"
+	s += strconv.Itoa(int(l.Atom))
+	s += "}"
+
+	return
+}
+
 type pair struct {
-	A, B int
+	A, B     int
+	idA, idB int
 }
 
 type pairSlice []pair
@@ -27,9 +39,12 @@ func (l pairSlice) Less(i, j int) bool {
 	}
 }
 
-func PrintSorterTikZ(sorter Sorter, filename string) {
+func (t *Threshold) PrintThresholdTikZ(filename string) {
 
 	// group
+
+	sorter := t.Sorter
+	showIds := true
 
 	depth := make(map[int]int, len(sorter.Comparators))
 	lines := make(map[int]int, len(sorter.Comparators))
@@ -59,10 +74,12 @@ func PrintSorterTikZ(sorter Sorter, filename string) {
 				groups = append(groups, group)
 			}
 
-			p := pair{lines[x.A], lines[x.B]}
+			p := pair{lines[x.A], lines[x.B], x.C, x.D}
 
 			if p.A >= p.B {
-				fmt.Println("something is wrong", p)
+
+				fmt.Println("something is wrong with comparator", x)
+				fmt.Println("something is and pair", p)
 			}
 
 			groups[max-1] = append(groups[max-1], p)
@@ -112,7 +129,7 @@ func PrintSorterTikZ(sorter Sorter, filename string) {
 
 	// groups contains the comparators for each depth
 	// layers is a map for layering the comparators in each
-	//  depth such they dont overlap
+	// group such they dont overlap
 
 	//lets start drawing it :-)
 
@@ -120,28 +137,36 @@ func PrintSorterTikZ(sorter Sorter, filename string) {
 	groupDist := 1.0
 	lineDist := 1.0
 
+	symbolsTex := make(map[int]string, 3)
+	symbolsTex[-1] = "\\ast"
+	symbolsTex[0] = "0"
+	symbolsTex[1] = "1"
+
 	file, ok := os.Create(filename)
 	if ok != nil {
 		panic("Can open file to write.")
 	}
 
 	file.Write([]byte(fmt.Sprintln(`
-    \documentclass{article}
-    
-    \usepackage[latin1]{inputenc}
-    \usepackage{tikz}
-    \usetikzlibrary{shapes,arrows}
-    \begin{document}
-    \pagestyle{empty}
-    \tikzset{cross/.style = 
-        {inner sep=0pt,minimum size=3pt,fill,circle}}
-    \centering 
-    \resizebox {\columnwidth} {!} {
-    \begin{tikzpicture}[node distance=1cm, auto]`)))
+\documentclass{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+\usetikzlibrary{decorations.pathreplacing}
+\begin{document}
+\pagestyle{empty}
+\tikzset{cross/.style = 
+    {inner sep=0pt,minimum size=3pt,fill,circle}}
+\centering 
+\resizebox {\columnwidth} {!} {
+\begin{tikzpicture}[node distance=1cm, auto]`)))
 
 	length := 0.0
 
 	maxLayerDist := 0
+
+	lineLength := make([]float64, len(sorter.In))
 
 	for i, group := range groups {
 
@@ -156,11 +181,30 @@ func PrintSorterTikZ(sorter Sorter, filename string) {
 			d := length + float64(layer[comp])*layerDist
 			A := float64(comp.A) * lineDist
 			B := float64(comp.B) * lineDist
-			s1 := "\\draw[thick] (%v,%v) to (%v,%v);\n"
-			s2 := "\\node[cross] at (%v,%v) {};\n"
+			s1 := "     \\draw[thick] (%v,%v) to (%v,%v);\n"
+			s2 := "     \\node[cross] at (%v,%v) {};\n"
 			file.Write([]byte(fmt.Sprintf(s1, d, A, d, B)))
 			file.Write([]byte(fmt.Sprintf(s2, d, A)))
 			file.Write([]byte(fmt.Sprintf(s2, d, B)))
+
+			if showIds {
+				s3 := "     \\node at (%v,%v) {$%v$};\n"
+
+				if comp.idA < 2 {
+					lineLength[comp.A] = d + layerDist
+					file.Write([]byte(fmt.Sprintf(s3, d+2*layerDist, A, symbolsTex[comp.idA])))
+				}
+
+				if comp.idB < 2 {
+					lineLength[comp.B] = d + layerDist
+					file.Write([]byte(fmt.Sprintf(s3, d+2*layerDist, B, symbolsTex[comp.idB])))
+				}
+
+				//debug
+				file.Write([]byte(fmt.Sprintf(s3, d+layerDist, A+layerDist, comp.idA)))
+				file.Write([]byte(fmt.Sprintf(s3, d+layerDist, B+layerDist, comp.idB)))
+			}
+
 		}
 
 		length += float64(maxLayerDist)*layerDist + groupDist
@@ -168,72 +212,44 @@ func PrintSorterTikZ(sorter Sorter, filename string) {
 	}
 
 	for i, _ := range sorter.In {
+		s1 := "    \\draw[thick] (%v,%v) to (%v,%v);\n"
+		hight := float64(i) * lineDist
+		var d float64
+		if lineLength[i] > 0.0 {
+			d = lineLength[i]
+		} else {
+			d = length - groupDist + layerDist
+		}
+		file.Write([]byte(fmt.Sprintf(s1, -layerDist, hight, d, hight)))
+	}
 
-		s1 := "\\draw[thick] (%v,%v) to (%v,%v);\n"
-		file.Write([]byte(fmt.Sprintf(s1, -layerDist, i, length-groupDist+layerDist, i)))
+	if showIds {
+
+		// i is level
+		pos := 0
+
+		for i, bag := range t.Bags {
+			start := pos
+
+			col1 := -3 * layerDist
+			col2 := -2 * layerDist
+
+			for _, lit := range bag {
+				s := "     \\node at (%v,%v) {$%v$};\n"
+				file.Write([]byte(fmt.Sprintf(s, col2, pos, lit.ToTex())))
+				pos++
+			}
+
+			if len(bag) > 0 {
+				s1 := "\\draw[thick,decorate,decoration={brace,amplitude=5pt},xshift=-4pt,yshift=0pt] (%v,%v) -- (%v,%v) node [black,midway,xshift=-5pt] {$2^%v$};"
+				file.Write([]byte(fmt.Sprintf(s1, col1, start, col1, pos-1, i)))
+			}
+
+		}
 	}
 
 	file.Write([]byte(fmt.Sprintln(`
-    \end{tikzpicture}
-    }
-    \end{document}`)))
+\end{tikzpicture}
 }
-
-func printSorterDot(sorter Sorter, filename string) {
-
-	file, ok := os.Create(filename)
-	if ok != nil {
-		panic("Can open file to write.")
-	}
-	file.Write([]byte(fmt.Sprintln("digraph {")))
-	file.Write([]byte(fmt.Sprintln("  graph [rankdir = LR, splines=ortho];")))
-
-	rank := "{rank=same; "
-	for i := 0; i < len(sorter.Out); i++ {
-		if sorter.Out[i] > 1 {
-			rank += fmt.Sprintf(" t%v ", sorter.Out[i])
-		}
-	}
-	rank += "}; "
-
-	for i := 0; i < len(sorter.Out); i++ {
-		file.Write([]byte(fmt.Sprintf("n%v -> t%v\n", sorter.In[i], sorter.In[i])))
-	}
-
-	file.Write([]byte(rank))
-	rank = "{rank=same; "
-	for i := 0; i < len(sorter.Out); i++ {
-		rank += fmt.Sprintf(" t%v ", sorter.In[i])
-	}
-	rank += "}; "
-	file.Write([]byte(rank))
-
-	//var rank string
-	for _, comp := range sorter.Comparators {
-		rank = "{rank=same; "
-		rank += fmt.Sprintf(" t%v t%v ", comp.A, comp.B)
-		rank += "}; "
-		file.Write([]byte(rank))
-	}
-
-	for _, comp := range sorter.Comparators {
-		if comp.A > 1 && comp.B > 1 {
-			//file.Write([]byte(fmt.Sprintf("t%v -> t%v [dir=none]\n", comp.A, comp.B)))
-			file.Write([]byte(fmt.Sprintf("t%v -> t%v \n", comp.B, comp.A)))
-		}
-		if comp.C > 1 {
-			file.Write([]byte(fmt.Sprintf("t%v -> t%v \n", comp.A, comp.C)))
-		}
-		if comp.D > 1 {
-
-			file.Write([]byte(fmt.Sprintf("t%v -> t%v \n", comp.B, comp.D)))
-		}
-	}
-	file.Write([]byte(fmt.Sprintln("}")))
-	// run dot stuff
-	dotPng := exec.Command("dot", "-Tpng", filename, "-O")
-	_ = dotPng.Run()
-
-	rmDot := exec.Command("rm", "-fr", filename)
-	_ = rmDot.Run()
+\end{document}`)))
 }

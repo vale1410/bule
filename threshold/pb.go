@@ -1,12 +1,14 @@
-package pb
+package threshold
 
 import (
 	"fmt"
+	"github.com/vale1410/bule/sat"
 	"github.com/vale1410/bule/sorters"
 	"math"
 )
 
 type EquationType int
+type TranslationType int
 
 const (
 	AtMost EquationType = iota
@@ -15,29 +17,99 @@ const (
 	Optimization
 )
 
+const (
+	SortingNetwork TranslationType = iota
+	Facts
+	SingleClause
+	BDD
+)
+
 type Entry struct {
-	Lit    Literal
-	Weight int64
+	Literal sat.Literal
+	Weight  int64
 }
 
-type Atom int
-
-type Literal struct {
-	sign bool
-	atom Atom
-}
+//type Atom int
+//
+//type Literal struct {
+//	Sign bool
+//	Atom Atom
+//}
 
 type Threshold struct {
 	Desc    string
 	Entries []Entry
 	K       int64
 	Typ     EquationType
-	Bags    [][]Literal
-	LitIn   []Literal //Bags flattened, input to Sorter
+	Trans   TranslationType
+	Pred    sat.Pred
+	Clauses sat.ClauseSet
 	Sorter  sorters.Sorter
+	Bags    [][]sat.Literal
+	LitIn   []sat.Literal //Bags flattened, input to Sorter
+}
+
+func (t *Threshold) OnlyFacts() (is bool) {
+
+	t.Normalize()
+	is = false
+
+	if t.K == 0 {
+		is = true
+		t.Clauses = make(sat.ClauseSet, len(t.Entries))
+		for i, x := range t.Entries {
+			t.Clauses[i] = sat.Clause{"OF", []sat.Literal{x.Literal}}
+		}
+
+	}
+
+	return is
+}
+
+func (t *Threshold) SingleClause() (yes bool, clause sat.Clause) {
+
+	entries := make([]Entry, len(t.Entries))
+	copy(entries, t.Entries)
+	K := t.K
+
+	if t.Typ == AtMost {
+		K = -K
+		for i, x := range entries {
+			entries[i].Weight = int64(-1) * x.Weight
+		}
+	}
+
+	// normalize to coefficients 1
+	allOne := true
+	clause.Literals = make([]sat.Literal, len(entries))
+
+	for i, x := range entries {
+		if x.Weight*x.Weight != 1 {
+			allOne = false
+			break
+		}
+		clause.Literals[i] = x.Literal
+
+		if x.Weight == -1 {
+			K += -x.Weight
+			clause.Literals[i] = sat.Neg(clause.Literals[i])
+		}
+	}
+	yes = allOne && K == 1
+	return
 }
 
 func (t *Threshold) CreateSortingEncoding(typ sorters.SortingNetworkType) {
+
+	total := t.Normalize()
+	t.Print10()
+
+	if total <= t.K {
+		panic("sum of weights is too low to make a difference!")
+	}
+	if t.K == 0 {
+		panic("Threshold is 0 with positive weights. All literals are facts!")
+	}
 
 	t.CreateBags()
 
@@ -52,144 +124,160 @@ func (t *Threshold) CreateSortingEncoding(typ sorters.SortingNetworkType) {
 	}
 
 	t.Sorter.In = make([]int, 0, len(t.LitIn))
+	t.Sorter.Out = make([]int, 0, len(t.LitIn))
 
 	offset := 2
 
-	fmt.Println("debug: layers", t.Bags)
+	//fmt.Println("debug: layers", t.Bags)
 
 	// determine the constant and what to add on both sides
-	nextPow2 := int64(1)
-	bitsThreshold := 1
+	layerPow2 := int64(1 << uint(len(t.Bags)))
 
-	for nextPow2 < t.K+1 {
-		nextPow2 *= 2
-		bitsThreshold++
-	}
-
-	tare := nextPow2 - (t.K + 1)
+	tare := layerPow2 - ((t.K + 1) % layerPow2)
+	tare = tare % layerPow2
 
 	bTare := binary(tare)
 	bitsTare := len(bTare)
 
-	fmt.Println("debug: bitsBag", bitsBag, "bitsThreshold", bitsThreshold, "bitsTare", bitsTare)
-
-	// layerTare indicates if odd or even output is taken
-
-	layerTare := bTare
-
-	if bitsBag < bitsTare {
-		layerTare = layerTare[:bitsBag]
-	}
-
-	// consistLastLayer identifies the nth output in the last layer
-	consistLastLayer := int64(0)
-	p := int64(1)
-
-	if bitsBag < bitsTare {
-		for _, b := range bTare[bitsBag:] {
-			if b == 1 {
-				consistLastLayer += p
-			}
-			p *= 2
-		}
-	}
-
-	fmt.Println("debug: layerTare", layerTare, "nth output in last layer:", p)
+	fmt.Println("debug: layerPow2", layerPow2)
+	fmt.Println("debug: tare", tare)
+	fmt.Println("debug: bitsBag", bitsBag, "bitsTare", bitsTare)
+	fmt.Println("debug: bTare", bTare)
 
 	// output of sorter in layer $i-1$
 	bIn := make([]int, 0)
+
+	finalMapping := make(map[int]int, len(t.Sorter.In))
 
 	for i, layer := range layers {
 
 		offset = layer.Normalize(offset, []int{})
 		t.Sorter.Comparators = append(t.Sorter.Comparators, layer.Comparators...)
 
-		fmt.Println(i, "debug: bIn for this layer", bIn)
+		//fmt.Println(i, "debug: bIn for this layer", bIn)
 
-		fmt.Println(i, "debug: layer", layer)
+		//fmt.Println(i, "debug: layer", layer)
 
 		t.Sorter.In = append(t.Sorter.In, layer.In...)
 
 		size := len(bIn) + len(layers[i].In)
 
-		fmt.Println(i, "debug: size", size)
+		//fmt.Println(i, "debug: size", size)
 
 		mergeIn := make([]int, 0, size)
 		mergeIn = append(mergeIn, bIn...)
 		mergeIn = append(mergeIn, layer.Out...)
 
-        fmt.Println(i, "debug: merger preparation: size,cut", size, len(bIn))
+		//fmt.Println(i, "debug: merger preparation: size,cut", size, len(bIn))
 		merger := sorters.CreateSortingNetwork(size, len(bIn), typ)
 		offset = merger.Normalize(offset, mergeIn)
-		fmt.Println(i, "debug: mergeSorter", merger)
+		//fmt.Println(i, "debug: mergeSorter", merger)
 
-        // halving circuit:
-
-		mapping := make(map[int]int, size)
+		// halving circuit:
 
 		odd := 1
 
 		if i < len(bTare) && bTare[i] == 1 {
 			odd = 0
 			bIn = make([]int, (len(merger.Out)+1)/2)
-			fmt.Println(i, "debug: lenMerger,tare i,odd", len(merger.Out), bTare[i], odd)
+			//fmt.Println(i, "debug: lenMerger,tare i,odd", len(merger.Out), bTare[i], odd)
 		} else {
 			bIn = make([]int, len(merger.Out)/2)
-			fmt.Println(i, "debug: lenMerger,odd", len(merger.Out), odd)
+			//fmt.Println(i, "debug: lenMerger,odd", len(merger.Out), odd)
 		}
 
 		// Alternate depending on bTare
 		for j, x := range merger.Out {
 			if j%2 == odd {
 				bIn[j/2] = x
-				fmt.Println(i, "debug: bIn,j,odd", bIn, j, odd)
-			} else {
-				fmt.Println(i, "debug: bIn,j,odd", bIn, j, odd)
-				mapping[merger.Out[j]] = -1
-				merger.Out[j] = -1
+			} else if i < len(layers)-1 { // not in last layer, but else
+				finalMapping[x] = -1
 			}
 		}
 
-		fmt.Println(i, "debug: merger", merger)
+		//fmt.Println(i, "debug: merger", merger)
 
 		t.Sorter.Comparators = append(t.Sorter.Comparators, merger.Comparators...)
-
-		fmt.Println(i, "debug: mapping", mapping)
-
-		t.Sorter.PropagateBackwards(mapping)
-
-		fmt.Println(i, "debug: tSorter", t.Sorter)
+		//fmt.Println(i, "debug: tSorter", t.Sorter)
 
 	}
 
-    // take the K power of two, and p (which is added... ) and 
-    // figure out the output element, set rest to -1 and backprop
+	// outLastLayer identifies the nth output in the last layer
+	outLastLayer := ((t.K + 1 + tare) / int64(layerPow2)) - 1
+	fmt.Println("debug: outLastLayer", outLastLayer)
+	idSetToZero := bIn[outLastLayer]
+	fmt.Println("which id is", idSetToZero)
 
-	offset = t.Sorter.Normalize(2, []int{})
-	t.Sorter.Out = make([]int, 1)
-	t.Sorter.Out[0] = offset - 1
-	fmt.Println("final debug: tSorter", t.Sorter)
+	// and propagate the rest backwards
+	setTo := -1
+	for _, id := range t.Sorter.ComputeOut() {
+		if id == idSetToZero {
+			setTo = 0
+		}
+		if _, ok := finalMapping[id]; !ok {
+			finalMapping[id] = setTo
+		}
+	}
+	//fmt.Println("debug: finalMapping", finalMapping)
+
+	t.Sorter.PropagateBackwards(finalMapping)
+
+	t.Sorter.Normalize(2, []int{})
+
+	//fmt.Println("final debug: tSorter", t.Sorter)
+}
+
+func (t *Threshold) IsNormalized() (yes bool) {
+	yes = true
+
+	for _, e := range t.Entries {
+		if e.Weight <= 0 {
+			yes = false
+		}
+	}
+	return t.K > 0 && yes && t.Typ == AtMost
 }
 
 // Normalize: work in progress
 // transform negative weights
 // check if maximum reaches K at all
 // sort by weight
-func (t *Threshold) Normalize() {
+// returns sum of weights
+func (t *Threshold) Normalize() (total int64) {
 
-	total := int64(0)
+	total = 0
 
-	for _, e := range t.Entries {
-		total += e.Weight
+	// remove 0 weights?
+	if t.Typ == AtLeast {
+		//set to AtMost, multiply by -1
+		for i, e := range t.Entries {
+			t.Entries[i].Weight = -e.Weight
+		}
+		t.K = -t.K
+		t.Typ = AtMost
+	} else if t.Typ == Equal {
+		panic("Equal type for threshold function not supported")
 	}
 
-	if total < t.K {
-		fmt.Println("sum of weights is too low!")
+	for i, e := range t.Entries {
+		if e.Weight == 0 {
+			panic("Threshold contains a 0 weight element, should not occur")
+		}
+		if e.Weight < 0 {
+			t.Entries[i].Weight = -e.Weight
+			t.Entries[i].Literal = sat.Neg(e.Literal)
+			t.K -= e.Weight
+		}
+		total += t.Entries[i].Weight
 	}
-
+	return
 }
 
 func (t *Threshold) CreateBags() {
+
+	if !t.IsNormalized() {
+		panic("Threshold is not normalized before creating bags")
+	}
 
 	nBags := len(binary(t.K))
 	bins := make([][]int, len(t.Entries))
@@ -202,7 +290,7 @@ func (t *Threshold) CreateBags() {
 		bins[i] = binary(e.Weight)
 
 		for j, x := range bins[i] {
-			bagSize[len(bins[i])-j-1] += x
+			bagSize[j] += x
 		}
 
 		if maxWeight < e.Weight {
@@ -211,25 +299,20 @@ func (t *Threshold) CreateBags() {
 
 	}
 
-	t.Bags = make([][]Literal, len(binary(maxWeight)))
+	t.Bags = make([][]sat.Literal, len(binary(maxWeight)))
 
 	for i, _ := range t.Bags {
-		t.Bags[i] = make([]Literal, bagSize[i])
-		//t.Bags[i][bagSize[i]] = Literal{true, Atom(100 + i)}
+		t.Bags[i] = make([]sat.Literal, bagSize[i])
 	}
 
 	for i, e := range t.Entries {
 		for j, x := range bins[i] {
-			pos := len(bins[i]) - j - 1
 			if x == 1 {
-				t.Bags[pos][bagPos[pos]] = e.Lit
-				bagPos[pos]++
+				t.Bags[j][bagPos[j]] = e.Literal
+				bagPos[j]++
 			}
 		}
 	}
-
-	fmt.Println(t.Bags)
-
 }
 
 func (t *Threshold) AddTare() {
@@ -238,24 +321,43 @@ func (t *Threshold) AddTare() {
 
 // binary
 // 23 = 10111
+// special case if n==0 then return empty slice
+// panic if n<0
 func binary(n int64) (bin []int) {
 
-	s := int64(math.Logb(float64(n))) + 1
+	var s int64
+
+	if n < 0 {
+		panic("binary representation of number smaller than 0")
+	} else if n == 0 {
+		s = 0
+	} else {
+		s = int64(math.Logb(float64(n))) + 1
+	}
+
 	bin = make([]int, s)
 
-	i := s
+	i := 0
 	var m int64
 
 	for n != 0 {
-		i--
 		m = n / 2
 		//fmt.Println(i, n, m)
 		if n != m*2 {
 			bin[i] = 1
 		}
 		n = m
+		i++
 	}
 	return
+}
+
+func PrintBinary(n int64) {
+	bin := binary(n)
+
+	for i := len(bin) - 1; i >= 0; i-- {
+		fmt.Print(bin[i])
+	}
 }
 
 func (t *Threshold) Print2() {
@@ -263,25 +365,21 @@ func (t *Threshold) Print2() {
 
 	first := true
 	for _, x := range t.Entries {
-		l := x.Lit
+		l := x.Literal
 		if !first {
 			fmt.Printf("+ ")
 		}
 		first = false
 
-		bin := binary(x.Weight)
+		PrintBinary(x.Weight)
 
-		for _, i := range bin {
-			fmt.Print(i)
-		}
-
-		if l.sign {
-			fmt.Print(" * ")
+		if l.Sign {
+			fmt.Print(" ")
 		} else {
-			fmt.Print(" *~")
+			fmt.Print(" ~")
 		}
-		//fmt.Print(l.atom.P, "(", l.atom.V1, ",", l.atom.V2, ")")
-		fmt.Print("x", l.atom, " ")
+		//fmt.Print(l.Atom.P, "(", l.Atom.V1, ",", l.Atom.V2, ")")
+		fmt.Print("x", l.Atom, " ")
 	}
 	switch t.Typ {
 	case AtMost:
@@ -292,11 +390,7 @@ func (t *Threshold) Print2() {
 		fmt.Print(" == ")
 	}
 
-	bin := binary(t.K)
-
-	for _, i := range bin {
-		fmt.Print(i)
-	}
+	PrintBinary(t.K)
 
 	fmt.Println()
 	fmt.Println()
@@ -305,32 +399,31 @@ func (t *Threshold) Print2() {
 func (t *Threshold) Print10() {
 	fmt.Println(t.Desc)
 
-	first := true
 	for _, x := range t.Entries {
-		l := x.Lit
-		if !first {
-			fmt.Printf("+ ")
+		l := x.Literal
+
+		if x.Weight > 0 {
+			fmt.Printf("+")
 		}
-		first = false
 
-		fmt.Print(x.Weight)
+		fmt.Print(x.Weight, "")
 
-		if l.sign {
-			fmt.Print(" * ")
+		if l.Sign {
+			fmt.Print(" ")
 		} else {
-			fmt.Print(" *~")
+			fmt.Print(" ~")
 		}
-		//fmt.Print(l.atom.P, "(", l.atom.V1, ",", l.atom.V2, ")")
-		fmt.Print("x", l.atom, " ")
+		//fmt.Print(l.Atom.P, "(", l.Atom.V1, ",", l.Atom.V2, ")")
+		fmt.Print("x", l.Atom, " ")
 	}
 	switch t.Typ {
 	case AtMost:
-		fmt.Print(" <= ")
+		fmt.Print("<= ")
 	case AtLeast:
-		fmt.Print(" >= ")
+		fmt.Print(">= ")
 	case Equal:
-		fmt.Print(" == ")
+		fmt.Print("== ")
 	}
-	fmt.Println(t.K)
+	fmt.Println(t.K, ";")
 
 }

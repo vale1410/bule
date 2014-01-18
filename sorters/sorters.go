@@ -245,9 +245,9 @@ func (sorter *Sorter) PropagateOrdering(cut int) {
 	if cut < 0 { // signal for no cut
 		return
 	} else if cut == 0 || cut == len(sorter.In) {
-        // the stuff is already sorted, remove comparators
-        sorter.Comparators = []Comparator{}
-        copy(sorter.Out,sorter.In)
+		// the stuff is already sorted, remove comparators
+		sorter.Comparators = []Comparator{}
+		copy(sorter.Out, sorter.In)
 	} else {
 
 		mapping := make(map[int]int, len(sorter.Comparators))
@@ -412,6 +412,28 @@ func (sorter *Sorter) PropagateForward(mapping map[int]int) {
 	sorter.Comparators = out
 }
 
+// determines the ids of the out-vector
+func (sorter *Sorter) ComputeOut() (out []int) {
+
+	mapping := make(map[int]int, len(sorter.In))
+	out = make([]int, len(sorter.In))
+
+	for i, id := range sorter.In {
+		mapping[id] = i
+		out[i] = id
+	}
+
+	for _, comp := range sorter.Comparators {
+
+		mapping[comp.C] = mapping[comp.A]
+		mapping[comp.D] = mapping[comp.B]
+		out[mapping[comp.A]] = comp.C
+		out[mapping[comp.B]] = comp.D
+	}
+
+	return
+}
+
 func (sorter *Sorter) PropagateBackwards(mapping map[int]int) {
 
 	l := 0
@@ -419,6 +441,10 @@ func (sorter *Sorter) PropagateBackwards(mapping map[int]int) {
 	remove := Comparator{0, 0, 0, 0}
 
 	cleanMapping := make(map[int]int, 0)
+
+	mapping[-1] = -1
+	mapping[0] = -1
+	mapping[1] = -1
 
 	for i := len(comparators) - 1; i >= 0; i-- {
 

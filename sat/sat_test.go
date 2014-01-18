@@ -13,7 +13,7 @@ func TestWhichClauses(t *testing.T) {
 
 	//sizes := []int{100,112,128,144,160,176}
 	//sizes := []int{500, 750, 1000}
-	sizes := []int{10, 20, 30}
+	sizes := []int{5, 10, 15}
 	//sizes := []int{}
 	typs := []sorters.SortingNetworkType{sorters.Bubble, sorters.Bitonic, sorters.OddEven, sorters.Pairwise}
 	//typs := []sorters.SortingNetworkType{Bitonic, OddEven, Pairwise}
@@ -57,55 +57,14 @@ func TestWhichClauses(t *testing.T) {
 					input[i] = Literal{true, Atom{Pred("Input"), i, 0}}
 				}
 
-				clauses := createEncoding(input, which1, []Literal{}, "lt", lt, sorter1)
-				clauses.AddClauseSet(createEncoding(input, which2, []Literal{}, "gt", gt, sorter2))
+				clauses := CreateEncoding(input, which1, []Literal{}, "lt", lt, sorter1)
+				clauses.AddClauseSet(CreateEncoding(input, which2, []Literal{}, "gt", gt, sorter2))
 				g := IdGenerator(size * size)
 				g.GenerateIds(clauses)
-				g.filename = os.TempDir() + "/" + strconv.Itoa(size) + "_" + strconv.Itoa(k) + "_" + typ.String() + "_" + strconv.Itoa(wh) + ".cnf"
-				g.printClausesDIMACS(clauses)
+				g.Filename = os.TempDir() + "/" + strconv.Itoa(size) + "_" + strconv.Itoa(k) + "_" + typ.String() + "_" + strconv.Itoa(wh) + ".cnf"
+				g.PrintClausesDIMACS(clauses)
 			}
 		}
 	}
 
 }
-
-//func TestGenerateSAT(t *testing.T) {
-//	size := 128
-//	k := size / 2
-//	//typ := Bubble
-//	typ := Bitonic
-//	//typ := OddEven
-//
-//	sorter1 := CreateCardinalityNetwork(size, k, AtMost, typ)
-//	sorter2 := CreateCardinalityNetwork(size, k+1, AtLeast, typ)
-//	sorter1.RemoveOutput()
-//	sorter2.RemoveOutput()
-//
-//	input := make([]Literal, size)
-//	for i, _ := range input {
-//		input[i] = Literal{true, Atom{Pred("Input"), i, 0}}
-//	}
-//
-//	lt := Pred("AtMost")
-//	gt := Pred("AtLeast")
-//
-//	which := [8]bool{false, true, true, true, true, true, true, true}
-//
-//	// 3,4,5
-//	which = [8]bool{false, false, false, true, true, true, false, false}
-//	fmt.Println(which)
-//	clauses := createEncoding(input, which, []Literal{}, "lt", lt, sorter1)
-//
-//	// 1,2,6
-//	which = [8]bool{false, true, true, false, false, false, true, false}
-//	clauses.AddClauseSet(createEncoding(input, which, []Literal{}, "gt", gt, sorter2))
-//
-//	printSorterTikZ(sorter2, "pic.tex")
-//
-//	g := IdGenerator(size * size)
-//	g.GenerateIds(clauses)
-//	g.filename = "test.cnf"
-//	g.printClausesDIMACS(clauses)
-//	//g.printDebug(clauses)
-//}
-//
