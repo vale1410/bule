@@ -2,6 +2,7 @@ package threshold
 
 import (
 	"fmt"
+	"github.com/vale1410/bule/sat"
 	"github.com/vale1410/bule/sorters"
 	"math"
 	"strconv"
@@ -39,17 +40,16 @@ func TestExample(test *testing.T) {
 	//filename := "japan1_10"
 
 	//Example 6
-	t := createJapan2(16)
+	t := createJapan2(3)
 	//filename := "japan2_3"
 
 	//t := createIgnasi1()
 	//t := createIgnasi2()
 
-	//t := createExample2()
-
+	fmt.Println(t)
 	t.Print10()
-	t.Print2()
-	t.Normalize()
+	//t.Normalize()
+	//t.Print2()
 
 	t.CreateSortingEncoding(typ)
 
@@ -58,27 +58,26 @@ func TestExample(test *testing.T) {
 	t.PrintThresholdTikZ(filename + ".tex")
 }
 
-
 func TestPBOGeneration(test *testing.T) {
 
 	//t := createJapan1(80)
 	t := createJapan2(16)
 
-    fmt.Printf("* #variable= %v #constraint= %v\n",len(t.Entries) ,2)
-    fmt.Println("****************************************")
-    fmt.Println("* begin normalizer comments")
-    fmt.Println("* category= SAT/UNSAT-BIGINT")
-    fmt.Println("* end normalizer comments")
-    fmt.Println("****************************************")
+	fmt.Printf("* #variable= %v #constraint= %v\n", len(t.Entries), 2)
+	fmt.Println("****************************************")
+	fmt.Println("* begin normalizer comments")
+	fmt.Println("* category= SAT/UNSAT-BIGINT")
+	fmt.Println("* end normalizer comments")
+	fmt.Println("****************************************")
 
 	//t.Print10()
 
 	//if t.Typ == AtMost {
 	//	t.Typ = AtLeast
-    //    //t.K++
+	//    //t.K++
 	//} else if t.Typ == AtLeast {
 	//	t.Typ = AtMost
-    //    //t.K--
+	//    //t.K--
 	//}
 	//t.Print10()
 }
@@ -121,17 +120,25 @@ func TestPBOGeneration(test *testing.T) {
 //	n := int64(10)
 //	fmt.Println(binary(n))
 //}
+
+func createEntries(weights []int64) (entries []Entry) {
+	p := sat.Pred("test")
+	entries = make([]Entry, len(weights))
+
+	for i := 0; i < len(weights); i++ {
+		l := sat.Literal{true, sat.Atom{p, i, 0}}
+		entries[i] = Entry{l, weights[i]}
+	}
+	return
+}
+
 func createExample1() (t Threshold) {
 	weights := []int64{11, 10, 6, 5}
 	t.K = 25
 
 	t.Desc = "Simple Test"
 	t.Typ = AtMost
-	t.Entries = make([]Entry, len(weights))
-
-	for i := 0; i < len(weights); i++ {
-		t.Entries[i] = Entry{Literal{true, Atom(i)}, weights[i]}
-	}
+	t.Entries = createEntries(weights)
 	return
 }
 
@@ -141,11 +148,7 @@ func createExample2() (t Threshold) {
 
 	t.Desc = "Simple Test"
 	t.Typ = AtLeast
-	t.Entries = make([]Entry, len(weights))
-
-	for i := 0; i < len(weights); i++ {
-		t.Entries[i] = Entry{Literal{true, Atom(i)}, weights[i]}
-	}
+	t.Entries = createEntries(weights)
 	return
 }
 
@@ -155,27 +158,12 @@ func createCardinality(n int, k int64, weight int64) (t Threshold) {
 
 	t.Desc = "Cardinality Test"
 	t.Typ = AtMost
-	t.Entries = make([]Entry, n)
-
+	weights := make([]int64, n)
 	for i := 0; i < n; i++ {
-		t.Entries[i] = Entry{Literal{true, Atom(i)}, weight}
+		weights[i] = weight
 	}
+	t.Entries = createEntries(weights)
 
-	return
-}
-
-func createSimple(n int) (t Threshold) {
-
-	t.K = 2 * int64(n)
-
-	t.Desc = "Simple Test"
-	t.Typ = AtMost
-	t.Entries = make([]Entry, n)
-
-	for i := 0; i < n; i++ {
-		x := int64(5)
-		t.Entries[i] = Entry{Literal{true, Atom(i)}, x}
-	}
 	return
 }
 
@@ -186,11 +174,7 @@ func createIgnasi1() (t Threshold) {
 
 	t.Desc = "Ignasi 1"
 	t.Typ = AtMost
-	t.Entries = make([]Entry, len(weights))
-
-	for i := 0; i < len(weights); i++ {
-		t.Entries[i] = Entry{Literal{true, Atom(i)}, weights[i]}
-	}
+	t.Entries = createEntries(weights)
 	return
 }
 
@@ -201,27 +185,26 @@ func createIgnasi2() (t Threshold) {
 
 	t.Desc = "Ignasi 2"
 	t.Typ = AtMost
-	t.Entries = make([]Entry, len(weights))
-
-	for i := 0; i < len(weights); i++ {
-		t.Entries[i] = Entry{Literal{true, Atom(i)}, weights[i]}
-	}
+	t.Entries = createEntries(weights)
 	return
 }
 
 // creats a Threshold function of size n (n must be even)
 // given in "Size of OBDDs representing threshold functions"
 func createJapan1(n int) (t Threshold) {
+
 	t.Desc = "Japan 1 size " + strconv.Itoa(n)
 	t.Typ = AtLeast
-	t.Entries = make([]Entry, n)
+	//t.Entries = make([]Entry, n)
+	weights := make([]int64, n)
 
 	x := int64(1)
 
 	for i := 0; i < n/2; i++ {
 		e := n - i - 1
 		t.K += x
-		t.Entries[e] = Entry{Literal{true, Atom(e+1)}, x}
+		weights[e] = x
+		//t.Entries[e] = Entry{Literal{true, Atom(e + 1)}, x}
 		x = x * 2
 	}
 
@@ -230,10 +213,12 @@ func createJapan1(n int) (t Threshold) {
 	for i := n / 2; i < n; i++ {
 		e := n - i - 1
 		t.K += x - y
-		t.Entries[e] = Entry{Literal{true, Atom(e+1)}, x - y}
+		weights[e] = x - y
+		//t.Entries[e] = Entry{Literal{true, Atom(e + 1)}, x - y}
 		y = y / 2
 	}
 
+	t.Entries = createEntries(weights)
 	t.K = t.K / 2
 
 	return
@@ -246,7 +231,8 @@ func createJapan2(k int) (t Threshold) {
 	n := k * k
 	t.Desc = "Japan 2 size " + strconv.Itoa(n)
 	t.Typ = AtLeast
-	t.Entries = make([]Entry, n)
+	//t.Entries = make([]Entry, n)
+	weights := make([]int64, n)
 
 	x := int64(1)
 	y := int64(math.Exp2(float64(k)))
@@ -254,18 +240,18 @@ func createJapan2(k int) (t Threshold) {
 	fmt.Println(y)
 
 	for i := 0; i < k; i++ {
-		//y := int64(math.Exp2(float64(k - 1)))
 		for j := 0; j < k; j++ {
 			e := n - i*k - j - 1
-			//e := i*k + j
 			t.K += x + y
-			t.Entries[e] = Entry{Literal{true, Atom(e+1)}, x + y}
+			weights[e] = x + y
+			//t.Entries[e] = Entry{Literal{true, Atom(e + 1)}, x + y}
 			x = x * 2
 		}
 		y = y * 2
 		x = int64(1)
 	}
 
+	t.Entries = createEntries(weights)
 	t.K = t.K / 2
 
 	return

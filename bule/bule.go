@@ -55,7 +55,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	var clauses sat.ClauseSet
 
 	for i, pb := range pbs {
-	   // pb.Print10()
+		// pb.Print10()
 		clauses.AddClauseSet(TranslatePB2Clauses(i, pb))
 		debug("number of clause", len(clauses))
 		fmt.Println("")
@@ -63,19 +63,19 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 	g := sat.IdGenerator(len(clauses) * 7)
 	g.GenerateIds(clauses)
-	//g.Filename = strings.Split(*f, ".")[0] + ".cnf"
-    g.Filename = *out
+	g.Filename = strings.Split(*f, ".")[0] + ".cnf"
+	//g.Filename = *out
 	g.PrintClausesDIMACS(clauses)
 }
 
 func TranslatePB2Clauses(id int, pb threshold.Threshold) (clauses sat.ClauseSet) {
 
-    if b, clause := sat.SingleClause(pb); b && *check_clause {
-        fmt.Print(".")
-        clauses = make(sat.ClauseSet,1)
-        clauses[0] = clause
+	if b, clause := pb.SingleClause(); b && *check_clause {
+		fmt.Print(".")
+		clauses = make(sat.ClauseSet, 1)
+		clauses[0] = clause
 	} else {
-        pb.Normalize()
+		pb.Normalize()
 
 		typ := sorters.OddEven
 		wh := 4
@@ -96,13 +96,7 @@ func TranslatePB2Clauses(id int, pb threshold.Threshold) (clauses sat.ClauseSet)
 		pb.CreateSortingEncoding(typ)
 
 		pred := sat.Pred("auxPB" + strconv.Itoa(id))
-
-		input := make([]sat.Literal, len(pb.LitIn))
-		for i, x := range pb.LitIn {
-			input[i] = sat.Literal{x.Sign, sat.Atom{sat.Pred("x"), int(x.Atom), 0}}
-		}
-
-		clauses = sat.CreateEncoding(input, which, []sat.Literal{}, "BnB", pred, pb.Sorter)
+		clauses = sat.CreateEncoding(pb.LitIn, which, []sat.Literal{}, "BnB", pred, pb.Sorter)
 	}
 
 	return
@@ -150,7 +144,7 @@ func parse(filename string) (pbs []threshold.Threshold) {
 	lines := strings.Split(string(input), "\n")
 
 	// 0 : first line, 1 : rest of the lines
-    var count int
+	var count int
 	state := 0
 	t := 0
 
@@ -166,7 +160,7 @@ func parse(filename string) (pbs []threshold.Threshold) {
 		case 0:
 			{
 				debug(l)
-                var b1 error
+				var b1 error
 				count, b1 = strconv.Atoi(elements[4])
 				vars, b2 := strconv.Atoi(elements[2])
 				if b1 != nil || b2 != nil {
@@ -179,9 +173,9 @@ func parse(filename string) (pbs []threshold.Threshold) {
 			}
 		case 1:
 			{
-			   if t >= count {
-			        panic("Number of constraints incorrectly specified in pb input file "+filename)
-			   }
+				if t >= count {
+					panic("Number of constraints incorrectly specified in pb input file " + filename)
+				}
 				pbs[t].Desc = l
 
 				n := (len(elements) - 3) / 2
@@ -197,7 +191,8 @@ func parse(filename string) (pbs []threshold.Threshold) {
 						debug("cant convert to threshold:", l)
 						panic("bad conversion of numbers")
 					}
-					pbs[t].Entries[i/2] = threshold.Entry{threshold.Literal{true, threshold.Atom(variable)}, weight}
+                    atom := sat.Atom{sat.Pred("x"),variable,0}
+					pbs[t].Entries[i/2] = threshold.Entry{sat.Literal{true, atom}, weight}
 				}
 
 				pbs[t].K, _ = strconv.ParseInt(elements[len(elements)-2], 10, 64)
@@ -209,7 +204,7 @@ func parse(filename string) (pbs []threshold.Threshold) {
 					pbs[t].Typ = threshold.AtMost
 				} else {
 					debug("cant convert to threshold:", l)
-					panic("bad conversion of equality "+ typS)
+					panic("bad conversion of equality " + typS)
 				}
 				t++
 			}

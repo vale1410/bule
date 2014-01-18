@@ -52,6 +52,21 @@ type Gen struct {
 	out      *os.File
 }
 
+func (atom Atom) ToTex() (s string) {
+	return strconv.Itoa(atom.V1 + atom.V1)
+}
+
+func (l Literal) ToTex() (s string) {
+	if !l.Sign {
+		s += "\\bar "
+	}
+	s += "x_{"
+	s += l.Atom.ToTex()
+	s += "}"
+
+	return
+}
+
 // Create Encoding for Sorting Network
 // 0) Omitted for clarity (ids as in paper)
 // 1)  A or -D

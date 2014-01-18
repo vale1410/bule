@@ -4,19 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strconv"
 )
-
-func (l Literal) ToTex() (s string) {
-	if !l.Sign {
-		s += "\\bar "
-	}
-	s += "x_{"
-	s += strconv.Itoa(int(l.Atom))
-	s += "}"
-
-	return
-}
 
 type pair struct {
 	A, B     int
