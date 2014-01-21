@@ -53,7 +53,19 @@ type Gen struct {
 }
 
 func (atom Atom) ToTex() (s string) {
-	return strconv.Itoa(atom.V1 + atom.V1)
+	return strconv.Itoa(atom.V1)
+}
+
+func (l Literal) ToTxt() (s string) {
+	if !l.Sign {
+		s += "~"
+	} else {
+		s += " "
+	}
+	s += "x"
+	s += l.Atom.ToTex()
+	s += " "
+	return
 }
 
 func (l Literal) ToTex() (s string) {
@@ -63,7 +75,6 @@ func (l Literal) ToTex() (s string) {
 	s += "x_{"
 	s += l.Atom.ToTex()
 	s += "}"
-
 	return
 }
 

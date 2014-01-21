@@ -7,20 +7,49 @@ import (
 	"testing"
 )
 
-//func TestStuff(t *testing.T) {
-//
-//	k := 100
-//	fmt.Println("Test: Print size", k*k)
-//
-//	sorter := CreateSortingNetwork(k*k, -1, OddEven)
-//
-//	fmt.Println("sorter size", k*k, len(sorter.Comparators))
-//
-//}
+func TestSizes(t *testing.T) {
+
+	fmt.Println("Comparing sizes: Bitonic/OddEven/Bubble/Pairwise")
+	var typs [3]SortingNetworkType
+	typs[0] = OddEven
+	typs[1] = Pairwise
+	typs[2] = Bitonic
+	//typs[3] = Bubble
+
+	N := 100
+
+    fmt.Println("Merging Networks")
+
+	for n := 2; n <= N; n++ {
+		for k := 1; k < n; k++ {
+            fmt.Print(n,"/",k,";")
+			for _,typ := range typs {
+				sorter := CreateSortingNetwork(n, k, typ)
+	            fmt.Print(len(sorter.Comparators),";")
+			}
+            fmt.Println()
+		}
+	}
+
+
+    fmt.Println("Cardinality Networks")
+
+	for n := 2; n <= N; n++ {
+		for k := 1; k < n; k++ {
+            fmt.Print(n,"/",k,";")
+			for _,typ := range typs {
+				sorter := CreateCardinalityNetwork(n, k,AtMost, typ)
+	            fmt.Print(len(sorter.Comparators),";")
+			}
+            fmt.Println()
+		}
+	}
+
+}
 
 func TestNormalize(t *testing.T) {
 
-    fmt.Println("Test: Normalization")
+	fmt.Println("Test: Normalization")
 
 	sorter := CreateSortingNetwork(8, -1, Pairwise)
 
@@ -145,14 +174,14 @@ func cutSorting(size int, cut int, t *testing.T, typ SortingNetworkType) {
 	array3 := append(array1, array2...)
 	copy(result, array3)
 
-    //fmt.Println("array1",array1)
-    //fmt.Println("array2",array2)
-    //fmt.Println("array3",array3)
+	//fmt.Println("array1",array1)
+	//fmt.Println("array2",array2)
+	//fmt.Println("array3",array3)
 	sort.Ints(result)
-    //fmt.Println("result",result)
+	//fmt.Println("result",result)
 
 	sorter := CreateSortingNetwork(size, cut, typ)
-    //PrintSorterTikZ(sorter,"tmp/cutSorter.tex")
+	//PrintSorterTikZ(sorter,"tmp/cutSorter.tex")
 	sortAndCompareArrays(sorter, array3, result, t)
 }
 

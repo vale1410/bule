@@ -40,10 +40,10 @@ func TestExample(test *testing.T) {
 	//filename := "japan1_10"
 
 	//Example 6
-	t := createJapan2(3)
+	//t := createJapan2(3)
 	//filename := "japan2_3"
 
-	//t := createIgnasi1()
+	t := createIgnasi1()
 	//t := createIgnasi2()
 
 	fmt.Println(t)
@@ -51,9 +51,11 @@ func TestExample(test *testing.T) {
 	//t.Normalize()
 	//t.Print2()
 
-	t.CreateSortingEncoding(typ)
+	t.CreateSorter(typ)
 
 	fmt.Println("sorter size comparators", len(t.Sorter.Comparators))
+
+    fmt.Println(t)
 
 	t.PrintThresholdTikZ(filename + ".tex")
 }
@@ -61,14 +63,14 @@ func TestExample(test *testing.T) {
 func TestPBOGeneration(test *testing.T) {
 
 	//t := createJapan1(80)
-	t := createJapan2(16)
+	//t := createJapan2(16)
 
-	fmt.Printf("* #variable= %v #constraint= %v\n", len(t.Entries), 2)
-	fmt.Println("****************************************")
-	fmt.Println("* begin normalizer comments")
-	fmt.Println("* category= SAT/UNSAT-BIGINT")
-	fmt.Println("* end normalizer comments")
-	fmt.Println("****************************************")
+	//fmt.Printf("* #variable= %v #constraint= %v\n", len(t.Entries), 2)
+	//fmt.Println("****************************************")
+	//fmt.Println("* begin normalizer comments")
+	//fmt.Println("* category= SAT/UNSAT-BIGINT")
+	//fmt.Println("* end normalizer comments")
+	//fmt.Println("****************************************")
 
 	//t.Print10()
 

@@ -2,6 +2,7 @@ package threshold
 
 import (
 	"fmt"
+	"github.com/vale1410/bule/sorters"
 	"os"
 	"sort"
 )
@@ -27,12 +28,47 @@ func (l pairSlice) Less(i, j int) bool {
 	}
 }
 
+//\usepackage{float}
+//\floatstyle{boxed}
+//\restylefloat{figure}
+
+func writeProlog(file *os.File) {
+	file.Write([]byte(fmt.Sprintln(`
+\documentclass{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+\usetikzlibrary{decorations.pathreplacing}
+\begin{document}
+\pagestyle{empty}`)))
+}
+
+func writeEpilog(file *os.File) {
+	file.Write([]byte(fmt.Sprintln(`
+\end{document}`)))
+}
+
 func (t *Threshold) PrintThresholdTikZ(filename string) {
 
-	// group
+	file, ok := os.Create(filename)
+	if ok != nil {
+		panic("Can open file to write.")
+	}
+	defer file.Close()
 
-	sorter := t.Sorter
-	showIds := true
+	writeProlog(file)
+
+	t.writeTikz(file)
+	//t.writeDescription(file)
+
+	writeEpilog(file)
+}
+
+// groups contains the comparators for each depth
+// layers is a map for layering the comparators in each
+// group such they dont overlap
+func prepareData(sorter sorters.Sorter) (groups []pairSlice, layers []layerMap) {
 
 	depth := make(map[int]int, len(sorter.Comparators))
 	lines := make(map[int]int, len(sorter.Comparators))
@@ -44,7 +80,7 @@ func (t *Threshold) PrintThresholdTikZ(filename string) {
 
 	maxDepth := 0
 
-	groups := make([]pairSlice, 0, len(sorter.Comparators))
+	groups = make([]pairSlice, 0, len(sorter.Comparators))
 
 	for _, x := range sorter.Comparators {
 		if max, ok := depth[x.A]; ok {
@@ -76,7 +112,7 @@ func (t *Threshold) PrintThresholdTikZ(filename string) {
 		}
 	}
 
-	layers := make([]layerMap, 0, maxDepth)
+	layers = make([]layerMap, 0, maxDepth)
 
 	for _, group := range groups {
 		sort.Sort(group)
@@ -114,10 +150,16 @@ func (t *Threshold) PrintThresholdTikZ(filename string) {
 		layers = append(layers, layer)
 		//fmt.Println(group, layer)
 	}
+	return
+}
 
-	// groups contains the comparators for each depth
-	// layers is a map for layering the comparators in each
-	// group such they dont overlap
+func (t *Threshold) writeTikz(file *os.File) {
+
+	sorter := t.Sorter
+
+	groups, layers := prepareData(sorter)
+
+	showIds := false
 
 	//lets start drawing it :-)
 
@@ -130,20 +172,8 @@ func (t *Threshold) PrintThresholdTikZ(filename string) {
 	symbolsTex[0] = "0"
 	symbolsTex[1] = "1"
 
-	file, ok := os.Create(filename)
-	if ok != nil {
-		panic("Can open file to write.")
-	}
-
 	file.Write([]byte(fmt.Sprintln(`
-\documentclass{article}
-
-\usepackage[latin1]{inputenc}
-\usepackage{tikz}
-\usetikzlibrary{shapes,arrows}
-\usetikzlibrary{decorations.pathreplacing}
-\begin{document}
-\pagestyle{empty}
+\begin{figure}[h!]
 \tikzset{cross/.style = 
     {inner sep=0pt,minimum size=3pt,fill,circle}}
 \centering 
@@ -175,19 +205,19 @@ func (t *Threshold) PrintThresholdTikZ(filename string) {
 			file.Write([]byte(fmt.Sprintf(s2, d, A)))
 			file.Write([]byte(fmt.Sprintf(s2, d, B)))
 
+			s3 := "     \\node at (%v,%v) {$%v$};\n"
+
+			if comp.idA < 2 {
+				lineLength[comp.A] = d + layerDist
+				file.Write([]byte(fmt.Sprintf(s3, d+2*layerDist, A, symbolsTex[comp.idA])))
+			}
+
+			if comp.idB < 2 {
+				lineLength[comp.B] = d + layerDist
+				file.Write([]byte(fmt.Sprintf(s3, d+2*layerDist, B, symbolsTex[comp.idB])))
+			}
+
 			if showIds {
-				s3 := "     \\node at (%v,%v) {$%v$};\n"
-
-				if comp.idA < 2 {
-					lineLength[comp.A] = d + layerDist
-					file.Write([]byte(fmt.Sprintf(s3, d+2*layerDist, A, symbolsTex[comp.idA])))
-				}
-
-				if comp.idB < 2 {
-					lineLength[comp.B] = d + layerDist
-					file.Write([]byte(fmt.Sprintf(s3, d+2*layerDist, B, symbolsTex[comp.idB])))
-				}
-
 				//debug
 				file.Write([]byte(fmt.Sprintf(s3, d+layerDist, A+layerDist, comp.idA)))
 				file.Write([]byte(fmt.Sprintf(s3, d+layerDist, B+layerDist, comp.idB)))
@@ -211,33 +241,131 @@ func (t *Threshold) PrintThresholdTikZ(filename string) {
 		file.Write([]byte(fmt.Sprintf(s1, -layerDist, hight, d, hight)))
 	}
 
-	if showIds {
+	//if showIds {
 
-		// i is level
-		pos := 0
+	// i is level
+	pos := 0
 
-		for i, bag := range t.Bags {
-			start := pos
+	for i, bag := range t.Bags {
+		start := pos
 
-			col1 := -3 * layerDist
-			col2 := -2 * layerDist
+		col1 := -3 * layerDist
+		col2 := -2 * layerDist
 
-			for _, lit := range bag {
-				s := "     \\node at (%v,%v) {$%v$};\n"
-				file.Write([]byte(fmt.Sprintf(s, col2, pos, lit.ToTex())))
-				pos++
-			}
-
-			if len(bag) > 0 {
-				s1 := "\\draw[thick,decorate,decoration={brace,amplitude=5pt},xshift=-4pt,yshift=0pt] (%v,%v) -- (%v,%v) node [black,midway,xshift=-5pt] {$2^%v$};"
-				file.Write([]byte(fmt.Sprintf(s1, col1, start, col1, pos-1, i)))
-			}
-
+		for _, lit := range bag {
+			s := "     \\node at (%v,%v) {$%v$};\n"
+			file.Write([]byte(fmt.Sprintf(s, col2, pos, lit.ToTex())))
+			pos++
 		}
+
+		if len(bag) > 0 {
+			s1 := "\\draw[thick,decorate,decoration={brace,amplitude=5pt},xshift=-4pt,yshift=0pt] (%v,%v) -- (%v,%v) node [black,midway,xshift=-5pt] {$2^%v$};"
+			file.Write([]byte(fmt.Sprintf(s1, col1, start, col1, pos-1, i)))
+		}
+
 	}
+	//}
 
 	file.Write([]byte(fmt.Sprintln(`
 \end{tikzpicture}
 }
-\end{document}`)))
+`)))
+
+	t.writeDescription(file)
+
+	file.Write([]byte(fmt.Sprintln(`
+\end{figure}
+`)))
+
+}
+
+func PrintBinary(n int64) {
+	bin := binary(n)
+
+	for i := len(bin) - 1; i >= 0; i-- {
+		fmt.Print(bin[i])
+	}
+}
+
+func (t *Threshold) Print2() {
+	fmt.Println(t.Desc)
+
+	first := true
+	for _, x := range t.Entries {
+		l := x.Literal
+		if !first {
+			fmt.Printf("+ ")
+		}
+		first = false
+
+		PrintBinary(x.Weight)
+		fmt.Print(x.Weight)
+		fmt.Print(l.ToTxt())
+	}
+	switch t.Typ {
+	case AtMost:
+		fmt.Print(" <= ")
+	case AtLeast:
+		fmt.Print(" >= ")
+	case Equal:
+		fmt.Print(" == ")
+	}
+
+	PrintBinary(t.K)
+
+	fmt.Println()
+	fmt.Println()
+}
+
+func (t *Threshold) writeDescription(file *os.File) {
+	file.Write([]byte("\\caption{"))
+	t.WriteFormula(10, file)
+	t.WriteFormula(2, file)
+	file.Write([]byte(fmt.Sprintf("}\n")))
+}
+
+func (t *Threshold) WriteFormula(base int,file *os.File) {
+
+	file.Write([]byte("$"))
+	for _, x := range t.Entries {
+		if x.Weight < 0 {
+			file.Write([]byte(fmt.Sprintf("%v \\cdot %v ", x.Weight, x.Literal.ToTex())))
+		} else {
+			file.Write([]byte(fmt.Sprintf("+%v \\cdot %v ", x.Weight, x.Literal.ToTex())))
+		}
+	}
+	switch t.Typ {
+	case AtMost:
+		file.Write([]byte(" \\leq "))
+	case AtLeast:
+		file.Write([]byte(" \\geq "))
+	case Equal:
+		file.Write([]byte(" = "))
+	}
+	file.Write([]byte(fmt.Sprintf("%v $\n", t.K)))
+}
+
+func (t *Threshold) Print10() {
+	fmt.Println(t.Desc)
+
+	for _, x := range t.Entries {
+		l := x.Literal
+
+		if x.Weight > 0 {
+			fmt.Printf("+")
+		}
+
+		fmt.Print(x.Weight)
+		fmt.Print(l.ToTxt())
+	}
+	switch t.Typ {
+	case AtMost:
+		fmt.Print("<= ")
+	case AtLeast:
+		fmt.Print(">= ")
+	case Equal:
+		fmt.Print("== ")
+	}
+	fmt.Println(t.K, ";")
+
 }

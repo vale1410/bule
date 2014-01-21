@@ -17,36 +17,46 @@ const (
 	Optimization
 )
 
-const (
-	SortingNetwork TranslationType = iota
-	Facts
-	SingleClause
-	BDD
-)
-
 type Entry struct {
 	Literal sat.Literal
 	Weight  int64
 }
-
-//type Atom int
-//
-//type Literal struct {
-//	Sign bool
-//	Atom Atom
-//}
 
 type Threshold struct {
 	Desc    string
 	Entries []Entry
 	K       int64
 	Typ     EquationType
-	Trans   TranslationType
 	Pred    sat.Pred
 	Clauses sat.ClauseSet
-	Sorter  sorters.Sorter
-	Bags    [][]sat.Literal
-	LitIn   []sat.Literal //Bags flattened, input to Sorter
+	Trans   TranslationType
+	Sorter sorters.Sorter
+	Bags   [][]sat.Literal
+	LitIn  []sat.Literal //Bags flattened, input to Sorter
+}
+
+const (
+	Facts TranslationType = iota
+	SingleClause
+	SortingNetwork
+	BDD
+)
+
+func (t *Threshold) Translate() {
+
+	if t.OnlyFacts() {
+		fmt.Println("only facts")
+		t.Trans = Facts
+	} else if t.SingleClause() {
+		fmt.Println("single clause")
+		t.Trans = SingleClause
+	} else {
+		fmt.Println("sorting network")
+		typ := sorters.OddEven
+		t.Trans = SortingNetwork
+		t.CreateSorter(typ)
+	}
+
 }
 
 func (t *Threshold) OnlyFacts() (is bool) {
@@ -66,7 +76,9 @@ func (t *Threshold) OnlyFacts() (is bool) {
 	return is
 }
 
-func (t *Threshold) SingleClause() (yes bool, clause sat.Clause) {
+func (t *Threshold) SingleClause() (bool) {
+
+    var clause sat.Clause
 
 	entries := make([]Entry, len(t.Entries))
 	copy(entries, t.Entries)
@@ -95,11 +107,13 @@ func (t *Threshold) SingleClause() (yes bool, clause sat.Clause) {
 			clause.Literals[i] = sat.Neg(clause.Literals[i])
 		}
 	}
-	yes = allOne && K == 1
-	return
+	t.Clauses = make(sat.ClauseSet, 1)
+    t.Clauses[0] = clause
+
+	return allOne && K == 1
 }
 
-func (t *Threshold) CreateSortingEncoding(typ sorters.SortingNetworkType) {
+func (t *Threshold) CreateSorter(typ sorters.SortingNetworkType) {
 
 	total := t.Normalize()
 	t.Print10()
@@ -114,7 +128,6 @@ func (t *Threshold) CreateSortingEncoding(typ sorters.SortingNetworkType) {
 	t.CreateBags()
 
 	layers := make([]sorters.Sorter, len(t.Bags))
-	bitsBag := len(t.Bags)
 
 	for i, bag := range t.Bags {
 
@@ -135,14 +148,15 @@ func (t *Threshold) CreateSortingEncoding(typ sorters.SortingNetworkType) {
 
 	tare := layerPow2 - ((t.K + 1) % layerPow2)
 	tare = tare % layerPow2
-
 	bTare := binary(tare)
-	bitsTare := len(bTare)
 
-	fmt.Println("debug: layerPow2", layerPow2)
-	fmt.Println("debug: tare", tare)
-	fmt.Println("debug: bitsBag", bitsBag, "bitsTare", bitsTare)
-	fmt.Println("debug: bTare", bTare)
+
+	//fmt.Println("debug: layerPow2", layerPow2)
+	//fmt.Println("debug: tare", tare)
+	//bitsTare := len(bTare)
+	//bitsBag := len(t.Bags)
+	//fmt.Println("debug: bitsBag", bitsBag, "bitsTare", bitsTare)
+	//fmt.Println("debug: bTare", bTare)
 
 	// output of sorter in layer $i-1$
 	bIn := make([]int, 0)
@@ -204,9 +218,9 @@ func (t *Threshold) CreateSortingEncoding(typ sorters.SortingNetworkType) {
 
 	// outLastLayer identifies the nth output in the last layer
 	outLastLayer := ((t.K + 1 + tare) / int64(layerPow2)) - 1
-	fmt.Println("debug: outLastLayer", outLastLayer)
+	//fmt.Println("debug: outLastLayer", outLastLayer)
 	idSetToZero := bIn[outLastLayer]
-	fmt.Println("which id is", idSetToZero)
+	//fmt.Println("which id is", idSetToZero)
 
 	// and propagate the rest backwards
 	setTo := -1
@@ -352,78 +366,3 @@ func binary(n int64) (bin []int) {
 	return
 }
 
-func PrintBinary(n int64) {
-	bin := binary(n)
-
-	for i := len(bin) - 1; i >= 0; i-- {
-		fmt.Print(bin[i])
-	}
-}
-
-func (t *Threshold) Print2() {
-	fmt.Println(t.Desc)
-
-	first := true
-	for _, x := range t.Entries {
-		l := x.Literal
-		if !first {
-			fmt.Printf("+ ")
-		}
-		first = false
-
-		PrintBinary(x.Weight)
-
-		if l.Sign {
-			fmt.Print(" ")
-		} else {
-			fmt.Print(" ~")
-		}
-		//fmt.Print(l.Atom.P, "(", l.Atom.V1, ",", l.Atom.V2, ")")
-		fmt.Print("x", l.Atom, " ")
-	}
-	switch t.Typ {
-	case AtMost:
-		fmt.Print(" <= ")
-	case AtLeast:
-		fmt.Print(" >= ")
-	case Equal:
-		fmt.Print(" == ")
-	}
-
-	PrintBinary(t.K)
-
-	fmt.Println()
-	fmt.Println()
-}
-
-func (t *Threshold) Print10() {
-	fmt.Println(t.Desc)
-
-	for _, x := range t.Entries {
-		l := x.Literal
-
-		if x.Weight > 0 {
-			fmt.Printf("+")
-		}
-
-		fmt.Print(x.Weight, "")
-
-		if l.Sign {
-			fmt.Print(" ")
-		} else {
-			fmt.Print(" ~")
-		}
-		//fmt.Print(l.Atom.P, "(", l.Atom.V1, ",", l.Atom.V2, ")")
-		fmt.Print("x", l.Atom, " ")
-	}
-	switch t.Typ {
-	case AtMost:
-		fmt.Print("<= ")
-	case AtLeast:
-		fmt.Print(">= ")
-	case Equal:
-		fmt.Print("== ")
-	}
-	fmt.Println(t.K, ";")
-
-}

@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/vale1410/bule/sat"
-	"github.com/vale1410/bule/sorters"
 	"github.com/vale1410/bule/threshold"
 	"io/ioutil"
 	"os"
@@ -56,28 +55,26 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 	for i, pb := range pbs {
 		// pb.Print10()
-		clauses.AddClauseSet(TranslatePB2Clauses(i, pb))
+		TranslatePB2Clauses(i, pb)
+		clauses.AddClauseSet(pb.Clauses)
 		debug("number of clause", len(clauses))
 		fmt.Println("")
 	}
 
 	g := sat.IdGenerator(len(clauses) * 7)
 	g.GenerateIds(clauses)
-	g.Filename = strings.Split(*f, ".")[0] + ".cnf"
-	//g.Filename = *out
+	//g.Filename = strings.Split(*f, ".")[0] + ".cnf"
+	g.Filename = *out
 	g.PrintClausesDIMACS(clauses)
 }
 
-func TranslatePB2Clauses(id int, pb threshold.Threshold) (clauses sat.ClauseSet) {
+func TranslatePB2Clauses(id int, pb threshold.Threshold) {
 
-	if b, clause := pb.SingleClause(); b && *check_clause {
-		fmt.Print(".")
-		clauses = make(sat.ClauseSet, 1)
-		clauses[0] = clause
+	pb.Translate()
+
+	if pb.Trans == threshold.SingleClause || pb.Trans == threshold.Facts {
 	} else {
-		pb.Normalize()
 
-		typ := sorters.OddEven
 		wh := 4
 		var which [8]bool
 
@@ -92,13 +89,9 @@ func TranslatePB2Clauses(id int, pb threshold.Threshold) (clauses sat.ClauseSet)
 			which = [8]bool{false, true, true, true, true, true, true, true}
 		}
 
-		pb.Normalize()
-		pb.CreateSortingEncoding(typ)
-
 		pred := sat.Pred("auxPB" + strconv.Itoa(id))
-		clauses = sat.CreateEncoding(pb.LitIn, which, []sat.Literal{}, "BnB", pred, pb.Sorter)
+		pb.Clauses = sat.CreateEncoding(pb.LitIn, which, []sat.Literal{}, "BnB", pred, pb.Sorter)
 	}
-
 	return
 }
 
@@ -191,7 +184,7 @@ func parse(filename string) (pbs []threshold.Threshold) {
 						debug("cant convert to threshold:", l)
 						panic("bad conversion of numbers")
 					}
-                    atom := sat.Atom{sat.Pred("x"),variable,0}
+					atom := sat.Atom{sat.Pred("x"), variable, 0}
 					pbs[t].Entries[i/2] = threshold.Entry{sat.Literal{true, atom}, weight}
 				}
 
