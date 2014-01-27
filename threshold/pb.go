@@ -1,7 +1,6 @@
 package threshold
 
 import (
-	"fmt"
 	"github.com/vale1410/bule/sat"
 	"github.com/vale1410/bule/sorters"
 	"math"
@@ -26,13 +25,14 @@ type Threshold struct {
 	Desc    string
 	Entries []Entry
 	K       int64
+	Tare    int64
 	Typ     EquationType
 	Pred    sat.Pred
 	Clauses sat.ClauseSet
 	Trans   TranslationType
-	Sorter sorters.Sorter
-	Bags   [][]sat.Literal
-	LitIn  []sat.Literal //Bags flattened, input to Sorter
+	Sorter  sorters.Sorter
+	Bags    [][]sat.Literal
+	LitIn   []sat.Literal //Bags flattened, input to Sorter
 }
 
 const (
@@ -44,14 +44,16 @@ const (
 
 func (t *Threshold) Translate() {
 
-	if t.OnlyFacts() {
-		fmt.Println("only facts")
+	if b, cls := t.OnlyFacts(); b {
+		//fmt.Println("Bule: translate by facts", len(cls))
+		t.Clauses = cls
 		t.Trans = Facts
-	} else if t.SingleClause() {
-		fmt.Println("single clause")
+	} else if b, cls := t.SingleClause(); b {
+		//fmt.Println("Bule: translate by single clause", len(cls))
+		t.Clauses = cls
 		t.Trans = SingleClause
 	} else {
-		fmt.Println("sorting network")
+		//fmt.Println("Bule: translate by sorting network")
 		typ := sorters.OddEven
 		t.Trans = SortingNetwork
 		t.CreateSorter(typ)
@@ -59,37 +61,31 @@ func (t *Threshold) Translate() {
 
 }
 
-func (t *Threshold) OnlyFacts() (is bool) {
+func (t *Threshold) OnlyFacts() (is bool, clauses sat.ClauseSet) {
 
-	t.Normalize()
+	t.NormalizeAtMost()
 	is = false
 
-	if t.K == 0 {
+	if t.K <= 0 {
 		is = true
-		t.Clauses = make(sat.ClauseSet, len(t.Entries))
+		clauses = make(sat.ClauseSet, len(t.Entries))
 		for i, x := range t.Entries {
-			t.Clauses[i] = sat.Clause{"OF", []sat.Literal{x.Literal}}
+			clauses[i] = sat.Clause{"OF", []sat.Literal{sat.Neg(x.Literal)}}
 		}
-
 	}
 
-	return is
+	return is, clauses
 }
 
-func (t *Threshold) SingleClause() (bool) {
+func (t *Threshold) SingleClause() (is bool, clauses sat.ClauseSet) {
 
-    var clause sat.Clause
+	t.NormalizeAtLeast(false)
+
+	var clause sat.Clause
 
 	entries := make([]Entry, len(t.Entries))
 	copy(entries, t.Entries)
 	K := t.K
-
-	if t.Typ == AtMost {
-		K = -K
-		for i, x := range entries {
-			entries[i].Weight = int64(-1) * x.Weight
-		}
-	}
 
 	// normalize to coefficients 1
 	allOne := true
@@ -107,16 +103,18 @@ func (t *Threshold) SingleClause() (bool) {
 			clause.Literals[i] = sat.Neg(clause.Literals[i])
 		}
 	}
-	t.Clauses = make(sat.ClauseSet, 1)
-    t.Clauses[0] = clause
+	clauses = make(sat.ClauseSet, 1)
+	clauses[0] = clause
+	is = allOne && K == 1
 
-	return allOne && K == 1
+	return is, clauses
 }
 
 func (t *Threshold) CreateSorter(typ sorters.SortingNetworkType) {
 
-	total := t.Normalize()
-	t.Print10()
+	total := t.NormalizeAtMost()
+
+	//t.Print10()
 
 	if total <= t.K {
 		panic("sum of weights is too low to make a difference!")
@@ -148,8 +146,8 @@ func (t *Threshold) CreateSorter(typ sorters.SortingNetworkType) {
 
 	tare := layerPow2 - ((t.K + 1) % layerPow2)
 	tare = tare % layerPow2
+	t.Tare = tare
 	bTare := binary(tare)
-
 
 	//fmt.Println("debug: layerPow2", layerPow2)
 	//fmt.Println("debug: tare", tare)
@@ -252,12 +250,44 @@ func (t *Threshold) IsNormalized() (yes bool) {
 	return t.K > 0 && yes && t.Typ == AtMost
 }
 
-// Normalize: work in progress
+// Normalize: AtLeast
+// transform to AtLeast, only positive variables
+// b=true: only positive variables
+// b=false: only positive weights
+func (t *Threshold) NormalizeAtLeast(posVariables bool) {
+	posWeights := !posVariables
+
+	// remove 0 weights?
+	if t.Typ == AtMost {
+		//set to AtMost, multiply by -1
+		t.K = -t.K
+		t.Typ = AtLeast
+		for i, e := range t.Entries {
+			t.Entries[i].Weight = -e.Weight
+		}
+	} else if t.Typ == Equal {
+		panic("Equal type for threshold function not supported yet")
+	}
+
+	for i, e := range t.Entries {
+		if (posWeights && t.Entries[i].Weight < 0) ||
+			(posVariables && e.Literal.Sign == false) {
+			t.Entries[i].Literal = sat.Neg(e.Literal)
+			t.K -= t.Entries[i].Weight
+			t.Entries[i].Weight = -t.Entries[i].Weight
+		}
+	}
+
+	return
+}
+
+// Normalize: AtMost
+// transform to AtMost, only positive weights
 // transform negative weights
 // check if maximum reaches K at all
-// sort by weight
+// todo: sort by weight
 // returns sum of weights
-func (t *Threshold) Normalize() (total int64) {
+func (t *Threshold) NormalizeAtMost() (total int64) {
 
 	total = 0
 
@@ -290,6 +320,7 @@ func (t *Threshold) Normalize() (total int64) {
 func (t *Threshold) CreateBags() {
 
 	if !t.IsNormalized() {
+		t.Print10()
 		panic("Threshold is not normalized before creating bags")
 	}
 
@@ -365,4 +396,3 @@ func binary(n int64) (bin []int) {
 	}
 	return
 }
-

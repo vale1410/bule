@@ -5,6 +5,7 @@ import (
 	"github.com/vale1410/bule/sorters"
 	"os"
 	"sort"
+	"strconv"
 )
 
 type pair struct {
@@ -49,7 +50,7 @@ func writeEpilog(file *os.File) {
 \end{document}`)))
 }
 
-func (t *Threshold) PrintThresholdTikZ(filename string) {
+func PrintThresholdTikZ(filename string, ts []Threshold) {
 
 	file, ok := os.Create(filename)
 	if ok != nil {
@@ -59,8 +60,11 @@ func (t *Threshold) PrintThresholdTikZ(filename string) {
 
 	writeProlog(file)
 
-	t.writeTikz(file)
-	//t.writeDescription(file)
+	for i, t := range ts {
+		file.Write([]byte(fmt.Sprintf("\\section{Example %v}", i+1)))
+		t.writeDescription(file)
+		t.writeTikz(file)
+	}
 
 	writeEpilog(file)
 }
@@ -172,13 +176,13 @@ func (t *Threshold) writeTikz(file *os.File) {
 	symbolsTex[0] = "0"
 	symbolsTex[1] = "1"
 
+	//file.Write([]byte("\\begin{figure}[h!]"))
 	file.Write([]byte(fmt.Sprintln(`
-\begin{figure}[h!]
 \tikzset{cross/.style = 
     {inner sep=0pt,minimum size=3pt,fill,circle}}
-\centering 
-\resizebox {\columnwidth} {!} {
-\begin{tikzpicture}[node distance=1cm, auto]`)))
+\centering`)))
+	file.Write([]byte(fmt.Sprintln(`\resizebox {\columnwidth} {!} {`)))
+	file.Write([]byte(fmt.Sprintln(`\begin{tikzpicture}[node distance=1cm, auto]`)))
 
 	length := 0.0
 
@@ -266,25 +270,18 @@ func (t *Threshold) writeTikz(file *os.File) {
 	}
 	//}
 
-	file.Write([]byte(fmt.Sprintln(`
-\end{tikzpicture}
-}
-`)))
-
-	t.writeDescription(file)
-
-	file.Write([]byte(fmt.Sprintln(`
-\end{figure}
-`)))
+	file.Write([]byte(fmt.Sprintln("\\end{tikzpicture}")))
+	file.Write([]byte(fmt.Sprintln("}")))
+//	file.Write([]byte(fmt.Sprintln("\\end{figure}")))
 
 }
 
-func PrintBinary(n int64) {
+func BinaryStr(n int64) (s string) {
 	bin := binary(n)
-
 	for i := len(bin) - 1; i >= 0; i-- {
-		fmt.Print(bin[i])
+		s += strconv.Itoa(bin[i])
 	}
+	return
 }
 
 func (t *Threshold) Print2() {
@@ -298,7 +295,7 @@ func (t *Threshold) Print2() {
 		}
 		first = false
 
-		PrintBinary(x.Weight)
+		fmt.Print(BinaryStr(x.Weight))
 		fmt.Print(x.Weight)
 		fmt.Print(l.ToTxt())
 	}
@@ -311,27 +308,39 @@ func (t *Threshold) Print2() {
 		fmt.Print(" == ")
 	}
 
-	PrintBinary(t.K)
+	fmt.Print(BinaryStr(t.K))
 
 	fmt.Println()
 	fmt.Println()
 }
 
 func (t *Threshold) writeDescription(file *os.File) {
-	file.Write([]byte("\\caption{"))
+	//file.Write([]byte("\\caption{"))
+	file.Write([]byte("The translation of the PB through sorters:\n"))
 	t.WriteFormula(10, file)
+	file.Write([]byte("and in binary representation:\n"))
 	t.WriteFormula(2, file)
-	file.Write([]byte(fmt.Sprintf("}\n")))
+	file.Write([]byte(fmt.Sprintf("adding the Tare on both sides. $$T = %v_{10} = %v_2$$\n", t.Tare, BinaryStr(t.Tare))))
+	//file.Write([]byte(fmt.Sprintf("}\n")))
 }
 
-func (t *Threshold) WriteFormula(base int,file *os.File) {
+func (t *Threshold) WriteFormula(base int, file *os.File) {
 
-	file.Write([]byte("$"))
+	var w string
+
+	file.Write([]byte("$$"))
 	for _, x := range t.Entries {
-		if x.Weight < 0 {
-			file.Write([]byte(fmt.Sprintf("%v \\cdot %v ", x.Weight, x.Literal.ToTex())))
+		if base == 2 {
+			w = BinaryStr(x.Weight)
+		} else if base == 10 {
+			w = fmt.Sprintf("%v", x.Weight)
 		} else {
-			file.Write([]byte(fmt.Sprintf("+%v \\cdot %v ", x.Weight, x.Literal.ToTex())))
+			panic("only base 2 and 10 supported")
+		}
+		if x.Weight < 0 {
+			file.Write([]byte(fmt.Sprintf("%v \\cdot %v ", w, x.Literal.ToTex())))
+		} else {
+			file.Write([]byte(fmt.Sprintf("+%v \\cdot %v ", w, x.Literal.ToTex())))
 		}
 	}
 	switch t.Typ {
@@ -342,12 +351,39 @@ func (t *Threshold) WriteFormula(base int,file *os.File) {
 	case Equal:
 		file.Write([]byte(" = "))
 	}
-	file.Write([]byte(fmt.Sprintf("%v $\n", t.K)))
+	if base == 2 {
+		w = BinaryStr(t.K)
+	} else if base == 10 {
+		w = fmt.Sprintf("%v", t.K)
+	} else {
+		panic("only base 2 and 10 supported")
+	}
+	file.Write([]byte(fmt.Sprintf("%v $$\n", w)))
 }
 
-func (t *Threshold) Print10() {
-	fmt.Println(t.Desc)
+func (t *Threshold) PrintGurobi() {
+	for _, x := range t.Entries {
+		l := x.Literal
 
+		if x.Weight > 0 {
+			fmt.Printf("+")
+		}
+
+		fmt.Print(x.Weight)
+		fmt.Print(l.ToTxt())
+	}
+	switch t.Typ {
+	case AtMost:
+		fmt.Print("<= ")
+	case AtLeast:
+		fmt.Print(">= ")
+	case Equal:
+		fmt.Print("= ")
+	}
+	fmt.Println(t.K)
+
+}
+func (t *Threshold) Print10() {
 	for _, x := range t.Entries {
 		l := x.Literal
 

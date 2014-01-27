@@ -1,7 +1,7 @@
 package threshold
 
 import (
-	"fmt"
+"fmt"
 	"github.com/vale1410/bule/sat"
 	"github.com/vale1410/bule/sorters"
 	"math"
@@ -43,21 +43,16 @@ func TestExample(test *testing.T) {
 	//t := createJapan2(3)
 	//filename := "japan2_3"
 
-	t := createIgnasi1()
-	//t := createIgnasi2()
+	t1 := createIgnasi1()
+	t2 := createIgnasi2()
 
-	fmt.Println(t)
-	t.Print10()
-	//t.Normalize()
-	//t.Print2()
+	t1.CreateSorter(typ)
+	t2.CreateSorter(typ)
 
-	t.CreateSorter(typ)
+    //fmt.Println(t)
 
-	fmt.Println("sorter size comparators", len(t.Sorter.Comparators))
+	PrintThresholdTikZ(filename + ".tex",[]Threshold{t1,t2})
 
-    fmt.Println(t)
-
-	t.PrintThresholdTikZ(filename + ".tex")
 }
 
 func TestPBOGeneration(test *testing.T) {

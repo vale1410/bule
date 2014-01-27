@@ -262,6 +262,7 @@ func (g *Gen) PrintClausesDIMACS(clauses ClauseSet) {
 	}
 
 	g.Println("p cnf", g.nextId, len(clauses))
+    fmt.Println("Bule: variables", g.nextId,"clauses", len(clauses))
 
 	for _, c := range clauses {
 		for _, l := range c.Literals {

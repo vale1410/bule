@@ -18,6 +18,8 @@ var ver = flag.Bool("ver", false, "Show version info.")
 var check_clause = flag.Bool("clause", true, "Checks if Pseudo-Boolean is not just a simple clause.")
 var dbg = flag.Bool("d", false, "Print debug information.")
 var dbgfile = flag.String("df", "", "File to print debug information.")
+var reformat = flag.Bool("reformat", false, "Reformat PB files into correct format. Decompose = into >= and <=")
+var gurobi = flag.Bool("gurobi", false, "Reformt to LS Gurobi input, output to stdout.")
 
 //var model = flag.String("model", "model.lp", "path to model file")
 //var solve = flag.Bool("solve", false, "Pass problem to clasp and solve.")
@@ -51,31 +53,58 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 	pbs := parse(*f)
 
-	var clauses sat.ClauseSet
+	if *gurobi {
+		fmt.Println("Subject To")
+		atoms := make(map[sat.Atom]bool, len(pbs))
+		for _, pb := range pbs {
+			pb.NormalizeAtLeast(true)
+			pb.PrintGurobi()
+			for _, x := range pb.Entries {
+				atoms[x.Literal.Atom] = true
+			}
+		}
+		fmt.Println("Binary")
+		for atom, _ := range atoms {
+			fmt.Print("x" + atom.ToTex() + " ")
+		}
+        fmt.Println()
+	} else if *reformat {
+		for _, pb := range pbs {
+			if pb.Typ == threshold.Equal {
+				pb.Typ = threshold.AtLeast
+				pb.NormalizeAtLeast(true)
+				pb.Print10()
+				pb.Typ = threshold.AtMost
+			}
+			pb.NormalizeAtLeast(true)
+			pb.Print10()
+		}
+	} else {
 
-	for i, pb := range pbs {
-		// pb.Print10()
-		TranslatePB2Clauses(i, pb)
-		clauses.AddClauseSet(pb.Clauses)
-		debug("number of clause", len(clauses))
-		fmt.Println("")
+		var clauses sat.ClauseSet
+
+		for i, pb := range pbs {
+			TranslatePB2Clauses(i, &pb)
+			clauses.AddClauseSet(pb.Clauses)
+			debug("number of clause", len(pb.Clauses))
+		}
+
+		g := sat.IdGenerator(len(clauses) * 7)
+		g.GenerateIds(clauses)
+		//g.Filename = strings.Split(*f, ".")[0] + ".cnf"
+		g.Filename = *out
+		g.PrintClausesDIMACS(clauses)
 	}
-
-	g := sat.IdGenerator(len(clauses) * 7)
-	g.GenerateIds(clauses)
-	//g.Filename = strings.Split(*f, ".")[0] + ".cnf"
-	g.Filename = *out
-	g.PrintClausesDIMACS(clauses)
 }
 
-func TranslatePB2Clauses(id int, pb threshold.Threshold) {
+func TranslatePB2Clauses(id int, pb *threshold.Threshold) {
 
 	pb.Translate()
 
 	if pb.Trans == threshold.SingleClause || pb.Trans == threshold.Facts {
 	} else {
 
-		wh := 4
+		wh := 2
 		var which [8]bool
 
 		switch wh {
@@ -94,8 +123,6 @@ func TranslatePB2Clauses(id int, pb threshold.Threshold) {
 	}
 	return
 }
-
-//
 
 func debug(arg ...interface{}) {
 	if *dbg {
@@ -142,6 +169,10 @@ func parse(filename string) (pbs []threshold.Threshold) {
 	t := 0
 
 	for _, l := range lines {
+
+		//if strings.HasPrefix(l, "*") {
+		//	fmt.Println(l)
+		//}
 
 		if state > 0 && (l == "" || strings.HasPrefix(l, "*")) {
 			continue
@@ -195,9 +226,11 @@ func parse(filename string) (pbs []threshold.Threshold) {
 					pbs[t].Typ = threshold.AtLeast
 				} else if typS == "<=" {
 					pbs[t].Typ = threshold.AtMost
+				} else if typS == "=" {
+					pbs[t].Typ = threshold.Equal
 				} else {
 					debug("cant convert to threshold:", l)
-					panic("bad conversion of equality " + typS)
+					panic("bad conversion of symbols" + typS)
 				}
 				t++
 			}

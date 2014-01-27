@@ -16,7 +16,7 @@ func TestSizes(t *testing.T) {
 	typs[2] = Bitonic
 	//typs[3] = Bubble
 
-	N := 100
+	N := 10
 
     fmt.Println("Merging Networks")
 
