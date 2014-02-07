@@ -1,7 +1,7 @@
 package threshold
 
 import (
-"fmt"
+	"fmt"
 	"github.com/vale1410/bule/sat"
 	"github.com/vale1410/bule/sorters"
 	"math"
@@ -12,9 +12,10 @@ import (
 func TestExample(test *testing.T) {
 
 	filename := "test"
+	typ := sorters.Bubble
 	//typ := sorters.Pairwise
 	//typ := sorters.Bitonic
-	typ := sorters.OddEven
+	//typ := sorters.OddEven
 
 	//Example 1
 	//t := createCardinality(4, 15, 5)
@@ -49,9 +50,9 @@ func TestExample(test *testing.T) {
 	t1.CreateSorter(typ)
 	t2.CreateSorter(typ)
 
-    //fmt.Println(t)
+	//fmt.Println(t)
 
-	PrintThresholdTikZ(filename + ".tex",[]Threshold{t1,t2})
+	PrintThresholdTikZ(filename+".tex", []Threshold{t1, t2})
 
 }
 

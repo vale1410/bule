@@ -102,8 +102,7 @@ func CreateCardinalityNetwork(size int, k int, cType CardinalityType, sType Sort
 	return
 }
 
-// CreateSortingNetworks creates a sorting network of arbitrary size and cut
-// and of type.
+// CreateSortingNetworks creates a sorting network of arbitrary size, cut and type
 func CreateSortingNetwork(s int, cut int, typ SortingNetworkType) (sorter Sorter) {
 
 	//grow to be 2^n
@@ -140,8 +139,10 @@ func CreateSortingNetwork(s int, cut int, typ SortingNetworkType) (sorter Sorter
 	}
 
 	sorter = Sorter{comparators, input, output}
+    log.Println(sorter)
 	sorter.changeSize(s)
 	sorter.PropagateOrdering(cut)
+    log.Println(sorter)
 
 	return
 }
@@ -338,8 +339,12 @@ func (sorter *Sorter) PropagateForward(mapping map[int]int) {
 
 	l := 0
 	comparators := sorter.Comparators
-	// remove is a comparator with no functionality
+
+	// remove is a comparator that marks removal
+
 	remove := Comparator{0, 0, 0, 0}
+
+    log.Println(mapping)
 
 	for i, comp := range comparators {
 
@@ -409,6 +414,8 @@ func (sorter *Sorter) PropagateForward(mapping map[int]int) {
 		}
 	}
 
+    log.Println(mapping)
+
 	sorter.Comparators = out
 }
 
@@ -443,8 +450,8 @@ func (sorter *Sorter) PropagateBackwards(mapping map[int]int) {
 	cleanMapping := make(map[int]int, 0)
 
 	mapping[-1] = -1
-	mapping[0] = -1
-	mapping[1] = -1
+	//mapping[0] = -1 //why?
+	//mapping[1] = -1 //why?
 
 	for i := len(comparators) - 1; i >= 0; i-- {
 

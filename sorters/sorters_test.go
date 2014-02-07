@@ -7,72 +7,97 @@ import (
 	"testing"
 )
 
-func TestSizes(t *testing.T) {
+func TestBubbleSortSize(t *testing.T) {
 
-	fmt.Println("Comparing sizes: Bitonic/OddEven/Bubble/Pairwise")
-	var typs [3]SortingNetworkType
-	typs[0] = OddEven
-	typs[1] = Pairwise
-	typs[2] = Bitonic
-	//typs[3] = Bubble
+	sorter := CreateSortingNetwork(5, -1, Bubble)
+	fmt.Println(sorter)
 
-	N := 10
-
-    fmt.Println("Merging Networks")
-
-	for n := 2; n <= N; n++ {
-		for k := 1; k < n; k++ {
-            fmt.Print(n,"/",k,";")
-			for _,typ := range typs {
-				sorter := CreateSortingNetwork(n, k, typ)
-	            fmt.Print(len(sorter.Comparators),";")
-			}
-            fmt.Println()
-		}
-	}
-
-
-    fmt.Println("Cardinality Networks")
-
-	for n := 2; n <= N; n++ {
-		for k := 1; k < n; k++ {
-            fmt.Print(n,"/",k,";")
-			for _,typ := range typs {
-				sorter := CreateCardinalityNetwork(n, k,AtMost, typ)
-	            fmt.Print(len(sorter.Comparators),";")
-			}
-            fmt.Println()
-		}
-	}
+	PrintSorterTikZ(sorter, "test.tex")
 
 }
 
-func TestNormalize(t *testing.T) {
+//func TestRemoveOutput(t *testing.T) {
+//
+//	size := 5
+//	k := 2
+//	typ := OddEven
+//
+//	sorter := CreateCardinalityNetwork(size, k, AtMost, typ)
+//	fmt.Println(sorter)
+//	sorter.RemoveOutput()
+//	fmt.Println(sorter)
+//
+//	if len(sorter.Comparators) == 0 {
+//		panic("removeOutput or propagateBackwards is broken!")
+//	}
+//
+//}
 
-	fmt.Println("Test: Normalization")
+//func TestSizes(t *testing.T) {
+//
+//	fmt.Println("Comparing sizes: Bitonic/OddEven/Bubble/Pairwise")
+//	var typs [3]SortingNetworkType
+//	typs[0] = OddEven
+//	typs[1] = Pairwise
+//	typs[2] = Bitonic
+//	//typs[3] = Bubble
+//
+//	N := 10
+//
+//	fmt.Println("Merging Networks")
+//
+//	for n := 2; n <= N; n++ {
+//		for k := 1; k < n; k++ {
+//			fmt.Print(n, "/", k, ";")
+//			for _, typ := range typs {
+//				sorter := CreateSortingNetwork(n, k, typ)
+//				fmt.Print(len(sorter.Comparators), ";")
+//			}
+//			fmt.Println()
+//		}
+//	}
+//
+//	fmt.Println("Cardinality Networks")
+//
+//	for n := 2; n <= N; n++ {
+//		for k := 1; k < n; k++ {
+//			fmt.Print(n, "/", k, ";")
+//			for _, typ := range typs {
+//				sorter := CreateCardinalityNetwork(n, k, AtMost, typ)
+//				fmt.Print(len(sorter.Comparators), ";")
+//			}
+//			fmt.Println()
+//		}
+//	}
+//
+//}
 
-	sorter := CreateSortingNetwork(8, -1, Pairwise)
-
-	ids1 := make(map[int]bool, len(sorter.Comparators)*4)
-
-	for _, comp := range sorter.Comparators {
-		ids1[comp.A] = true
-		ids1[comp.B] = true
-		ids1[comp.C] = true
-		ids1[comp.D] = true
-	}
-
-	offset := 100
-
-	var in []int
-
-	max := sorter.Normalize(offset, in)
-
-	if max-offset != len(ids1) {
-		t.Error("Normalize failed")
-	}
-
-}
+//func TestNormalize(t *testing.T) {
+//
+//	fmt.Println("Test: Normalization")
+//
+//	sorter := CreateSortingNetwork(8, -1, Pairwise)
+//
+//	ids1 := make(map[int]bool, len(sorter.Comparators)*4)
+//
+//	for _, comp := range sorter.Comparators {
+//		ids1[comp.A] = true
+//		ids1[comp.B] = true
+//		ids1[comp.C] = true
+//		ids1[comp.D] = true
+//	}
+//
+//	offset := 100
+//
+//	var in []int
+//
+//	max := sorter.Normalize(offset, in)
+//
+//	if max-offset != len(ids1) {
+//		t.Error("Normalize failed")
+//	}
+//
+//}
 
 //func TestStuff(t *testing.T) {
 //
@@ -83,42 +108,42 @@ func TestNormalize(t *testing.T) {
 
 // TestCardinality check constraint sum n <= k
 // TestAtLeast check constraint sum n >= k
-func TestCardinality(t *testing.T) {
-
-	fmt.Println("Test: Bitonic/OddEven/Bubble/Pairwise")
-	var typs [4]SortingNetworkType
-	typs[0] = OddEven
-	typs[1] = Bitonic
-	typs[2] = Bubble
-	typs[3] = Pairwise
-
-	for _, typ := range typs {
-
-		sizes := []int{3, 4, 6, 9, 9, 9, 33, 68, 123, 250}
-		ks := []int{2, 2, 3, 2, 6, 7, 29, 8, 8, 100}
-
-		for i, size := range sizes {
-			cardinalityAtMost(size, ks[i], t, typ)
-			cardinalityAtLeast(size, ks[i], t, typ)
-			cutSorting(size, ks[i], t, typ)
-			normalSorting(size, t, typ)
-		}
-
-		for x := 5; x < 100; x = x + 20 {
-			for y := 1; y < x; y = y + 6 {
-				sizes = []int{x}
-				ks = []int{y}
-
-				for i, size := range sizes {
-					cardinalityAtMost(size, ks[i], t, typ)
-					cardinalityAtLeast(size, ks[i], t, typ)
-					cutSorting(size, ks[i], t, typ)
-					normalSorting(size, t, typ)
-				}
-			}
-		}
-	}
-}
+//func TestCardinality(t *testing.T) {
+//
+//	fmt.Println("Test: Bitonic/OddEven/Bubble/Pairwise")
+//	var typs [4]SortingNetworkType
+//	typs[0] = OddEven
+//	typs[1] = Bitonic
+//	typs[2] = Bubble
+//	typs[3] = Pairwise
+//
+//	for _, typ := range typs {
+//
+//		sizes := []int{3, 4, 6, 9, 9, 9, 33, 68, 123, 250}
+//		ks := []int{2, 2, 3, 2, 6, 7, 29, 8, 8, 100}
+//
+//		for i, size := range sizes {
+//			cardinalityAtMost(size, ks[i], t, typ)
+//			cardinalityAtLeast(size, ks[i], t, typ)
+//			cutSorting(size, ks[i], t, typ)
+//			normalSorting(size, t, typ)
+//		}
+//
+//		for x := 5; x < 100; x = x + 20 {
+//			for y := 1; y < x; y = y + 6 {
+//				sizes = []int{x}
+//				ks = []int{y}
+//
+//				for i, size := range sizes {
+//					cardinalityAtMost(size, ks[i], t, typ)
+//					cardinalityAtLeast(size, ks[i], t, typ)
+//					cutSorting(size, ks[i], t, typ)
+//					normalSorting(size, t, typ)
+//				}
+//			}
+//		}
+//	}
+//}
 
 func cardinalityAtLeast(size int, k int, t *testing.T, typ SortingNetworkType) {
 

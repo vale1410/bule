@@ -1,6 +1,5 @@
 package sat
 
-// test class, but will eventuall be turned into the sat package :-)
 // todo: Call Solvers, get back result etc.
 
 import (
@@ -79,7 +78,7 @@ func (l Literal) ToTex() (s string) {
 }
 
 // Create Encoding for Sorting Network
-// 0) Omitted for clarity (ids as in paper)
+// 0)  Omitted for clarity (ids as in paper)
 // 1)  A or -D
 // 2)  B or -D
 // 3) -A or -B or D
@@ -94,8 +93,6 @@ func CreateEncoding(input []Literal, which [8]bool, output []Literal, tag string
 
 	backup := make(map[int]Literal, len(sorter.Out)+len(sorter.In))
 
-	fmt.Println(sorter)
-	fmt.Println(input)
 	for i, x := range sorter.In {
 		backup[x] = input[i]
 	}
@@ -262,7 +259,7 @@ func (g *Gen) PrintClausesDIMACS(clauses ClauseSet) {
 	}
 
 	g.Println("p cnf", g.nextId, len(clauses))
-    fmt.Println("Bule: variables", g.nextId,"clauses", len(clauses))
+    fmt.Println("CNF: #var", g.nextId,"#cls", len(clauses))
 
 	for _, c := range clauses {
 		for _, l := range c.Literals {

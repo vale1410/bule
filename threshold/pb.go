@@ -139,8 +139,6 @@ func (t *Threshold) CreateSorter(typ sorters.SortingNetworkType) {
 
 	offset := 2
 
-	//fmt.Println("debug: layers", t.Bags)
-
 	// determine the constant and what to add on both sides
 	layerPow2 := int64(1 << uint(len(t.Bags)))
 
@@ -148,13 +146,6 @@ func (t *Threshold) CreateSorter(typ sorters.SortingNetworkType) {
 	tare = tare % layerPow2
 	t.Tare = tare
 	bTare := binary(tare)
-
-	//fmt.Println("debug: layerPow2", layerPow2)
-	//fmt.Println("debug: tare", tare)
-	//bitsTare := len(bTare)
-	//bitsBag := len(t.Bags)
-	//fmt.Println("debug: bitsBag", bitsBag, "bitsTare", bitsTare)
-	//fmt.Println("debug: bTare", bTare)
 
 	// output of sorter in layer $i-1$
 	bIn := make([]int, 0)
@@ -166,24 +157,16 @@ func (t *Threshold) CreateSorter(typ sorters.SortingNetworkType) {
 		offset = layer.Normalize(offset, []int{})
 		t.Sorter.Comparators = append(t.Sorter.Comparators, layer.Comparators...)
 
-		//fmt.Println(i, "debug: bIn for this layer", bIn)
-
-		//fmt.Println(i, "debug: layer", layer)
-
 		t.Sorter.In = append(t.Sorter.In, layer.In...)
 
 		size := len(bIn) + len(layers[i].In)
-
-		//fmt.Println(i, "debug: size", size)
 
 		mergeIn := make([]int, 0, size)
 		mergeIn = append(mergeIn, bIn...)
 		mergeIn = append(mergeIn, layer.Out...)
 
-		//fmt.Println(i, "debug: merger preparation: size,cut", size, len(bIn))
 		merger := sorters.CreateSortingNetwork(size, len(bIn), typ)
 		offset = merger.Normalize(offset, mergeIn)
-		//fmt.Println(i, "debug: mergeSorter", merger)
 
 		// halving circuit:
 
@@ -192,10 +175,8 @@ func (t *Threshold) CreateSorter(typ sorters.SortingNetworkType) {
 		if i < len(bTare) && bTare[i] == 1 {
 			odd = 0
 			bIn = make([]int, (len(merger.Out)+1)/2)
-			//fmt.Println(i, "debug: lenMerger,tare i,odd", len(merger.Out), bTare[i], odd)
 		} else {
 			bIn = make([]int, len(merger.Out)/2)
-			//fmt.Println(i, "debug: lenMerger,odd", len(merger.Out), odd)
 		}
 
 		// Alternate depending on bTare
@@ -207,18 +188,13 @@ func (t *Threshold) CreateSorter(typ sorters.SortingNetworkType) {
 			}
 		}
 
-		//fmt.Println(i, "debug: merger", merger)
-
 		t.Sorter.Comparators = append(t.Sorter.Comparators, merger.Comparators...)
-		//fmt.Println(i, "debug: tSorter", t.Sorter)
 
 	}
 
 	// outLastLayer identifies the nth output in the last layer
 	outLastLayer := ((t.K + 1 + tare) / int64(layerPow2)) - 1
-	//fmt.Println("debug: outLastLayer", outLastLayer)
 	idSetToZero := bIn[outLastLayer]
-	//fmt.Println("which id is", idSetToZero)
 
 	// and propagate the rest backwards
 	setTo := -1
@@ -230,10 +206,8 @@ func (t *Threshold) CreateSorter(typ sorters.SortingNetworkType) {
 			finalMapping[id] = setTo
 		}
 	}
-	//fmt.Println("debug: finalMapping", finalMapping)
 
 	t.Sorter.PropagateBackwards(finalMapping)
-
 	t.Sorter.Normalize(2, []int{})
 
 	//fmt.Println("final debug: tSorter", t.Sorter)
