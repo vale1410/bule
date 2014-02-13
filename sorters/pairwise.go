@@ -18,10 +18,10 @@ func pairwiseMerge(newId *int, array []int, comparators *[]Comparator, lo int, h
 }
 
 func pairwiseSplit(newId *int, array []int, comparators *[]Comparator, lo int, hi int) {
-    //fmt.Println("pairwiseSplit",lo,hi)
+	//fmt.Println("pairwiseSplit",lo,hi)
 	mid := lo + ((hi - lo) / 2)
 	for i := 0; i <= mid-lo; i++ {
-        //fmt.Println("compareAndSwap Split",lo+i,mid+i+1)
+		//fmt.Println("compareAndSwap Split",lo+i,mid+i+1)
 		compareAndSwap(newId, array, comparators, lo+i, mid+i+1)
 	}
 }

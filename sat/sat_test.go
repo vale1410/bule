@@ -1,15 +1,14 @@
 package sat
 
-// test class, but will eventuall be turned into the sat package :-)
+// test class
 
 import (
-	"fmt"
+//	"fmt"
 	"github.com/vale1410/bule/sorters"
 	"os"
 	"strconv"
 	"testing"
 )
-
 
 func TestWhichClauses(t *testing.T) {
 

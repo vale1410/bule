@@ -272,7 +272,7 @@ func (t *Threshold) writeTikz(file *os.File) {
 
 	file.Write([]byte(fmt.Sprintln("\\end{tikzpicture}")))
 	file.Write([]byte(fmt.Sprintln("}")))
-//	file.Write([]byte(fmt.Sprintln("\\end{figure}")))
+	//	file.Write([]byte(fmt.Sprintln("\\end{figure}")))
 
 }
 

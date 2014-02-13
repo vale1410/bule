@@ -139,10 +139,8 @@ func CreateSortingNetwork(s int, cut int, typ SortingNetworkType) (sorter Sorter
 	}
 
 	sorter = Sorter{comparators, input, output}
-    log.Println(sorter)
 	sorter.changeSize(s)
 	sorter.PropagateOrdering(cut)
-    log.Println(sorter)
 
 	return
 }
@@ -344,7 +342,6 @@ func (sorter *Sorter) PropagateForward(mapping map[int]int) {
 
 	remove := Comparator{0, 0, 0, 0}
 
-    log.Println(mapping)
 
 	for i, comp := range comparators {
 
@@ -414,7 +411,6 @@ func (sorter *Sorter) PropagateForward(mapping map[int]int) {
 		}
 	}
 
-    log.Println(mapping)
 
 	sorter.Comparators = out
 }

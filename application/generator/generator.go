@@ -15,7 +15,7 @@ func main() {
 	fmt.Println("p edges", edges, *number**clique)
 
 	for i := 0; i < *number; i++ {
-		printClique(*clique, i * *clique)
+		printClique(*clique, i**clique)
 	}
 
 }
@@ -28,5 +28,3 @@ func printClique(n int, offset int) {
 		}
 	}
 }
-
-

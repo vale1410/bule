@@ -10,6 +10,21 @@ import (
 	"strconv"
 )
 
+var uniqueId int
+var sorterClauses int
+var sorterType sorters.SortingNetworkType
+
+// which sets the type of clauses translated from sorting networks
+// see below CreateEncoding for ids wrt clauses
+// 0: false, false, false, true, true, true, false, false
+// 1: false, false, false, true, true, true, false, true
+// 2: false, true, true, true, true, true, true, false
+// 3: false, true, true, true, true, true, true, true
+func SetUp(which int, typ sorters.SortingNetworkType) {
+	sorterClauses = which
+	sorterType = typ
+}
+
 type Pred string
 
 // we only allow two dimensional predicates
@@ -77,6 +92,36 @@ func (l Literal) ToTex() (s string) {
 	return
 }
 
+// CreateCardinality takes set of literals and creates an sorting network
+// encoding.
+func CreateCardinality(tag string, input []Literal, k int, cType sorters.CardinalityType) ClauseSet {
+
+	var which [8]bool
+
+	switch sorterClauses {
+	case 1:
+		which = [8]bool{false, false, false, true, true, true, false, false}
+	case 2:
+		which = [8]bool{false, false, false, true, true, true, false, true}
+	case 3:
+		which = [8]bool{false, true, true, true, true, true, true, false}
+	case 4:
+		which = [8]bool{false, true, true, true, true, true, true, true}
+	default:
+		panic("sorterClauses in sat module not set")
+	}
+
+	sorter := sorters.CreateCardinalityNetwork(len(input), k, cType, sorterType)
+	sorter.RemoveOutput()
+
+	uniqueId++
+	pred := Pred("cnt" + strconv.Itoa(uniqueId))
+
+	output := make([]Literal, 0)
+
+	return CreateEncoding(input, which, output, tag, pred, sorter)
+}
+
 // Create Encoding for Sorting Network
 // 0)  Omitted for clarity (ids as in paper)
 // 1)  A or -D
@@ -123,43 +168,43 @@ func CreateEncoding(input []Literal, which [8]bool, output []Literal, tag string
 
 		if comp.C == 1 { // 6) A or B
 			//if which[6] {
-			cs.AddClause(tag+"6-", a, b)
+			cs.AddClause(tag, a, b)
 			//}
 		} else if comp.C > 0 { // 4) 5) 6)
 			//4)
 			if which[4] {
-				cs.AddClause(tag+"4", Neg(a), c)
+				cs.AddClause(tag, Neg(a), c)
 			}
 			//5)
 			if which[5] {
-				cs.AddClause(tag+"5", Neg(b), c)
+				cs.AddClause(tag, Neg(b), c)
 			}
 			//6)
 			if which[6] {
-				cs.AddClause(tag+"6", a, b, Neg(c))
+				cs.AddClause(tag, a, b, Neg(c))
 			}
 		}
 		if comp.D == 0 { //3)
 			//if which[3] {
-			cs.AddClause(tag+"3-", Neg(a), Neg(b))
+			cs.AddClause(tag, Neg(a), Neg(b))
 			//}
 		} else if comp.D > 0 { // 1) 2) 3)
 			//1)
 			if which[1] {
-				cs.AddClause(tag+"1", a, Neg(d))
+				cs.AddClause(tag, a, Neg(d))
 			}
 			//2)
 			if which[2] {
-				cs.AddClause(tag+"2", b, Neg(d))
+				cs.AddClause(tag, b, Neg(d))
 			}
 			//3)
 			if which[3] {
-				cs.AddClause(tag+"3", Neg(a), Neg(b), d)
+				cs.AddClause(tag, Neg(a), Neg(b), d)
 			}
 		}
 
 		if which[7] && (comp.D > 1 || comp.D > 1) { // 7)
-			cs.AddClause(tag+"7", c, Neg(d))
+			cs.AddClause(tag, c, Neg(d))
 		}
 	}
 	return
@@ -259,7 +304,7 @@ func (g *Gen) PrintClausesDIMACS(clauses ClauseSet) {
 	}
 
 	g.Println("p cnf", g.nextId, len(clauses))
-    fmt.Println("CNF: #var", g.nextId,"#cls", len(clauses))
+	//fmt.Println("CNF: #var", g.nextId, "#cls", len(clauses))
 
 	for _, c := range clauses {
 		for _, l := range c.Literals {
@@ -322,7 +367,7 @@ func (g *Gen) printSymbolTable(filename string) {
 
 }
 
-func (g *Gen) printDebug(clauses []Clause) {
+func (g *Gen) PrintDebug(clauses []Clause) {
 
 	symbolTable := g.generateSymbolTable()
 
