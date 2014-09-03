@@ -19,7 +19,7 @@ var check_clause = flag.Bool("clause", true, "Checks if Pseudo-Boolean is not ju
 var dbg = flag.Bool("d", false, "Print debug information.")
 var dbgfile = flag.String("df", "", "File to print debug information.")
 var reformat = flag.Bool("reformat", false, "Reformat PB files into correct format. Decompose = into >= and <=")
-var gurobi = flag.Bool("gurobi", false, "Reformt to LS Gurobi input, output to stdout.")
+var gurobi = flag.Bool("gurobi", false, "Reformat to Gurobi input, output to stdout.")
 
 //var model = flag.String("model", "model.lp", "path to model file")
 //var solve = flag.Bool("solve", false, "Pass problem to clasp and solve.")

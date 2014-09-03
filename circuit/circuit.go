@@ -1,7 +1,7 @@
 package circuit
 
 import (
-	"fmt"
+//	"fmt"
 )
 
 type GateType int
