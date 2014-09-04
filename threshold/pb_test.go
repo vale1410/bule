@@ -124,7 +124,7 @@ func createEntries(weights []int64) (entries []Entry) {
 	entries = make([]Entry, len(weights))
 
 	for i := 0; i < len(weights); i++ {
-		l := sat.Literal{true, sat.Atom{p, i, 0}}
+		l := sat.Literal{true, sat.NewAtomP1(p,i)}
 		entries[i] = Entry{l, weights[i]}
 	}
 	return

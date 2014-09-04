@@ -55,17 +55,17 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 	if *gurobi {
 		fmt.Println("Subject To")
-		atoms := make(map[sat.Atom]bool, len(pbs))
+		atoms := make(map[string]bool, len(pbs))
 		for _, pb := range pbs {
 			pb.NormalizeAtLeast(true)
 			pb.PrintGurobi()
 			for _, x := range pb.Entries {
-				atoms[x.Literal.Atom] = true
+				atoms[x.Literal.A.Id()] = true
 			}
 		}
 		fmt.Println("Binary")
-		for atom, _ := range atoms {
-			fmt.Print("x" + atom.ToTex() + " ")
+		for aS, _ := range atoms {
+			fmt.Print("x" + aS + " ")
 		}
         fmt.Println()
 	} else if *reformat {
@@ -215,7 +215,7 @@ func parse(filename string) (pbs []threshold.Threshold) {
 						debug("cant convert to threshold:", l)
 						panic("bad conversion of numbers")
 					}
-					atom := sat.Atom{sat.Pred("x"), variable, 0}
+					atom := sat.NewAtomP1(sat.Pred("x"), variable)
 					pbs[t].Entries[i/2] = threshold.Entry{sat.Literal{true, atom}, weight}
 				}
 

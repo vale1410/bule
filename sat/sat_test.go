@@ -55,7 +55,7 @@ func TestWhichClauses(t *testing.T) {
 
 				input := make([]Literal, size)
 				for i, _ := range input {
-					input[i] = Literal{true, Atom{Pred("Input"), i, 0}}
+					input[i] = Literal{true, NewAtomP1(Pred("Input"), i)}
 				}
 
 				clauses := CreateEncoding(input, which1, []Literal{}, "lt", lt, sorter1)

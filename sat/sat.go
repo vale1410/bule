@@ -3,9 +3,7 @@ package sat
 // todo: Call Solvers, get back result etc.
 
 import (
-	"bufio"
 	"fmt"
-	"github.com/vale1410/bule/sorters"
 	"os"
 	"strconv"
 )
@@ -13,7 +11,7 @@ import (
 func (g *Gen) GenerateIds(cl ClauseSet) {
 	for _, c := range cl {
 		for _, l := range c.Literals {
-			g.putAtom(l.Atom)
+			g.putAtom(l.A)
 		}
 	}
 }
@@ -21,7 +19,7 @@ func (g *Gen) GenerateIds(cl ClauseSet) {
 func (g *Gen) solve(cl []Clause) {
 	for _, c := range cl {
 		for _, l := range c.Literals {
-			g.putAtom(l.Atom)
+			g.putAtom(l.A)
 		}
 	}
 
@@ -83,7 +81,7 @@ func (g *Gen) PrintClausesDIMACS(clauses ClauseSet) {
 
 	for _, c := range clauses {
 		for _, l := range c.Literals {
-			s := strconv.Itoa(g.mapping[l.Atom])
+			s := strconv.Itoa(g.mapping[l.A.Id()])
 			if l.Sign {
 				g.Print(" " + s)
 			} else {
@@ -98,12 +96,10 @@ func (g *Gen) PrintClausesDIMACS(clauses ClauseSet) {
 
 func (g *Gen) PrintDebug(clauses []Clause) {
 
-	symbolTable := g.generateSymbolTable()
-
 	// first print symbol table into file
 	fmt.Println("c <atom>(V1,V2).")
 
-	for i, s := range symbolTable {
+	for i, s := range g.mapping {
 		fmt.Println("c", i, "\t:", s)
 	}
 
@@ -132,7 +128,7 @@ func (g *Gen) PrintDebug(clauses []Clause) {
 			} else {
 				fmt.Print("-")
 			}
-			fmt.Print(l.Atom.P, "(", l.Atom.V1, ",", l.Atom.V2, ")")
+			fmt.Print(l.ToTxt())
 		}
 		fmt.Println(".")
 	}

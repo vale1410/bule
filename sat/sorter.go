@@ -1,3 +1,5 @@
+package sat
+
 import (
 	"fmt"
 	"github.com/vale1410/bule/sorters"
@@ -6,6 +8,7 @@ import (
 
 var sorterClauses int
 var sorterType sorters.SortingNetworkType
+var uniqueId int
 
 // which sets the type of clauses translated from sorting networks
 // see below CreateEncoding for ids wrt clauses
@@ -84,7 +87,7 @@ func CreateEncoding(input []Literal, which [8]bool, output []Literal, tag string
 			if lit, ok := backup[x]; ok {
 				return lit
 			} else {
-				return Literal{true, Atom{pred, x, 0}}
+				return Literal{true, NewAtomP1(pred, x)}
 			}
 		}
 
@@ -95,43 +98,43 @@ func CreateEncoding(input []Literal, which [8]bool, output []Literal, tag string
 
 		if comp.C == 1 { // 6) A or B
 			//if which[6] {
-			cs.AddClause(tag, a, b)
+			cs.AddTaggedClause(tag, a, b)
 			//}
 		} else if comp.C > 0 { // 4) 5) 6)
 			//4)
 			if which[4] {
-				cs.AddClause(tag, Neg(a), c)
+				cs.AddTaggedClause(tag, Neg(a), c)
 			}
 			//5)
 			if which[5] {
-				cs.AddClause(tag, Neg(b), c)
+				cs.AddTaggedClause(tag, Neg(b), c)
 			}
 			//6)
 			if which[6] {
-				cs.AddClause(tag, a, b, Neg(c))
+				cs.AddTaggedClause(tag, a, b, Neg(c))
 			}
 		}
 		if comp.D == 0 { //3)
 			//if which[3] {
-			cs.AddClause(tag, Neg(a), Neg(b))
+			cs.AddTaggedClause(tag, Neg(a), Neg(b))
 			//}
 		} else if comp.D > 0 { // 1) 2) 3)
 			//1)
 			if which[1] {
-				cs.AddClause(tag, a, Neg(d))
+				cs.AddTaggedClause(tag, a, Neg(d))
 			}
 			//2)
 			if which[2] {
-				cs.AddClause(tag, b, Neg(d))
+				cs.AddTaggedClause(tag, b, Neg(d))
 			}
 			//3)
 			if which[3] {
-				cs.AddClause(tag, Neg(a), Neg(b), d)
+				cs.AddTaggedClause(tag, Neg(a), Neg(b), d)
 			}
 		}
 
 		if which[7] && (comp.D > 1 || comp.D > 1) { // 7)
-			cs.AddClause(tag, c, Neg(d))
+			cs.AddTaggedClause(tag, c, Neg(d))
 		}
 	}
 	return
