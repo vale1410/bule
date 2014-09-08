@@ -53,6 +53,10 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	s.GenerateIds(clauses)
 	s.Filename = *out
 	s.PrintClausesDIMACS(clauses)
+
+	if *dbg {
+		s.PrintDebug(clauses)
+	}
 }
 
 func debug(arg ...interface{}) {
@@ -79,49 +83,54 @@ func debug(arg ...interface{}) {
 
 func translateToSAT(g QGC) (clauses sat.ClauseSet) {
 
-	fmt.Println(g)
+	p := sat.Pred("v")
 
 	n := len(g)
 
-	var litIn []sat.Literal
-	p := sat.Pred("v")
-
-	for i = 0; i < n; i++ {
-		for j = 0; j < n; j++ {
-			litIn = make([]sat.Literal, n)
-			//s := "at least one"
-			for k = 0; k < n; k++ {
-				litIn[i][j] = sat.Literal{true, sat.Atom{i, j, k}}
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			lits := make([]sat.Literal, n)
+			for k := 0; k < n; k++ {
+				lits[k] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
 			}
-			clauses.AddClause(s, litIn...)
+			clauses.AddTaggedClause("atLeast", lits...)
 		}
 	}
 
-	//p := sat.Pred("vc")
+	for k := 0; k < n; k++ {
+		for i := 0; i < n; i++ {
+			for j1 := 0; j1 < n; j1++ {
+				for j2 := j1 + 1; j2 < n; j2++ {
+					l1 := sat.Literal{false, sat.NewAtomP3(p, i, j1, k)}
+					l2 := sat.Literal{false, sat.NewAtomP3(p, i, j2, k)}
+					clauses.AddTaggedClause("Horizontal", l1, l2)
+				}
+			}
+		}
+	}
 
-	////at least constraint for each edge
+	for k := 0; k < n; k++ {
+		for i := 0; i < n; i++ {
+			for j1 := 0; j1 < n; j1++ {
+				for j2 := j1 + 1; j2 < n; j2++ {
+					l1 := sat.Literal{false, sat.NewAtomP3(p, j1, i, k)}
+					l2 := sat.Literal{false, sat.NewAtomP3(p, j2, i, k)}
+					clauses.AddTaggedClause("Vertical", l1, l2)
+				}
+			}
+		}
+	}
 
-	//s := "at least one"
-	//for _, e := range vc.Edges {
-	//	l1 := sat.Literal{true, sat.Atom{p, e.a, 0}}
-	//	l2 := sat.Literal{true, sat.Atom{p, e.b, 0}}
-	//	clauses.AddClause(s, l1, l2)
-	//}
-
-	////global counter
-
-	//sorter := sorters.CreateCardinalityNetwork(vc.NVertex, vc.Size, sorters.AtMost, sorters.Pairwise)
-	//sorter.RemoveOutput()
-
-	//litIn := make([]sat.Literal, vc.NVertex)
-
-	//for i, _ := range litIn {
-	//	litIn[i] = sat.Literal{true, sat.Atom{p, i + 1, 0}}
-	//}
-
-	//which := [8]bool{false, false, false, true, true, true, false, false}
-	//pred := sat.Pred("aux")
-	//clauses.AddClauseSet(sat.CreateEncoding(litIn, which, []sat.Literal{}, "atMost", pred, sorter))
+	for i, r := range g {
+		for j, k := range r {
+			fmt.Print(" ", k)
+			if k >= 0 {
+				l1 := sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
+				clauses.AddTaggedClause("Instance", l1)
+			}
+		}
+		fmt.Println("")
+	}
 
 	return
 }
@@ -142,6 +151,92 @@ func parse(filename string) (g QGC) {
 	defer output.Close()
 
 	lines := strings.Split(string(input), "\n")
+
+	if matched, _ := regexp.MatchString(".dzn", filename); matched {
+		g = parseDZN(lines)
+	} else if matched, _ := regexp.MatchString(".pls", filename); matched {
+		g = parsePLS(lines)
+	} else {
+		debug("filename/type unknown:", filename)
+		panic("")
+	}
+
+	return
+}
+
+func parseDZN(lines []string) (g QGC) {
+	// 0 : first line, 1 : rest of the lines
+	state := 0
+	t := 0
+
+	for ln, l := range lines {
+
+		if state > 0 && (l == "" || strings.HasPrefix(l, "%")) {
+			continue
+		}
+
+		elements := digitRegexp.FindAllString(l, -1)
+
+		switch state {
+		case 0:
+			{
+				debug(l)
+
+				n, b := strconv.Atoi(elements[0])
+
+				if b != nil && len(elements) != 1 {
+					debug("first line in data file wrong:", l)
+					panic("bad conversion of numbers")
+				}
+
+				debug("Size of problem", n)
+
+				g = make(QGC, n)
+				for i, _ := range g {
+					g[i] = make([]int, n)
+				}
+				state = 1
+			}
+		case 1:
+			{
+				// skip this one :-)
+				state++
+			}
+		case 2:
+			{
+				fmt.Println(elements)
+
+				if len(elements) == 0 {
+					continue
+				}
+				if t > len(g) {
+					debug(t, " ", l)
+					panic("incorrect number of elements.")
+				}
+
+
+				for i, p := range elements {
+
+					a, b := strconv.Atoi(p)
+
+					if b != nil {
+						debug("cant convert to instance:", l)
+						panic("bad conversion of numbers")
+					}
+
+					// -1 means unknown
+					// domain is 0 .. n-1
+					g[ln-2][i] = a - 1
+				}
+
+			}
+		}
+	}
+	fmt.Println(g)
+	return
+}
+
+func parsePLS(lines []string) (g QGC) {
 
 	// 0 : first line, 1 : rest of the lines
 	state := 0

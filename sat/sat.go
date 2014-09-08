@@ -75,7 +75,7 @@ func (g *Gen) PrintClausesDIMACS(clauses ClauseSet) {
 			}
 		}()
 	}
-
+    fmt.Println("debug")
 	g.Println("p cnf", g.nextId, len(clauses))
 	//fmt.Println("CNF: #var", g.nextId, "#cls", len(clauses))
 

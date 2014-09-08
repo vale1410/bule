@@ -98,9 +98,9 @@ func (l Literal) ToTxt() (s string) {
 	} else {
 		s += " "
 	}
-	s += "x"
+	//s += "x"
 	s += l.A.Id()
-	s += " "
+	//s += " "
 	return
 }
 
@@ -108,9 +108,9 @@ func (l Literal) ToTex() (s string) {
 	if !l.Sign {
 		s += "\\bar "
 	}
-	s += "x_{"
+	//s += "x_{"
 	s += l.A.Id()
-	s += "}"
+	//s += "}"
 	return
 }
 
