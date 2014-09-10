@@ -64,7 +64,7 @@ func CreateCardinality(tag string, input []Literal, k int, cType sorters.Cardina
 // -1,0,1 mean dontCare, false, true
 func CreateEncoding(input []Literal, which [8]bool, output []Literal, tag string, pred Pred, sorter sorters.Sorter) (cs ClauseSet) {
 
-	cs = make([]Clause, 0, 7*len(sorter.Comparators))
+	cs.list = make([]Clause, 0, 7*len(sorter.Comparators))
 
 	backup := make(map[int]Literal, len(sorter.Out)+len(sorter.In))
 

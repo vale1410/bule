@@ -86,10 +86,10 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		for i, pb := range pbs {
 			TranslatePB2Clauses(i, &pb)
 			clauses.AddClauseSet(pb.Clauses)
-			debug("number of clause", len(pb.Clauses))
+			debug("number of clause", pb.Clauses.Size())
 		}
 
-		g := sat.IdGenerator(len(clauses) * 7)
+		g := sat.IdGenerator(clauses.Size() * 7)
 		g.GenerateIds(clauses)
 		//g.Filename = strings.Split(*f, ".")[0] + ".cnf"
 		g.Filename = *out

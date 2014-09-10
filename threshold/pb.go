@@ -48,9 +48,9 @@ func (t *Threshold) Translate() {
 		//fmt.Println("Bule: translate by facts", len(cls))
 		t.Clauses = cls
 		t.Trans = Facts
-	} else if b, cls := t.SingleClause(); b {
+	} else if b, literals := t.SingleClause(); b {
 		//fmt.Println("Bule: translate by single clause", len(cls))
-		t.Clauses = cls
+		t.Clauses.AddTaggedClause("SC",literals...)
 		t.Trans = SingleClause
 	} else {
 		//fmt.Println("Bule: translate by sorting network")
@@ -61,23 +61,23 @@ func (t *Threshold) Translate() {
 
 }
 
-func (t *Threshold) OnlyFacts() (is bool, clauses sat.ClauseSet) {
+func (t *Threshold) OnlyFacts() (is bool, cs sat.ClauseSet) {
 
 	t.NormalizeAtMost()
 	is = false
 
 	if t.K <= 0 {
 		is = true
-		clauses = make(sat.ClauseSet, len(t.Entries))
-		for i, x := range t.Entries {
-			clauses[i] = sat.Clause{"OF", []sat.Literal{sat.Neg(x.Literal)}}
+		cs = sat.NewClauseSet(len(t.Entries))
+		for _, x := range t.Entries {
+			cs.AddTaggedClause("OF", sat.Neg(x.Literal))
 		}
 	}
 
-	return is, clauses
+	return
 }
 
-func (t *Threshold) SingleClause() (is bool, clauses sat.ClauseSet) {
+func (t *Threshold) SingleClause() (is bool, literals []sat.Literal) {
 
 	t.NormalizeAtLeast(false)
 
@@ -89,25 +89,22 @@ func (t *Threshold) SingleClause() (is bool, clauses sat.ClauseSet) {
 
 	// normalize to coefficients 1
 	allOne := true
-	clause.Literals = make([]sat.Literal, len(entries))
+	literals = make([]sat.Literal, len(entries))
 
 	for i, x := range entries {
 		if x.Weight*x.Weight != 1 {
 			allOne = false
 			break
 		}
-		clause.Literals[i] = x.Literal
+		literals[i] = x.Literal
 
 		if x.Weight == -1 {
 			K += -x.Weight
-			clause.Literals[i] = sat.Neg(clause.Literals[i])
+			literals[i] = sat.Neg(clause.Literals[i])
 		}
 	}
-	clauses = make(sat.ClauseSet, 1)
-	clauses[0] = clause
-	is = allOne && K == 1
 
-	return is, clauses
+	return allOne && K == 1, literals
 }
 
 func (t *Threshold) CreateSorter(typ sorters.SortingNetworkType) {

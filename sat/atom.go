@@ -94,7 +94,7 @@ func Neg(l Literal) Literal {
 
 func (l Literal) ToTxt() (s string) {
 	if !l.Sign {
-		s += "~"
+		s += "-"
 	} else {
 		s += " "
 	}

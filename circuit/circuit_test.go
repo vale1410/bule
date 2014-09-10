@@ -1,35 +1,15 @@
-package circuit
+package constraints
 
 import (
 	"fmt"
 	"testing"
 )
 
-func TestExample(test *testing.T) {
+func TestAtMostOne(test *testing.T) {
 
-	fmt.Println("check")
-    buildXOR()
+    // idea is to check if at most one is translated correctly
+    // and if the translations have the right sizes
+    // a benchmark test could incooperate exactly comparison
+    // in size and speed when solving
+
 }
-
-func buildXOR() (c Circuit) {
-
-	var in1, in2 Gate
-
-	in1.Typ = Input
-	in2.Typ = Input
-
-	nIn1 := build(NEG, &in1)
-	nIn2 := build(NEG, &in2)
-
-	and1 := build(AND, &in1, nIn2)
-	and2 := build(AND, nIn1, &in2)
-
-	or := build(OR, and1, and2)
-
-	c.Name = "xor"
-	c.In = []*Gate{&in1, &in2}
-	c.Out = []*Gate{or}
-    fmt.Println(c)
-	return
-}
-
