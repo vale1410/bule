@@ -10,9 +10,9 @@ type CardinalityType int
 
 const (
     Naive CardinalityType = iota
-    Sorter
+    Sort
     Split
-    Counter
+    Count
 )
 
 
@@ -25,13 +25,13 @@ func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat
                 clauses.AddTaggedClause(tag, sat.Neg(l), sat.Neg(lits[j]))
             }
         }
-    case Sorter:
+    case Sort:
 
         sorter := sorters.CreateCardinalityNetwork(len(lits), 1, sorters.AtMost, sorters.Pairwise)
         sorter.RemoveOutput()
 
         which := [8]bool{false, false, false, true, true, true, false, false}
-        pred := sat.Pred("sorter")
+        pred := sat.Pred("sort")
         clauses.AddClauseSet(sat.CreateEncoding(lits, which, []sat.Literal{}, "sort", pred, sorter))
 
     case Split:
@@ -56,7 +56,7 @@ func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat
             clauses.AddClauseSet(AtMostOne(typ, tag, lits[len(lits)/2:]))
 
         }
-    case Counter:
+    case Count:
         pred := sat.Pred("count")
         tag := "count"
 
@@ -82,13 +82,13 @@ func ExactlyOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sa
         clauses.AddClauseSet(AtMostOne(typ , tag , lits ))
         clauses.AddTaggedClause(tag, lits...)
 
-    case Sorter:
+    case Sort:
 
         sorter := sorters.CreateCardinalityNetwork(len(lits), 1, sorters.Equal, sorters.Pairwise)
         sorter.RemoveOutput()
 
         which := [8]bool{false, false, false, true, true, true, false, false}
-        pred := sat.Pred("sorter")
+        pred := sat.Pred("sort")
         clauses.AddClauseSet(sat.CreateEncoding(lits, which, []sat.Literal{}, "sort", pred, sorter))
 
     case Split:
@@ -96,7 +96,7 @@ func ExactlyOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sa
         clauses.AddClauseSet(AtMostOne(typ , tag , lits ))
         clauses.AddTaggedClause(tag, lits...)
 
-    case Counter:
+    case Count:
         pred := sat.Pred("count")
         tag := "count"
         counterId := newId()

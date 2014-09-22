@@ -1,9 +1,11 @@
 package main
 
 import (
+    "path/filepath"
     "flag"
     "fmt"
     "github.com/vale1410/bule/sat"
+    "github.com/vale1410/bule/constraints"
     "io/ioutil"
     "os"
     "regexp"
@@ -11,11 +13,14 @@ import (
     "strings"
 )
 
-var f = flag.String("f", "qwh-5-10.pls", "Instance.")
-var out = flag.String("o", "out.cnf", "Path of output file.")
+var f = flag.String("f", "instances/qwh-5-10.pls", "Instance.")
+var dir = flag.String("dir", "out", "directory for output.")
+var out = flag.String("out", "out.cnf", "output of conversion.")
 var ver = flag.Bool("ver", false, "Show version info.")
 var dbg = flag.Bool("d", false, "Print debug information.")
 var dbgfile = flag.String("df", "", "File to print debug information.")
+var encoding = flag.Int("e", 0, "EncodingType. 0: naive, 1: sort, 2: split, 3: count, 4: log, 5: Feydy, 6: Hull")
+
 
 var digitRegexp = regexp.MustCompile("([0-9]+ )*[0-9]+")
 
@@ -46,17 +51,73 @@ There is NO WARRANTY, to the extent permitted by law.`)
     }
 
     g := parse(*f)
+    n := len(g)
 
-    clauses := translateToSAT(g)
+    if *encoding > -1 { 
+        clauses := translateCardDecomposition(n,mapEncoding(*encoding)) 
+        clauses.AddClauseSet(translateInstance(g))
+        doEncoding(clauses,*out)
+    }  else { 
 
-    s := sat.IdGenerator(len(clauses))
-    s.GenerateIds(clauses)
-    s.Filename = *out
-    s.PrintClausesDIMACS(clauses)
+    maxEncoding := 3
+    for e:= 0; e <= maxEncoding; e++ { 
+        clauses := translateCardDecomposition(n,mapEncoding(*encoding)) 
+        clauses.AddClauseSet(translateInstance(g))
+        //generate String
+        name := pathOutput(*f,*encoding) 
+        doEncoding(clauses,name)
 
-    if *dbg {
-        s.PrintDebug(clauses)
     }
+
+    } 
+}
+
+func mapEncoding(e int) (c constraints.CardinalityType) {
+
+    switch e {
+    case 0: c = constraints.Naive
+    case 1: c = constraints.Sort
+    case 2: c = constraints.Split
+    case 3: c = constraints.Count
+    default: 
+        panic("not implemented this encoding yet")
+    }
+
+    return c
+}
+
+func pathOutput(path string,encoding int) string{
+
+    var name string
+
+    switch encoding {
+    case 0: name = "Naive/"
+    case 1: name = "Card-Sort/"
+    case 2: name = "Card-Split/"
+    case 3: name = "Card-Count/"
+    default: 
+        panic("not implemented this encoding yet")
+    }
+
+    filename := filepath.Base(path)
+    outname := filepath.Join(*dir, name,filename)
+
+    return outname
+
+}
+
+
+func doEncoding(clauses sat.ClauseSet, filename string) {
+
+   s := sat.IdGenerator(clauses.Size())
+   s.GenerateIds(clauses)
+   s.Filename = filename
+   s.PrintClausesDIMACS(clauses)
+
+   if *dbg {
+       s.Print(clauses)
+   }
+
 }
 
 func debug(arg ...interface{}) {
@@ -81,7 +142,7 @@ func debug(arg ...interface{}) {
     }
 }
 
-func translateToInstance(g QGC) (clauses sat.ClauseSet) {
+func translateInstance(g QGC) (clauses sat.ClauseSet) {
 
     p := sat.Pred("v")
 
@@ -99,32 +160,7 @@ func translateToInstance(g QGC) (clauses sat.ClauseSet) {
     return
 }
 
-// in every row/column each value has to occur at least once
-func translateRedundant(n int) (clauses sat.ClauseSet) {
-    p := sat.Pred("v")
-
-    for i := 0; i < n; i++ {
-        for k := 0; k < n; k++ {
-            lits := make([]sat.Literal, n)
-            for j := 0; j < n; j++ {
-                lits[k] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
-            }
-            clauses.AddTaggedClause("AtLeastValueV", lits...)
-        }
-    }
-
-    for j := 0; j < n; j++ {
-        for k := 0; k < n; k++ {
-            lits := make([]sat.Literal, n)
-            for i := 0; i < n; i++ {
-                lits[k] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
-            }
-            clauses.AddTaggedClause("AtLeastValueH", lits...)
-        }
-    }
-}
-
-func translateAMO(n int,typ AtMostType) (clauses sat.ClauseSet) {
+func translateCardDecomposition(n int,typ constraints.CardinalityType) (clauses sat.ClauseSet) {
 
     p := sat.Pred("v")
 
@@ -145,7 +181,7 @@ func translateAMO(n int,typ AtMostType) (clauses sat.ClauseSet) {
                 lits[k] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
             }
             // in each row each value at most one
-            clauses.AddClauseSet(constraints.atMostOne(typ, "amo", lits))
+            clauses.AddClauseSet(constraints.ExactlyOne(typ, "ex1Row", lits))
         }
     }
 
@@ -156,89 +192,7 @@ func translateAMO(n int,typ AtMostType) (clauses sat.ClauseSet) {
                 lits[k] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
             }
             // in each column each value at most one
-            clauses.AddClauseSet(constraints.atMostOne(typ, "amo", lits))
-        }
-    }
-
-    return
-}
-
-func translateNaive(n int) (clauses sat.ClauseSet) {
-
-    p := sat.Pred("v")
-
-    for i := 0; i < n; i++ {
-        for j := 0; j < n; j++ {
-            lits := make([]sat.Literal, n)
-            for k := 0; k < n; k++ {
-                lits[k] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
-            }
-            clauses.AddTaggedClause("AtLeast", lits...)
-        }
-    }
-
-    for k := 0; k < n; k++ {
-        for i := 0; i < n; i++ {
-            for j1 := 0; j1 < n; j1++ {
-                for j2 := j1 + 1; j2 < n; j2++ {
-                    l1 := sat.Literal{false, sat.NewAtomP3(p, i, j1, k)}
-                    l2 := sat.Literal{false, sat.NewAtomP3(p, i, j2, k)}
-                    clauses.AddTaggedClause("Horizontal", l1, l2)
-                }
-            }
-        }
-    }
-
-    for k := 0; k < n; k++ {
-        for i := 0; i < n; i++ {
-            for j1 := 0; j1 < n; j1++ {
-                for j2 := j1 + 1; j2 < n; j2++ {
-                    l1 := sat.Literal{false, sat.NewAtomP3(p, j1, i, k)}
-                    l2 := sat.Literal{false, sat.NewAtomP3(p, j2, i, k)}
-                    clauses.AddTaggedClause("Vertical", l1, l2)
-                }
-            }
-        }
-    }
-
-    return
-}
-
-func translateEncodingNaive(n int) (clauses sat.ClauseSet) {
-
-    p := sat.Pred("v")
-
-    for i := 0; i < n; i++ {
-        for j := 0; j < n; j++ {
-            lits := make([]sat.Literal, n)
-            for k := 0; k < n; k++ {
-                lits[k] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
-            }
-            clauses.AddTaggedClause("AtLeast", lits...)
-        }
-    }
-
-    for k := 0; k < n; k++ {
-        for i := 0; i < n; i++ {
-            for j1 := 0; j1 < n; j1++ {
-                for j2 := j1 + 1; j2 < n; j2++ {
-                    l1 := sat.Literal{false, sat.NewAtomP3(p, i, j1, k)}
-                    l2 := sat.Literal{false, sat.NewAtomP3(p, i, j2, k)}
-                    clauses.AddTaggedClause("Horizontal", l1, l2)
-                }
-            }
-        }
-    }
-
-    for k := 0; k < n; k++ {
-        for i := 0; i < n; i++ {
-            for j1 := 0; j1 < n; j1++ {
-                for j2 := j1 + 1; j2 < n; j2++ {
-                    l1 := sat.Literal{false, sat.NewAtomP3(p, j1, i, k)}
-                    l2 := sat.Literal{false, sat.NewAtomP3(p, j2, i, k)}
-                    clauses.AddTaggedClause("Vertical", l1, l2)
-                }
-            }
+            clauses.AddClauseSet(constraints.ExactlyOne(typ, "ex1Column", lits))
         }
     }
 
