@@ -8,15 +8,19 @@ import (
     "strconv"
 )
 
-func (g *Gen) GenerateIds(cs ClauseSet) {
-    for _, c := range cs.list {
-        for _, l := range c.Literals {
-            g.putAtom(l.A)
-        }
-    }
+type Gen struct {
+    nextId   int
+    mapping  map[string]int
+    Filename string
+    out      *os.File
 }
 
-func (g *Gen) solve(cs ClauseSet) {
+func IdGenerator(m int) (g Gen) {
+    g.mapping = make(map[string]int, m)
+    return
+}
+
+func (g *Gen) Solve(cs ClauseSet) {
     for _, c := range cs.list {
         for _, l := range c.Literals {
             g.putAtom(l.A)
@@ -24,9 +28,9 @@ func (g *Gen) solve(cs ClauseSet) {
     }
 
     // much much more will happen here
-    // interface to others sovlers etc. 
+    // interface to others solvers etc.
 
-    g.PrintClausesDIMACS(cs)
+    g.PrintDIMACS(cs)
 }
 
 func (g *Gen) Print(arg ...interface{}) {
@@ -34,7 +38,7 @@ func (g *Gen) Print(arg ...interface{}) {
         for _, s := range arg {
             fmt.Print(s, " ")
         }
-    } else {
+    } else {//assuming the file is open!
         var ss string
         for _, s := range arg {
             ss += fmt.Sprintf("%v", s) + " "
@@ -51,7 +55,7 @@ func (g *Gen) Println(arg ...interface{}) {
             fmt.Print(s, " ")
         }
         fmt.Println()
-    } else {
+    } else { //assuming the file is open!
         var ss string
         for _, s := range arg {
             ss += fmt.Sprintf("%v", s) + " "
@@ -64,7 +68,20 @@ func (g *Gen) Println(arg ...interface{}) {
     }
 }
 
-func (g *Gen) PrintClausesDIMACS(cs ClauseSet) {
+func (g *Gen) generateIds(cs ClauseSet) {
+    // assuming full regeneration of Ids
+    // might change existing mappings
+    g.nextId = 0
+    for _, c := range cs.list {
+        for _, l := range c.Literals {
+            g.putAtom(l.A)
+        }
+    }
+}
+
+func (g *Gen) PrintDIMACS(cs ClauseSet) {
+
+    g.generateIds(cs)
 
     if g.Filename != "" {
         var err error

@@ -1,7 +1,7 @@
 package constraints
 
 import (
-    //  "fmt"
+//  "fmt"
     "github.com/vale1410/bule/sat"
     "github.com/vale1410/bule/sorters"
 )
@@ -27,19 +27,15 @@ func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat
         }
     case Sort:
 
-        sorter := sorters.CreateCardinalityNetwork(len(lits), 1, sorters.AtMost, sorters.Pairwise)
-        sorter.RemoveOutput()
-
-        which := [8]bool{false, false, false, true, true, true, false, false}
-        pred := sat.Pred("sort")
-        clauses.AddClauseSet(sat.CreateEncoding(lits, which, []sat.Literal{}, "sort", pred, sorter))
+    sat.SetUp(3, sorters.Pairwise)
+    clauses.AddClauseSet(sat.CreateCardinality("sort", lits, 1, sorters.AtMost))
 
     case Split:
 
         // a constant that should be exposed,
         // its the cuttoff for the split method of atMostOne
 
-        cutOff := 4
+        cutOff := 3
 
         if len(lits) <= cutOff {
             return AtMostOne(Naive, tag, lits)
@@ -84,12 +80,8 @@ func ExactlyOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sa
 
     case Sort:
 
-        sorter := sorters.CreateCardinalityNetwork(len(lits), 1, sorters.Equal, sorters.Pairwise)
-        sorter.RemoveOutput()
-
-        which := [8]bool{false, false, false, true, true, true, false, false}
-        pred := sat.Pred("sort")
-        clauses.AddClauseSet(sat.CreateEncoding(lits, which, []sat.Literal{}, "sort", pred, sorter))
+    sat.SetUp(3, sorters.Pairwise)
+    clauses.AddClauseSet(sat.CreateCardinality("sort", lits, 1, sorters.Equal))
 
     case Split:
 
@@ -101,16 +93,22 @@ func ExactlyOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sa
         tag := "count"
         counterId := newId()
 
+        first := sat.NewAtomP2(pred,counterId,1)
+        clauses.AddTaggedClause(tag+"-2",lits[0], sat.Literal{false,first})
+
         for i := 1; i < len(lits) ; i++{
             p1 := sat.NewAtomP2(pred,counterId,i)
+            clauses.AddTaggedClause(tag+"-1", sat.Neg(lits[i-1]),sat.Literal{true, p1})
+            clauses.AddTaggedClause(tag+"-1", sat.Neg(lits[i]),sat.Literal{false, p1})
+            if i != len(lits) {
             p2 := sat.NewAtomP2(pred,counterId,i+1)
-            clauses.AddTaggedClause(tag, sat.Literal{false, p1}, sat.Literal{true, p2})
-            clauses.AddTaggedClause(tag, sat.Neg(lits[i-1]),sat.Literal{true, p1})
-            clauses.AddTaggedClause(tag, sat.Literal{false, p1}, sat.Neg(lits[i]))
+            clauses.AddTaggedClause(tag+"-2", lits[i], sat.Literal{true, p1}, sat.Literal{false, p2})
+            clauses.AddTaggedClause(tag+"-3", sat.Literal{false, p1}, sat.Literal{true, p2})
+            }
         }
-        // force that last counter has to be 1, i.e. it models Exactly
-        final := sat.NewAtomP2(pred,counterId,len(lits)-1)
-        clauses.AddTaggedClause(tag,sat.Literal{true,final})
+        // force that last counter has to be 1, i.e. it models ExactlyOne
+        final := sat.NewAtomP2(pred,counterId,len(lits))
+        clauses.AddTaggedClause(tag+"-4",sat.Literal{true,final})
 
     }
 

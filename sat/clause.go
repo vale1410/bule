@@ -22,7 +22,6 @@ func (cs *ClauseSet) Size() int {
     return len(cs.list)
 }
 
-
 func (cs *ClauseSet) AddClause(literals ...Literal) {
     cs.list = append(cs.list, Clause{"-", literals})
 }
@@ -35,7 +34,7 @@ func (cs *ClauseSet) AddClauseSet(cl ClauseSet) {
     cs.list = append(cs.list, cl.list...)
 }
 
-func (cs *ClauseSet) Print() {
+func (cs *ClauseSet) PrintDebug() {
 
     stat := make(map[string]int, 0)
     var descs []string
@@ -63,7 +62,7 @@ func (cs *ClauseSet) Print() {
     }
 
     for _, key := range descs {
-        fmt.Printf("c %v\t: %v\t%.1f \n", key, stat[key], 100*float64(stat[key])/float64(len(cs.list)))
+        fmt.Printf("c %v\t: %v\t%.1f%% \n", key, stat[key], 100*float64(stat[key])/float64(len(cs.list)))
     }
-    fmt.Printf("c %v\t: %v\t%.1f \n", "tot", len(cs.list), 100.0)
+    fmt.Printf("c %v\t\t: %v\t%.1f%% \n", "tot", len(cs.list), 100.0)
 }

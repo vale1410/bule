@@ -3,7 +3,7 @@ package sat
 // test class
 
 import (
-//  "fmt"
+    //  "fmt"
     "github.com/vale1410/bule/sorters"
     "os"
     "strconv"
@@ -61,9 +61,9 @@ func TestWhichClauses(t *testing.T) {
                 clauses := CreateEncoding(input, which1, []Literal{}, "lt", lt, sorter1)
                 clauses.AddClauseSet(CreateEncoding(input, which2, []Literal{}, "gt", gt, sorter2))
                 g := IdGenerator(size * size)
-                g.GenerateIds(clauses)
+                //g.GenerateIds(clauses)
                 g.Filename = os.TempDir() + "/" + strconv.Itoa(size) + "_" + strconv.Itoa(k) + "_" + typ.String() + "_" + strconv.Itoa(wh) + ".cnf"
-                g.PrintClausesDIMACS(clauses)
+                g.PrintDIMACS(clauses)
             }
         }
     }

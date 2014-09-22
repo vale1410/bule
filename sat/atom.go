@@ -114,22 +114,10 @@ func (l Literal) ToTex() (s string) {
     return
 }
 
-type Gen struct {
-    nextId   int
-    mapping  map[string]int
-    Filename string
-    out      *os.File
-}
-
-func IdGenerator(m int) (g Gen) {
-    g.mapping = make(map[string]int, m)
-    return
-}
-
 func (g *Gen) putAtom(a Atom) {
-    if id, b := g.mapping[a.Id()]; !b {
+    if _, b := g.mapping[a.Id()]; !b {
         g.nextId++
-        id = g.nextId
+        id := g.nextId
         g.mapping[a.Id()] = id
     }
 }

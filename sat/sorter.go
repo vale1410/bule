@@ -21,7 +21,6 @@ func SetUp(which int, typ sorters.SortingNetworkType) {
     sorterType = typ
 }
 
-
 // CreateCardinality takes set of literals and creates a sorting network
 // encoding.
 func CreateCardinality(tag string, input []Literal, k int, cType sorters.CardinalityType) ClauseSet {
@@ -45,7 +44,7 @@ func CreateCardinality(tag string, input []Literal, k int, cType sorters.Cardina
     sorter.RemoveOutput()
 
     uniqueId++
-    pred := Pred("cnt" + strconv.Itoa(uniqueId))
+    pred := Pred("sort" + strconv.Itoa(uniqueId))
 
     output := make([]Literal, 0)
 
@@ -139,4 +138,3 @@ func CreateEncoding(input []Literal, which [8]bool, output []Literal, tag string
     }
     return
 }
-

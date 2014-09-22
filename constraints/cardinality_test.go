@@ -30,12 +30,12 @@ func TestAtMostOne(t *testing.T) {
     //clauses.Print()
 
     fmt.Println()
-    clauses = AtMostOne(Counter, "counter", lits)
+    clauses = AtMostOne(Count, "counter", lits)
     fmt.Println(clauses.Size())
     //clauses.Print()
 
     fmt.Println()
-    clauses = AtMostOne(Sorter, "sorter", lits)
+    clauses = AtMostOne(Sort, "sorter", lits)
     fmt.Println(clauses.Size())
     //clauses.Print()
 
@@ -52,12 +52,12 @@ func TestAtMostOne(t *testing.T) {
     //clauses.Print()
 
     fmt.Println()
-    clauses = ExactlyOne(Counter, "counter", lits)
+    clauses = ExactlyOne(Count, "counter", lits)
     fmt.Println(clauses.Size())
     //clauses.Print()
 
     fmt.Println()
-    clauses = ExactlyOne(Sorter, "sorter", lits)
+    clauses = ExactlyOne(Sort, "sorter", lits)
     fmt.Println(clauses.Size())
     //clauses.Print()
 }

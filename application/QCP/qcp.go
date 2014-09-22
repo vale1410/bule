@@ -1,13 +1,13 @@
 package main
 
 import (
-    "path/filepath"
     "flag"
     "fmt"
-    "github.com/vale1410/bule/sat"
     "github.com/vale1410/bule/constraints"
+    "github.com/vale1410/bule/sat"
     "io/ioutil"
     "os"
+    "path/filepath"
     "regexp"
     "strconv"
     "strings"
@@ -15,12 +15,11 @@ import (
 
 var f = flag.String("f", "instances/qwh-5-10.pls", "Instance.")
 var dir = flag.String("dir", "out", "directory for output.")
-var out = flag.String("out", "out.cnf", "output of conversion.")
+var out = flag.String("o", "out.cnf", "output of conversion.")
 var ver = flag.Bool("ver", false, "Show version info.")
 var dbg = flag.Bool("d", false, "Print debug information.")
 var dbgfile = flag.String("df", "", "File to print debug information.")
-var encoding = flag.Int("e", 0, "EncodingType. 0: naive, 1: sort, 2: split, 3: count, 4: log, 5: Feydy, 6: Hull")
-
+var encoding = flag.Int("e", -1, "EncodingType. 0: naive, 1: sort, 2: split, 3: count, 4: log, 5: Feydy, 6: Hull")
 
 var digitRegexp = regexp.MustCompile("([0-9]+ )*[0-9]+")
 
@@ -53,70 +52,79 @@ There is NO WARRANTY, to the extent permitted by law.`)
     g := parse(*f)
     n := len(g)
 
-    if *encoding > -1 { 
-        clauses := translateCardDecomposition(n,mapEncoding(*encoding)) 
+    if *encoding > -1 {
+        clauses := translateCardDecomposition(n, mapEncoding(*encoding))
         clauses.AddClauseSet(translateInstance(g))
-        doEncoding(clauses,*out)
-    }  else { 
+        doEncoding(clauses, *out)
+    } else {
 
-    maxEncoding := 3
-    for e:= 0; e <= maxEncoding; e++ { 
-        clauses := translateCardDecomposition(n,mapEncoding(*encoding)) 
-        clauses.AddClauseSet(translateInstance(g))
-        //generate String
-        name := pathOutput(*f,*encoding) 
-        doEncoding(clauses,name)
+        maxEncoding := 3
+        for e := 0; e <= maxEncoding; e++ {
+            clauses := translateCardDecomposition(n, mapEncoding(e))
+            clauses.AddClauseSet(translateInstance(g))
+            //generate String
+            name := pathOutput(*f, e)
+            doEncoding(clauses, name)
+
+        }
 
     }
-
-    } 
 }
 
 func mapEncoding(e int) (c constraints.CardinalityType) {
 
     switch e {
-    case 0: c = constraints.Naive
-    case 1: c = constraints.Sort
-    case 2: c = constraints.Split
-    case 3: c = constraints.Count
-    default: 
+    case 0:
+        c = constraints.Naive
+    case 1:
+        c = constraints.Sort
+    case 2:
+        c = constraints.Split
+    case 3:
+        c = constraints.Count
+    default:
+    fmt.Println(e)
         panic("not implemented this encoding yet")
     }
 
     return c
 }
 
-func pathOutput(path string,encoding int) string{
+func pathOutput(path string, encoding int) string {
 
     var name string
 
     switch encoding {
-    case 0: name = "Naive/"
-    case 1: name = "Card-Sort/"
-    case 2: name = "Card-Split/"
-    case 3: name = "Card-Count/"
-    default: 
+    case 0:
+        name = "Naive/"
+    case 1:
+        name = "Card-Sort/"
+    case 2:
+        name = "Card-Split/"
+    case 3:
+        name = "Card-Count/"
+    default:
+    fmt.Println(encoding)
         panic("not implemented this encoding yet")
     }
 
     filename := filepath.Base(path)
-    outname := filepath.Join(*dir, name,filename)
+    outname := filepath.Join(*dir, name, filename)
 
     return outname
 
 }
 
-
 func doEncoding(clauses sat.ClauseSet, filename string) {
 
-   s := sat.IdGenerator(clauses.Size())
-   s.GenerateIds(clauses)
-   s.Filename = filename
-   s.PrintClausesDIMACS(clauses)
+    s := sat.IdGenerator(clauses.Size())
 
-   if *dbg {
-       s.Print(clauses)
-   }
+    s.Filename = filename
+    s.PrintDIMACS(clauses)
+
+    if *dbg {
+        clauses.PrintDebug()
+    }
 
 }
 
@@ -148,19 +156,17 @@ func translateInstance(g QGC) (clauses sat.ClauseSet) {
 
     for i, r := range g {
         for j, k := range r {
-            fmt.Print(" ", k)
             if k >= 0 {
                 l1 := sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
                 clauses.AddTaggedClause("Instance", l1)
             }
         }
-        fmt.Println("")
     }
 
     return
 }
 
-func translateCardDecomposition(n int,typ constraints.CardinalityType) (clauses sat.ClauseSet) {
+func translateCardDecomposition(n int, typ constraints.CardinalityType) (clauses sat.ClauseSet) {
 
     p := sat.Pred("v")
 
@@ -178,7 +184,7 @@ func translateCardDecomposition(n int,typ constraints.CardinalityType) (clauses 
         for i := 0; i < n; i++ {
             lits := make([]sat.Literal, n)
             for j := 0; j < n; j++ {
-                lits[k] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
+                lits[j] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
             }
             // in each row each value at most one
             clauses.AddClauseSet(constraints.ExactlyOne(typ, "ex1Row", lits))
@@ -189,7 +195,7 @@ func translateCardDecomposition(n int,typ constraints.CardinalityType) (clauses 
         for j := 0; j < n; j++ {
             lits := make([]sat.Literal, n)
             for i := 0; i < n; i++ {
-                lits[k] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
+                lits[i] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
             }
             // in each column each value at most one
             clauses.AddClauseSet(constraints.ExactlyOne(typ, "ex1Column", lits))
@@ -268,7 +274,6 @@ func parseDZN(lines []string) (g QGC) {
             }
         case 2:
             {
-                fmt.Println(elements)
 
                 if len(elements) == 0 {
                     continue
@@ -295,7 +300,6 @@ func parseDZN(lines []string) (g QGC) {
             }
         }
     }
-    fmt.Println(g)
     return
 }
 
