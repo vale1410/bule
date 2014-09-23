@@ -13,6 +13,7 @@ const (
     Sort
     Split
     Count
+    Heule
 )
 
 
@@ -28,7 +29,7 @@ func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat
     case Sort:
 
     sat.SetUp(3, sorters.Pairwise)
-    clauses.AddClauseSet(sat.CreateCardinality("sort", lits, 1, sorters.AtMost))
+    clauses.AddClauseSet(sat.CreateCardinality(tag, lits, 1, sorters.AtMost))
 
     case Split:
 
@@ -53,16 +54,41 @@ func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat
 
         }
     case Count:
+
         pred := sat.Pred("count")
-        tag := "count"
+        counterId := newId()
+
+        first := sat.NewAtomP2(pred,counterId,1)
+        clauses.AddTaggedClause(tag+"-2",lits[0], sat.Literal{false,first})
 
         for i := 1; i < len(lits) ; i++{
-            p1 := sat.NewAtomP1(pred,i)
-            p2 := sat.NewAtomP1(pred,i+1)
-            clauses.AddTaggedClause(tag, sat.Literal{false, p1}, sat.Literal{true, p2})
-            clauses.AddTaggedClause(tag, sat.Neg(lits[i-1]),sat.Literal{true, p1})
-            clauses.AddTaggedClause(tag, sat.Literal{false, p1}, sat.Neg(lits[i]))
+            p1 := sat.NewAtomP2(pred,counterId,i)
+            clauses.AddTaggedClause(tag+"-1", sat.Neg(lits[i-1]),sat.Literal{true, p1})
+            clauses.AddTaggedClause(tag+"-1", sat.Neg(lits[i]),sat.Literal{false, p1})
+            if i != len(lits) {
+            p2 := sat.NewAtomP2(pred,counterId,i+1)
+            clauses.AddTaggedClause(tag+"-2", lits[i], sat.Literal{true, p1}, sat.Literal{false, p2})
+            clauses.AddTaggedClause(tag+"-3", sat.Literal{false, p1}, sat.Literal{true, p2})
+            }
         }
+
+    case Heule:
+
+        k := 4
+
+        if len(lits) > k+1  {
+            aux := sat.NewAtomP1(sat.Pred("heule"), newId())
+            front := make([]sat.Literal, k+1)
+            copy(front,lits[:k])
+            front[k] = sat.Literal{true,aux}
+            clauses = AtMostOne(Naive, tag, front)
+            back := make([]sat.Literal, len(lits)-k+1)
+            copy(back, lits[k:])
+            back[len(lits)-k] = sat.Literal{false,aux}
+            clauses.AddClauseSet(AtMostOne(typ, tag, back))
+        }  else { 
+            clauses = AtMostOne(Naive, tag, lits)
+        } 
 
     }
 
@@ -81,7 +107,7 @@ func ExactlyOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sa
     case Sort:
 
     sat.SetUp(3, sorters.Pairwise)
-    clauses.AddClauseSet(sat.CreateCardinality("sort", lits, 1, sorters.Equal))
+    clauses.AddClauseSet(sat.CreateCardinality(tag, lits, 1, sorters.Equal))
 
     case Split:
 
@@ -90,7 +116,6 @@ func ExactlyOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sa
 
     case Count:
         pred := sat.Pred("count")
-        tag := "count"
         counterId := newId()
 
         first := sat.NewAtomP2(pred,counterId,1)
@@ -109,6 +134,18 @@ func ExactlyOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sa
         // force that last counter has to be 1, i.e. it models ExactlyOne
         final := sat.NewAtomP2(pred,counterId,len(lits))
         clauses.AddTaggedClause(tag+"-4",sat.Literal{true,final})
+
+    case Heule:
+
+    //fmt.Println("exactlyOne")
+    //fmt.Println(lits)
+
+        clauses.AddClauseSet(AtMostOne(typ , tag , lits ))
+        clauses.AddTaggedClause(tag, lits...)
+
+    default: 
+        panic("CNF translation for this type not implemented yet")
+
 
     }
 

@@ -82,6 +82,8 @@ func mapEncoding(e int) (c constraints.CardinalityType) {
         c = constraints.Split
     case 3:
         c = constraints.Count
+    case 4:
+        c = constraints.Heule
     default:
     fmt.Println(e)
         panic("not implemented this encoding yet")
@@ -103,6 +105,8 @@ func pathOutput(path string, encoding int) string {
         name = "Card-Split/"
     case 3:
         name = "Card-Count/"
+    case 4:
+        name = "Heule/"
     default:
     fmt.Println(encoding)
         panic("not implemented this encoding yet")
