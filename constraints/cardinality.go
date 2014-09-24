@@ -14,6 +14,7 @@ const (
     Split
     Count
     Heule
+    Log
 )
 
 
@@ -36,7 +37,7 @@ func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat
         // a constant that should be exposed,
         // its the cuttoff for the split method of atMostOne
 
-        cutOff := 3
+        cutOff := 5
 
         if len(lits) <= cutOff {
             return AtMostOne(Naive, tag, lits)
@@ -90,6 +91,12 @@ func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat
             clauses = AtMostOne(Naive, tag, lits)
         } 
 
+    case Log:
+
+        //TODO log encoding as in Asis paper
+        //add things
+
+
     }
 
     return
@@ -137,15 +144,16 @@ func ExactlyOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sa
 
     case Heule:
 
-    //fmt.Println("exactlyOne")
-    //fmt.Println(lits)
-
         clauses.AddClauseSet(AtMostOne(typ , tag , lits ))
         clauses.AddTaggedClause(tag, lits...)
 
+    case Log:
+
+        //TODO log encoding as in Asis paper
+        //add things
+
     default: 
         panic("CNF translation for this type not implemented yet")
-
 
     }
 

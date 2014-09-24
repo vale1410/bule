@@ -7,14 +7,12 @@ import (
     "github.com/vale1410/bule/sat"
     "io/ioutil"
     "os"
-    "path/filepath"
     "regexp"
     "strconv"
     "strings"
 )
 
 var f = flag.String("f", "instances/qwh-5-10.pls", "Instance.")
-var dir = flag.String("dir", "out", "directory for output.")
 var out = flag.String("o", "out.cnf", "output of conversion.")
 var ver = flag.Bool("ver", false, "Show version info.")
 var dbg = flag.Bool("d", false, "Print debug information.")
@@ -58,15 +56,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
         doEncoding(clauses, *out)
     } else {
 
-        maxEncoding := 3
-        for e := 0; e <= maxEncoding; e++ {
-            clauses := translateCardDecomposition(n, mapEncoding(e))
-            clauses.AddClauseSet(translateInstance(g))
-            //generate String
-            name := pathOutput(*f, e)
-            doEncoding(clauses, name)
-
-        }
+        panic("no support for batch mode")
 
     }
 }
@@ -84,39 +74,14 @@ func mapEncoding(e int) (c constraints.CardinalityType) {
         c = constraints.Count
     case 4:
         c = constraints.Heule
+    case 5:
+        c = constraints.Log
     default:
     fmt.Println(e)
         panic("not implemented this encoding yet")
     }
 
     return c
-}
-
-func pathOutput(path string, encoding int) string {
-
-    var name string
-
-    switch encoding {
-    case 0:
-        name = "Naive/"
-    case 1:
-        name = "Card-Sort/"
-    case 2:
-        name = "Card-Split/"
-    case 3:
-        name = "Card-Count/"
-    case 4:
-        name = "Heule/"
-    default:
-    fmt.Println(encoding)
-        panic("not implemented this encoding yet")
-    }
-
-    filename := filepath.Base(path)
-    outname := filepath.Join(*dir, name, filename)
-
-    return outname
-
 }
 
 func doEncoding(clauses sat.ClauseSet, filename string) {
@@ -168,6 +133,24 @@ func translateInstance(g QGC) (clauses sat.ClauseSet) {
     }
 
     return
+}
+
+func translateLogDomain(n int) (clauses sat.ClauseSet) {
+// TODO implement both encodings
+// one forbidding the values below multiple of 2, the other one not
+
+    return 
+
+}
+
+func translateFeydy(n int) (clauses sat.ClauseSet) {
+// TODO
+    return 
+}
+
+func translateBounds(n int) (clauses sat.ClauseSet) {
+// TODO
+    return 
 }
 
 func translateCardDecomposition(n int, typ constraints.CardinalityType) (clauses sat.ClauseSet) {
