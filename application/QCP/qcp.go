@@ -144,13 +144,34 @@ func translateLogDomain(n int) (clauses sat.ClauseSet) {
 }
 
 func translateFeydy(n int) (clauses sat.ClauseSet) {
-// TODO
+
+    // TODO
+
+    //do order encoding
+    //do direct encoding
+    // link them 
+    // and post cardinality constraints
+
     return 
 }
 
 func translateBounds(n int) (clauses sat.ClauseSet) {
 // TODO
     return 
+
+    p := sat.Pred("v") //direct encoding
+    o := sat.Pred("o") //order encoding
+
+    // i 1 ...n 
+    // i implies i+1
+    // (i and not i+1) equivalent to p
+
+    // introduce range variables
+
+    // and post cardinality constraints
+
+    // sum of k..1 n, sum_i o(i) = k
+
 }
 
 func translateCardDecomposition(n int, typ constraints.CardinalityType) (clauses sat.ClauseSet) {

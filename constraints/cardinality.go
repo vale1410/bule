@@ -21,12 +21,14 @@ const (
 func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat.ClauseSet) {
 
     switch typ {
+
     case Naive:
         for i, l := range lits {
             for j := i + 1; j < len(lits); j++ {
                 clauses.AddTaggedClause(tag, sat.Neg(l), sat.Neg(lits[j]))
             }
         }
+
     case Sort:
 
     sat.SetUp(3, sorters.Pairwise)
@@ -37,9 +39,9 @@ func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat
         // a constant that should be exposed,
         // its the cuttoff for the split method of atMostOne
 
-        cutOff := 5
+        cutoff := 5
 
-        if len(lits) <= cutOff {
+        if len(lits) <= cutoff {
             return AtMostOne(Naive, tag, lits)
         } else {
             aux := sat.NewAtomP1(sat.Pred("split"), newId())
@@ -93,14 +95,47 @@ func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat
 
     case Log:
 
-        //TODO log encoding as in Asis paper
-        //add things
+        cutoff := 5 //will be a parameter of this encoding
 
+        //this is very similar to the split encoding
+
+        clauses = buildLogEncoding(sat.Pred("logE"),newId(),cutoff,0,tag,lits)
 
     }
 
     return
 
+}
+
+func buildLogEncoding(pred sat.Pred,uId int,cutoff int,depth int,tag string, lits []sat.Literal) (clauses sat.ClauseSet) {
+
+    //fmt.Println(depth,lits)
+
+    if len(lits) <= cutoff { 
+        clauses = AtMostOne(Naive, tag, lits)
+    } else {
+
+        atom := sat.NewAtomP2(pred,uId,depth)
+
+        first := lits[:len(lits)/2]
+        for _,l := range first { 
+            clauses.AddTaggedClause(tag,sat.Literal{true,atom},sat.Neg(l))
+        } 
+        second := lits[len(lits)/2:]
+        for _,l := range second { 
+            clauses.AddTaggedClause(tag,sat.Literal{false,atom},sat.Neg(l))
+        }
+
+        depth++
+
+        clauses.AddClauseSet(buildLogEncoding(pred,uId,cutoff,depth, tag,first ))
+        clauses.AddClauseSet(buildLogEncoding(pred,uId,cutoff, depth, tag,second ))
+
+    }
+
+    //fmt.Println(clauses)
+
+    return 
 }
 
 func ExactlyOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat.ClauseSet) {
@@ -149,8 +184,8 @@ func ExactlyOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sa
 
     case Log:
 
-        //TODO log encoding as in Asis paper
-        //add things
+        clauses.AddClauseSet(AtMostOne(typ , tag , lits ))
+        clauses.AddTaggedClause(tag, lits...)
 
     default: 
         panic("CNF translation for this type not implemented yet")
