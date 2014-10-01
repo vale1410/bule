@@ -157,10 +157,9 @@ func translateFeydy(n int) (clauses sat.ClauseSet) {
 
 func translateBounds(n int) (clauses sat.ClauseSet) {
 // TODO
-    return 
 
-    p := sat.Pred("v") //direct encoding
-    o := sat.Pred("o") //order encoding
+    //p := sat.Pred("v") //direct encoding
+    //o := sat.Pred("o") //order encoding
 
     // i 1 ...n 
     // i implies i+1
@@ -171,6 +170,8 @@ func translateBounds(n int) (clauses sat.ClauseSet) {
     // and post cardinality constraints
 
     // sum of k..1 n, sum_i o(i) = k
+
+    return 
 
 }
 
