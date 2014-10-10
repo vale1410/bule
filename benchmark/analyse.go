@@ -7,7 +7,6 @@ import (
     "fmt"
     "io/ioutil"
     "os"
-    //    "path/filepath"
     "regexp"
     "strconv"
     "strings"
@@ -26,7 +25,6 @@ var timeout = flag.Int("timeout", 3600, "Timeout.")
 
 var digitRegexp = regexp.MustCompile("([0-9]+ )*[0-9]+.[0-9]+")
 
-var encodings = []string{"e0","e1","e2","e3","e4","e5"}
 
 
 type statistic struct { 
@@ -48,7 +46,7 @@ func main() {
     flag.Parse()
 
     if *ver {
-        fmt.Println(`Logfile analyser: Tag 0.1 Pseudo Booleans
+        fmt.Println(`Logfile analyser: Tag 0.2 
 Copyright (C) NICTA and Valentin Mayer-Eichberger
 License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 There is NO WARRANTY, to the extent permitted by law.`)
@@ -66,16 +64,26 @@ func analyseLogs(path string) {
     statistics := make([]statistic,len(solvers))
 
     for i,solver := range solvers { 
+
+
+
         statistics[i].solver = solver.Name()
         confs,_ := ioutil.ReadDir(path+"/"+solver.Name())
-        statistics[i].experiments = make([]experiment,len(confs)*len(encodings))
-        for c,conf := range confs {
-            for e,enc := range encodings {
-                pos := c*len(encodings)+e
-                statistics[i].experiments[pos].encoding = enc
-                statistics[i].experiments[pos].conf = conf.Name()
-                statistics[i].experiments[pos].times = 
-                    getTimes(path+"/"+solver.Name()+"/"+conf.Name()+"/"+enc)
+
+        // determine number of encodings; assumption is that each solver has same
+        // number of encodings for each configuration
+        if len(confs) > 0 { 
+            encodings,_ := ioutil.ReadDir(path+"/"+solver.Name()+"/"+confs[0].Name())
+
+            statistics[i].experiments = make([]experiment,len(confs)*len(encodings))
+            for c,conf := range confs {
+                for e,enc := range encodings {
+                    pos := c*len(encodings)+e
+                    statistics[i].experiments[pos].encoding = enc.Name()
+                    statistics[i].experiments[pos].conf = conf.Name()
+                    statistics[i].experiments[pos].times = 
+                        getTimes(path+"/"+solver.Name()+"/"+conf.Name()+"/"+enc.Name())
+                }
             }
         }
     }
