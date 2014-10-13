@@ -1,0 +1,5 @@
+numActors = 3 ;
+numScenes = 4 ;
+actorPay = [1,2,3];
+sceneDuration = [1,2,3,1];
+actorInScene = array2d(Actors,Scenes,[1,0,1,0,1,1,0,1,0,1,1,0]);

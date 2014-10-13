@@ -25,6 +25,8 @@ var timeout = flag.Int("timeout", 3600, "Timeout.")
 
 var digitRegexp = regexp.MustCompile("([0-9]+ )*[0-9]+.[0-9]+")
 
+var timeString = "xTIME"
+
 
 
 type statistic struct { 
@@ -150,7 +152,7 @@ func parseTime(path string) (time float64,err error) {
 
     for scanner.Scan() {
         s := scanner.Text()
-        if strings.HasPrefix(s,"xTIME") { 
+        if strings.HasPrefix(s,timeString) { 
 
             found = true
             time, err = strconv.ParseFloat(digitRegexp.FindString(s),64)
@@ -163,6 +165,7 @@ func parseTime(path string) (time float64,err error) {
     }
 
     if !found { 
+        fmt.Println(path, "does not contain a line with",timeString)
         panic("Log file does not contain line with time")
     }
 

@@ -37,21 +37,21 @@ constraint all_different(s); % each scene scheduled once
 constraint
         bef[1] = {} /\       % no actors before time 1
         aft[numScenes] = {} /\       % no actors after time numScenes
-	forall(t in 1..numScenes-1)(
+    forall(t in 1..numScenes-1)(
                bef[t+1] = a[s[t]] union bef[t]   /\ 
                aft[t] = a[s[t+1]] union aft[t+1] );
 
 constraint 
-	dur[1] = a[s[1]] /\   
+    dur[1] = a[s[1]] /\   
         forall(t in 2..numScenes-1)( 
-		 dur[t] = bef[t+1] intersect aft[t]
-	) /\
+         dur[t] = bef[t+1] intersect aft[t]
+    ) /\
         dur[numScenes] = a[s[numScenes]];
 
 constraint cost = sum(i in Scenes)(
-      	       	     sum(j in Actors)(
-		     	   c[j] * d[s[i]] * bool2int(j in dur[i])
-		         )
+                     sum(j in Actors)(
+                   c[j] * d[s[i]] * bool2int(j in dur[i])
+                 )
                   );   
 
 %-- symmetry breaking constraint

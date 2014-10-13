@@ -77,15 +77,5 @@ output [
 ];
 
 
-numActors = 5;
-actorPay = [1, 1, 1, 1, 1];
-numScenes = 9;
-sceneDuration = [2, 4, 1, 3, 3, 2, 5, 7, 6];
-actorInScene = array2d(Actors, Scenes, 
-        [1, 1, 0, 1, 0, 1, 1, 0, 1,
-         1, 1, 0, 1, 1, 1, 0, 1, 0,
-         1, 1, 0, 0, 0, 0, 1, 1, 0,
-         1, 0, 0, 0, 1, 1, 0, 0, 1,
-         0, 0, 1, 0, 1, 1, 1, 1, 0]);
 
 
