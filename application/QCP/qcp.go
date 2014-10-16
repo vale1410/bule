@@ -48,6 +48,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
     }
 
     g := parse(*f)
+
     n := len(g)
 
     if *encoding > -1 {
@@ -185,7 +186,8 @@ func translateCardDecomposition(n int, typ constraints.CardinalityType) (clauses
             for k := 0; k < n; k++ {
                 lits[k] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
             }
-            clauses.AddTaggedClause("AtLeast", lits...)
+            //clauses.AddTaggedClause("AtLeast", lits...)
+            clauses.AddClauseSet(constraints.ExactlyOne(typ, "ex1Value", lits))
         }
     }
 
