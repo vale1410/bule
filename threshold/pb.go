@@ -7,7 +7,6 @@ import (
 )
 
 type EquationType int
-type TranslationType int
 
 const (
 	AtMost EquationType = iota
@@ -35,6 +34,8 @@ type Threshold struct {
 	LitIn   []sat.Literal //Bags flattened, input to Sorter
 }
 
+type TranslationType int
+
 const (
 	Facts TranslationType = iota
 	SingleClause
@@ -50,7 +51,7 @@ func (t *Threshold) Translate() {
 		t.Trans = Facts
 	} else if b, literals := t.SingleClause(); b {
 		//fmt.Println("Bule: translate by single clause", len(cls))
-		t.Clauses.AddTaggedClause("SC",literals...)
+		t.Clauses.AddTaggedClause("SC", literals...)
 		t.Trans = SingleClause
 	} else {
 		//fmt.Println("Bule: translate by sorting network")
