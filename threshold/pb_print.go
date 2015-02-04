@@ -366,23 +366,27 @@ func (t *Threshold) PrintGurobi() {
 		l := x.Literal
 
 		if x.Weight > 0 {
-			fmt.Printf("+")
+			fmt.Printf(" +")
 		}
 
-		fmt.Print(x.Weight)
+		if x.Weight != 1 {
+			fmt.Printf(" ")
+			fmt.Print(x.Weight)
+		}
 		fmt.Print(l.ToTxt())
 	}
 	switch t.Typ {
 	case AtMost:
-		fmt.Print("<= ")
+		fmt.Print(" <= ")
 	case AtLeast:
-		fmt.Print(">= ")
+		fmt.Print(" >= ")
 	case Equal:
-		fmt.Print("= ")
+		fmt.Print(" = ")
 	}
 	fmt.Println(t.K)
 
 }
+
 func (t *Threshold) Print10() {
 	for _, x := range t.Entries {
 		l := x.Literal
@@ -403,5 +407,46 @@ func (t *Threshold) Print10() {
 		fmt.Print("== ")
 	}
 	fmt.Println(t.K, ";")
+
+}
+
+func (t *Threshold) PrintGringo() {
+
+	if len(t.Entries) > 0 {
+
+		switch t.Typ {
+		case AtMost:
+			fmt.Print(":- ", t.K+1, " [ ")
+		case AtLeast:
+			fmt.Print(":- [ ")
+		case Equal:
+			fmt.Print(":- not ", t.K, " [ ")
+		case Optimization:
+			fmt.Print("#minimize[")
+		}
+
+		for i, x := range t.Entries {
+			if i != 0 {
+				fmt.Print(" , ")
+			}
+			if x.Weight != 1 {
+				fmt.Print(x.Literal.ToTxt(), "=", x.Weight)
+			} else {
+				fmt.Print(x.Literal.ToTxt())
+			}
+		}
+
+		switch t.Typ {
+		case AtMost:
+			fmt.Print(" ]")
+		case AtLeast:
+			fmt.Print(" ] ", t.K-1)
+		case Equal:
+			fmt.Print(" ] ", t.K)
+		case Optimization:
+			fmt.Print("]")
+		}
+		fmt.Println(".")
+	}
 
 }

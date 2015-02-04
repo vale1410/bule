@@ -87,6 +87,10 @@ type Literal struct {
 	A    Atom
 }
 
+func NewLit(s string) Literal {
+	return Literal{true, AtomP{Pred(s)}}
+}
+
 func Neg(l Literal) Literal {
 	l.Sign = !l.Sign
 	return l

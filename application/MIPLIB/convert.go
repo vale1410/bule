@@ -9,50 +9,31 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"github.com/vale1410/bule/sat"
+	t "github.com/vale1410/bule/threshold"
 	"io/ioutil"
 	"strconv"
 	"strings"
 )
 
-type EquationType int
-
-const (
-	AtMost EquationType = iota
-	AtLeast
-	Equal
-	Optimization
-)
-
-type Entry struct {
-	Literal string
-	Weight  int64
-}
-
-type Threshold struct {
-	Desc    string
-	Entries []Entry
-	K       int64
-	Typ     EquationType
-}
-
-var filename = flag.String("file", "test.txt", "Path of the file specifying the Knapsack Problem.")
+var filename = flag.String("f", "test.txt", "Path of the file.")
 
 type Constraint struct {
 	name string
 }
 
-func getEquationType(t string) EquationType {
-	if t == "E" {
-		return Equal
-	} else if t == "L" {
-		return AtMost
-	} else if t == "G" {
-		return AtLeast
+func getEquationType(s string) t.EquationType {
+	if s == "E" {
+		return t.Equal
+	} else if s == "L" {
+		return t.AtMost
+	} else if s == "G" {
+		return t.AtLeast
 	}
-	if t != "N" {
-		panic("UNknown equation type " + t)
+	if s != "N" {
+		panic("UNknown equation type " + s)
 	}
-	return Optimization
+	return t.Optimization
 }
 
 func main() {
@@ -71,15 +52,17 @@ func main() {
 
 	state := 0
 
-	pbs := make([]Threshold, 0, 100)
+	pbs := make([]t.Threshold, 0, 100)
+	vars := make(map[string]bool)
 	rowMap := make(map[string]int)
 
 	for _, l := range lines {
 		if l == "" {
 			continue
 		}
+
 		entries := strings.Fields(l)
-		ts := Threshold{}
+		ts := t.Threshold{}
 
 		switch state {
 		case 0:
@@ -87,7 +70,7 @@ func main() {
 				if entries[0] == "NAME" {
 					state = 1
 				}
-				fmt.Println("name : ", entries[1])
+				//fmt.Println("name : ", entries[1])
 			}
 		case 1:
 			{
@@ -105,7 +88,8 @@ func main() {
 				rowMap[ts.Desc] = len(pbs) - 1
 			}
 		case 3: // COLUMNS
-			if entries[0] == "INT1" || strings.HasPrefix(entries[0], "MARK") {
+			if entries[0] == "INT1" || entries[0] == "INT1END" || entries[0] == "INTEND" ||
+				entries[0] == "INTSTART" || strings.HasPrefix(entries[0], "MARK") {
 				state = 3
 			} else if entries[0] == "RHS" {
 				state = 4
@@ -114,23 +98,28 @@ func main() {
 				if err != nil {
 					panic("wrong number " + entries[2])
 				}
-				e := Entry{entries[0], a}
-				pbs[rowMap[entries[1]]].Entries =
-					append(pbs[rowMap[entries[1]]].Entries, e)
+				v := strings.ToLower(strings.Replace(entries[0], "#", "_", -1))
+				if !vars[v] {
+					vars[v] = true
+				}
+				row := strings.ToLower(strings.Replace(entries[1], "#", "_", -1))
+				//fmt.Println(v, row)
+				e := t.Entry{sat.NewLit(v), a}
+				pbs[rowMap[row]].Entries =
+					append(pbs[rowMap[row]].Entries, e)
 			}
 		case 4:
 			{
-				if len(entries) < 3 {
-					fmt.Println(len(entries))
-				}
 				if entries[0] == "BOUNDS" {
 					state = 5
+				} else {
+					a, err := strconv.ParseInt(entries[2], 10, 64)
+					if err != nil {
+						panic("wrong number " + entries[2])
+					}
+					row := strings.ToLower(strings.Replace(entries[1], "#", "_", -1))
+					pbs[rowMap[row]].K = a
 				}
-				a, err := strconv.ParseInt(entries[3], 10, 64)
-				if err != nil {
-					panic("wrong number " + entries[2])
-				}
-				pbs[rowMap[entries[1]]].K = a
 			}
 		case 5:
 			{
@@ -138,8 +127,13 @@ func main() {
 		}
 	}
 
+	fmt.Println("#hide.")
+
+	for x, _ := range vars {
+		fmt.Println("{", x, "}.")
+	}
 	for _, t := range pbs {
-		fmt.Println(t)
+		t.PrintGringo()
 	}
 	return
 }
