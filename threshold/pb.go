@@ -332,10 +332,6 @@ func (t *Threshold) CreateBags() {
 	}
 }
 
-func (t *Threshold) AddTare() {
-
-}
-
 // binary
 // 23 = 10111
 // special case if n==0 then return empty slice
