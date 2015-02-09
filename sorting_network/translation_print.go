@@ -1,11 +1,12 @@
-package threshold
+package sorting_network
 
 import (
 	"fmt"
+	//	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sorters"
 	"os"
 	"sort"
-	"strconv"
+	//"strconv"
 )
 
 type pair struct {
@@ -50,7 +51,7 @@ func writeEpilog(file *os.File) {
 \end{document}`)))
 }
 
-func PrintThresholdTikZ(filename string, ts []Threshold) {
+func PrintThresholdTikZ(filename string, ts []Translation) {
 
 	file, ok := os.Create(filename)
 	if ok != nil {
@@ -67,6 +68,16 @@ func PrintThresholdTikZ(filename string, ts []Threshold) {
 	}
 
 	writeEpilog(file)
+}
+
+func (t *Translation) writeDescription(file *os.File) {
+	//file.Write([]byte("\\caption{"))
+	file.Write([]byte("The translation of the PB through sorters:\n"))
+	t.PB.WriteFormula(10, file)
+	file.Write([]byte("and in binary representation:\n"))
+	t.PB.WriteFormula(2, file)
+	//file.Write([]byte(fmt.Sprintf("adding the Tare on both sides. $$T = %v_{10} = %v_2$$\n", t.Tare, BinaryStr(t.Tare))))
+	//file.Write([]byte(fmt.Sprintf("}\n")))
 }
 
 // groups contains the comparators for each depth
@@ -157,7 +168,7 @@ func prepareData(sorter sorters.Sorter) (groups []pairSlice, layers []layerMap) 
 	return
 }
 
-func (t *Threshold) writeTikz(file *os.File) {
+func (t *Translation) writeTikz(file *os.File) {
 
 	sorter := t.Sorter
 
@@ -273,180 +284,5 @@ func (t *Threshold) writeTikz(file *os.File) {
 	file.Write([]byte(fmt.Sprintln("\\end{tikzpicture}")))
 	file.Write([]byte(fmt.Sprintln("}")))
 	//  file.Write([]byte(fmt.Sprintln("\\end{figure}")))
-
-}
-
-func BinaryStr(n int64) (s string) {
-	bin := binary(n)
-	for i := len(bin) - 1; i >= 0; i-- {
-		s += strconv.Itoa(bin[i])
-	}
-	return
-}
-
-func (t *Threshold) Print2() {
-	fmt.Println(t.Desc)
-
-	first := true
-	for _, x := range t.Entries {
-		l := x.Literal
-		if !first {
-			fmt.Printf("+ ")
-		}
-		first = false
-
-		fmt.Print(BinaryStr(x.Weight))
-		fmt.Print(x.Weight)
-		fmt.Print(l.ToTex())
-	}
-	switch t.Typ {
-	case AtMost:
-		fmt.Print(" <= ")
-	case AtLeast:
-		fmt.Print(" >= ")
-	case Equal:
-		fmt.Print(" == ")
-	}
-
-	fmt.Print(BinaryStr(t.K))
-
-	fmt.Println()
-	fmt.Println()
-}
-
-func (t *Threshold) writeDescription(file *os.File) {
-	//file.Write([]byte("\\caption{"))
-	file.Write([]byte("The translation of the PB through sorters:\n"))
-	t.WriteFormula(10, file)
-	file.Write([]byte("and in binary representation:\n"))
-	t.WriteFormula(2, file)
-	file.Write([]byte(fmt.Sprintf("adding the Tare on both sides. $$T = %v_{10} = %v_2$$\n", t.Tare, BinaryStr(t.Tare))))
-	//file.Write([]byte(fmt.Sprintf("}\n")))
-}
-
-func (t *Threshold) WriteFormula(base int, file *os.File) {
-
-	var w string
-
-	file.Write([]byte("$$"))
-	for _, x := range t.Entries {
-		if base == 2 {
-			w = BinaryStr(x.Weight)
-		} else if base == 10 {
-			w = fmt.Sprintf("%v", x.Weight)
-		} else {
-			panic("only base 2 and 10 supported")
-		}
-		if x.Weight < 0 {
-			file.Write([]byte(fmt.Sprintf("%v \\cdot %v ", w, x.Literal.ToTex())))
-		} else {
-			file.Write([]byte(fmt.Sprintf("+%v \\cdot %v ", w, x.Literal.ToTex())))
-		}
-	}
-	switch t.Typ {
-	case AtMost:
-		file.Write([]byte(" \\leq "))
-	case AtLeast:
-		file.Write([]byte(" \\geq "))
-	case Equal:
-		file.Write([]byte(" = "))
-	}
-	if base == 2 {
-		w = BinaryStr(t.K)
-	} else if base == 10 {
-		w = fmt.Sprintf("%v", t.K)
-	} else {
-		panic("only base 2 and 10 supported")
-	}
-	file.Write([]byte(fmt.Sprintf("%v $$\n", w)))
-}
-
-func (t *Threshold) PrintGurobi() {
-	for _, x := range t.Entries {
-		l := x.Literal
-
-		if x.Weight > 0 {
-			fmt.Printf(" +")
-		}
-
-		if x.Weight != 1 {
-			fmt.Printf(" ")
-			fmt.Print(x.Weight)
-		}
-		fmt.Print(l.ToTxt())
-	}
-	switch t.Typ {
-	case AtMost:
-		fmt.Print(" <= ")
-	case AtLeast:
-		fmt.Print(" >= ")
-	case Equal:
-		fmt.Print(" = ")
-	}
-	fmt.Println(t.K)
-
-}
-
-func (t *Threshold) Print10() {
-	for _, x := range t.Entries {
-		l := x.Literal
-
-		if x.Weight > 0 {
-			fmt.Printf("+")
-		}
-
-		fmt.Print(x.Weight)
-		fmt.Print(l.ToTex())
-	}
-	switch t.Typ {
-	case AtMost:
-		fmt.Print("<= ")
-	case AtLeast:
-		fmt.Print(">= ")
-	case Equal:
-		fmt.Print("== ")
-	}
-	fmt.Println(t.K, ";")
-
-}
-
-func (t *Threshold) PrintGringo() {
-
-	if len(t.Entries) > 0 {
-
-		switch t.Typ {
-		case AtMost:
-			fmt.Print(":- ", t.K+1, " [ ")
-		case AtLeast:
-			fmt.Print(":- [ ")
-		case Equal:
-			fmt.Print(":- not ", t.K, " [ ")
-		case Optimization:
-			fmt.Print("#minimize[")
-		}
-
-		for i, x := range t.Entries {
-			if i != 0 {
-				fmt.Print(" , ")
-			}
-			if x.Weight != 1 {
-				fmt.Print(x.Literal.ToTxt(), "=", x.Weight)
-			} else {
-				fmt.Print(x.Literal.ToTxt())
-			}
-		}
-
-		switch t.Typ {
-		case AtMost:
-			fmt.Print(" ]")
-		case AtLeast:
-			fmt.Print(" ] ", t.K-1)
-		case Equal:
-			fmt.Print(" ] ", t.K)
-		case Optimization:
-			fmt.Print("]")
-		}
-		fmt.Println(".")
-	}
 
 }

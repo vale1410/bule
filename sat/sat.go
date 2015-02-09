@@ -68,10 +68,13 @@ func (g *Gen) Println(arg ...interface{}) {
 	}
 }
 
-func (g *Gen) GenerateIds(cs ClauseSet) {
+func (g *Gen) generateIds(cs ClauseSet) {
+	// recalculates new sat ids for each atom:
 	// assuming full regeneration of Ids
 	// might change existing mappings
+
 	g.nextId = 0
+
 	for _, c := range cs.list {
 		for _, l := range c.Literals {
 			g.putAtom(l.A)
@@ -81,7 +84,7 @@ func (g *Gen) GenerateIds(cs ClauseSet) {
 
 func (g *Gen) PrintDIMACS(cs ClauseSet) {
 
-	g.GenerateIds(cs)
+	g.generateIds(cs)
 
 	if g.Filename != "" {
 		var err error

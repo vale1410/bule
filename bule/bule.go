@@ -90,7 +90,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		}
 
 		g := sat.IdGenerator(clauses.Size() * 7)
-		g.GenerateIds(clauses)
+		//g.GenerateIds(clauses)
 		//g.Filename = strings.Split(*f, ".")[0] + ".cnf"
 		g.Filename = *out
 		g.PrintDIMACS(clauses)
