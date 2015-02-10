@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
-	"github.com/vale1410/bule/threshold"
+	"github.com/vale1410/bule/translation"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -70,11 +71,11 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		fmt.Println()
 	} else if *reformat {
 		for _, pb := range pbs {
-			if pb.Typ == threshold.Equal {
-				pb.Typ = threshold.AtLeast
+			if pb.Typ == constraints.Equal {
+				pb.Typ = constraints.AtLeast
 				pb.NormalizeAtLeast(true)
 				pb.Print10()
-				pb.Typ = threshold.AtMost
+				pb.Typ = constraints.AtMost
 			}
 			pb.NormalizeAtLeast(true)
 			pb.Print10()
@@ -83,9 +84,10 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 		var clauses sat.ClauseSet
 
-		for i, pb := range pbs {
-			TranslatePB2Clauses(i, &pb)
-			clauses.AddClauseSet(pb.Clauses)
+		for _, pb := range pbs {
+			//TranslatePB2Clauses(i, &pb)
+			t := translation.Translate(pb)
+			clauses.AddClauseSet(t.Clauses)
 			debug("number of clause", pb.Clauses.Size())
 		}
 
@@ -95,33 +97,6 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		g.Filename = *out
 		g.PrintDIMACS(clauses)
 	}
-}
-
-func TranslatePB2Clauses(id int, pb *threshold.Threshold) {
-
-	pb.Translate()
-
-	if pb.Trans == threshold.SingleClause || pb.Trans == threshold.Facts {
-	} else {
-
-		wh := 2
-		var which [8]bool
-
-		switch wh {
-		case 1:
-			which = [8]bool{false, false, false, true, true, true, false, false}
-		case 2:
-			which = [8]bool{false, false, false, true, true, true, false, true}
-		case 3:
-			which = [8]bool{false, true, true, true, true, true, true, false}
-		case 4:
-			which = [8]bool{false, true, true, true, true, true, true, true}
-		}
-
-		pred := sat.Pred("auxPB" + strconv.Itoa(id))
-		pb.Clauses = sat.CreateEncoding(pb.LitIn, which, []sat.Literal{}, "BnB", pred, pb.Sorter)
-	}
-	return
 }
 
 func debug(arg ...interface{}) {
@@ -146,7 +121,7 @@ func debug(arg ...interface{}) {
 	}
 }
 
-func parse(filename string) (pbs []threshold.Threshold) {
+func parse(filename string) (pbs []constraints.Threshold) {
 
 	input, err := ioutil.ReadFile(filename)
 
@@ -192,7 +167,7 @@ func parse(filename string) (pbs []threshold.Threshold) {
 					panic("bad conversion of numbers")
 				}
 				debug("Found PB file with", count, "constraints and", vars, "variables")
-				pbs = make([]threshold.Threshold, count)
+				pbs = make([]constraints.Threshold, count)
 				state = 1
 			}
 		case 1:
@@ -203,7 +178,7 @@ func parse(filename string) (pbs []threshold.Threshold) {
 				pbs[t].Desc = l
 
 				n := (len(elements) - 3) / 2
-				pbs[t].Entries = make([]threshold.Entry, n)
+				pbs[t].Entries = make([]constraints.Entry, n)
 
 				for i := 0; i < len(elements)-3; i++ {
 
@@ -216,18 +191,18 @@ func parse(filename string) (pbs []threshold.Threshold) {
 						panic("bad conversion of numbers")
 					}
 					atom := sat.NewAtomP1(sat.Pred("x"), variable)
-					pbs[t].Entries[i/2] = threshold.Entry{sat.Literal{true, atom}, weight}
+					pbs[t].Entries[i/2] = constraints.Entry{sat.Literal{true, atom}, weight}
 				}
 
 				pbs[t].K, _ = strconv.ParseInt(elements[len(elements)-2], 10, 64)
 				typS := elements[len(elements)-3]
 
 				if typS == ">=" {
-					pbs[t].Typ = threshold.AtLeast
+					pbs[t].Typ = constraints.AtLeast
 				} else if typS == "<=" {
-					pbs[t].Typ = threshold.AtMost
+					pbs[t].Typ = constraints.AtMost
 				} else if typS == "=" {
-					pbs[t].Typ = threshold.Equal
+					pbs[t].Typ = constraints.Equal
 				} else {
 					debug("cant convert to threshold:", l)
 					panic("bad conversion of symbols" + typS)

@@ -51,7 +51,7 @@ func writeEpilog(file *os.File) {
 \end{document}`)))
 }
 
-func PrintThresholdTikZ(filename string, ts []Translation) {
+func PrintThresholdTikZ(filename string, ts []SortingNetwork) {
 
 	file, ok := os.Create(filename)
 	if ok != nil {
@@ -70,7 +70,7 @@ func PrintThresholdTikZ(filename string, ts []Translation) {
 	writeEpilog(file)
 }
 
-func (t *Translation) writeDescription(file *os.File) {
+func (t *SortingNetwork) writeDescription(file *os.File) {
 	//file.Write([]byte("\\caption{"))
 	file.Write([]byte("The translation of the PB through sorters:\n"))
 	t.PB.WriteFormula(10, file)
@@ -168,7 +168,7 @@ func prepareData(sorter sorters.Sorter) (groups []pairSlice, layers []layerMap) 
 	return
 }
 
-func (t *Translation) writeTikz(file *os.File) {
+func (t *SortingNetwork) writeTikz(file *os.File) {
 
 	sorter := t.Sorter
 

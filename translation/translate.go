@@ -1,12 +1,14 @@
 package translation
 
 import (
+	"fmt"
 	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
 	"github.com/vale1410/bule/sorting_network"
+	"strconv"
 )
 
-type TranslationType int
+type TranslationType int // replace by a configuration
 
 const (
 	Facts TranslationType = iota
@@ -16,29 +18,50 @@ const (
 )
 
 type ThresholdTranslation struct {
-	PB    constraints.Threshold
-	Trans TranslationType
+	//	PB        constraints.Threshold
+	Trans   TranslationType
+	Clauses sat.ClauseSet
 }
 
-func Translate(t ThresholdTranslation) {
+func Translate(PB constraints.Threshold) (t ThresholdTranslation) {
+
+	//	t.PB = PB
 
 	//this will become much more elaborate in the future
-	// several translation methods; heurist on which one to use
+	// several translation methods; heuristics on which one to use
 	// different configurations, etc.
 
-	if b, cls := t.PB.OnlyFacts(); b {
-		//fmt.Println("Bule: translate by facts", len(cls))
-		t.PB.Clauses = cls
+	if b, cls := PB.OnlyFacts(); b {
+		fmt.Println("Bule: translate by facts", cls.Size())
+		PB.Clauses = cls
 		t.Trans = Facts
-	} else if b, literals := t.PB.SingleClause(); b {
-		//fmt.Println("Bule: translate by single clause", len(cls))
-		t.PB.Clauses.AddTaggedClause("SC", literals...)
+	} else if b, literals := PB.SingleClause(); b {
+		fmt.Println("Bule: translate by single clause", cls.Size())
+		PB.Clauses.AddTaggedClause("SC", literals...)
 		t.Trans = SingleClause
 	} else {
-		//fmt.Println("Bule: translate by sorting network")
+		fmt.Println("Bule: translate by sorting network")
 		t.Trans = SortingNetwork
-		transation := sorting_network.NewTranslation(t.PB)
-		transation.CreateSorter()
-	}
+		sn := sorting_network.NewSortingNetwork(PB)
+		sn.CreateSorter()
+		wh := 2
+		var which [8]bool
 
+		switch wh {
+		case 1:
+			which = [8]bool{false, false, false, true, true, true, false, false}
+		case 2:
+			which = [8]bool{false, false, false, true, true, true, false, true}
+		case 3:
+			which = [8]bool{false, true, true, true, true, true, true, false}
+		case 4:
+			which = [8]bool{false, true, true, true, true, true, true, true}
+		}
+		id := 0 // TODO
+
+		pred := sat.Pred("auxSN" + strconv.Itoa(id))
+		//fmt.Println("sorter", sn.Sorter)
+		t.Clauses = sat.CreateEncoding(sn.PB.LitIn, which, []sat.Literal{}, "BnB", pred, sn.Sorter)
+	}
+	return
 }

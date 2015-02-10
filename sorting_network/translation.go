@@ -1,12 +1,13 @@
 package sorting_network
 
 import (
+	"fmt"
 	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
 	"github.com/vale1410/bule/sorters"
 )
 
-type Translation struct {
+type SortingNetwork struct {
 	PB     constraints.Threshold
 	Tare   int64
 	Sorter sorters.Sorter
@@ -14,21 +15,24 @@ type Translation struct {
 	typ    sorters.SortingNetworkType
 }
 
-func NewTranslation(pb constraints.Threshold) (t Translation) {
-	t.PB = pb
-	t.typ = sorters.OddEven
+func NewSortingNetwork(pb constraints.Threshold) (sn SortingNetwork) {
+	// much more configuration in the future
+	sn.PB = pb
+	sn.typ = sorters.OddEven
 	return
 }
 
-func (t *Translation) CreateSorter() {
+func (t *SortingNetwork) CreateSorter() {
 
 	total := t.PB.NormalizeAtMost()
 
+	t.PB.Print10()
+
 	if total <= t.PB.K {
-		panic("sum of weights is too low to make a difference!")
+		panic("sum of weights is lower than threshold!")
 	}
 	if t.PB.K == 0 {
-		panic("Threshold is 0 with positive weights. All literals are facts!")
+		panic("Threshold is 0 with positive weights. All negated literals are facts!")
 	}
 
 	t.CreateBags()
@@ -39,7 +43,7 @@ func (t *Translation) CreateSorter() {
 
 		layers[i] = sorters.CreateSortingNetwork(len(bag), -1, t.typ)
 
-		t.PB.LitIn = append(t.PB.LitIn, bag...) // this might have to be reversed
+		t.PB.LitIn = append(t.PB.LitIn, bag...)
 	}
 
 	t.Sorter.In = make([]int, 0, len(t.PB.LitIn))
@@ -118,10 +122,12 @@ func (t *Translation) CreateSorter() {
 	t.Sorter.PropagateBackwards(finalMapping)
 	t.Sorter.Normalize(2, []int{})
 
-	//fmt.Println("final debug: tSorter", t.Sorter)
+	fmt.Println("LitIn", t.PB.LitIn)
+	fmt.Println("final debug: tSorter", t.Sorter)
+
 }
 
-func (t *Translation) CreateBags() {
+func (t *SortingNetwork) CreateBags() {
 
 	if !t.PB.IsNormalized() {
 		t.PB.Print10()
