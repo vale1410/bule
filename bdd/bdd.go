@@ -9,10 +9,10 @@ import (
 type Node struct {
 	id    int
 	level int
-	wmin  int
-	wmax  int
-	pos   int // if variable in level is true
-	neg   int // if variable in level is false
+	wmin  int64
+	wmax  int64
+	right int // if variable in level is true
+	left  int // if variable in level is false
 }
 
 type BddStore struct {
@@ -22,6 +22,8 @@ type BddStore struct {
 
 func Init(size int) (bddStore BddStore) {
 	bddStore.storage = rbtree.NewTree(Compare)
+	bddStore.Insert(Node{level: 0, wmin: math.MinInt64, wmax: -1})
+	bddStore.Insert(Node{level: 0, wmin: 0, wmax: math.MaxInt64})
 	return
 }
 
@@ -50,7 +52,7 @@ func (bddStore *BddStore) Debug(withTable bool) {
 
 	if withTable {
 		anon := func(n rbtree.Item) bool {
-			if n.(Node).wmax >= math.MaxInt32 {
+			if n.(Node).wmax >= math.MaxInt64 {
 				fmt.Println("level", n.(Node).level, "[", n.(Node).wmin, ", +∞]")
 			} else {
 				fmt.Println("level", n.(Node).level, "[", n.(Node).wmin, ",", n.(Node).wmax, "]")
@@ -58,9 +60,11 @@ func (bddStore *BddStore) Debug(withTable bool) {
 			return false
 		}
 
-		iter := bddStore.storage.FindGE(0)
+		//iter := bddStore.storage.FindGE(Node{})
+		iter := bddStore.storage.Min()
 
 		for iter.Limit() {
+			fmt.Println("hello")
 			anon(iter.Item())
 			iter.Next()
 		}
@@ -69,7 +73,7 @@ func (bddStore *BddStore) Debug(withTable bool) {
 }
 
 // returns node, if exists
-func (bddStore *BddStore) GetByWeight(level, weight int) (id, wmin, wmax int) {
+func (bddStore *BddStore) GetByWeight(level int, weight int64) (id int, wmin, wmax int64) {
 	n := Node{level: level, wmin: weight, wmax: weight}
 	if a := bddStore.storage.Get(n); a != nil {
 		id = a.(Node).id
@@ -81,15 +85,17 @@ func (bddStore *BddStore) GetByWeight(level, weight int) (id, wmin, wmax int) {
 	return
 }
 
-func (bddStore *BddStore) Insert(level, wmin, wmax, pos, neg int) {
+func (bddStore *BddStore) Insert(n Node) (id int) {
 	//debug code
-	n := Node{level: level, wmin: wmin, wmax: wmax}
+	//n := Node{level: level, wmin: wmin, wmax: wmax}
+	//bbdStore
 	if a := bddStore.storage.Get(n); a != nil {
-		fmt.Println(n)
+		fmt.Printf("%#v \n", a)
 		panic("node should not exist")
 	}
 	//debug code end
-
-	bddStore.storage.Insert(Node{id: bddStore.nextId, level: level, wmin: wmin, wmax: wmax, pos: pos, neg: neg})
+	n.id = bddStore.nextId
 	bddStore.nextId++
+	bddStore.storage.Insert(n)
+	return n.id
 }

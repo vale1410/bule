@@ -86,7 +86,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 		for _, pb := range pbs {
 			//TranslatePB2Clauses(i, &pb)
-			t := translation.Translate(pb)
+			t := translation.Translate(pb, translation.BDD)
 			clauses.AddClauseSet(t.Clauses)
 			debug("number of clause", pb.Clauses.Size())
 		}
