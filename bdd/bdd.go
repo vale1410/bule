@@ -15,15 +15,41 @@ type Node struct {
 	left  int // if variable in level is false
 }
 
+func (node Node) IsZero() bool {
+	return node.wmin <= math.MinInt64+10000000
+}
+
+func (node Node) IsOne() bool {
+	return node.wmax >= math.MaxInt64-10000000
+}
+
+func printNode(node Node) bool {
+	if node.IsZero() {
+		fmt.Print(node.id, "\t", node.level, "\t[ -∞,", node.wmax, "]")
+	} else if node.IsOne() {
+		fmt.Print(node.id, "\t", node.level, "\t[", node.wmin, ", +∞]")
+	} else {
+		fmt.Print(node.id, "\t", node.level, "\t[", node.wmin, ",", node.wmax, "]")
+	}
+	fmt.Println(" - ", node.left, " + ", node.right)
+	return true
+}
+
 type BddStore struct {
-	nextId  int
+	NextId  int
+	Nodes   []*Node
 	storage *rbtree.Tree
 }
 
-func Init(size int) (bddStore BddStore) {
-	bddStore.storage = rbtree.NewTree(Compare)
-	bddStore.Insert(Node{level: 0, wmin: math.MinInt64, wmax: -1})
-	bddStore.Insert(Node{level: 0, wmin: 0, wmax: math.MaxInt64})
+func Init(size int) (b BddStore) {
+	b.storage = rbtree.NewTree(Compare)
+	b.Nodes = make([]*Node, 2)
+
+	b.Nodes[0] = &Node{id: 0, level: 0, wmin: math.MinInt64 + 100000, wmax: -1} // id 0
+	b.Nodes[1] = &Node{id: 1, level: 0, wmin: 0, wmax: math.MaxInt64 - 100000}  // id 1
+	b.storage.Insert(*b.Nodes[0])
+	b.storage.Insert(*b.Nodes[1])
+	b.NextId = 2
 	return
 }
 
@@ -45,28 +71,36 @@ func Compare(aa, bb rbtree.Item) int {
 	}
 }
 
+//preparation for MDDs, gives out ids of decendancts
+func (b *BddStore) ClauseIds(n Node) (v int, level int, des []int) {
+	v = n.id
+	level = n.level
+	des = []int{b.checkId(n.left), b.checkId(n.right)}
+	return
+}
+
+func (b *BddStore) checkId(id int) int {
+	if b.Nodes[id].IsZero() {
+		return 0
+	} else if b.Nodes[id].IsOne() {
+		return 1
+	} else {
+		return id
+	}
+}
+
 func (bddStore *BddStore) Debug(withTable bool) {
 
 	fmt.Println("Bdd Nodes:")
 	fmt.Println("#nodes rb-data\t:", bddStore.storage.Len())
 
 	if withTable {
-		anon := func(n rbtree.Item) bool {
-			if n.(Node).wmax >= math.MaxInt64 {
-				fmt.Println("level", n.(Node).level, "[", n.(Node).wmin, ", +∞]")
-			} else {
-				fmt.Println("level", n.(Node).level, "[", n.(Node).wmin, ",", n.(Node).wmax, "]")
-			}
-			return false
-		}
+		fmt.Println("id\tlevel\tinterval")
 
-		//iter := bddStore.storage.FindGE(Node{})
 		iter := bddStore.storage.Min()
-
-		for iter.Limit() {
-			fmt.Println("hello")
-			anon(iter.Item())
-			iter.Next()
+		for !iter.Limit() {
+			printNode(iter.Item().(Node))
+			iter = iter.Next()
 		}
 	}
 
@@ -86,16 +120,20 @@ func (bddStore *BddStore) GetByWeight(level int, weight int64) (id int, wmin, wm
 }
 
 func (bddStore *BddStore) Insert(n Node) (id int) {
-	//debug code
-	//n := Node{level: level, wmin: wmin, wmax: wmax}
-	//bbdStore
+
+	//check code start
 	if a := bddStore.storage.Get(n); a != nil {
-		fmt.Printf("%#v \n", a)
+		fmt.Println("FAIL")
+		printNode(a.(Node))
 		panic("node should not exist")
 	}
-	//debug code end
-	n.id = bddStore.nextId
-	bddStore.nextId++
+	//check code end
+	n.id = bddStore.NextId
+	bddStore.Nodes = append(bddStore.Nodes, &n)
+	bddStore.NextId++
+	if bddStore.NextId != len(bddStore.Nodes) {
+		panic("nextId calculation and length of Nodes list is wrong")
+	}
 	bddStore.storage.Insert(n)
 	return n.id
 }

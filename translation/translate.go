@@ -19,16 +19,13 @@ const (
 )
 
 type ThresholdTranslation struct {
-	//	PB        constraints.Threshold
 	Trans   TranslationType
 	Clauses sat.ClauseSet
 }
 
 func Translate(PB constraints.Threshold, typ TranslationType) (t ThresholdTranslation) {
 
-	//	t.PB = PB
-
-	//this will become much more elaborate in the future
+	// this will become much more elaborate in the future
 	// several translation methods; heuristics on which one to use
 	// different configurations, etc.
 
@@ -40,6 +37,7 @@ func Translate(PB constraints.Threshold, typ TranslationType) (t ThresholdTransl
 		fmt.Println("Bule: translate by single clause", cls.Size())
 		PB.Clauses.AddTaggedClause("SC", literals...)
 		t.Trans = SingleClause
+	} else if false { // check for AtMostOne/ExacltyOne
 	} else {
 
 		if typ == SortingNetwork {
@@ -61,17 +59,51 @@ func Translate(PB constraints.Threshold, typ TranslationType) (t ThresholdTransl
 			case 4:
 				which = [8]bool{false, true, true, true, true, true, true, true}
 			}
-			id := 0 // TODO
 
-			pred := sat.Pred("auxSN" + strconv.Itoa(id))
+			pred := sat.Pred("auxSN_" + strconv.Itoa(PB.Id))
 			//fmt.Println("sorter", sn.Sorter)
 			t.Clauses = sat.CreateEncoding(sn.PB.LitIn, which, []sat.Literal{}, "BnB", pred, sn.Sorter)
+			// should be in the translation package
 		} else { // BDD
 
+			fmt.Println("test")
 			// maybe do some sorting or such kinds?
-
-			bdd.Translate(PB)
+			b := bdd.Init(len(PB.Entries))
+			topId, _, _ := b.CreateBdd(PB.K, PB.Entries)
+			b.Debug(true)
+			t.Clauses = convertBDDIntoClauses(PB, topId, b)
 		}
 	}
+	return
+}
+
+// include some type of configuration
+func convertSNIntoClauses(sn sorting_network.SortingNetwork) (clauses sat.ClauseSet) {
+
+	return
+}
+
+// include some type of configuration
+func convertBDDIntoClauses(pb constraints.Threshold, id int, b bdd.BddStore) (clauses sat.ClauseSet) {
+
+	//	pred := sat.Pred("auxBDD_" + strconv.Itoa(pb.Id))
+
+	fmt.Println("check")
+
+	for _, n := range b.Nodes {
+		if !n.IsZero() && !n.IsOne() {
+
+			v, l, vds := b.ClauseIds(*n)
+			for i, vd := range vds {
+				if i > 0 {
+					fmt.Println("-(", pb.Entries[len(pb.Entries)-l-1].Literal.ToTxt(), " >=  ", i, ")", -v, vd)
+				} else {
+					fmt.Println(-v, vd)
+				}
+			}
+		}
+
+	}
+
 	return
 }

@@ -19,6 +19,7 @@ type Entry struct {
 }
 
 type Threshold struct {
+	Id      int // unique id to reference Threshold in encodings
 	Desc    string
 	Entries []Entry
 	K       int64

@@ -4,47 +4,38 @@ import (
 	//	"fmt"
 	"github.com/vale1410/bule/constraints"
 	//	"github.com/vale1410/bule/sat"
+	//	"strconv"
 )
 
 var totalNodes int
 
-func Translate(pb constraints.Threshold) (b BddStore) {
-
-	b = Init(len(pb.Entries))
-
-	b.createBdd(pb.K, pb.Entries)
-
-	return
-}
-
-func (b *BddStore) createBdd(K int64, entries []constraints.Entry) (id int, wmin, max int64) {
+func (b *BddStore) CreateBdd(K int64, entries []constraints.Entry) (int, int64, int64) {
 
 	l := len(entries) ///level
 	totalNodes++
 
+	//fmt.Println(l, K, entries)
+
 	//check if node already exists
 	if id, wmin, wmax := b.GetByWeight(l, K); id != -1 {
 
-		return id, wmin, max
+		//	fmt.Println("exists", l, K, "[", wmin, wmax, "]")
+		return id, wmin, wmax
 
 	} else {
 
-		id_left, wmin_left, wmax_left := b.createBdd(K-entries[0].Weight, entries[1:])
-
-		id_right, wmin_right, wmax_right := b.createBdd(K, entries[1:])
-
-		//fmt.Print(n.Left, " (", left.Lb+entries[0].w, left.Ub+entries[0].w, ")  ", n.Right, "(", right.Lb, right.Ub, ") ->")
+		id_left, wmin_left, wmax_left := b.CreateBdd(K-entries[0].Weight, entries[1:])
+		id_right, wmin_right, wmax_right := b.CreateBdd(K, entries[1:])
 
 		var n Node
 
+		n.level = l
 		n.wmin = maxx(wmin_left+entries[0].Weight, wmin_right)
 		n.wmax = min(wmax_left+entries[0].Weight, wmax_right)
 		n.right = id_right
 		n.left = id_left
 
-		newNode := b.Insert(n)
-		//fmt.Println(newNode, "(", n.Lb, n.Ub, ")", n.Best)
-		return newNode, wmin, wmax
+		return b.Insert(n), n.wmin, n.wmax
 	}
 }
 
