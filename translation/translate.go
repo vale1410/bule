@@ -1,7 +1,7 @@
 package translation
 
 import (
-	"fmt"
+	//	"fmt"
 	"github.com/vale1410/bule/bdd"
 	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
@@ -13,94 +13,116 @@ type TranslationType int // replace by a configuration
 
 const (
 	Facts TranslationType = iota
-	SingleClause
-	SortingNetwork
-	BDD
+	Clause
+	AtMostOne
+	ExactlyOne
+	Cardinality
+	Complex
 )
 
 type ThresholdTranslation struct {
+	Var     int
+	Cls     int
 	Trans   TranslationType
 	Clauses sat.ClauseSet
 }
 
-func Translate(PB constraints.Threshold, typ TranslationType) (t ThresholdTranslation) {
+func Categorize(pb constraints.Threshold) (t ThresholdTranslation) {
 
 	// this will become much more elaborate in the future
 	// several translation methods; heuristics on which one to use
 	// different configurations, etc.
 
-	if b, cls := PB.OnlyFacts(); b { // forced type
-		fmt.Println("Bule: translate by facts", cls.Size())
-		PB.Clauses = cls
+	if b, cls := pb.OnlyFacts(); b { // forced type
+		//	fmt.Println(PB)
+		//	fmt.Println("Bule: facts", cls.Size())
+		t.Clauses = cls
 		t.Trans = Facts
-	} else if b, literals := PB.SingleClause(); b { // forced type
-		fmt.Println("Bule: translate by single clause", cls.Size())
-		PB.Clauses.AddTaggedClause("SC", literals...)
-		t.Trans = SingleClause
-	} else if false { // check for AtMostOne/ExacltyOne
+	} else if b, literals := pb.SingleClause(); b { // forced type
+		//	fmt.Println("Bule: single clause", cls.Size())
+		t.Clauses.AddTaggedClause("single", literals...)
+		t.Trans = Clause
+		//	} else if b, literals := pb.AtMostOne(); b {
+		//		// isAtMostOne constraint
+		//	} else if b, literals := pb.Cardinality(); b {
+		//		// isCardinality constraint
 	} else {
-
-		if typ == SortingNetwork {
-
-			fmt.Println("Bule: translate by sorting network")
-			t.Trans = SortingNetwork
-			sn := sorting_network.NewSortingNetwork(PB)
-			sn.CreateSorter()
-			wh := 2
-			var which [8]bool
-
-			switch wh {
-			case 1:
-				which = [8]bool{false, false, false, true, true, true, false, false}
-			case 2:
-				which = [8]bool{false, false, false, true, true, true, false, true}
-			case 3:
-				which = [8]bool{false, true, true, true, true, true, true, false}
-			case 4:
-				which = [8]bool{false, true, true, true, true, true, true, true}
-			}
-
-			pred := sat.Pred("auxSN_" + strconv.Itoa(PB.Id))
-			//fmt.Println("sorter", sn.Sorter)
-			t.Clauses = sat.CreateEncoding(sn.PB.LitIn, which, []sat.Literal{}, "BnB", pred, sn.Sorter)
-			// should be in the translation package
-		} else { // BDD
-
-			fmt.Println("test")
-			// maybe do some sorting or such kinds?
-			b := bdd.Init(len(PB.Entries))
-			topId, _, _ := b.CreateBdd(PB.K, PB.Entries)
-			b.Debug(true)
-			t.Clauses = convertBDDIntoClauses(PB, topId, b)
-		}
+		t.Trans = Complex
 	}
 	return
 }
 
-// include some type of configuration
-func convertSNIntoClauses(sn sorting_network.SortingNetwork) (clauses sat.ClauseSet) {
+func TranslateBySN(pb constraints.Threshold) (t ThresholdTranslation) {
+	//	t.Trans = Complex
+	//	pb.NormalizeAtMost()
+	pb.Print10()
+	sn := sorting_network.NewSortingNetwork(pb)
+	sn.CreateSorter()
+	wh := 2
+	var which [8]bool
 
+	switch wh {
+	case 1:
+		which = [8]bool{false, false, false, true, true, true, false, false}
+	case 2:
+		which = [8]bool{false, false, false, true, true, true, false, true}
+	case 3:
+		which = [8]bool{false, true, true, true, true, true, true, false}
+	case 4:
+		which = [8]bool{false, true, true, true, true, true, true, true}
+	}
+
+	pred := sat.Pred("auxSN_" + strconv.Itoa(pb.Id))
+	t.Clauses = sat.CreateEncoding(sn.LitIn, which, []sat.Literal{}, "BnB", pred, sn.Sorter)
+	t.Cls = t.Clauses.Size()
+	return
+}
+
+func TranslateByBDD(pb constraints.Threshold) (t ThresholdTranslation) {
+	pb.NormalizeAtMost()
+	pb.Sort()
+	// maybe do some sorting or such kinds?
+	b := bdd.Init(len(pb.Entries))
+	topId, _, _ := b.CreateBdd(pb.K, pb.Entries)
+	t.Clauses = convertBDDIntoClauses(pb, topId, b)
+	t.Cls = t.Clauses.Size()
 	return
 }
 
 // include some type of configuration
+// optimize to remove 1 and 0 nodes in each level
 func convertBDDIntoClauses(pb constraints.Threshold, id int, b bdd.BddStore) (clauses sat.ClauseSet) {
 
-	//	pred := sat.Pred("auxBDD_" + strconv.Itoa(pb.Id))
+	pred := sat.Pred("auxBDD_" + strconv.Itoa(pb.Id))
 
-	fmt.Println("check")
-
+	top_lit := sat.Literal{true, sat.NewAtomP1(pred, id)}
+	clauses.AddTaggedClause("Top", top_lit)
 	for _, n := range b.Nodes {
+		v_id, l, vds := b.ClauseIds(*n)
+		//fmt.Println(v_id, l, vds)
 		if !n.IsZero() && !n.IsOne() {
 
-			v, l, vds := b.ClauseIds(*n)
-			for i, vd := range vds {
+			v_lit := sat.Literal{false, sat.NewAtomP1(pred, v_id)}
+			for i, vd_id := range vds {
+				vd_lit := sat.Literal{true, sat.NewAtomP1(pred, vd_id)}
 				if i > 0 {
-					fmt.Println("-(", pb.Entries[len(pb.Entries)-l-1].Literal.ToTxt(), " >=  ", i, ")", -v, vd)
+					//if vd_id != 0 { // vd is not true
+					clauses.AddTaggedClause("1B", v_lit, sat.Neg(pb.Entries[len(pb.Entries)-l].Literal), vd_lit)
+					//} else {
+					//	clauses.AddClause(sat.Neg(v_lit), sat.Neg(pb.Entries[len(pb.Entries)-l].Literal))
+					//}
 				} else {
-					fmt.Println(-v, vd)
+					//if vd_id != 1 { // vd is not true
+					clauses.AddTaggedClause("0B", v_lit, vd_lit)
+					//}
 				}
 			}
+		} else if n.IsZero() {
+			v_lit := sat.Literal{false, sat.NewAtomP1(pred, v_id)}
+			clauses.AddTaggedClause("False", v_lit)
+		} else if n.IsOne() {
+			v_lit := sat.Literal{true, sat.NewAtomP1(pred, v_id)}
+			clauses.AddTaggedClause("True", v_lit)
 		}
 
 	}

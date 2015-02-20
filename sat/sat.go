@@ -98,6 +98,7 @@ func (g *Gen) PrintDIMACS(cs ClauseSet) {
 			}
 		}()
 	}
+
 	g.Println("p cnf", g.nextId, len(cs.list))
 
 	for _, c := range cs.list {

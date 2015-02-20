@@ -56,7 +56,7 @@ func (cs *ClauseSet) PrintDebug() {
 				fmt.Printf(",")
 			}
 			first = false
-			fmt.Print(l.ToTex())
+			fmt.Print(l.ToTxt())
 		}
 		fmt.Println(".")
 	}

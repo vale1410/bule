@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
-	"github.com/vale1410/bule/translation"
+	//"github.com/vale1410/bule/translation"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -84,16 +84,33 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 		var clauses sat.ClauseSet
 
-		for _, pb := range pbs {
-			//TranslatePB2Clauses(i, &pb)
-			t := translation.Translate(pb, translation.BDD)
-			clauses.AddClauseSet(t.Clauses)
-			debug("number of clause", pb.Clauses.Size())
+		for i, pb := range pbs {
+			pb.Id = i
+
+			//			pb.NormalizeAtMost()
+			//			pb.Print10()
+
+			//t := translation.Categorize(pb)
+			pb.OnlyFacts()
+			pb.Print10()
+			pb.NormalizeAtLeast(true)
+			pb.Print10()
+
+			//if t.Trans == translation.Complex {
+
+			//	translationSN := translation.TranslateBySN(pb)
+			//	//	translationBDD := translation.TranslateByBDD(pb)
+			//	//	fmt.Println("Complex, SN:", translationSN.Cls, " BDD:", translationBDD.Cls)
+			//	//	if translationBDD.Clauses.Size() < translationSN.Clauses.Size() {
+			//	//		clauses.AddClauseSet(translationBDD.Clauses)
+			//	//	} else {
+			//	clauses.AddClauseSet(translationSN.Clauses)
+			//	//	}
+			//}
+			//	t.Clauses.PrintDebug()
 		}
 
 		g := sat.IdGenerator(clauses.Size() * 7)
-		//g.GenerateIds(clauses)
-		//g.Filename = strings.Split(*f, ".")[0] + ".cnf"
 		g.Filename = *out
 		g.PrintDIMACS(clauses)
 	}

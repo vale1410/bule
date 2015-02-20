@@ -1,7 +1,7 @@
 package sorting_network
 
 import (
-	"fmt"
+	//	"fmt"
 	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
 	"github.com/vale1410/bule/sorters"
@@ -12,6 +12,7 @@ type SortingNetwork struct {
 	Tare   int64
 	Sorter sorters.Sorter
 	Bags   [][]sat.Literal
+	LitIn  []sat.Literal //Bags (specific stuff) flattened, input to Sorter > should this go sorting network translation?
 	typ    sorters.SortingNetworkType
 }
 
@@ -43,11 +44,11 @@ func (t *SortingNetwork) CreateSorter() {
 
 		layers[i] = sorters.CreateSortingNetwork(len(bag), -1, t.typ)
 
-		t.PB.LitIn = append(t.PB.LitIn, bag...)
+		t.LitIn = append(t.LitIn, bag...)
 	}
 
-	t.Sorter.In = make([]int, 0, len(t.PB.LitIn))
-	t.Sorter.Out = make([]int, 0, len(t.PB.LitIn))
+	t.Sorter.In = make([]int, 0, len(t.LitIn))
+	t.Sorter.Out = make([]int, 0, len(t.LitIn))
 
 	offset := 2
 
@@ -122,8 +123,8 @@ func (t *SortingNetwork) CreateSorter() {
 	t.Sorter.PropagateBackwards(finalMapping)
 	t.Sorter.Normalize(2, []int{})
 
-	fmt.Println("LitIn", t.PB.LitIn)
-	fmt.Println("final debug: tSorter", t.Sorter)
+	//fmt.Println("LitIn", t.LitIn)
+	//fmt.Println("final debug: tSorter", t.Sorter)
 
 }
 

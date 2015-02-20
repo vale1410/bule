@@ -1,20 +1,44 @@
-package translation
+package bdd
 
 import (
+	"fmt"
 	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
 	"testing"
 )
 
+func Test1(test *testing.T) {
+	//
+	//	fmt.Println("test stuff")
+	//
+	//	b := Init(100)
+	//
+	//	b.Insert(Node{level: 5})
+	//	b.Insert(Node{level: 7})
+	//	b.Insert(Node{level: 2})
+	//	b.Insert(Node{level: 3})
+	//
+	//	if id, wmin, wmax := b.GetByWeight(0, -1); id != -1 {
+	//		fmt.Println(id, wmin, wmax)
+	//	} else {
+	//		fmt.Println(id, wmin, wmax)
+	//		fmt.Println("shit")
+	//	}
+	//
+	//	b.Debug(true)
+
+}
+
 func TestBDD(test *testing.T) {
 
-	pb := createIgnasi1()
+	pb := createIgnasi2()
 
-	pb.NormalizeAtMost()
+	b := Init(len(pb.Entries))
+	_, _, _ = b.CreateBdd(pb.K, pb.Entries)
 
-	pb.Print10()
+	b.Debug(true)
 
-	Translate(pb, BDD)
+	fmt.Println("are you happy now?")
 
 }
 

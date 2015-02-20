@@ -24,14 +24,14 @@ func (b *BddStore) CreateBdd(K int64, entries []constraints.Entry) (int, int64, 
 
 	} else {
 
-		id_left, wmin_left, wmax_left := b.CreateBdd(K-entries[0].Weight, entries[1:])
-		id_right, wmin_right, wmax_right := b.CreateBdd(K, entries[1:])
+		id_left, wmin_left, wmax_left := b.CreateBdd(K, entries[1:])
+		id_right, wmin_right, wmax_right := b.CreateBdd(K-entries[0].Weight, entries[1:])
 
 		var n Node
 
 		n.level = l
-		n.wmin = maxx(wmin_left+entries[0].Weight, wmin_right)
-		n.wmax = min(wmax_left+entries[0].Weight, wmax_right)
+		n.wmin = maxx(wmin_left, wmin_right+entries[0].Weight)
+		n.wmax = min(wmax_left, wmax_right+entries[0].Weight)
 		n.right = id_right
 		n.left = id_left
 

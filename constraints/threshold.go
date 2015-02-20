@@ -2,6 +2,7 @@ package constraints
 
 import (
 	"github.com/vale1410/bule/sat"
+	"sort"
 )
 
 type EquationType int
@@ -25,8 +26,6 @@ type Threshold struct {
 	K       int64
 	Typ     EquationType
 	Pred    sat.Pred
-	Clauses sat.ClauseSet
-	LitIn   []sat.Literal //Bags flattened, input to Sorter
 }
 
 func (t *Threshold) OnlyFacts() (is bool, cs sat.ClauseSet) {
@@ -36,9 +35,8 @@ func (t *Threshold) OnlyFacts() (is bool, cs sat.ClauseSet) {
 
 	if t.K <= 0 {
 		is = true
-		cs = sat.NewClauseSet(len(t.Entries))
 		for _, x := range t.Entries {
-			cs.AddTaggedClause("OF", sat.Neg(x.Literal))
+			cs.AddTaggedClause("Fact", sat.Neg(x.Literal))
 		}
 	}
 
@@ -151,4 +149,14 @@ func (t *Threshold) NormalizeAtMost() (total int64) {
 		total += t.Entries[i].Weight
 	}
 	return
+}
+
+type ThresholdAscending Threshold
+
+func (a ThresholdAscending) Len() int           { return len(a.Entries) }
+func (a ThresholdAscending) Swap(i, j int)      { a.Entries[i], a.Entries[j] = a.Entries[j], a.Entries[i] }
+func (a ThresholdAscending) Less(i, j int) bool { return a.Entries[i].Weight > a.Entries[j].Weight }
+
+func (t *Threshold) Sort() {
+	sort.Sort(ThresholdAscending(*t))
 }
