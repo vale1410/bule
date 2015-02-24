@@ -43,6 +43,55 @@ func (t *Threshold) OnlyFacts() (is bool, cs sat.ClauseSet) {
 	return
 }
 
+// all weights are the same; do rounding
+// is an AtMostK
+func (t *Threshold) AtMostK() (is bool, literals []sat.Literal) {
+
+	t.NormalizeAtMost()
+
+	allSame := true
+	literals = make([]sat.Literal, len(t.Entries))
+
+	coeff := t.Entries[0].Weight
+	for _, x := range t.Entries {
+		if x.Weight != coeff {
+			allSame = false
+			break
+		}
+	}
+	if allSame {
+		t.K = t.K / coeff
+		for i, x := range t.Entries {
+			t.Entries[1].Weight = 1
+
+			literals[i] = x.Literal
+		}
+
+	}
+
+	return allSame, literals
+}
+
+func (t *Threshold) AtMostOne() (is bool, literals []sat.Literal) {
+
+	t.NormalizeAtMost()
+
+	allOne := true
+	literals = make([]sat.Literal, len(t.Entries))
+
+	if t.K == 1 {
+		for i, x := range t.Entries {
+			if x.Weight != 1 {
+				allOne = false
+				break
+			}
+			literals[i] = x.Literal
+		}
+	}
+
+	return allOne, literals
+}
+
 func (t *Threshold) SingleClause() (is bool, literals []sat.Literal) {
 
 	t.NormalizeAtLeast(false)

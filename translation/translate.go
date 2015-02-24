@@ -18,16 +18,17 @@ const (
 	ExactlyOne
 	Cardinality
 	Complex
+	TranslationTypes
 )
 
 type ThresholdTranslation struct {
-	Var     int
-	Cls     int
-	Trans   TranslationType
+	Var     int // number of auxiliary variables introduced by this encoding
+	Cls     int // number of clauses used
+	Typ     TranslationType
 	Clauses sat.ClauseSet
 }
 
-func Categorize(pb constraints.Threshold) (t ThresholdTranslation) {
+func Categorize(pb *constraints.Threshold) (t ThresholdTranslation) {
 
 	// this will become much more elaborate in the future
 	// several translation methods; heuristics on which one to use
@@ -37,26 +38,25 @@ func Categorize(pb constraints.Threshold) (t ThresholdTranslation) {
 		//	fmt.Println(PB)
 		//	fmt.Println("Bule: facts", cls.Size())
 		t.Clauses = cls
-		t.Trans = Facts
+		t.Typ = Facts
 	} else if b, literals := pb.SingleClause(); b { // forced type
 		//	fmt.Println("Bule: single clause", cls.Size())
 		t.Clauses.AddTaggedClause("single", literals...)
-		t.Trans = Clause
+		t.Typ = Clause
 		//	} else if b, literals := pb.AtMostOne(); b {
 		//		// isAtMostOne constraint
 		//	} else if b, literals := pb.Cardinality(); b {
 		//		// isCardinality constraint
 	} else {
-		t.Trans = Complex
+		t.Typ = Complex
 	}
 	return
 }
 
-func TranslateBySN(pb constraints.Threshold) (t ThresholdTranslation) {
+func TranslateBySN(pb *constraints.Threshold) (t ThresholdTranslation) {
 	//	t.Trans = Complex
-	//	pb.NormalizeAtMost()
-	pb.Print10()
-	sn := sorting_network.NewSortingNetwork(pb)
+	//pb.NormalizeAtMost()
+	sn := sorting_network.NewSortingNetwork(*pb)
 	sn.CreateSorter()
 	wh := 2
 	var which [8]bool
@@ -78,7 +78,7 @@ func TranslateBySN(pb constraints.Threshold) (t ThresholdTranslation) {
 	return
 }
 
-func TranslateByBDD(pb constraints.Threshold) (t ThresholdTranslation) {
+func TranslateByBDD(pb *constraints.Threshold) (t ThresholdTranslation) {
 	pb.NormalizeAtMost()
 	pb.Sort()
 	// maybe do some sorting or such kinds?
@@ -91,7 +91,7 @@ func TranslateByBDD(pb constraints.Threshold) (t ThresholdTranslation) {
 
 // include some type of configuration
 // optimize to remove 1 and 0 nodes in each level
-func convertBDDIntoClauses(pb constraints.Threshold, id int, b bdd.BddStore) (clauses sat.ClauseSet) {
+func convertBDDIntoClauses(pb *constraints.Threshold, id int, b bdd.BddStore) (clauses sat.ClauseSet) {
 
 	pred := sat.Pred("auxBDD_" + strconv.Itoa(pb.Id))
 

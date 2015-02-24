@@ -1,6 +1,7 @@
 package translation
 
 import (
+	"fmt"
 	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
 	"testing"
@@ -8,13 +9,16 @@ import (
 
 func TestBDD(test *testing.T) {
 
-	pb := createIgnasi1()
+	pb := createIgnasi2()
 
 	pb.NormalizeAtMost()
 
 	pb.Print10()
 
-	Translate(pb, BDD)
+	t := TranslateBySN(pb)
+	fmt.Println("SN:", t.Cls)
+	t = TranslateByBDD(pb)
+	fmt.Println("BDD:", t.Cls)
 
 }
 

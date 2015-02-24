@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
-	//"github.com/vale1410/bule/translation"
+	"github.com/vale1410/bule/translation"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -84,31 +84,43 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 		var clauses sat.ClauseSet
 
+		typeCounter := make([]int, translation.TranslationTypes)
+
 		for i, pb := range pbs {
 			pb.Id = i
+			//fmt.Printf("%#v: %#v\n", pb.Id, translation.Categorize(pb))
 
-			//			pb.NormalizeAtMost()
-			//			pb.Print10()
-
-			//t := translation.Categorize(pb)
-			pb.OnlyFacts()
 			pb.Print10()
-			pb.NormalizeAtLeast(true)
-			pb.Print10()
+			t := translation.Categorize(&pb)
+			typeCounter[t.Typ]++
 
-			//if t.Trans == translation.Complex {
-
-			//	translationSN := translation.TranslateBySN(pb)
-			//	//	translationBDD := translation.TranslateByBDD(pb)
-			//	//	fmt.Println("Complex, SN:", translationSN.Cls, " BDD:", translationBDD.Cls)
-			//	//	if translationBDD.Clauses.Size() < translationSN.Clauses.Size() {
-			//	//		clauses.AddClauseSet(translationBDD.Clauses)
-			//	//	} else {
-			//	clauses.AddClauseSet(translationSN.Clauses)
-			//	//	}
-			//}
+			switch t.Typ {
+			case translation.Facts:
+				clauses.AddClauseSet(t.Clauses)
+			case translation.Clause:
+				clauses.AddClauseSet(t.Clauses)
+			case translation.AtMostOne:
+				clauses.AddClauseSet(t.Clauses)
+			case translation.ExactlyOne:
+				clauses.AddClauseSet(t.Clauses)
+			case translation.Cardinality:
+				clauses.AddClauseSet(t.Clauses)
+			case translation.Complex:
+				//tSN := translation.TranslateBySN(&pb)
+				//	tBDD := translation.TranslateByBDD(&pb)
+				//	fmt.Println("Complex, SN:", tSN.Cls, " BDD:", tBDD.Cls)
+				//	if tBDD.Clauses.Size() < tSN.Clauses.Size() {
+				//	clauses.AddClauseSet(tBDD.Clauses)
+				//	} else {
+				//clauses.AddClauseSet(tSN.Clauses)
+				//	}
+			}
 			//	t.Clauses.PrintDebug()
+			pb.Print10()
+			fmt.Println()
 		}
+
+		fmt.Printf("%#v\n", typeCounter)
 
 		g := sat.IdGenerator(clauses.Size() * 7)
 		g.Filename = *out
