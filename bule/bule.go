@@ -232,7 +232,7 @@ func parse(filename string) (pbs []constraints.Threshold) {
 					pbs[t].Typ = constraints.AtLeast
 				} else if typS == "<=" {
 					pbs[t].Typ = constraints.AtMost
-				} else if typS == "=" {
+				} else if typS == "==" || typS == "=" {
 					pbs[t].Typ = constraints.Equal
 				} else {
 					debug("cant convert to threshold:", l)

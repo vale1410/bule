@@ -15,9 +15,9 @@ func TestBDD(test *testing.T) {
 
 	pb.Print10()
 
-	t := TranslateBySN(pb)
+	t := TranslateBySN(&pb)
 	fmt.Println("SN:", t.Cls)
-	t = TranslateByBDD(pb)
+	t = TranslateByBDD(&pb)
 	fmt.Println("BDD:", t.Cls)
 
 }
