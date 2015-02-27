@@ -9,14 +9,16 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	t "github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
-	t "github.com/vale1410/bule/threshold"
 	"io/ioutil"
 	"strconv"
 	"strings"
 )
 
 var filename = flag.String("f", "test.txt", "Path of the file.")
+var gringo = flag.Bool("gringo", true, "Ouput in Potasscos Gringo Format.")
+var pbo = flag.Bool("pbo", false, "Ouput in PseudoBoolean Competition Format.")
 
 type Constraint struct {
 	name string
@@ -40,7 +42,44 @@ func main() {
 
 	flag.Parse()
 
-	input, err := ioutil.ReadFile(*filename)
+	pbs, vars := ParseMPS(*filename)
+
+	if *pbo {
+		PrintPBO(pbs, vars)
+	} else if *gringo {
+		PrintGringo(pbs, vars)
+	}
+
+	return
+}
+
+func PrintGringo(pbs []t.Threshold, vars map[string]bool) {
+	// print problem to Gringo
+
+	fmt.Println("#hide.")
+
+	for x, _ := range vars {
+		fmt.Println("{", x, "}.")
+	}
+	for _, t := range pbs {
+		t.PrintGringo()
+	}
+}
+
+func PrintPBO(pbs []t.Threshold, vars map[string]bool) {
+	// print problem to Gringo
+
+	fmt.Println("* #variable=", len(vars), "#constraints=", len(vars))
+
+	for _, t := range pbs {
+		t.NormalizeAtLeast(true)
+		t.PrintPBO()
+	}
+
+}
+
+func ParseMPS(f string) (pbs []t.Threshold, vars map[string]bool) {
+	input, err := ioutil.ReadFile(f)
 
 	if err != nil {
 		panic("Please specifiy correct path to instance. Does not exist")
@@ -52,8 +91,8 @@ func main() {
 
 	state := 0
 
-	pbs := make([]t.Threshold, 0, 100)
-	vars := make(map[string]bool)
+	pbs = make([]t.Threshold, 0, 100)
+	vars = make(map[string]bool)
 	rowMap := make(map[string]int)
 
 	for _, l := range lines {
@@ -125,15 +164,6 @@ func main() {
 			{
 			}
 		}
-	}
-
-	fmt.Println("#hide.")
-
-	for x, _ := range vars {
-		fmt.Println("{", x, "}.")
-	}
-	for _, t := range pbs {
-		t.PrintGringo()
 	}
 	return
 }

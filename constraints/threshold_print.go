@@ -101,6 +101,26 @@ func (t *Threshold) PrintGurobi() {
 
 }
 
+func (t *Threshold) PrintPBO() {
+	for _, x := range t.Entries {
+		l := x.Literal
+
+		if x.Weight > 0 {
+			fmt.Printf("+")
+		}
+		fmt.Print(x.Weight, " ", l.ToPBO(), " ")
+	}
+	switch t.Typ {
+	case AtMost:
+		fmt.Print("<= ")
+	case AtLeast:
+		fmt.Print(">= ")
+	case Equal:
+		fmt.Print("== ")
+	}
+	fmt.Println(t.K, ";")
+}
+
 func (t *Threshold) Print10() {
 	for _, x := range t.Entries {
 		l := x.Literal

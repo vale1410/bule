@@ -5,6 +5,7 @@ import (
 	"github.com/vale1410/bule/bdd"
 	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
+	"github.com/vale1410/bule/sorters"
 	"github.com/vale1410/bule/sorting_network"
 	"strconv"
 )
@@ -34,6 +35,8 @@ func Categorize(pb *constraints.Threshold) (t ThresholdTranslation) {
 	// several translation methods; heuristics on which one to use
 	// different configurations, etc.
 
+	sat.SetUp(2, sorters.Pairwise)
+
 	if b, cls := pb.OnlyFacts(); b { // forced type
 		//	fmt.Println(PB)
 		//	fmt.Println("Bule: facts", cls.Size())
@@ -43,10 +46,13 @@ func Categorize(pb *constraints.Threshold) (t ThresholdTranslation) {
 		//	fmt.Println("Bule: single clause", cls.Size())
 		t.Clauses.AddTaggedClause("single", literals...)
 		t.Typ = Clause
-		//	} else if b, literals := pb.AtMostOne(); b {
-		//		// isAtMostOne constraint
-		//	} else if b, literals := pb.Cardinality(); b {
-		//		// isCardinality constraint
+	} else if b, literals := pb.AtMostOne(); b {
+		t.Clauses.AddClauseSet(constraints.AtMostOne(constraints.Heule, "heuleAMO", literals))
+		t.Typ = AtMostOne
+	} else if b, literals := pb.AtMostK(); b {
+		t.Clauses = sat.CreateCardinality("AtMostK", literals, int(pb.K), sorters.AtMost)
+		t.Cls = t.Clauses.Size()
+		t.Typ = Cardinality
 	} else {
 		t.Typ = Complex
 	}

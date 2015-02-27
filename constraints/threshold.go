@@ -75,21 +75,22 @@ func (t *Threshold) AtMostK() (is bool, literals []sat.Literal) {
 func (t *Threshold) AtMostOne() (is bool, literals []sat.Literal) {
 
 	t.NormalizeAtMost()
+	is = true
 
-	allOne := true
 	literals = make([]sat.Literal, len(t.Entries))
 
 	if t.K == 1 {
 		for i, x := range t.Entries {
 			if x.Weight != 1 {
-				allOne = false
+				is = false
 				break
 			}
 			literals[i] = x.Literal
 		}
+	} else {
+		is = false
 	}
-
-	return allOne, literals
+	return is, literals
 }
 
 func (t *Threshold) SingleClause() (is bool, literals []sat.Literal) {

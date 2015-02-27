@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type Pred string
@@ -98,13 +99,23 @@ func Neg(l Literal) Literal {
 
 func (l Literal) ToTxt() (s string) {
 	if !l.Sign {
-		s += "-"
+		s += " ~"
 	} else {
 		s += " "
 	}
 	//s += "x"
 	s += l.A.Id()
 	//s += " "
+	return
+}
+
+func (l Literal) ToPBO() (s string) {
+	if !l.Sign {
+		panic("PBO prining not accept negated literals!")
+	}
+	s = strings.Replace(l.A.Id(), ",", "_", -1)
+	s = strings.Replace(s, "(", "_", -1)
+	s = strings.Replace(s, ")", "", -1)
 	return
 }
 

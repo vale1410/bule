@@ -84,48 +84,50 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 		var clauses sat.ClauseSet
 
-		typeCounter := make([]int, translation.TranslationTypes)
+		stats := make([]int, translation.TranslationTypes)
 
 		for i, pb := range pbs {
-			pb.Id = i
-			//fmt.Printf("%#v: %#v\n", pb.Id, translation.Categorize(pb))
 
+			pb.Id = i
 			pb.Print10()
+
 			t := translation.Categorize(&pb)
-			typeCounter[t.Typ]++
+			stats[t.Typ]++
 
 			switch t.Typ {
-			case translation.Facts:
-				clauses.AddClauseSet(t.Clauses)
-			case translation.Clause:
-				clauses.AddClauseSet(t.Clauses)
-			case translation.AtMostOne:
-				clauses.AddClauseSet(t.Clauses)
-			case translation.ExactlyOne:
-				clauses.AddClauseSet(t.Clauses)
-			case translation.Cardinality:
-				clauses.AddClauseSet(t.Clauses)
 			case translation.Complex:
-				//tSN := translation.TranslateBySN(&pb)
-				//	tBDD := translation.TranslateByBDD(&pb)
-				//	fmt.Println("Complex, SN:", tSN.Cls, " BDD:", tBDD.Cls)
-				//	if tBDD.Clauses.Size() < tSN.Clauses.Size() {
-				//	clauses.AddClauseSet(tBDD.Clauses)
-				//	} else {
-				//clauses.AddClauseSet(tSN.Clauses)
-				//	}
+				tSN := translation.TranslateBySN(&pb)
+				tBDD := translation.TranslateByBDD(&pb)
+				fmt.Println("Complex, SN:", tSN.Cls, " BDD:", tBDD.Cls)
+				if tBDD.Clauses.Size() < tSN.Clauses.Size() {
+					t.Clauses = tBDD.Clauses
+				} else {
+					t.Clauses = tSN.Clauses
+				}
 			}
+			clauses.AddClauseSet(t.Clauses)
 			//	t.Clauses.PrintDebug()
 			pb.Print10()
 			fmt.Println()
 		}
 
-		fmt.Printf("%#v\n", typeCounter)
-
+		printStats(stats)
 		g := sat.IdGenerator(clauses.Size() * 7)
 		g.Filename = *out
 		g.PrintDIMACS(clauses)
 	}
+}
+
+func printStats(stats []int) {
+	if len(stats) != int(translation.TranslationTypes) {
+		panic("Stats for translation errornous")
+	}
+	fmt.Printf("Facts\tClause\tAMO\tEx1\tCard\tCompl\n")
+
+	for _, x := range stats {
+		fmt.Printf("%v\t", x)
+	}
+	fmt.Println()
 }
 
 func debug(arg ...interface{}) {
