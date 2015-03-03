@@ -16,7 +16,8 @@ import (
 var f = flag.String("f", "test.pb", "Path of to PB file.")
 var out = flag.String("o", "out.cnf", "Path of output file.")
 var ver = flag.Bool("ver", false, "Show version info.")
-var check_clause = flag.Bool("clause", true, "Checks if Pseudo-Boolean is not just a simple clause.")
+
+//var check_clause = flag.Bool("clause", true, "Checks if Pseudo-Boolean is not just a simple clause.")
 var dbg = flag.Bool("d", false, "Print debug information.")
 var dbgfile = flag.String("df", "", "File to print debug information.")
 var reformat = flag.Bool("reformat", false, "Reformat PB files into correct format. Decompose = into >= and <=")
