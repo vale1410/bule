@@ -32,30 +32,92 @@ type ThresholdTranslation struct {
 func Categorize(pb *constraints.Threshold) (t ThresholdTranslation) {
 
 	// this will become much more elaborate in the future
-	// several translation methods; heuristics on which one to use
-	// different configurations, etc.
 
-	sat.SetUp(2, sorters.Pairwise)
-
-	if b, cls := pb.OnlyFacts(); b { // forced type
+	if b, cls := pb.OnlyFacts(); b { // forced
 		//	fmt.Println(PB)
 		//	fmt.Println("Bule: facts", cls.Size())
 		t.Clauses = cls
 		t.Typ = Facts
-	} else if b, literals := pb.SingleClause(); b { // forced type
-		//	fmt.Println("Bule: single clause", cls.Size())
-		t.Clauses.AddTaggedClause("single", literals...)
-		t.Typ = Clause
-	} else if b, literals := pb.AtMostOne(); b {
-		t.Clauses.AddClauseSet(constraints.AtMostOne(constraints.Heule, "heuleAMO", literals))
-		t.Typ = AtMostOne
-	} else if b, literals := pb.AtMostK(); b {
-		t.Clauses = sat.CreateCardinality("AtMostK", literals, int(pb.K), sorters.AtMost)
-		t.Cls = t.Clauses.Size()
-		t.Typ = Cardinality
+	} else if b, literals := pb.Cardinality(); b {
+
+		if pb.K == int64(len(pb.Entries)-1) {
+			switch pb.Typ {
+			case constraints.AtMost:
+				pb.Normalize(constraints.AtLeast, true)
+			case constraints.AtLeast:
+				pb.Normalize(constraints.AtMost, true)
+			}
+		}
+
+		if pb.K == 1 {
+			switch pb.Typ {
+			case constraints.AtMost: // AMO
+				println("debug")
+				t.Clauses.AddClauseSet(constraints.AtMostOne(constraints.Heule, "pb-HeuleAMO", literals))
+				t.Typ = AtMostOne
+			case constraints.AtLeast: // its a clause!
+				t.Clauses.AddTaggedClause("pb->Cls", literals...)
+				t.Typ = Clause
+			case constraints.Equal: // Ex1
+				t.Clauses.AddClauseSet(constraints.ExactlyOne(constraints.Heule, "pb-HeuleEX1", literals))
+				t.Typ = ExactlyOne
+			}
+		} else {
+			var s string
+			var typ sorters.EquationType
+			sx := strconv.Itoa(int(pb.K)) + "\\" + strconv.Itoa(len(pb.Entries))
+			switch pb.Typ {
+			case constraints.AtMost:
+				sat.SetUp(2, sorters.Pairwise)
+				typ = sorters.AtMost
+				s = "pb<" + sx
+			case constraints.AtLeast:
+				sat.SetUp(2, sorters.Pairwise)
+				typ = sorters.AtLeast
+				s = "pb>" + sx
+			case constraints.Equal:
+				sat.SetUp(4, sorters.Pairwise)
+				s = "pb=" + sx
+				typ = sorters.Equal
+			}
+			t.Clauses = sat.CreateCardinality(s, literals, int(pb.K), typ)
+			t.Cls = t.Clauses.Size()
+			t.Typ = Cardinality
+		}
+
 	} else {
-		t.Typ = Complex
+		// treat equality as two constraints!
+		if pb.Typ == constraints.Equal {
+			//fmt.Println("decompose in >= amd <=")
+			pb.Typ = constraints.AtMost
+			t = TranslateComplexThreshold(pb)
+			pb.Normalize(constraints.AtMost, true)
+			pb.Typ = constraints.AtLeast
+			tt := TranslateComplexThreshold(pb)
+			pb.Typ = constraints.Equal
+			t.Var += tt.Var
+			t.Cls += tt.Cls
+			t.Typ = Complex
+			t.Clauses.AddClauseSet(t.Clauses)
+		} else {
+			pb.Normalize(constraints.AtMost, true)
+			t = TranslateComplexThreshold(pb)
+		}
 	}
+	return
+}
+
+func TranslateComplexThreshold(pb *constraints.Threshold) (t ThresholdTranslation) {
+	//	pb.Print10()
+	tSN := TranslateBySN(pb)
+	tBDD := TranslateByBDD(pb)
+	//fmt.Println("Complex, SN:", tSN.Cls, " BDD:", tBDD.Cls)
+	if tBDD.Clauses.Size() < tSN.Clauses.Size() {
+		t.Clauses = tBDD.Clauses
+	} else {
+		t.Clauses = tSN.Clauses
+	}
+	t.Typ = Complex
 	return
 }
 
@@ -85,7 +147,7 @@ func TranslateBySN(pb *constraints.Threshold) (t ThresholdTranslation) {
 }
 
 func TranslateByBDD(pb *constraints.Threshold) (t ThresholdTranslation) {
-	pb.NormalizeAtMost()
+	pb.Normalize(constraints.AtMost, true)
 	pb.Sort()
 	// maybe do some sorting or such kinds?
 	b := bdd.Init(len(pb.Entries))

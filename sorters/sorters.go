@@ -4,6 +4,15 @@ import (
 	"log"
 )
 
+type EquationType int
+
+const (
+	AtMost EquationType = iota
+	AtLeast
+	Equal
+	Optimization
+)
+
 const (
 	OddEven SortingNetworkType = iota
 	Bitonic
@@ -33,14 +42,7 @@ func (s SortingNetworkType) String() string {
 	return ""
 }
 
-const (
-	AtMost CardinalityType = iota
-	AtLeast
-	Equal
-)
-
 type SortingNetworkType int
-type CardinalityType int
 
 // The slice of comparators must be in correct order,
 // meaning that the comparator with input A and B must
@@ -64,7 +66,7 @@ type Comparator struct {
 	A, B, C, D int
 }
 
-func CreateCardinalityNetwork(size int, k int, cType CardinalityType, sType SortingNetworkType) (sorter Sorter) {
+func CreateCardinalityNetwork(size int, k int, cType EquationType, sType SortingNetworkType) (sorter Sorter) {
 
 	mapping := make(map[int]int, size)
 
@@ -85,7 +87,7 @@ func CreateCardinalityNetwork(size int, k int, cType CardinalityType, sType Sort
 		}
 		sorter.PropagateBackwards(mapping)
 		sorter.Out = sorter.Out[k:]
-	case Equal:
+	case Equal: // this works!
 		for i := k; i < size; i++ {
 			mapping[sorter.Out[i]] = 0
 			sorter.Out[i] = 0

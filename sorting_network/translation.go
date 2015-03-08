@@ -7,12 +7,14 @@ import (
 	"github.com/vale1410/bule/sorters"
 )
 
+//this sorter is only for AtMost constraints
+
 type SortingNetwork struct {
 	PB     constraints.Threshold
 	Tare   int64
 	Sorter sorters.Sorter
 	Bags   [][]sat.Literal
-	LitIn  []sat.Literal //Bags (specific stuff) flattened, input to Sorter > should this go sorting network translation?
+	LitIn  []sat.Literal //Bags flattened, input to Sorter
 	typ    sorters.SortingNetworkType
 }
 
@@ -25,7 +27,8 @@ func NewSortingNetwork(pb constraints.Threshold) (sn SortingNetwork) {
 
 func (t *SortingNetwork) CreateSorter() {
 
-	total := t.PB.NormalizeAtMost()
+	t.PB.Normalize(constraints.AtMost, true)
+	total := t.PB.SumWeights()
 
 	t.PB.Print10()
 
@@ -128,12 +131,8 @@ func (t *SortingNetwork) CreateSorter() {
 
 }
 
+// assumes AtMost, positive weights
 func (t *SortingNetwork) CreateBags() {
-
-	if !t.PB.IsNormalized() {
-		t.PB.Print10()
-		panic("Threshold is not normalized before creating bags")
-	}
 
 	nBags := len(constraints.Binary(t.PB.K))
 	bins := make([][]int, len(t.PB.Entries))

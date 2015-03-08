@@ -1,6 +1,7 @@
 package constraints
 
 import (
+	//	"fmt"
 	"github.com/vale1410/bule/sat"
 	"sort"
 )
@@ -20,37 +21,42 @@ type Entry struct {
 }
 
 type Threshold struct {
-	Id      int // unique id to reference Threshold in encodings
-	Desc    string
+	Id   int // unique id to reference Threshold in encodings
+	Desc string
+
 	Entries []Entry
 	K       int64
 	Typ     EquationType
 	Pred    sat.Pred
 }
 
+// works with any threshold
 func (t *Threshold) OnlyFacts() (is bool, cs sat.ClauseSet) {
 
-	t.NormalizeAtMost()
 	is = false
 
-	if t.K <= 0 {
+	if t.Typ == Equal {
+		t.Normalize(Equal, true)
+	} else {
+		t.Normalize(AtLeast, true)
+	}
+
+	if t.SumWeights() == t.K {
 		is = true
 		for _, x := range t.Entries {
-			cs.AddTaggedClause("Fact", sat.Neg(x.Literal))
+			cs.AddTaggedClause("Fact", x.Literal)
 		}
 	}
 
 	return
 }
 
-// all weights are the same; do rounding
-// is an AtMostK
-func (t *Threshold) AtMostK() (is bool, literals []sat.Literal) {
+// all weights are the same; performs rounding
+// if is is true, then all weights are 1, and K is the cardinality
+func (t *Threshold) Cardinality() (allSame bool, literals []sat.Literal) {
 
-	t.NormalizeAtMost()
-
-	allSame := true
-	literals = make([]sat.Literal, len(t.Entries))
+	t.NormalizePositiveCoefficients()
+	allSame = true
 
 	coeff := t.Entries[0].Weight
 	for _, x := range t.Entries {
@@ -59,11 +65,12 @@ func (t *Threshold) AtMostK() (is bool, literals []sat.Literal) {
 			break
 		}
 	}
+
 	if allSame {
+		literals = make([]sat.Literal, len(t.Entries))
 		t.K = t.K / coeff
 		for i, x := range t.Entries {
 			t.Entries[1].Weight = 1
-
 			literals[i] = x.Literal
 		}
 
@@ -72,131 +79,68 @@ func (t *Threshold) AtMostK() (is bool, literals []sat.Literal) {
 	return allSame, literals
 }
 
-func (t *Threshold) AtMostOne() (is bool, literals []sat.Literal) {
-
-	t.NormalizeAtMost()
-	is = true
-
-	literals = make([]sat.Literal, len(t.Entries))
-
-	if t.K == 1 {
-		for i, x := range t.Entries {
-			if x.Weight != 1 {
-				is = false
-				break
-			}
-			literals[i] = x.Literal
-		}
-	} else {
-		is = false
-	}
-	return is, literals
-}
-
-func (t *Threshold) SingleClause() (is bool, literals []sat.Literal) {
-
-	t.NormalizeAtLeast(false)
-
-	var clause sat.Clause
-
-	entries := make([]Entry, len(t.Entries))
-	copy(entries, t.Entries)
-	K := t.K
-
-	// normalize to coefficients 1
-	allOne := true
-	literals = make([]sat.Literal, len(entries))
-
-	for i, x := range entries {
-		if x.Weight*x.Weight != 1 {
-			allOne = false
-			break
-		}
-		literals[i] = x.Literal
-
-		if x.Weight == -1 {
-			K += -x.Weight
-			literals[i] = sat.Neg(clause.Literals[i])
-		}
-	}
-
-	return allOne && K == 1, literals
-}
-
-func (t *Threshold) IsNormalized() (yes bool) {
-	yes = true
-
-	for _, e := range t.Entries {
-		if e.Weight <= 0 {
-			yes = false
-		}
-	}
-	return t.K > 0 && yes && t.Typ == AtMost
-}
-
-// Normalize: AtLeast
-// transform to AtLeast, only positive variables
-// b=true: only positive variables
-// b=false: only positive weights
-func (t *Threshold) NormalizeAtLeast(posVariables bool) {
-	posWeights := !posVariables
-
-	// remove 0 weights?
-	if t.Typ == AtMost {
-		//set to AtMost, multiply by -1
-		t.K = -t.K
-		t.Typ = AtLeast
-		for i, e := range t.Entries {
-			t.Entries[i].Weight = -e.Weight
-		}
-	} else if t.Typ == Equal {
-		panic("Equal type for threshold function not supported yet")
-	}
+func (t *Threshold) NormalizePositiveCoefficients() {
 
 	for i, e := range t.Entries {
-		if (posWeights && t.Entries[i].Weight < 0) ||
-			(posVariables && e.Literal.Sign == false) {
+		if t.Entries[i].Weight < 0 {
 			t.Entries[i].Literal = sat.Neg(e.Literal)
 			t.K -= t.Entries[i].Weight
 			t.Entries[i].Weight = -t.Entries[i].Weight
 		}
 	}
-
-	return
 }
 
-// Normalize: AtMost
-// transform to AtMost, only positive weights
-// transform negative weights
-// check if maximum reaches K at all
-// todo: sort by weight
-// returns sum of weights
-func (t *Threshold) NormalizeAtMost() (total int64) {
+func (t *Threshold) NormalizePositiveLiterals() {
 
-	total = 0
+	for i, e := range t.Entries {
+		if t.Entries[i].Literal.Sign == false {
+			t.Entries[i].Literal = sat.Neg(e.Literal)
+			t.K -= t.Entries[i].Weight
+			t.Entries[i].Weight = -t.Entries[i].Weight
+		}
+	}
+}
 
-	// remove 0 weights?
-	if t.Typ == AtLeast {
-		//set to AtMost, multiply by -1
+// works only on AtMost/AtLeast
+func (t *Threshold) ChangeTo(typ EquationType) {
+	if typ != AtMost && typ != AtLeast {
+		panic("EquationType not correct")
+	}
+
+	if t.Typ != typ {
 		for i, e := range t.Entries {
 			t.Entries[i].Weight = -e.Weight
 		}
 		t.K = -t.K
-		t.Typ = AtMost
-	} else if t.Typ == Equal {
-		panic("Equal type for threshold function not supported")
+		t.Typ = typ
 	}
 
-	for i, e := range t.Entries {
-		if e.Weight == 0 {
-			panic("Threshold contains a 0 weight element, should not occur")
+}
+
+// normalizes the threshold
+func (t *Threshold) Normalize(typ EquationType, posWeights bool) {
+
+	if t.Typ == Equal {
+		if typ != Equal {
+			panic("cant normalize Equal on threshold that is not Equal")
 		}
-		if e.Weight < 0 {
-			t.Entries[i].Weight = -e.Weight
-			t.Entries[i].Literal = sat.Neg(e.Literal)
-			t.K -= e.Weight
-		}
-		total += t.Entries[i].Weight
+	} else {
+		t.ChangeTo(typ)
+	}
+
+	if posWeights {
+		t.NormalizePositiveCoefficients()
+	} else {
+		t.NormalizePositiveLiterals()
+	}
+
+	return
+}
+
+// sums up all weights
+func (t *Threshold) SumWeights() (total int64) {
+	for _, e := range t.Entries {
+		total += e.Weight
 	}
 	return
 }

@@ -59,7 +59,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		fmt.Println("Subject To")
 		atoms := make(map[string]bool, len(pbs))
 		for _, pb := range pbs {
-			pb.NormalizeAtLeast(true)
+			pb.Normalize(constraints.AtLeast, false)
 			pb.PrintGurobi()
 			for _, x := range pb.Entries {
 				atoms[x.Literal.A.Id()] = true
@@ -74,11 +74,11 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		for _, pb := range pbs {
 			if pb.Typ == constraints.Equal {
 				pb.Typ = constraints.AtLeast
-				pb.NormalizeAtLeast(true)
+				pb.Normalize(constraints.AtLeast, false)
 				pb.Print10()
 				pb.Typ = constraints.AtMost
 			}
-			pb.NormalizeAtLeast(true)
+			pb.Normalize(constraints.AtLeast, false)
 			pb.Print10()
 		}
 	} else {
@@ -93,28 +93,19 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			pb.Print10()
 
 			t := translation.Categorize(&pb)
+
 			stats[t.Typ]++
 
-			switch t.Typ {
-			case translation.Complex:
-				tSN := translation.TranslateBySN(&pb)
-				tBDD := translation.TranslateByBDD(&pb)
-				fmt.Println("Complex, SN:", tSN.Cls, " BDD:", tBDD.Cls)
-				if tBDD.Clauses.Size() < tSN.Clauses.Size() {
-					t.Clauses = tBDD.Clauses
-				} else {
-					t.Clauses = tSN.Clauses
-				}
-			}
 			clauses.AddClauseSet(t.Clauses)
 			//	t.Clauses.PrintDebug()
-			pb.Print10()
-			fmt.Println()
+			//pb.Print10()
+			//fmt.Println()
 		}
 
 		printStats(stats)
 		g := sat.IdGenerator(clauses.Size() * 7)
 		g.Filename = *out
+		clauses.PrintDebug()
 		g.PrintDIMACS(clauses)
 	}
 }

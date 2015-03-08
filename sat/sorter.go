@@ -23,7 +23,7 @@ func SetUp(which int, typ sorters.SortingNetworkType) {
 
 // CreateCardinality takes set of literals and creates a sorting network
 // encoding.
-func CreateCardinality(tag string, input []Literal, k int, cType sorters.CardinalityType) ClauseSet {
+func CreateCardinality(tag string, input []Literal, k int, cType sorters.EquationType) ClauseSet {
 
 	var which [8]bool
 
