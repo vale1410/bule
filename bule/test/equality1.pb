@@ -1,3 +1,4 @@
 * #variable= 3 #constraint= 2
 +1 x1 +1 x2 +1 x3 = 2 ;
 +1 x1 +1 x2 <= 1 ;
+%#sol=2

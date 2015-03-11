@@ -41,9 +41,11 @@ func CreateCardinality(tag string, input []Literal, k int, cType sorters.Equatio
 	}
 
 	sorter := sorters.CreateCardinalityNetwork(len(input), k, cType, sorterType)
+
 	sorter.RemoveOutput()
 
 	uniqueId++
+
 	pred := Pred("sort" + strconv.Itoa(uniqueId))
 
 	output := make([]Literal, 0)
@@ -62,6 +64,8 @@ func CreateCardinality(tag string, input []Literal, k int, cType sorters.Equatio
 // 7)  C or -D
 // -1,0,1 = *, false, true
 func CreateEncoding(input []Literal, which [8]bool, output []Literal, tag string, pred Pred, sorter sorters.Sorter) (cs ClauseSet) {
+
+	sorters.PrintSorterTikZ(sorter, "sorter1.tex")
 
 	cs.list = make([]Clause, 0, 7*len(sorter.Comparators))
 
@@ -132,7 +136,11 @@ func CreateEncoding(input []Literal, which [8]bool, output []Literal, tag string
 			}
 		}
 
-		if which[7] && (comp.D > 1 || comp.D > 1) { // 7)
+		if which[7] && comp.C != 1 && comp.D != 0 && comp.C != -1 && comp.D != -1 { // 7)
+
+			if comp.C == 0 || comp.D == 1 {
+				panic("something is wrong with this comparator")
+			}
 			cs.AddTaggedClause(tag, c, Neg(d))
 		}
 	}

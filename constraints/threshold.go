@@ -1,7 +1,7 @@
 package constraints
 
 import (
-	//	"fmt"
+	//"fmt"
 	"github.com/vale1410/bule/sat"
 	"sort"
 )
@@ -30,10 +30,44 @@ type Threshold struct {
 	Pred    sat.Pred
 }
 
-// works with any threshold
-func (t *Threshold) OnlyFacts() (is bool, cs sat.ClauseSet) {
+// creates an AtMost constraint
+// with coefficients in weights,
+// variables x1..xm
+func CreatePB(weights []int64, K int64) (pb Threshold) {
 
-	is = false
+	pb.Entries = make([]Entry, len(weights))
+	pb.Typ = AtMost
+	pb.K = K
+
+	p := sat.Pred("x")
+	for i := 0; i < len(weights); i++ {
+		l := sat.Literal{true, sat.NewAtomP1(p, i)}
+		pb.Entries[i] = Entry{l, weights[i]}
+	}
+	return
+}
+
+// finds trivially implied facts, returns set of facts
+// removes such entries from the pb
+// threshold can become empty!
+func (t *Threshold) Simplify() (cs sat.ClauseSet) {
+
+	if t.Typ == Equal {
+		t.Normalize(Equal, true)
+	} else {
+		t.Normalize(AtMost, true)
+	}
+
+	entries := make([]Entry, 0, len(t.Entries))
+
+	for _, x := range t.Entries {
+		if x.Weight > t.K {
+			cs.AddTaggedClause("Trivial", sat.Neg(x.Literal))
+		} else {
+			entries = append(entries, x)
+		}
+	}
+	t.Entries = entries
 
 	if t.Typ == Equal {
 		t.Normalize(Equal, true)
@@ -42,10 +76,11 @@ func (t *Threshold) OnlyFacts() (is bool, cs sat.ClauseSet) {
 	}
 
 	if t.SumWeights() == t.K {
-		is = true
 		for _, x := range t.Entries {
 			cs.AddTaggedClause("Fact", x.Literal)
 		}
+		t.Entries = []Entry{}
+		t.K = 0
 	}
 
 	return
@@ -70,7 +105,7 @@ func (t *Threshold) Cardinality() (allSame bool, literals []sat.Literal) {
 		literals = make([]sat.Literal, len(t.Entries))
 		t.K = t.K / coeff
 		for i, x := range t.Entries {
-			t.Entries[1].Weight = 1
+			t.Entries[i].Weight = 1
 			literals[i] = x.Literal
 		}
 
@@ -101,20 +136,26 @@ func (t *Threshold) NormalizePositiveLiterals() {
 	}
 }
 
-// works only on AtMost/AtLeast
-func (t *Threshold) ChangeTo(typ EquationType) {
-	if typ != AtMost && typ != AtLeast {
-		panic("EquationType not correct")
+func (t *Threshold) Multiply(c int64) {
+	if c == 0 {
+		panic("multiplyer is 0")
+	}
+	for i, e := range t.Entries {
+		t.Entries[i].Weight = c * e.Weight
 	}
 
-	if t.Typ != typ {
-		for i, e := range t.Entries {
-			t.Entries[i].Weight = -e.Weight
+	t.K = c * t.K
+
+	if c < 0 {
+		switch t.Typ {
+		case AtMost:
+			t.Typ = AtLeast
+		case AtLeast:
+			t.Typ = AtMost
+		default:
+			//nothing
 		}
-		t.K = -t.K
-		t.Typ = typ
 	}
-
 }
 
 // normalizes the threshold
@@ -124,8 +165,8 @@ func (t *Threshold) Normalize(typ EquationType, posWeights bool) {
 		if typ != Equal {
 			panic("cant normalize Equal on threshold that is not Equal")
 		}
-	} else {
-		t.ChangeTo(typ)
+	} else if typ != t.Typ {
+		t.Multiply(-1)
 	}
 
 	if posWeights {
@@ -133,7 +174,6 @@ func (t *Threshold) Normalize(typ EquationType, posWeights bool) {
 	} else {
 		t.NormalizePositiveLiterals()
 	}
-
 	return
 }
 

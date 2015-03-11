@@ -90,14 +90,14 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		for i, pb := range pbs {
 
 			pb.Id = i
-			pb.Print10()
+			//pb.Print10()
 
 			t := translation.Categorize(&pb)
 
 			stats[t.Typ]++
 
 			clauses.AddClauseSet(t.Clauses)
-			//	t.Clauses.PrintDebug()
+			//t.Clauses.PrintDebug()
 			//pb.Print10()
 			//fmt.Println()
 		}
@@ -105,9 +105,11 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		printStats(stats)
 		g := sat.IdGenerator(clauses.Size() * 7)
 		g.Filename = *out
-		clauses.PrintDebug()
-		g.PrintDIMACS(clauses)
+		//clauses.PrintDebug()
+		//g.PrintDIMACS(clauses)
+		g.Solve(clauses)
 	}
+
 }
 
 func printStats(stats []int) {
@@ -141,6 +143,7 @@ func debug(arg ...interface{}) {
 				panic(err)
 			}
 		}
+
 	}
 }
 
@@ -168,11 +171,7 @@ func parse(filename string) (pbs []constraints.Threshold) {
 
 	for _, l := range lines {
 
-		//if strings.HasPrefix(l, "*") {
-		//  fmt.Println(l)
-		//}
-
-		if state > 0 && (l == "" || strings.HasPrefix(l, "*")) {
+		if state > 0 && (l == "" || strings.HasPrefix(l, "%") || strings.HasPrefix(l, "*")) {
 			continue
 		}
 

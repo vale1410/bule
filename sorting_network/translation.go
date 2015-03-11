@@ -10,7 +10,7 @@ import (
 //this sorter is only for AtMost constraints
 
 type SortingNetwork struct {
-	PB     constraints.Threshold
+	pb     constraints.Threshold
 	Tare   int64
 	Sorter sorters.Sorter
 	Bags   [][]sat.Literal
@@ -20,22 +20,21 @@ type SortingNetwork struct {
 
 func NewSortingNetwork(pb constraints.Threshold) (sn SortingNetwork) {
 	// much more configuration in the future
-	sn.PB = pb
+	sn.pb = pb
 	sn.typ = sorters.OddEven
 	return
 }
 
 func (t *SortingNetwork) CreateSorter() {
 
-	t.PB.Normalize(constraints.AtMost, true)
-	total := t.PB.SumWeights()
+	total := t.pb.SumWeights()
 
-	t.PB.Print10()
+	t.pb.Print10()
 
-	if total <= t.PB.K {
+	if total <= t.pb.K {
 		panic("sum of weights is lower than threshold!")
 	}
-	if t.PB.K == 0 {
+	if t.pb.K == 0 {
 		panic("Threshold is 0 with positive weights. All negated literals are facts!")
 	}
 
@@ -58,7 +57,7 @@ func (t *SortingNetwork) CreateSorter() {
 	// determine the constant and what to add on both sides
 	layerPow2 := int64(1 << uint(len(t.Bags)))
 
-	tare := layerPow2 - ((t.PB.K + 1) % layerPow2)
+	tare := layerPow2 - ((t.pb.K + 1) % layerPow2)
 	tare = tare % layerPow2
 	t.Tare = tare
 	bTare := constraints.Binary(tare)
@@ -109,7 +108,7 @@ func (t *SortingNetwork) CreateSorter() {
 	}
 
 	// outLastLayer identifies the nth output in the last layer
-	outLastLayer := ((t.PB.K + 1 + tare) / int64(layerPow2)) - 1
+	outLastLayer := ((t.pb.K + 1 + tare) / int64(layerPow2)) - 1
 	idSetToZero := bIn[outLastLayer]
 
 	// and propagate the rest backwards
@@ -134,14 +133,14 @@ func (t *SortingNetwork) CreateSorter() {
 // assumes AtMost, positive weights
 func (t *SortingNetwork) CreateBags() {
 
-	nBags := len(constraints.Binary(t.PB.K))
-	bins := make([][]int, len(t.PB.Entries))
+	nBags := len(constraints.Binary(t.pb.K))
+	bins := make([][]int, len(t.pb.Entries))
 	bagPos := make([]int, nBags)
 	bagSize := make([]int, nBags)
 
 	maxWeight := int64(0)
 
-	for i, e := range t.PB.Entries {
+	for i, e := range t.pb.Entries {
 		bins[i] = constraints.Binary(e.Weight)
 
 		for j, x := range bins[i] {
@@ -160,7 +159,7 @@ func (t *SortingNetwork) CreateBags() {
 		t.Bags[i] = make([]sat.Literal, bagSize[i])
 	}
 
-	for i, e := range t.PB.Entries {
+	for i, e := range t.pb.Entries {
 		for j, x := range bins[i] {
 			if x == 1 {
 				t.Bags[j][bagPos[j]] = e.Literal

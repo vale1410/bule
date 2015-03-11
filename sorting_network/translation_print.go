@@ -72,10 +72,10 @@ func PrintThresholdTikZ(filename string, ts []SortingNetwork) {
 
 func (t *SortingNetwork) writeDescription(file *os.File) {
 	//file.Write([]byte("\\caption{"))
-	file.Write([]byte("The translation of the PB through sorters:\n"))
-	t.PB.WriteFormula(10, file)
+	file.Write([]byte("The translation of the pb through sorters:\n"))
+	t.pb.WriteFormula(10, file)
 	file.Write([]byte("and in binary representation:\n"))
-	t.PB.WriteFormula(2, file)
+	t.pb.WriteFormula(2, file)
 	//file.Write([]byte(fmt.Sprintf("adding the Tare on both sides. $$T = %v_{10} = %v_2$$\n", t.Tare, BinaryStr(t.Tare))))
 	//file.Write([]byte(fmt.Sprintf("}\n")))
 }
