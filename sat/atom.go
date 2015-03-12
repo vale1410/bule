@@ -1,9 +1,6 @@
 package sat
 
 import (
-	"bufio"
-	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -127,54 +124,4 @@ func (l Literal) ToTex() (s string) {
 	s += l.A.Id()
 	//s += "}"
 	return
-}
-
-func (g *Gen) putAtom(a Atom) {
-	if _, b := g.mapping[a.Id()]; !b {
-		g.nextId++
-		id := g.nextId
-		g.mapping[a.Id()] = id
-	}
-}
-
-func (g *Gen) getId(a Atom) (id int) {
-	id, b := g.mapping[a.Id()]
-
-	if !b {
-		g.nextId++
-		id = g.nextId
-		g.mapping[a.Id()] = id
-	}
-
-	return id
-}
-
-func (g *Gen) printSymbolTable(filename string) {
-
-	symbolFile, err := os.Create(filename)
-
-	if err != nil {
-		panic(err)
-	}
-	// close on exit and check for its returned error
-	defer func() {
-		if err := symbolFile.Close(); err != nil {
-			panic(err)
-		}
-	}()
-
-	// make a write buffer
-	w := bufio.NewWriter(symbolFile)
-
-	for i, s := range g.mapping {
-		// write a chunk
-		if _, err := w.Write([]byte(fmt.Sprintln(i, "\t:", s))); err != nil {
-			panic(err)
-		}
-	}
-
-	if err = w.Flush(); err != nil {
-		panic(err)
-	}
-
 }

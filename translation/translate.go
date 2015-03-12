@@ -1,7 +1,6 @@
 package translation
 
 import (
-	"fmt"
 	"github.com/vale1410/bule/bdd"
 	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
@@ -13,12 +12,14 @@ import (
 type TranslationType int // replace by a configuration
 
 const (
-	Facts TranslationType = iota
+	UNKNOWN TranslationType = iota
+	Facts
 	Clause
 	AtMostOne
 	ExactlyOne
 	Cardinality
-	Complex
+	ComplexBDD
+	ComplexSN
 	TranslationTypes
 )
 
@@ -107,7 +108,6 @@ func Categorize(pb *constraints.Threshold) (t ThresholdTranslation) {
 				pb.Typ = constraints.Equal
 				t.Var += tt.Var
 				t.Cls += tt.Cls
-				t.Typ = Complex
 				t.Clauses.AddClauseSet(t.Clauses)
 			} else {
 				t = TranslateComplexThreshold(pb)
@@ -120,23 +120,23 @@ func Categorize(pb *constraints.Threshold) (t ThresholdTranslation) {
 func TranslateComplexThreshold(pb *constraints.Threshold) (t ThresholdTranslation) {
 	tSN := TranslateBySN(pb)
 	tBDD := TranslateByBDD(pb)
-	fmt.Println("Complex, SN:", tSN.Cls, " BDD:", tBDD.Cls)
+	//fmt.Println("Complex, SN:", tSN.Cls, " BDD:", tBDD.Cls)
 	if tBDD.Clauses.Size() < tSN.Clauses.Size() {
 		t.Clauses = tBDD.Clauses
+		t.Typ = ComplexBDD
 	} else {
 		t.Clauses = tSN.Clauses
+		t.Typ = ComplexSN
 	}
-	t.Typ = Complex
 	return
 }
 
 func TranslateBySN(pb *constraints.Threshold) (t ThresholdTranslation) {
 	pb.Normalize(constraints.AtMost, true)
-	pb.Print10()
 	pb.Sort()
 	sn := sorting_network.NewSortingNetwork(*pb)
 	sn.CreateSorter()
-	sorting_network.PrintThresholdTikZ("sn.tex", []sorting_network.SortingNetwork{sn})
+	//sorting_network.PrintThresholdTikZ("sn.tex", []sorting_network.SortingNetwork{sn})
 	wh := 2
 	var which [8]bool
 

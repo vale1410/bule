@@ -53,7 +53,12 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		return
 	}
 
-	pbs := parse(*f)
+	pbs, err := parse(*f)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 
 	if *gurobi {
 		fmt.Println("Subject To")
@@ -81,11 +86,20 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			pb.Normalize(constraints.AtLeast, false)
 			pb.Print10()
 		}
+
 	} else {
 
 		var clauses sat.ClauseSet
 
 		stats := make([]int, translation.TranslationTypes)
+
+		if len(pbs) < 10 {
+			fmt.Println()
+			for _, pb := range pbs {
+				pb.Print10()
+			}
+			fmt.Println()
+		}
 
 		for i, pb := range pbs {
 
@@ -103,6 +117,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		}
 
 		printStats(stats)
+		fmt.Println("\nsolve\n")
 		g := sat.IdGenerator(clauses.Size() * 7)
 		g.Filename = *out
 		//clauses.PrintDebug()
@@ -116,10 +131,12 @@ func printStats(stats []int) {
 	if len(stats) != int(translation.TranslationTypes) {
 		panic("Stats for translation errornous")
 	}
-	fmt.Printf("Facts\tClause\tAMO\tEx1\tCard\tCompl\n")
+	fmt.Printf("Facts\tClause\tAMO\tEx1\tCard\tBDD\tSN\n")
 
-	for _, x := range stats {
-		fmt.Printf("%v\t", x)
+	for i, x := range stats {
+		if i > 0 {
+			fmt.Printf("%v\t", x)
+		}
 	}
 	fmt.Println()
 }
@@ -147,13 +164,12 @@ func debug(arg ...interface{}) {
 	}
 }
 
-func parse(filename string) (pbs []constraints.Threshold) {
+func parse(filename string) (pbs []constraints.Threshold, err error) {
 
 	input, err := ioutil.ReadFile(filename)
 
 	if err != nil {
-		fmt.Println("Please specifiy correct path to instance. File does not exist: ", filename)
-		panic(err)
+		return pbs, err
 	}
 
 	output, err := os.Create(*out)

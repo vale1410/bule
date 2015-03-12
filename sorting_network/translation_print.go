@@ -115,10 +115,8 @@ func prepareData(sorter sorters.Sorter) (groups []pairSlice, layers []layerMap) 
 
 			p := pair{lines[x.A], lines[x.B], x.C, x.D}
 
-			if p.A >= p.B {
-
-				fmt.Println("something is wrong with comparator", x)
-				fmt.Println("something is and pair", p)
+			if p.A >= p.B { // what again does this check do?
+				fmt.Println("something is wrong with comparator", x, "because", p.A, "is bigger than", p.B)
 			}
 
 			groups[max-1] = append(groups[max-1], p)

@@ -7,7 +7,7 @@ import (
 	"github.com/vale1410/bule/sorters"
 )
 
-//this sorter is only for AtMost constraints
+//this construction is based on AtMost threshold constraints
 
 type SortingNetwork struct {
 	pb     constraints.Threshold
@@ -18,6 +18,7 @@ type SortingNetwork struct {
 	typ    sorters.SortingNetworkType
 }
 
+// TODO: update construction of sorting network!
 func NewSortingNetwork(pb constraints.Threshold) (sn SortingNetwork) {
 	// much more configuration in the future
 	sn.pb = pb

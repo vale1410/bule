@@ -65,7 +65,7 @@ func CreateCardinality(tag string, input []Literal, k int, cType sorters.Equatio
 // -1,0,1 = *, false, true
 func CreateEncoding(input []Literal, which [8]bool, output []Literal, tag string, pred Pred, sorter sorters.Sorter) (cs ClauseSet) {
 
-	sorters.PrintSorterTikZ(sorter, "sorter1.tex")
+	//	sorters.PrintSorterTikZ(sorter, "sorter1.tex")
 
 	cs.list = make([]Clause, 0, 7*len(sorter.Comparators))
 

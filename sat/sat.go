@@ -1,7 +1,9 @@
 package sat
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strconv"
@@ -12,16 +14,71 @@ import (
 type Gen struct {
 	nextId   int
 	mapping  map[string]int
+	idMap    []Atom
 	Filename string
 	out      *os.File
 }
 
 func IdGenerator(m int) (g Gen) {
 	g.mapping = make(map[string]int, m)
+	g.idMap = make([]Atom, 1, m)
 	return
 }
 
-//#########################################################3
+func (g *Gen) putAtom(a Atom) {
+	if _, b := g.mapping[a.Id()]; !b {
+		g.nextId++
+		id := g.nextId
+		g.mapping[a.Id()] = id
+		g.idMap = append(g.idMap, a)
+		// id check code:
+		//		if g.mapping[g.idMap[id].Id()] != id {
+		//			panic("wrong id mapping stuff")
+		//		}
+	}
+}
+
+func (g *Gen) getId(a Atom) (id int) {
+	id, b := g.mapping[a.Id()]
+
+	if !b {
+		g.nextId++
+		id = g.nextId
+		g.mapping[a.Id()] = id
+	}
+
+	return id
+}
+
+func (g *Gen) printSymbolTable(filename string) {
+
+	symbolFile, err := os.Create(filename)
+
+	if err != nil {
+		panic(err)
+	}
+	// close on exit and check for its returned error
+	defer func() {
+		if err := symbolFile.Close(); err != nil {
+			panic(err)
+		}
+	}()
+
+	// make a write buffer
+	w := bufio.NewWriter(symbolFile)
+
+	for i, s := range g.mapping {
+		// write a chunk
+		if _, err := w.Write([]byte(fmt.Sprintln(i, "\t:", s))); err != nil {
+			panic(err)
+		}
+	}
+
+	if err = w.Flush(); err != nil {
+		panic(err)
+	}
+
+}
 
 func (g *Gen) Solve(cs ClauseSet) {
 
@@ -37,7 +94,7 @@ func (g *Gen) Solve(cs ClauseSet) {
 
 	result := make(chan Result)
 	timeout := make(chan bool, 1)
-	ttimeout := 10 //timeout in seconds
+	ttimeout := 180 //timeout in seconds
 
 	go func() {
 		time.Sleep(time.Duration(ttimeout) * time.Second)
@@ -45,13 +102,39 @@ func (g *Gen) Solve(cs ClauseSet) {
 	}()
 
 	go g.solveProblem(result)
+	assignment := make([]bool, len(g.idMap))
 
 	select {
 	case r := <-result:
 
 		if r.satisfiable {
-			//parseResult(r.s, assignment)
-			fmt.Println("SATISFIABLE", r.s)
+			fmt.Println("s SATISFIABLE\n")
+			ss := strings.Split(r.s, " ")
+
+			for _, x := range ss {
+				id, _ := strconv.Atoi(x)
+				if id < 0 {
+					assignment[-id] = false
+				} else {
+					assignment[id] = true
+				}
+			}
+
+			for i, x := range assignment {
+				if i > 0 {
+					if i%10 == 0 {
+						fmt.Println()
+					}
+					if x {
+						fmt.Print("  ")
+						g.idMap[i].Id()
+					} else {
+						fmt.Print(" -")
+					}
+					fmt.Print(g.idMap[i].Id())
+				}
+			}
+			fmt.Println()
 		} else {
 			fmt.Println("UNSATISFIABLE")
 		}
@@ -64,11 +147,6 @@ func (g *Gen) Solve(cs ClauseSet) {
 
 	//print output from mapping
 
-	//fmt.Printf("%v %v\n", current, optimal)
-	//for _, x := range assignment {
-	//	fmt.Printf("%v ", x)
-	//}
-	//fmt.Printf("\n")
 }
 
 //func parseResult(s string, assignment []bool) bool {
@@ -101,56 +179,53 @@ func (g *Gen) Solve(cs ClauseSet) {
 //	return ok
 //}
 
+type Result struct {
+	satisfiable bool
+	s           string
+}
+
 func (g *Gen) solveProblem(result chan<- Result) {
 
 	//	gringo := exec.Command("gringo", *out, *model)
 	clasp := exec.Command("clasp", g.Filename)
 	//clasp.Stdin, _ = gringo.StdoutPipe()
 
-	satFilter := NewSATFilter(result)
-	clasp.Stdout = &satFilter
+	//	satFilter := NewSATFilter(result)
+	//	clasp.Stdout = &satFilter
 
-	_ = clasp.Run()
+	stdout, _ := clasp.StdoutPipe()
+	clasp.Start()
+	r := bufio.NewReader(stdout)
+	line, isPrefix, err := r.ReadLine()
 
-}
+	assignment := ""
 
-type Result struct {
-	satisfiable bool
-	s           string
-}
-
-type SATFilter struct {
-	result chan<- Result
-	backup string // keep string of values
-}
-
-func NewSATFilter(result chan<- Result) (cf SATFilter) {
-	cf.result = result
-	return
-}
-
-func (cf *SATFilter) Write(p []byte) (n int, err error) {
-
-	s := string(p)
-
-	fmt.Println("out:", string(p))
-
-	if strings.HasPrefix(s, "v ") {
-		cf.backup += s[2:]
-	} else if strings.HasPrefix(s, "s ") {
-		result := Result{true, cf.backup}
-		if strings.Contains(s, "UNSATISFIABLE") {
-			result.satisfiable = false
-		} else if strings.Contains(s, "SATISFIABLE") {
-			result.satisfiable = true
-		} else {
-			fmt.Println(s)
-			panic("whats up? result of sat solver does not contain proper anwser!")
+	for err == nil && !isPrefix {
+		s := string(line)
+		if strings.HasPrefix(s, "v ") {
+			assignment += s[2:]
+		} else if strings.HasPrefix(s, "s ") {
+			r := Result{true, assignment}
+			if strings.Contains(s, "UNSATISFIABLE") {
+				r.satisfiable = false
+			} else if strings.Contains(s, "SATISFIABLE") {
+				r.satisfiable = true
+			} else {
+				fmt.Println(s)
+				panic("whats up? result of sat solver does not contain proper answer!")
+			}
+			result <- r
 		}
-		cf.result <- result
+		line, isPrefix, err = r.ReadLine()
 	}
-
-	return len(p), nil
+	if isPrefix {
+		fmt.Println("buffer size to small")
+		return
+	}
+	if err != io.EOF {
+		fmt.Println(err)
+		return
+	}
 }
 
 //#########################################################3
