@@ -30,7 +30,7 @@ func (t *SortingNetwork) CreateSorter() {
 
 	total := t.pb.SumWeights()
 
-	t.pb.Print10()
+	//t.pb.Print10()
 
 	if total <= t.pb.K {
 		panic("sum of weights is lower than threshold!")

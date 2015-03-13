@@ -12,11 +12,12 @@ import (
 )
 
 type Gen struct {
-	nextId   int
-	mapping  map[string]int
-	idMap    []Atom
-	Filename string
-	out      *os.File
+	nextId      int
+	mapping     map[string]int
+	idMap       []Atom
+	PrimaryVars map[string]bool
+	Filename    string
+	out         *os.File
 }
 
 func IdGenerator(m int) (g Gen) {
@@ -113,28 +114,16 @@ func (g *Gen) Solve(cs ClauseSet) {
 
 			for _, x := range ss {
 				id, _ := strconv.Atoi(x)
-				if id < 0 {
-					assignment[-id] = false
-				} else {
-					assignment[id] = true
-				}
-			}
-
-			for i, x := range assignment {
-				if i > 0 {
-					if i%10 == 0 {
-						fmt.Println()
-					}
-					if x {
-						fmt.Print("  ")
-						g.idMap[i].Id()
+				if id != 0 {
+					//fmt.Println(id)
+					if id < 0 {
+						assignment[-id] = false
 					} else {
-						fmt.Print(" -")
+						assignment[id] = true
 					}
-					fmt.Print(g.idMap[i].Id())
 				}
 			}
-			fmt.Println()
+			g.printAssignment(assignment)
 		} else {
 			fmt.Println("UNSATISFIABLE")
 		}
@@ -149,35 +138,55 @@ func (g *Gen) Solve(cs ClauseSet) {
 
 }
 
-//func parseResult(s string, assignment []bool) bool {
-//	ss := strings.Split(string(s), " ")
-//
-//	ok := len(assignment) == len(ss)
-//
-//	if ok {
-//		for _, x := range ss {
-//
-//			if strings.HasPrefix(x, "assign") {
-//				numbers := digitRegexp.FindAllString(x, -1)
-//
-//				if 2 == len(numbers) {
-//
-//					customer, b1 := strconv.Atoi(numbers[0])
-//					warehouse, b2 := strconv.Atoi(numbers[1])
-//					if b1 != nil || b2 != nil {
-//						panic("bad conversion of numbers in result")
-//					}
-//					assignment[customer] = warehouse
-//				} else {
-//					ok = false
-//					break
-//				}
-//			}
-//		}
-//	}
-//
-//	return ok
-//}
+func (g *Gen) printAssignment(assignment []bool) {
+
+	count := -1
+	fmt.Println("Primary Variables:")
+	for i, x := range assignment {
+		if i > 0 && g.PrimaryVars[g.idMap[i].Id()] {
+			count++
+			if count%10 == 0 {
+				fmt.Println()
+			} else if count == 19 {
+				fmt.Println("\n... ")
+				break
+			}
+
+			if x {
+				fmt.Print(" ")
+			} else {
+				fmt.Print(" -")
+			}
+			fmt.Print(g.idMap[i].Id())
+		}
+	}
+	fmt.Println()
+	count = -1
+
+	first := true
+	for i, x := range assignment {
+		if i > 0 && !g.PrimaryVars[g.idMap[i].Id()] {
+			if first {
+				fmt.Println("Auxiliary Variables:")
+				first = false
+			}
+			count++
+			if count%10 == 0 {
+				fmt.Println()
+			} else if count == 19 {
+				fmt.Println("\n... ")
+				break
+			}
+			if x {
+				fmt.Print(" ")
+			} else {
+				fmt.Print(" -")
+			}
+			fmt.Print(g.idMap[i].Id())
+		}
+	}
+	fmt.Println()
+}
 
 type Result struct {
 	satisfiable bool
@@ -186,15 +195,11 @@ type Result struct {
 
 func (g *Gen) solveProblem(result chan<- Result) {
 
-	//	gringo := exec.Command("gringo", *out, *model)
 	clasp := exec.Command("clasp", g.Filename)
-	//clasp.Stdin, _ = gringo.StdoutPipe()
-
-	//	satFilter := NewSATFilter(result)
-	//	clasp.Stdout = &satFilter
-
 	stdout, _ := clasp.StdoutPipe()
+
 	clasp.Start()
+
 	r := bufio.NewReader(stdout)
 	line, isPrefix, err := r.ReadLine()
 
@@ -203,7 +208,7 @@ func (g *Gen) solveProblem(result chan<- Result) {
 	for err == nil && !isPrefix {
 		s := string(line)
 		if strings.HasPrefix(s, "v ") {
-			assignment += s[2:]
+			assignment += s[1:]
 		} else if strings.HasPrefix(s, "s ") {
 			r := Result{true, assignment}
 			if strings.Contains(s, "UNSATISFIABLE") {

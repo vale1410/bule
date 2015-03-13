@@ -1,11 +1,13 @@
 package translation
 
 import (
+	"fmt"
 	"github.com/vale1410/bule/bdd"
 	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
 	"github.com/vale1410/bule/sorters"
 	"github.com/vale1410/bule/sorting_network"
+	"math"
 	"strconv"
 )
 
@@ -121,7 +123,7 @@ func TranslateComplexThreshold(pb *constraints.Threshold) (t ThresholdTranslatio
 	tSN := TranslateBySN(pb)
 	tBDD := TranslateByBDD(pb)
 	//fmt.Println("Complex, SN:", tSN.Cls, " BDD:", tBDD.Cls)
-	if tBDD.Clauses.Size() < tSN.Clauses.Size() {
+	if tBDD.Cls < tSN.Cls {
 		t.Clauses = tBDD.Clauses
 		t.Typ = ComplexBDD
 	} else {
@@ -161,10 +163,15 @@ func TranslateByBDD(pb *constraints.Threshold) (t ThresholdTranslation) {
 	pb.Normalize(constraints.AtMost, true)
 	pb.Sort()
 	// maybe do some sorting or such kinds?
-	b := bdd.Init(len(pb.Entries))
-	topId, _, _ := b.CreateBdd(pb.K, pb.Entries)
-	t.Clauses = convertBDDIntoClauses(pb, topId, b)
-	t.Cls = t.Clauses.Size()
+	b := bdd.Init(len(pb.Entries), 300000) //max nodes for one BDD
+	topId, _, _, err := b.CreateBdd(pb.K, pb.Entries)
+	if err != nil {
+		fmt.Println(err.Error())
+		t.Cls = math.MaxInt32
+	} else {
+		t.Clauses = convertBDDIntoClauses(pb, topId, b)
+		t.Cls = t.Clauses.Size()
+	}
 	return
 }
 

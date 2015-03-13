@@ -13,15 +13,16 @@ import (
 	"strings"
 )
 
-var f = flag.String("f", "test.pb", "Path of to PB file.")
+var filename_flag = flag.String("f", "test.pb", "Path of to PB file.")
 var out = flag.String("o", "out.cnf", "Path of output file.")
 var ver = flag.Bool("ver", false, "Show version info.")
 
 //var check_clause = flag.Bool("clause", true, "Checks if Pseudo-Boolean is not just a simple clause.")
 var dbg = flag.Bool("d", false, "Print debug information.")
 var dbgfile = flag.String("df", "", "File to print debug information.")
-var reformat = flag.Bool("reformat", false, "Reformat PB files into correct format. Decompose = into >= and <=")
-var gurobi = flag.Bool("gurobi", false, "Reformat to Gurobi input, output to stdout.")
+var reformat_flag = flag.Bool("reformat", false, "Reformat PB files into correct format. Decompose = into >= and <=")
+var gurobi_flag = flag.Bool("gurobi", false, "Reformat to Gurobi input, output to stdout.")
+var solve_flag = flag.Bool("solve", true, "Dont solve just categorize and analyze the constriants.")
 
 //var model = flag.String("model", "model.lp", "path to model file")
 //var solve = flag.Bool("solve", false, "Pass problem to clasp and solve.")
@@ -53,14 +54,14 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		return
 	}
 
-	pbs, err := parse(*f)
+	pbs, err := parse(*filename_flag)
 
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 
-	if *gurobi {
+	if *gurobi_flag {
 		fmt.Println("Subject To")
 		atoms := make(map[string]bool, len(pbs))
 		for _, pb := range pbs {
@@ -75,7 +76,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			fmt.Print("x" + aS + " ")
 		}
 		fmt.Println()
-	} else if *reformat {
+	} else if *reformat_flag {
 		for _, pb := range pbs {
 			if pb.Typ == constraints.Equal {
 				pb.Typ = constraints.AtLeast
@@ -93,18 +94,24 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 		stats := make([]int, translation.TranslationTypes)
 
-		if len(pbs) < 10 {
-			fmt.Println()
-			for _, pb := range pbs {
-				pb.Print10()
-			}
-			fmt.Println()
-		}
+		//if len(pbs) < 10 {
+		//	fmt.Println()
+		//	for _, pb := range pbs {
+		//		pb.Print10()
+		//	}
+		//	fmt.Println()
+		//}
+
+		primaryVars := make(map[string]bool, 0)
 
 		for i, pb := range pbs {
 
 			pb.Id = i
 			//pb.Print10()
+
+			for _, x := range pb.Entries {
+				primaryVars[x.Literal.A.Id()] = true
+			}
 
 			t := translation.Categorize(&pb)
 
@@ -116,13 +123,24 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			//fmt.Println()
 		}
 
-		printStats(stats)
-		fmt.Println("\nsolve\n")
-		g := sat.IdGenerator(clauses.Size() * 7)
-		g.Filename = *out
-		//clauses.PrintDebug()
-		//g.PrintDIMACS(clauses)
-		g.Solve(clauses)
+		if !*solve_flag {
+			fmt.Print(*filename_flag, ";")
+			for i, x := range stats {
+				if i > 0 {
+					fmt.Printf("%v;", x)
+				}
+			}
+			fmt.Println()
+		} else {
+			printStats(stats)
+			//fmt.Println("\nsolve\n")
+			//g := sat.IdGenerator(clauses.Size() * 7)
+			//g.Filename = *out
+			//g.PrimaryVars = primaryVars
+			////clauses.PrintDebug()
+			////g.PrintDIMACS(clauses)
+			//g.Solve(clauses)
+		}
 	}
 
 }
@@ -222,13 +240,13 @@ func parse(filename string) (pbs []constraints.Threshold, err error) {
 
 					weight, b1 := strconv.ParseInt(elements[i], 10, 64)
 					i++
-					variable, b2 := strconv.Atoi(digitRegexp.FindString(elements[i]))
+					//variable, b2 := strconv.Atoi(digitRegexp.FindString(elements[i]))
 
-					if b1 != nil || b2 != nil {
+					if b1 != nil {
 						debug("cant convert to threshold:", l)
 						panic("bad conversion of numbers")
 					}
-					atom := sat.NewAtomP1(sat.Pred("x"), variable)
+					atom := sat.NewAtomP(sat.Pred(elements[i]))
 					pbs[t].Entries[i/2] = constraints.Entry{sat.Literal{true, atom}, weight}
 				}
 

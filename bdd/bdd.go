@@ -36,14 +36,16 @@ func printNode(node Node) bool {
 }
 
 type BddStore struct {
-	NextId  int
-	Nodes   []*Node
-	storage *rbtree.Tree
+	NextId   int
+	Nodes    []*Node
+	MaxNodes int
+	storage  *rbtree.Tree
 }
 
-func Init(size int) (b BddStore) {
+func Init(size int, maxNodes int) (b BddStore) {
 	b.storage = rbtree.NewTree(Compare)
 	b.Nodes = make([]*Node, 2)
+	b.MaxNodes = maxNodes
 
 	b.Nodes[0] = &Node{id: 0, level: 0, wmin: math.MinInt64 + 100000, wmax: -1} // id 0
 	b.Nodes[1] = &Node{id: 1, level: 0, wmin: 0, wmax: math.MaxInt64 - 100000}  // id 1

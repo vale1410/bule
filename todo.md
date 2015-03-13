@@ -1,17 +1,13 @@
 today
 =====
-* produce sat package with interface to sat solver:
-* call encode, solve, etc.  all on fundamental solver
 * print variables and auxiliary variables (might help to find the bug!)
-* add solver interface for SAT(cryptominisat?, clasp etc. does not matter)
 
 this week
 =========
 * finish the test suite, a mix of problems
 * categorize benchmarks into (type of constraints, possible matchings, rankings)
-* prepare the matching problem of real PBs to constraints 
 * structure paper, touch and update, print for Monday
-* do solving and parsing!
+* prepare the matching problem of real PBs to constraints 
 * finish the categorization of the constraint
 
 long term
@@ -20,6 +16,7 @@ long term
 * integrate AMO into BDD/SN, compactify (split this task into smaller ones)
 * treat equality for pseudo booleans with BDDs and SN
 * translate MDDs instead of BDDs, introduce IntVar
+* add solver interface for SAT with several solvers and statistics (cryptominisat, lingeling, ), call them in parallel ...
 
 open tasks (unspecified due date)
 ==========
@@ -29,6 +26,8 @@ open tasks (unspecified due date)
 Milestones
 ==========
 * Table for Pseudo Boolean competition
+* Table for BP of MIP
+* First Draft of Paper
 
 ideas
 =====
@@ -38,6 +37,7 @@ ideas
 
 done
 ====
+* solver interface with clasp - parse variables, print assignment
 * treat equality for Cardinality Constraints
 * produce 3 examples for rewriting
 * get bug (number of results on current test set incorrect)
