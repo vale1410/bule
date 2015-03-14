@@ -116,7 +116,7 @@ func (t *Threshold) PrintPBO() {
 	case AtLeast:
 		fmt.Print(">= ")
 	case Equal:
-		fmt.Print("== ")
+		fmt.Print("= ")
 	}
 	fmt.Println(t.K, ";")
 }
@@ -140,7 +140,7 @@ func (t *Threshold) Print10() {
 	case AtLeast:
 		fmt.Print(" >= ")
 	case Equal:
-		fmt.Print(" == ")
+		fmt.Print(" = ")
 	}
 	fmt.Println(t.K, ";")
 

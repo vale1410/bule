@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	t "github.com/vale1410/bule/constraints"
+	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
 	"io/ioutil"
 	"strconv"
@@ -24,18 +24,18 @@ type Constraint struct {
 	name string
 }
 
-func getEquationType(s string) t.EquationType {
+func getEquationType(s string) constraints.EquationType {
 	if s == "E" {
-		return t.Equal
+		return constraints.Equal
 	} else if s == "L" {
-		return t.AtMost
+		return constraints.AtMost
 	} else if s == "G" {
-		return t.AtLeast
+		return constraints.AtLeast
 	}
 	if s != "N" {
 		panic("UNknown equation type " + s)
 	}
-	return t.Optimization
+	return constraints.Optimization
 }
 
 func main() {
@@ -53,7 +53,7 @@ func main() {
 	return
 }
 
-func PrintGringo(pbs []t.Threshold, vars map[string]bool) {
+func PrintGringo(pbs []constraints.Threshold, vars map[string]bool) {
 	// print problem to Gringo
 
 	fmt.Println("#hide.")
@@ -66,19 +66,19 @@ func PrintGringo(pbs []t.Threshold, vars map[string]bool) {
 	}
 }
 
-func PrintPBO(pbs []t.Threshold, vars map[string]bool) {
+func PrintPBO(pbs []constraints.Threshold, vars map[string]bool) {
 	// print problem to Gringo
 
-	fmt.Println("* #variable=", len(vars), "#constraints=", len(vars))
+	fmt.Println("* #variable=", len(vars), "#constraints=", len(pbs))
 
 	for _, t := range pbs {
-		t.NormalizeAtLeast(true)
+		t.NormalizePositiveLiterals()
 		t.PrintPBO()
 	}
 
 }
 
-func ParseMPS(f string) (pbs []t.Threshold, vars map[string]bool) {
+func ParseMPS(f string) (pbs []constraints.Threshold, vars map[string]bool) {
 	input, err := ioutil.ReadFile(f)
 
 	if err != nil {
@@ -91,7 +91,7 @@ func ParseMPS(f string) (pbs []t.Threshold, vars map[string]bool) {
 
 	state := 0
 
-	pbs = make([]t.Threshold, 0, 100)
+	pbs = make([]constraints.Threshold, 0, 100)
 	vars = make(map[string]bool)
 	rowMap := make(map[string]int)
 
@@ -101,7 +101,7 @@ func ParseMPS(f string) (pbs []t.Threshold, vars map[string]bool) {
 		}
 
 		entries := strings.Fields(l)
-		ts := t.Threshold{}
+		ts := constraints.Threshold{}
 
 		switch state {
 		case 0:
@@ -143,7 +143,7 @@ func ParseMPS(f string) (pbs []t.Threshold, vars map[string]bool) {
 				}
 				row := strings.ToLower(strings.Replace(entries[1], "#", "_", -1))
 				//fmt.Println(v, row)
-				e := t.Entry{sat.NewLit(v), a}
+				e := constraints.Entry{sat.NewLit(v), a}
 				pbs[rowMap[row]].Entries =
 					append(pbs[rowMap[row]].Entries, e)
 			}
