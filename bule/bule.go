@@ -133,12 +133,12 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			fmt.Println()
 		} else {
 			printStats(stats)
-			//fmt.Println("\nsolve\n")
+			fmt.Println("\nsolve\n")
 			g := sat.IdGenerator(clauses.Size() * 7)
 			g.Filename = *out
 			g.PrimaryVars = primaryVars
-			////clauses.PrintDebug()
-			////g.PrintDIMACS(clauses)
+			//clauses.PrintDebug()
+			//g.PrintDIMACS(clauses)
 			g.Solve(clauses)
 		}
 	}

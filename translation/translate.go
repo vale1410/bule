@@ -32,6 +32,13 @@ type ThresholdTranslation struct {
 	Clauses sat.ClauseSet
 }
 
+type CombinedTranslation struct {
+	Var     int // number of auxiliary variables introduced by this encoding
+	Cls     int // number of clauses used
+	Typ     TranslationType
+	Clauses sat.ClauseSet
+}
+
 func Categorize(pb *constraints.Threshold) (t ThresholdTranslation) {
 
 	// this will become much more elaborate in the future
@@ -124,7 +131,7 @@ func Categorize(pb *constraints.Threshold) (t ThresholdTranslation) {
 func TranslateComplexThreshold(pb *constraints.Threshold) (t ThresholdTranslation) {
 	tSN := TranslateBySN(pb)
 	tBDD := TranslateByBDD(pb)
-	//fmt.Println("Complex, SN:", tSN.Cls, " BDD:", tBDD.Cls)
+	//	fmt.Println("Complex, SN:", tSN.Cls, " BDD:", tBDD.Cls)
 	if tBDD.Cls < tSN.Cls {
 		t.Clauses = tBDD.Clauses
 		t.Typ = ComplexBDD
@@ -133,6 +140,25 @@ func TranslateComplexThreshold(pb *constraints.Threshold) (t ThresholdTranslatio
 		t.Typ = ComplexSN
 	}
 	return
+}
+
+func TranslateByBDDandEX1(pb *constraints.Threshold, ex1 []sat.Literal) (t ThresholdTranslation) {
+	// check for overlap of variables
+	// just do a rewrite, and call translateByBDDandAMO, reuse variables
+	return
+}
+
+func TranslateByBDDandAMO(pb *constraints.Threshold, literals []sat.Literal) (t ThresholdTranslation) {
+	// check for overlap of variables
+	// just do a rewrite, and call translateByBDDandAMO, reuse variables
+	return
+}
+
+func TranslateBySNandAMO(pb *constraints.Threshold, literals []sat.Literal) (t ThresholdTranslation) {
+	// check for overlap of variables
+	// just do a rewrite, and call translateByBDDandAMO, reuse variables
+	return
+
 }
 
 func TranslateBySN(pb *constraints.Threshold) (t ThresholdTranslation) {
@@ -165,7 +191,7 @@ func TranslateByBDD(pb *constraints.Threshold) (t ThresholdTranslation) {
 	pb.Normalize(constraints.AtMost, true)
 	pb.Sort()
 	// maybe do some sorting or such kinds?
-	b := bdd.Init(len(pb.Entries), 300000) //max nodes for one BDD
+	b := bdd.Init(len(pb.Entries), 300000) //space-out for nodes for one BDD construction
 	topId, _, _, err := b.CreateBdd(pb.K, pb.Entries)
 	if err != nil {
 		//fmt.Println(err.Error())
