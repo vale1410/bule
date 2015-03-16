@@ -95,7 +95,7 @@ func (g *Gen) Solve(cs ClauseSet) {
 
 	result := make(chan Result)
 	timeout := make(chan bool, 1)
-	ttimeout := 180 //timeout in seconds
+	ttimeout := 3600 //timeout in seconds
 
 	go func() {
 		time.Sleep(time.Duration(ttimeout) * time.Second)

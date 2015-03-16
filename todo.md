@@ -1,14 +1,29 @@
+<<<<<<< HEAD
 Today
 =====
 * Categorize benchmarks into (type of constraints, possible matchings, rankings)
 * Do Table for categorization, group benchmarks into interesting and not interesting!
 * Prepare the matching problem of real PBs to constraints 
+=======
+today(monday)
+=====
+* Simple Match PB with AMO with auxiliary variables(counter encoding)  
+       and apply it on BDD. 
+* Prepare the matching problem of real PBs to constraints. 
+>>>>>>> 76f91edadba5e95b0deb264779f331c2521a000e
 
 This week
 =========
+<<<<<<< HEAD
 * Do Rewrite EX1 and PB
 * Do BDD with AMO
 * Do SN with AMO
+=======
+* Restructure paper. 
+* Apply it at the same time to SN
+* Categorize benchmarks into (type of constraints, possible matchings, rankings).
+* Integrate convert.go into bule.go; call clasp with the program!
+>>>>>>> 76f91edadba5e95b0deb264779f331c2521a000e
 
 Long term
 ==========
@@ -39,6 +54,7 @@ Ideas
 
 Done
 ====
+<<<<<<< HEAD
 * Structure paper, touch and update, print for Monday
 * Finish the test suite, a mix of problems (did some stuff)
 * Print variables and auxiliary variables
@@ -48,3 +64,13 @@ Done
 * Get bug (number of results on current test set incorrect)
 * Write three more test for categorize cardinality
 * Design the integration of matchings
+=======
+* Finish the test suite, a mix of problems.
+* print variables and auxiliary variables
+* solver interface with clasp - parse variables, print assignment
+* treat equality for Cardinality Constraints
+* produce 3 examples for rewriting
+* get bug (number of results on current test set incorrect)
+* write three more test for categorize cardinality
+* design the integration of matchings
+>>>>>>> 76f91edadba5e95b0deb264779f331c2521a000e

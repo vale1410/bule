@@ -1,7 +1,7 @@
 package translation
 
 import (
-	"fmt"
+	//"fmt"
 	"github.com/vale1410/bule/bdd"
 	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
@@ -44,6 +44,8 @@ func Categorize(pb *constraints.Threshold) (t ThresholdTranslation) {
 	// this will become much more elaborate in the future
 
 	t.Clauses.AddClauseSet(pb.Simplify())
+	// per default all information is simplified and in form of facts
+	t.Typ = Facts
 
 	if len(pb.Entries) > 0 {
 
@@ -192,7 +194,7 @@ func TranslateByBDD(pb *constraints.Threshold) (t ThresholdTranslation) {
 	b := bdd.Init(len(pb.Entries), 300000) //space-out for nodes for one BDD construction
 	topId, _, _, err := b.CreateBdd(pb.K, pb.Entries)
 	if err != nil {
-		fmt.Println(err.Error())
+		//fmt.Println(err.Error())
 		t.Cls = math.MaxInt32
 	} else {
 		t.Clauses = convertBDDIntoClauses(pb, topId, b)
