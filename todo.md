@@ -9,6 +9,7 @@ this week
 * Restructure paper. 
 * Apply it at the same time to SN
 * Categorize benchmarks into (type of constraints, possible matchings, rankings).
+* Integrate convert.go into bule.go; call clasp with the program!
 
 long term
 ==========
