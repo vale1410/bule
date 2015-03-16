@@ -47,7 +47,7 @@ func main() {
 	debug("Running Debug Mode...")
 
 	if *ver {
-		fmt.Println(`Bule CNF Grounder: Tag 0.1 Pseudo Booleans
+		fmt.Println(`Bule CNF Grounder: Tag 0.4 Pseudo Booleans
 Copyright (C) NICTA and Valentin Mayer-Eichberger
 License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 There is NO WARRANTY, to the extent permitted by law.`)
@@ -124,7 +124,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		}
 
 		if !*solve_flag {
-			fmt.Print(*filename_flag, ";")
+			fmt.Print(*filename_flag, ";", len(primaryVars), ";", len(pbs), ";")
 			for i, x := range stats {
 				if i > 0 {
 					fmt.Printf("%v;", x)
@@ -134,12 +134,12 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		} else {
 			printStats(stats)
 			//fmt.Println("\nsolve\n")
-			//g := sat.IdGenerator(clauses.Size() * 7)
-			//g.Filename = *out
-			//g.PrimaryVars = primaryVars
+			g := sat.IdGenerator(clauses.Size() * 7)
+			g.Filename = *out
+			g.PrimaryVars = primaryVars
 			////clauses.PrintDebug()
 			////g.PrintDIMACS(clauses)
-			//g.Solve(clauses)
+			g.Solve(clauses)
 		}
 	}
 

@@ -1,12 +1,14 @@
-today
+today(monday)
 =====
-* finish the test suite, a mix of problems
-* categorize benchmarks into (type of constraints, possible matchings, rankings)
-* structure paper, touch and update, print for Monday
-* prepare the matching problem of real PBs to constraints 
+* Simple Match PB with AMO with auxiliary variables(counter encoding)  
+       and apply it on BDD. 
+* Prepare the matching problem of real PBs to constraints. 
 
 this week
 =========
+* Restructure paper. 
+* Apply it at the same time to SN
+* Categorize benchmarks into (type of constraints, possible matchings, rankings).
 
 long term
 ==========
@@ -35,6 +37,7 @@ ideas
 
 done
 ====
+* Finish the test suite, a mix of problems.
 * print variables and auxiliary variables
 * solver interface with clasp - parse variables, print assignment
 * treat equality for Cardinality Constraints
