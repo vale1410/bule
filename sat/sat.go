@@ -51,7 +51,7 @@ func (g *Gen) getId(a Atom) (id int) {
 	return id
 }
 
-func (g *Gen) printSymbolTable(filename string) {
+func (g *Gen) PrintSymbolTable(filename string) {
 
 	symbolFile, err := os.Create(filename)
 
@@ -95,7 +95,7 @@ func (g *Gen) Solve(cs ClauseSet) {
 
 	result := make(chan Result)
 	timeout := make(chan bool, 1)
-	ttimeout := 3600 //timeout in seconds
+	ttimeout := 600 //timeout in seconds
 
 	go func() {
 		time.Sleep(time.Duration(ttimeout) * time.Second)
@@ -109,7 +109,7 @@ func (g *Gen) Solve(cs ClauseSet) {
 	case r := <-result:
 
 		if r.satisfiable {
-			fmt.Println("s SATISFIABLE\n")
+			fmt.Print(";SATISFIABLE")
 			ss := strings.Split(r.s, " ")
 
 			for _, x := range ss {
@@ -123,12 +123,12 @@ func (g *Gen) Solve(cs ClauseSet) {
 					}
 				}
 			}
-			g.printAssignment(assignment)
+			//g.printAssignment(assignment)
 		} else {
-			fmt.Println("UNSATISFIABLE")
+			fmt.Print(";UNSATISFIABLE")
 		}
 	case <-timeout:
-		fmt.Println("what are you waiting for? timeout")
+		fmt.Print(";TIMEOUT")
 	}
 
 	close(result)

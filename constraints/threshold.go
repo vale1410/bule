@@ -1,7 +1,7 @@
 package constraints
 
 import (
-	//"fmt"
+	//	"fmt"
 	"github.com/vale1410/bule/sat"
 	"sort"
 )
@@ -50,6 +50,23 @@ func CreatePB(weights []int64, K int64) (pb Threshold) {
 // finds trivially implied facts, returns set of facts
 // removes such entries from the pb
 // threshold can become empty!
+func (t *Threshold) RemoveZeros() {
+	c := len(t.Entries)
+
+	for i := 0; i < c; i++ {
+		if t.Entries[i].Weight == 0 {
+			//fmt.Println(i, c)
+			c--
+			t.Entries[i] = t.Entries[c]
+			i--
+		}
+	}
+	t.Entries = t.Entries[:c]
+}
+
+// finds trivially implied facts, returns set of facts
+// removes such entries from the pb
+// threshold can become empty!
 func (t *Threshold) Simplify() (cs sat.ClauseSet) {
 
 	if t.Typ == Equal {
@@ -87,7 +104,7 @@ func (t *Threshold) Simplify() (cs sat.ClauseSet) {
 }
 
 // all weights are the same; performs rounding
-// if is is true, then all weights are 1, and K is the cardinality
+// if this is true, then all weights are 1, and K is the cardinality
 func (t *Threshold) Cardinality() (allSame bool, literals []sat.Literal) {
 
 	t.NormalizePositiveCoefficients()
@@ -183,6 +200,18 @@ func (t *Threshold) SumWeights() (total int64) {
 		total += e.Weight
 	}
 	return
+}
+
+type ThresholdVariables Threshold
+
+func (a ThresholdVariables) Len() int      { return len(a.Entries) }
+func (a ThresholdVariables) Swap(i, j int) { a.Entries[i], a.Entries[j] = a.Entries[j], a.Entries[i] }
+func (a ThresholdVariables) Less(i, j int) bool {
+	return a.Entries[i].Literal.A.Id() <= a.Entries[j].Literal.A.Id()
+}
+
+func (t *Threshold) SortVar() {
+	sort.Sort(ThresholdVariables(*t))
 }
 
 type ThresholdAscending Threshold

@@ -132,8 +132,8 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			}
 			fmt.Println()
 		} else {
-			printStats(stats)
-			fmt.Println("\nsolve\n")
+			//printStats(stats)
+			fmt.Print(*filename_flag)
 			g := sat.IdGenerator(clauses.Size() * 7)
 			g.Filename = *out
 			g.PrimaryVars = primaryVars

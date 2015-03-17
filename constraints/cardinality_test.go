@@ -8,71 +8,39 @@ import (
 	"testing"
 )
 
-func TestAtMostOne(t *testing.T) {
+func TestAtMostOne(test *testing.T) {
 
-	fmt.Println("Repair Test for Pure Cardinality.")
-	k := 10
+	fmt.Println("Test for Pure Cardinality.")
+	k := 6
 
 	lits := make([]sat.Literal, k)
+	atoms := make(map[string]bool)
 
 	for i, _ := range lits {
-		lits[i] = sat.Literal{true, sat.NewAtomP1(sat.Pred("input"), i)}
+		lits[i] = sat.Literal{true, sat.NewAtomP1(sat.Pred("x"), i)}
+		atoms[lits[i].A.Id()] = true
 	}
-	//var clauses sat.ClauseSet
 
-	//    fmt.Println("atMostOne size test")
-	//
-	//    fmt.Println()
-	//    clauses := AtMostOne(Naive, "naive", lits)
-	//    fmt.Println(clauses.Size())
-	//
-	//    fmt.Println()
-	//    clauses = AtMostOne(Split, "split", lits)
-	//    fmt.Println(clauses.Size())
-	//
-	//    fmt.Println()
-	//    clauses = AtMostOne(Count, "counter", lits)
-	//    fmt.Println(clauses.Size())
-	//
-	//    fmt.Println()
-	//    clauses = AtMostOne(Sort, "sorter", lits)
-	//    fmt.Println(clauses.Size())
-	//
-	//    clauses = AtMostOne(Heule, "heule", lits)
-	//    fmt.Println(clauses.Size())
-	//    //clauses.Print()
+	t := AtMostOne(Naive, "naive", lits)
+	t = AtMostOne(Split, "split", lits)
+	t = AtMostOne(Sort, "sorter", lits)
+	t = AtMostOne(Heule, "heule", lits)
+	t = AtMostOne(Log, "Log", lits)
 
-	//    clauses = AtMostOne(Log, "Log", lits)
-	//    fmt.Println(clauses.Size())
-	//    clauses.PrintDebug()
+	fmt.Println()
+	t = AtMostOne(Count, "counter", lits)
+	t.Clauses.PrintDebug()
+	//g := sat.IdGenerator(t.Clauses.Size() * 7)
+	//g.Filename = "out.cnf"
+	//g.PrimaryVars = atoms
+	//g.Solve(t.Clauses)
+	//g.PrintSymbolTable("sym.txt")
 
-	//    fmt.Println("ExactlyOne size test")
-	//
-	//    fmt.Println()
-	//    clauses = ExactlyOne(Naive, "naive", lits)
-	//    fmt.Println(clauses.Size())
-	//    //clauses.Print()
-	//
-	//    fmt.Println()
-	//    clauses = ExactlyOne(Split, "split", lits)
-	//    fmt.Println(clauses.Size())
-	//    //clauses.Print()
-	//
-	//    fmt.Println()
-	//    clauses = ExactlyOne(Count, "counter", lits)
-	//    fmt.Println(clauses.Size())
-	//    //clauses.Print()
-	//
-	//    fmt.Println()
-	//    clauses = ExactlyOne(Sort, "sorter", lits)
-	//    fmt.Println(clauses.Size())
-	//    //clauses.Print()
-	//
-	//    clauses = ExactlyOne(Heule, "heule", lits)
-	//    fmt.Println(clauses.Size())
-	//    //clauses.Print()
-
-	//clauses = ExactlyOne(Log, "Log", lits)
-	//fmt.Println(clauses.Size())
-	//clauses.PrintDebug()
+	fmt.Println()
+	t = ExactlyOne(Naive, "naive", lits)
+	t = ExactlyOne(Split, "split", lits)
+	t = ExactlyOne(Count, "counter", lits)
+	t = ExactlyOne(Sort, "sorter", lits)
+	t = ExactlyOne(Heule, "heule", lits)
+	t = ExactlyOne(Log, "Log", lits)
 }

@@ -7,12 +7,13 @@ import (
 )
 
 type Node struct {
-	id    int
-	level int
-	wmin  int64
-	wmax  int64
-	right int // if variable in level is true
-	left  int // if variable in level is false
+	id       int
+	level    int
+	wmin     int64
+	wmax     int64
+	children []int
+	//right int // if variable in level is true
+	//left  int // if variable in level is false
 }
 
 func (node Node) IsZero() bool {
@@ -31,7 +32,7 @@ func printNode(node Node) bool {
 	} else {
 		fmt.Print(node.id, "\t", node.level, "\t[", node.wmin, ",", node.wmax, "]")
 	}
-	fmt.Println(" - ", node.left, " + ", node.right)
+	fmt.Println(" children ", node.children)
 	return true
 }
 
@@ -75,10 +76,8 @@ func Compare(aa, bb rbtree.Item) int {
 
 //preparation for MDDs, gives out ids of decendancts
 func (b *BddStore) ClauseIds(n Node) (v int, level int, des []int) {
-	v = n.id
-	level = n.level
-	des = []int{b.checkId(n.left), b.checkId(n.right)}
-	return
+	//children = []int{b.checkId(n.left), b.checkId(n.right)}
+	return n.id, n.level, n.children
 }
 
 func (b *BddStore) checkId(id int) int {

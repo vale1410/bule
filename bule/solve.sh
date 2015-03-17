@@ -2,4 +2,8 @@
 
 go build bule.go
 
-for x in **/**/*.*pb; do echo $x; timeout 600 ./bule -f $x; echo ;  done
+for x in $1/*.*pb; 
+do 
+    timeout 600 ./bule -f $x; 
+    echo ;  
+done

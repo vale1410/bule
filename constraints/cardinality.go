@@ -6,11 +6,10 @@ import (
 	"github.com/vale1410/bule/sorters"
 )
 
-// better rename to encoding type
-type CardinalityType int
+type OneTranslationType int
 
 const (
-	Naive CardinalityType = iota
+	Naive OneTranslationType = iota
 	Sort
 	Split
 	Count
@@ -18,7 +17,15 @@ const (
 	Log
 )
 
-func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat.ClauseSet) {
+type CardTranslation struct {
+	Typ     OneTranslationType
+	Aux     []sat.Literal
+	Clauses sat.ClauseSet
+}
+
+func AtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans CardTranslation) {
+
+	var clauses sat.ClauseSet
 
 	switch typ {
 
@@ -31,6 +38,7 @@ func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat
 
 	case Sort:
 
+		// TODO: collect the auxiliary variables from sorter
 		sat.SetUp(3, sorters.Pairwise)
 		clauses.AddClauseSet(sat.CreateCardinality(tag, lits, 1, sorters.AtMost))
 
@@ -45,6 +53,8 @@ func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat
 			return AtMostOne(Naive, tag, lits)
 		} else {
 			aux := sat.NewAtomP1(sat.Pred("split"), newId())
+			trans.Aux = append(trans.Aux, sat.Literal{true, aux})
+
 			for _, l := range lits[:len(lits)/2] {
 				clauses.AddTaggedClause(tag, sat.Literal{true, aux}, sat.Neg(l))
 			}
@@ -52,8 +62,8 @@ func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat
 				clauses.AddTaggedClause(tag, sat.Literal{false, aux}, sat.Neg(l))
 			}
 
-			clauses.AddClauseSet(AtMostOne(typ, tag, lits[:len(lits)/2]))
-			clauses.AddClauseSet(AtMostOne(typ, tag, lits[len(lits)/2:]))
+			clauses.AddClauseSet(AtMostOne(typ, tag, lits[:len(lits)/2]).Clauses)
+			clauses.AddClauseSet(AtMostOne(typ, tag, lits[len(lits)/2:]).Clauses)
 
 		}
 	case Count:
@@ -61,62 +71,144 @@ func AtMostOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat
 		pred := sat.Pred("count")
 		counterId := newId()
 
-		first := sat.NewAtomP2(pred, counterId, 1)
-		clauses.AddTaggedClause(tag+"-2", lits[0], sat.Literal{false, first})
-
+		auxs := make([]sat.Literal, len(lits))
+		for i, _ := range auxs {
+			auxs[i] = sat.Literal{true, sat.NewAtomP2(pred, counterId, i)}
+		} // S_i -> S_{i-1}
 		for i := 1; i < len(lits); i++ {
-			p1 := sat.NewAtomP2(pred, counterId, i)
-			clauses.AddTaggedClause(tag+"-1", sat.Neg(lits[i-1]), sat.Literal{true, p1})
-			clauses.AddTaggedClause(tag+"-1", sat.Neg(lits[i]), sat.Literal{false, p1})
+			clauses.AddTaggedClause(tag+"1", auxs[i-1], sat.Neg(auxs[i]))
+		}
+
+		// X_i -> S_i
+		for i := 0; i < len(lits); i++ {
+			clauses.AddTaggedClause(tag+"2", auxs[i], sat.Neg(lits[i]))
+		}
+
+		// X_i-1 -> -S_i
+		for i := 1; i < len(lits); i++ {
+			clauses.AddTaggedClause(tag+"3", sat.Neg(auxs[i]), sat.Neg(lits[i-1]))
+		}
+
+		// (S_i-1 /\ -S_i) -> X_i-1
+		for i := 1; i <= len(lits); i++ {
 			if i != len(lits) {
-				p2 := sat.NewAtomP2(pred, counterId, i+1)
-				clauses.AddTaggedClause(tag+"-2", lits[i], sat.Literal{true, p1}, sat.Literal{false, p2})
-				clauses.AddTaggedClause(tag+"-3", sat.Literal{false, p1}, sat.Literal{true, p2})
+				clauses.AddTaggedClause(tag+"4", sat.Neg(auxs[i-1]), auxs[i], lits[i-1])
+			} else {
+				clauses.AddTaggedClause(tag+"4", sat.Neg(auxs[i-1]), lits[i-1])
 			}
 		}
 
 	case Heule:
 
-		k := 4
+		k := 4 // fixed size for the heule encoding
 
 		if len(lits) > k+1 {
 			aux := sat.NewAtomP1(sat.Pred("heule"), newId())
+			trans.Aux = append(trans.Aux, sat.Literal{true, aux})
+
 			front := make([]sat.Literal, k+1)
 			copy(front, lits[:k])
 			front[k] = sat.Literal{true, aux}
-			clauses = AtMostOne(Naive, tag, front)
+
+			trans2 := AtMostOne(Naive, tag, front)
+			clauses.AddClauseSet(trans2.Clauses)
+
 			back := make([]sat.Literal, len(lits)-k+1)
 			copy(back, lits[k:])
 			back[len(lits)-k] = sat.Literal{false, aux}
-			clauses.AddClauseSet(AtMostOne(typ, tag, back))
+
+			trans2 = AtMostOne(typ, tag, back)
+			trans.Aux = append(trans.Aux, trans2.Aux...)
+			clauses.AddClauseSet(trans2.Clauses)
+
 		} else {
-			clauses = AtMostOne(Naive, tag, lits)
+			trans2 := AtMostOne(Naive, tag, lits)
+			clauses.AddClauseSet(trans2.Clauses)
 		}
 
 	case Log:
 
 		cutoff := 5 //will be a parameter of this encoding
-
-		//this is very similar to the split encoding
-
 		clauses = buildLogEncoding(sat.Pred("logE"), newId(), cutoff, 0, tag, lits)
 
 	}
+
+	trans.Typ = typ
+	trans.Clauses = clauses
+
+	return
+
+}
+
+func ExactlyOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans CardTranslation) {
+
+	var clauses sat.ClauseSet
+
+	switch typ {
+	case Heule, Log, Naive, Split:
+
+		trans2 := AtMostOne(typ, tag, lits)
+		trans.Aux = append(trans.Aux, trans2.Aux...)
+		clauses.AddClauseSet(trans2.Clauses)
+		clauses.AddTaggedClause(tag, lits...)
+
+	case Sort:
+
+		sat.SetUp(3, sorters.Pairwise)
+		clauses.AddClauseSet(sat.CreateCardinality(tag, lits, 1, sorters.Equal))
+
+	case Count:
+
+		pred := sat.Pred("count")
+		counterId := newId()
+
+		auxs := make([]sat.Literal, len(lits))
+		for i, _ := range auxs {
+			auxs[i] = sat.Literal{true, sat.NewAtomP2(pred, counterId, i)}
+		} // S_i -> S_{i-1}
+		for i := 1; i < len(lits); i++ {
+			clauses.AddTaggedClause(tag+"1", auxs[i-1], sat.Neg(auxs[i]))
+		}
+
+		// X_i -> S_i
+		for i := 0; i < len(lits); i++ {
+			clauses.AddTaggedClause(tag+"2", auxs[i], sat.Neg(lits[i]))
+		}
+
+		// X_i-1 -> -S_i
+		for i := 1; i < len(lits); i++ {
+			clauses.AddTaggedClause(tag+"3", sat.Neg(auxs[i]), sat.Neg(lits[i-1]))
+		}
+
+		// (S_i-1 /\ -S_i) -> X_i-1
+		for i := 1; i <= len(lits); i++ {
+			if i != len(lits) {
+				clauses.AddTaggedClause(tag+"4", sat.Neg(auxs[i-1]), auxs[i], lits[i-1])
+			} else {
+				clauses.AddTaggedClause(tag+"4", sat.Neg(auxs[i-1]), lits[i-1])
+			}
+		}
+
+		clauses.AddTaggedClause(tag+"Ex1", auxs[0])
+
+	default:
+		panic("CNF translation for this type not implemented yet")
+
+	}
+
+	trans.Typ = typ
+	trans.Clauses = clauses
 
 	return
 
 }
 
 func buildLogEncoding(pred sat.Pred, uId int, cutoff int, depth int, tag string, lits []sat.Literal) (clauses sat.ClauseSet) {
-
-	//fmt.Println(depth,lits)
-
 	if len(lits) <= cutoff {
-		clauses = AtMostOne(Naive, tag, lits)
+		trans2 := AtMostOne(Naive, tag, lits)
+		clauses.AddClauseSet(trans2.Clauses)
 	} else {
-
 		atom := sat.NewAtomP2(pred, uId, depth)
-
 		first := lits[:len(lits)/2]
 		for _, l := range first {
 			clauses.AddTaggedClause(tag, sat.Literal{true, atom}, sat.Neg(l))
@@ -125,73 +217,9 @@ func buildLogEncoding(pred sat.Pred, uId int, cutoff int, depth int, tag string,
 		for _, l := range second {
 			clauses.AddTaggedClause(tag, sat.Literal{false, atom}, sat.Neg(l))
 		}
-
 		depth++
-
 		clauses.AddClauseSet(buildLogEncoding(pred, uId, cutoff, depth, tag, first))
 		clauses.AddClauseSet(buildLogEncoding(pred, uId, cutoff, depth, tag, second))
-
 	}
-
-	//fmt.Println(clauses)
-
 	return
-}
-
-func ExactlyOne(typ CardinalityType, tag string, lits []sat.Literal) (clauses sat.ClauseSet) {
-
-	switch typ {
-	case Naive:
-
-		clauses.AddClauseSet(AtMostOne(typ, tag, lits))
-		clauses.AddTaggedClause(tag, lits...)
-
-	case Sort:
-
-		sat.SetUp(3, sorters.Pairwise)
-		clauses.AddClauseSet(sat.CreateCardinality(tag, lits, 1, sorters.Equal))
-
-	case Split:
-
-		clauses.AddClauseSet(AtMostOne(typ, tag, lits))
-		clauses.AddTaggedClause(tag, lits...)
-
-	case Count:
-		pred := sat.Pred("count")
-		counterId := newId()
-
-		first := sat.NewAtomP2(pred, counterId, 1)
-		clauses.AddTaggedClause(tag+"-2", lits[0], sat.Literal{false, first})
-
-		for i := 1; i < len(lits); i++ {
-			p1 := sat.NewAtomP2(pred, counterId, i)
-			clauses.AddTaggedClause(tag+"-1", sat.Neg(lits[i-1]), sat.Literal{true, p1})
-			clauses.AddTaggedClause(tag+"-1", sat.Neg(lits[i]), sat.Literal{false, p1})
-			if i != len(lits) {
-				p2 := sat.NewAtomP2(pred, counterId, i+1)
-				clauses.AddTaggedClause(tag+"-2", lits[i], sat.Literal{true, p1}, sat.Literal{false, p2})
-				clauses.AddTaggedClause(tag+"-3", sat.Literal{false, p1}, sat.Literal{true, p2})
-			}
-		}
-		// force that last counter has to be 1, i.e. it models ExactlyOne
-		final := sat.NewAtomP2(pred, counterId, len(lits))
-		clauses.AddTaggedClause(tag+"-4", sat.Literal{true, final})
-
-	case Heule:
-
-		clauses.AddClauseSet(AtMostOne(typ, tag, lits))
-		clauses.AddTaggedClause(tag, lits...)
-
-	case Log:
-
-		clauses.AddClauseSet(AtMostOne(typ, tag, lits))
-		clauses.AddTaggedClause(tag, lits...)
-
-	default:
-		panic("CNF translation for this type not implemented yet")
-
-	}
-
-	return
-
 }
