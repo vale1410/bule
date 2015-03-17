@@ -42,7 +42,14 @@ func main() {
 
 	flag.Parse()
 
-	pbs, vars := ParseMPS(*filename)
+	var pbs []constraints.Threshold
+	var vars map[string]bool
+
+	if strings.HasSuffix(*filename, "opb") || strings.HasSuffix(*filename, "pbo") || strings.HasSuffix(*filename, "pb") {
+		pbs, vars = ParsePBO(*filename)
+	} else if strings.HasSuffix(*filename, "mps") {
+		pbs, vars = ParseMPS(*filename)
+	}
 
 	if *pbo {
 		PrintPBO(pbs, vars)
@@ -162,6 +169,85 @@ func ParseMPS(f string) (pbs []constraints.Threshold, vars map[string]bool) {
 			}
 		case 5:
 			{
+			}
+		}
+	}
+	return
+}
+
+func ParsePBO(filename string) (pbs []constraints.Threshold, vars map[string]bool) {
+
+	input, err := ioutil.ReadFile(filename)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	lines := strings.Split(string(input), "\n")
+
+	// 0 : first line, 1 : rest of the lines
+	var count int
+	state := 0
+	t := 0
+
+	for _, l := range lines {
+
+		if state > 0 && (l == "" || strings.HasPrefix(l, "%") || strings.HasPrefix(l, "*")) {
+			continue
+		}
+
+		elements := strings.Fields(l)
+
+		switch state {
+		case 0:
+			{
+				var b1 error
+				count, b1 = strconv.Atoi(elements[4])
+				vn, b2 := strconv.Atoi(elements[2])
+				vars = make(map[string]bool, vn)
+				if b1 != nil || b2 != nil {
+					panic("bad conversion of numbers")
+				}
+				pbs = make([]constraints.Threshold, count)
+				state = 1
+			}
+		case 1:
+			{
+				if t >= count {
+					panic("Number of constraints incorrectly specified in pb input file " + filename)
+				}
+				pbs[t].Desc = l
+
+				n := (len(elements) - 3) / 2
+				pbs[t].Entries = make([]constraints.Entry, n)
+
+				for i := 0; i < len(elements)-3; i++ {
+
+					weight, b1 := strconv.ParseInt(elements[i], 10, 64)
+					i++
+					//variable, b2 := strconv.Atoi(digitRegexp.FindString(elements[i]))
+
+					if b1 != nil {
+						panic("bad conversion of numbers")
+					}
+					atom := sat.NewAtomP(sat.Pred(elements[i]))
+					vars[elements[i]] = true
+					pbs[t].Entries[i/2] = constraints.Entry{sat.Literal{true, atom}, weight}
+				}
+
+				pbs[t].K, _ = strconv.ParseInt(elements[len(elements)-2], 10, 64)
+				typS := elements[len(elements)-3]
+
+				if typS == ">=" {
+					pbs[t].Typ = constraints.AtLeast
+				} else if typS == "<=" {
+					pbs[t].Typ = constraints.AtMost
+				} else if typS == "==" || typS == "=" {
+					pbs[t].Typ = constraints.Equal
+				} else {
+					panic("bad conversion of symbols" + typS)
+				}
+				t++
 			}
 		}
 	}

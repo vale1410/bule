@@ -4,6 +4,6 @@ go build bule.go
 
 for x in $1/*.*pb; 
 do 
-    timeout 600 ./bule -f $x; 
+    time -f';%e' timeout 600 ./bule -f $x; 
     echo ;  
 done

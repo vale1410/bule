@@ -1,0 +1,603 @@
+ ./solve.sh New                                                            veichberger-nicta 21:22
+New/graph10_UNSAT.pb;UNSATISFIABLE;337.62
+
+New/graph1_UNSAT.pb;UNSATISFIABLE;56.11
+
+New/graph2_SAT.pb;SATISFIABLE;375.81
+
+New/graph3_SAT.pb;SATISFIABLE;0.56
+
+New/graph4_UNSAT.pb;UNSATISFIABLE;40.57
+
+New/graph5_UNSAT.pb;UNSATISFIABLE;34.65
+
+New/graph6_SAT.pb;SATISFIABLE;56.84
+
+New/graph7_UNSAT.pbCommand exited with non-zero status 124
+;600.00
+
+New/graph8_SAT.pb;SATISFIABLE;37.49
+
+New/graph9_SAT.pb;SATISFIABLE;26.09
+
+New/graph9_UNSAT.pb;UNSATISFIABLE;25.32
+
+New/japan1_50_SAT.pb;SATISFIABLE;3.09
+
+New/japan1_50_UNSAT.pb;UNSATISFIABLE;105.43
+
+New/japan1_80_SAT.pb;SATISFIABLE;5.70
+
+New/japan1_80_UNSAT.pbCommand exited with non-zero status 124
+;600.00
+
+New/japan2_100_SAT.pb;SATISFIABLE;3.02
+
+New/japan2_100_UNSAT.pb;UNSATISFIABLE;15.00
+
+New/japan2_256_SAT.pb;SATISFIABLE;10.12
+
+New/japan2_256_UNSAT.pbCommand exited with non-zero status 124
+;600.00
+
+New/normalized-cuww1.opbCommand exited with non-zero status 124
+;600.15
+
+New/normalized-cuww2.opbCommand exited with non-zero status 124
+;600.89
+
+New/normalized-cuww3.opbCommand exited with non-zero status 124
+;600.30
+
+New/normalized-cuww5.opbCommand exited with non-zero status 124
+;600.82
+
+New/normalized-prob1.opb;SATISFIABLE;185.33
+
+New/normalized-prob2.opbCommand exited with non-zero status 124
+;600.64
+
+New/normalized-prob3.opbCommand exited with non-zero status 124
+;603.82
+
+New/normalized-prob4.opbCommand exited with non-zero status 124
+;609.38
+
+New/normalized-prob5.opbCommand exited with non-zero status 124
+;608.85
+
+New/normalized-prob6.opb;SATISFIABLE;239.71
+
+New/normalized-prob7.opbCommand exited with non-zero status 124
+;600.00
+
+New/normalized-prob8.opbCommand exited with non-zero status 124
+;600.00
+
+New/queens1.pbCommand exited with non-zero status 124
+;600.00
+
+New/queens10.pbCommand exited with non-zero status 124
+;600.00
+
+New/queens2.pbs UNKNOWN
+panic: whats up? result of sat solver does not contain proper answer!
+
+goroutine 6 [running]:
+github.com/vale1410/bule/sat.(*Gen).solveProblem(0xc2089341e0, 0xc20803c060)
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:220 +0x885
+created by github.com/vale1410/bule/sat.(*Gen).Solve
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:105 +0x1e0
+
+goroutine 1 [select]:
+github.com/vale1410/bule/sat.(*Gen).Solve(0xc2089341e0, 0xc20de8a000, 0x1e775, 0x1e800)
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:108 +0x76a
+main.main()
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/bule/bule.go:142 +0x17ff
+
+goroutine 5 [sleep]:
+github.com/vale1410/bule/sat.func·002()
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:101 +0x3a
+created by github.com/vale1410/bule/sat.(*Gen).Solve
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:103 +0x1b9
+Command exited with non-zero status 2
+;2.37
+
+New/queens3.pbCommand exited with non-zero status 124
+;600.00
+
+New/queens4.pb;SATISFIABLE;23.20
+
+New/queens5.pb;SATISFIABLE;16.92
+
+New/queens6.pbCommand exited with non-zero status 124
+;600.00
+
+New/queens7.pbCommand exited with non-zero status 124
+;600.02
+
+New/queens8.pbCommand exited with non-zero status 124
+;600.01
+
+New/queens9.pbCommand exited with non-zero status 124
+;600.00
+
+
+./solve.sh PB-DEC >> exp1_PB_DEC 2>> exp1_PB_DEC &                        veichberger-nicta 21:25
+[1] 27226
+(master|✚2…) bule :) tail -f exp1_PB_DEC                                                       veichberger-nicta 21:26
+PB-DEC/22s.smv.opb;UNSATISFIABLE;1.37
+
+PB-DEC/25s.smv.opb;UNSATISFIABLE;1.13
+
+PB-DEC/37s.smv.opb;UNSATISFIABLE;0.12
+
+PB-DEC/43s.smv.opb;UNSATISFIABLE;0.73
+
+PB-DEC/44s.smv.opb;UNSATISFIABLE;0.11
+
+PB-DEC/46s.smv.opb;UNSATISFIABLE;0.32
+
+PB-DEC/army10.14bt.opb;SATISFIABLE;46.20
+
+PB-DEC/army10.14ls.opb;SATISFIABLE;4.99
+
+PB-DEC/army11.17bt.opb;SATISFIABLE;7.03
+
+PB-DEC/army11.17ls.opb;SATISFIABLE;10.24
+
+PB-DEC/army12.21bt.opbCommand exited with non-zero status 124
+;600.00
+
+PB-DEC/army12.21ls.opbCommand exited with non-zero status 124
+;600.00
+
+PB-DEC/army13.24bt.opb;SATISFIABLE;17.94
+
+PB-DEC/army13.24ls.opb;SATISFIABLE;5.71
+
+PB-DEC/army8.9bt.opb;SATISFIABLE;0.21
+
+PB-DEC/army8.9ls.opb;SATISFIABLE;0.48
+
+PB-DEC/army9.12bt.opb;SATISFIABLE;2.12
+
+PB-DEC/army9.12ls.opb;SATISFIABLE;3.49
+
+PB-DEC/blast-floppy1-2.ucl.opb;UNSATISFIABLE;0.05
+
+PB-DEC/blast-floppy1-3.ucl.opb;UNSATISFIABLE;0.07
+
+PB-DEC/blast-floppy1-4.ucl.opb;UNSATISFIABLE;0.06
+
+PB-DEC/blast-floppy1-6.ucl.opb;UNSATISFIABLE;0.26
+
+PB-DEC/blast-floppy1-7.ucl.opb;UNSATISFIABLE;1.34
+
+PB-DEC/blast-floppy1-8.ucl.opb;UNSATISFIABLE;1.68
+
+PB-DEC/blast-tlan2.ucl.opb;UNSATISFIABLE;0.91
+
+PB-DEC/blast-tlan3.ucl.opb;UNSATISFIABLE;8.24
+
+PB-DEC/cache-ibm-q-full.all.ucl.opb;UNSATISFIABLE;92.21
+
+PB-DEC/cache-ibm-q-unbounded.Ic22arity.ucl.opb;UNSATISFIABLE;13.60
+
+PB-DEC/cache-ibm-q-unbounded.Icl2arity.ucl.opb;UNSATISFIABLE;3.56
+
+PB-DEC/cache-ibm-q-unbounded.Ih1arity.ucl.opb;UNSATISFIABLE;71.91
+
+PB-DEC/cache-ibm-q-unbounded.Ih2arity.ucl.opb;SATISFIABLE;98.70
+
+PB-DEC/cache.inv10.ucl.opb;UNSATISFIABLE;0.47
+
+PB-DEC/cache.inv12.ucl.opb;UNSATISFIABLE;1.57
+
+PB-DEC/cache.inv14.ucl.opb;UNSATISFIABLE;113.81
+
+PB-DEC/cache.inv8.ucl.opb;UNSATISFIABLE;0.16
+
+PB-DEC/dbst_v30_e350_d15_mw10_1.opb.PB06.opb;SATISFIABLE;102.12
+
+PB-DEC/dbst_v30_e350_d15_mw10_2.opb.PB06.opb;SATISFIABLE;114.02
+
+PB-DEC/dbst_v30_e350_d15_mw10_3.opb.PB06.opb;SATISFIABLE;100.41
+
+PB-DEC/dbst_v30_e350_d15_mw10_8.opb.PB06.opb;SATISFIABLE;112.44
+
+PB-DEC/dbst_v30_e350_d15_mw10_9.opb.PB06.opb;SATISFIABLE;104.33
+
+PB-DEC/dbst_v40_e600_d20_mw10_0.opb.PB06.opbCommand exited with non-zero status 124
+;600.19
+
+PB-DEC/dbst_v40_e600_d20_mw10_2.opb.PB06.opbCommand exited with non-zero status 124
+;600.47
+
+PB-DEC/dbst_v40_e600_d20_mw10_5.opb.PB06.opbCommand exited with non-zero status 124
+;600.41
+
+PB-DEC/dbst_v40_e600_d20_mw10_6.opb.PB06.opbCommand exited with non-zero status 124
+;601.05
+
+PB-DEC/dbst_v40_e600_d20_mw10_9.opb.PB06.opbCommand exited with non-zero status 124
+;601.07
+
+PB-DEC/dbst_v50_e1000_d25_mw10_1.opb.PB06.opbCommand exited with non-zero status 124
+;600.89
+
+PB-DEC/dbst_v50_e1000_d25_mw10_3.opb.PB06.opbCommand exited with non-zero status 124
+;601.62
+
+PB-DEC/dbst_v50_e1000_d25_mw10_5.opb.PB06.opbCommand exited with non-zero status 124
+;606.74
+
+PB-DEC/dbst_v50_e1000_d25_mw10_6.opb.PB06.opbCommand exited with non-zero status 124
+;600.56
+
+PB-DEC/dbst_v50_e1000_d25_mw10_9.opb.PB06.opbCommand exited with non-zero status 124
+;600.46
+
+PB-DEC/dlx1c.rwmem.ucl.opb;UNSATISFIABLE;1.06
+
+PB-DEC/dlx1c.rwmem1.ucl.opb;UNSATISFIABLE;1.13
+
+PB-DEC/dlx1c.ucl.opb;UNSATISFIABLE;1.34
+
+PB-DEC/elf.rf10.ucl.opb;UNSATISFIABLE;6.68
+
+PB-DEC/elf.rf6.ucl.opb;UNSATISFIABLE;0.02
+
+PB-DEC/elf.rf7.ucl.opb;UNSATISFIABLE;0.18
+
+PB-DEC/elf.rf8.ucl.opb;UNSATISFIABLE;0.78
+
+PB-DEC/elf.rf9.ucl.opb;UNSATISFIABLE;2.44
+
+PB-DEC/neos-820146.opbCommand exited with non-zero status 124
+;600.00
+
+PB-DEC/neos-820157.opbCommand exited with non-zero status 124
+;600.00
+
+PB-DEC/neos-849702.opb;SATISFIABLE;47.75
+
+PB-DEC/neos808444.opb;SATISFIABLE;13.83
+
+PB-DEC/ooo.burch_dill.2.accl.ucl.opb;UNSATISFIABLE;0.49
+
+PB-DEC/ooo.burch_dill.3.accl.ucl.opb;UNSATISFIABLE;1.20
+
+PB-DEC/ooo.burch_dill.4.accl.ucl.opb;UNSATISFIABLE;0.70
+
+PB-DEC/ooo.burch_dill.6.accl.ucl.opb;UNSATISFIABLE;494.29
+
+PB-DEC/ooo.burch_dill.8.accl.ucl.opb;UNSATISFIABLE;43.20
+
+PB-DEC/ooo.ex.br.mem.RobRegValid_bar.ucl.opb;UNSATISFIABLE;16.70
+
+PB-DEC/ooo.ex.br.mem.Src1Valid_Src1ValidBar.ucl.opb;UNSATISFIABLE;45.15
+
+PB-DEC/ooo.ex.mem.LdValue.ucl.opb;UNSATISFIABLE;37.33
+
+PB-DEC/ooo.ex.mem.LsqHdStrong.ucl.opb;UNSATISFIABLE;207.58
+
+PB-DEC/ooo.rf10.ucl.opb;UNSATISFIABLE;4.20
+
+PB-DEC/ooo.rf6.ucl.opb;UNSATISFIABLE;0.17
+
+PB-DEC/ooo.rf7.ucl.opb;UNSATISFIABLE;0.34
+
+PB-DEC/ooo.rf8.ucl.opb;UNSATISFIABLE;0.58
+
+PB-DEC/ooo.rf9.ucl.opb;UNSATISFIABLE;1.01
+
+PB-DEC/ooo.tag10.ucl.opb;UNSATISFIABLE;0.80
+
+PB-DEC/ooo.tag12.ucl.opbs UNKNOWN
+panic: whats up? result of sat solver does not contain proper answer!
+
+goroutine 6 [running]:
+github.com/vale1410/bule/sat.(*Gen).solveProblem(0xc20a20aa00, 0xc20803a060)
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:220 +0x885
+created by github.com/vale1410/bule/sat.(*Gen).Solve
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:105 +0x1e0
+
+goroutine 1 [select]:
+github.com/vale1410/bule/sat.(*Gen).Solve(0xc20a20aa00, 0xc20b74e000, 0x1cd8f, 0x21000)
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:108 +0x76a
+main.main()
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/bule/bule.go:142 +0x17ff
+
+goroutine 5 [sleep]:
+github.com/vale1410/bule/sat.func·002()
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:101 +0x3a
+created by github.com/vale1410/bule/sat.(*Gen).Solve
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:103 +0x1b9
+Command exited with non-zero status 2
+;1.34
+
+PB-DEC/ooo.tag14.ucl.opbs UNKNOWN
+panic: whats up? result of sat solver does not contain proper answer!
+
+goroutine 6 [running]:
+github.com/vale1410/bule/sat.(*Gen).solveProblem(0xc20c7b5310, 0xc20803c060)
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:220 +0x885
+created by github.com/vale1410/bule/sat.(*Gen).Solve
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:105 +0x1e0
+
+goroutine 1 [select]:
+github.com/vale1410/bule/sat.(*Gen).Solve(0xc20c7b5310, 0xc20e2e0000, 0x34e8d, 0x40800)
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:108 +0x76a
+main.main()
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/bule/bule.go:142 +0x17ff
+
+goroutine 5 [sleep]:
+github.com/vale1410/bule/sat.func·002()
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:101 +0x3a
+created by github.com/vale1410/bule/sat.(*Gen).Solve
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:103 +0x1b9
+Command exited with non-zero status 2
+;2.51
+
+PB-DEC/ooo.tag8.ucl.opb;UNSATISFIABLE;0.33
+
+PB-DEC/ooo.unbounded.all.ucl.opb;UNSATISFIABLE;26.53
+
+PB-DEC/ppp:1,3-13,19.opb;SATISFIABLE;1.16
+
+PB-DEC/ppp:1-11,19,21.opbCommand exited with non-zero status 124
+;600.00
+
+PB-DEC/ppp:1-12,16.opb;SATISFIABLE;1.00
+
+PB-DEC/ppp:1-13.opb;SATISFIABLE;1.44
+
+PB-DEC/ppp:1-9,16-19.opbCommand exited with non-zero status 124
+;600.00
+
+PB-DEC/ppp:3-13,25,26.opb;SATISFIABLE;1.45
+
+PB-DEC/robin10.opb;SATISFIABLE;4.93
+
+PB-DEC/robin12.opbCommand exited with non-zero status 124
+;600.00
+
+PB-DEC/robin14.opb;SATISFIABLEpanic: runtime error: index out of range
+
+goroutine 1 [running]:
+github.com/vale1410/bule/sat.(*Gen).Solve(0xc212bb9a40, 0xc210b60000, 0xb0626, 0xc5199)
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:120 +0x512
+main.main()
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/bule/bule.go:142 +0x17ff
+
+goroutine 5 [sleep]:
+github.com/vale1410/bule/sat.func·002()
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:101 +0x3a
+created by github.com/vale1410/bule/sat.(*Gen).Solve
+	/home/vale-nicta/code/go/src/github.com/vale1410/bule/sat/sat.go:103 +0x1b9
+Command exited with non-zero status 2
+;56.59
+
+PB-DEC/robin16.opbCommand exited with non-zero status 124
+;600.01
+
+PB-DEC/robin18.opbCommand exited with non-zero status 124
+;600.02
+
+PB-DEC/robin8.opb;SATISFIABLE;0.81
+
+PB-DEC/t2001.13queen13.1111220546.opb;UNSATISFIABLE;1.63
+
+PB-DEC/t2001.13queen13.1111220767.opb;UNSATISFIABLE;2.03
+
+PB-DEC/t2001.13queen13.1111221203.opb;UNSATISFIABLE;1.52
+
+PB-DEC/t2001.13queen13.1111222248.opb;SATISFIABLE;0.55
+
+PB-DEC/t2001.13queen13.1111222257.opb;UNSATISFIABLE;1.74
+
+PB-DEC/t2001.13queen13.1111222539.opb;UNSATISFIABLE;2.15
+
+PB-DEC/t2001.13queen13.1111223004.opb;UNSATISFIABLE;1.93
+
+PB-DEC/t3002.11tsp11.1900544463.opb;SATISFIABLE;0.47
+
+PB-DEC/t3002.11tsp11.1900544484.opb;UNSATISFIABLE;3.61
+
+PB-DEC/t3002.11tsp11.1900545610.opb;UNSATISFIABLE;5.73
+
+PB-DEC/t3002.11tsp11.1900546076.opb;UNSATISFIABLE;0.85
+
+PB-DEC/t3002.11tsp11.1900546417.opb;UNSATISFIABLE;5.64
+
+PB-DEC/t3002.11tsp11.1900547334.opb;SATISFIABLE;0.17
+
+PB-DEC/t3002.11tsp11.1900547353.opb;SATISFIABLE;0.49
+
+
+for x in PB-DEC/*; do echo $x ';' $(./convert -f $x -gringo | gringo | clasp --time-limit=600 | grep 'CPU Time\|SATIS'); done  
+PB-DEC/22s.smv.opb ; UNSATISFIABLE CPU Time : 0.100s
+PB-DEC/25s.smv.opb ; UNSATISFIABLE CPU Time : 0.070s
+PB-DEC/37s.smv.opb ; UNSATISFIABLE CPU Time : 0.010s
+PB-DEC/43s.smv.opb ; UNSATISFIABLE CPU Time : 0.080s
+PB-DEC/44s.smv.opb ; UNSATISFIABLE CPU Time : 0.000s
+PB-DEC/46s.smv.opb ; UNSATISFIABLE CPU Time : 0.020s
+PB-DEC/army10.14bt.opb ; SATISFIABLE CPU Time : 0.810s
+PB-DEC/army10.14ls.opb ; SATISFIABLE CPU Time : 0.130s
+PB-DEC/army11.17bt.opb ; SATISFIABLE CPU Time : 2.280s
+PB-DEC/army11.17ls.opb ; SATISFIABLE CPU Time : 0.830s
+PB-DEC/army12.21bt.opb ; SATISFIABLE CPU Time : 301.290s
+*** Info : (clasp): INTERRUPTED by signal!
+PB-DEC/army12.21ls.opb ; CPU Time : 599.820s
+PB-DEC/army13.24bt.opb ; SATISFIABLE CPU Time : 0.810s
+PB-DEC/army13.24ls.opb ; SATISFIABLE CPU Time : 3.090s
+PB-DEC/army8.9bt.opb ; SATISFIABLE CPU Time : 0.040s
+PB-DEC/army8.9ls.opb ; SATISFIABLE CPU Time : 0.010s
+PB-DEC/army9.12bt.opb ; SATISFIABLE CPU Time : 0.010s
+PB-DEC/army9.12ls.opb ; SATISFIABLE CPU Time : 0.010s
+PB-DEC/blast-floppy1-2.ucl.opb ; UNSATISFIABLE CPU Time : 0.000s
+PB-DEC/blast-floppy1-3.ucl.opb ; UNSATISFIABLE CPU Time : 0.000s
+PB-DEC/blast-floppy1-4.ucl.opb ; UNSATISFIABLE CPU Time : 0.000s
+PB-DEC/blast-floppy1-6.ucl.opb ; UNSATISFIABLE CPU Time : 0.010s
+PB-DEC/blast-floppy1-7.ucl.opb ; UNSATISFIABLE CPU Time : 0.020s
+PB-DEC/blast-floppy1-8.ucl.opb ; UNSATISFIABLE CPU Time : 0.030s
+PB-DEC/blast-tlan2.ucl.opb ; UNSATISFIABLE CPU Time : 0.020s
+PB-DEC/blast-tlan3.ucl.opb ; UNSATISFIABLE CPU Time : 0.450s
+*** Info : (clasp): INTERRUPTED by signal!
+PB-DEC/cache-ibm-q-full.all.ucl.opb ; CPU Time : 599.190s
+PB-DEC/cache-ibm-q-unbounded.Ic22arity.ucl.opb ; UNSATISFIABLE CPU Time : 9.330s
+PB-DEC/cache-ibm-q-unbounded.Icl2arity.ucl.opb ; UNSATISFIABLE CPU Time : 0.900s
+*** Info : (clasp): INTERRUPTED by signal!
+PB-DEC/cache-ibm-q-unbounded.Ih1arity.ucl.opb ; CPU Time : 598.680s
+PB-DEC/cache-ibm-q-unbounded.Ih2arity.ucl.opb ; SATISFIABLE CPU Time : 2.740s
+PB-DEC/cache.inv10.ucl.opb ; UNSATISFIABLE CPU Time : 0.200s
+PB-DEC/cache.inv12.ucl.opb ; UNSATISFIABLE CPU Time : 5.070s
+*** Info : (clasp): INTERRUPTED by signal!
+PB-DEC/cache.inv14.ucl.opb ; CPU Time : 599.260s
+PB-DEC/cache.inv8.ucl.opb ; UNSATISFIABLE CPU Time : 0.030s
+PB-DEC/dbst_v30_e350_d15_mw10_1.opb.PB06.opb ; SATISFIABLE CPU Time : 2.410s
+PB-DEC/dbst_v30_e350_d15_mw10_2.opb.PB06.opb ; SATISFIABLE CPU Time : 2.420s
+PB-DEC/dbst_v30_e350_d15_mw10_3.opb.PB06.opb ; SATISFIABLE CPU Time : 2.290s
+PB-DEC/dbst_v30_e350_d15_mw10_8.opb.PB06.opb ; SATISFIABLE CPU Time : 2.070s
+PB-DEC/dbst_v30_e350_d15_mw10_9.opb.PB06.opb ; SATISFIABLE CPU Time : 2.130s
+PB-DEC/dbst_v40_e600_d20_mw10_0.opb.PB06.opb ; SATISFIABLE CPU Time : 7.640s
+PB-DEC/dbst_v40_e600_d20_mw10_2.opb.PB06.opb ; SATISFIABLE CPU Time : 7.900s
+PB-DEC/dbst_v40_e600_d20_mw10_5.opb.PB06.opb ; SATISFIABLE CPU Time : 8.450s
+PB-DEC/dbst_v40_e600_d20_mw10_6.opb.PB06.opb ; SATISFIABLE CPU Time : 7.340s
+PB-DEC/dbst_v40_e600_d20_mw10_9.opb.PB06.opb ; SATISFIABLE CPU Time : 8.170s
+PB-DEC/dbst_v50_e1000_d25_mw10_1.opb.PB06.opb ; SATISFIABLE CPU Time : 19.050s
+PB-DEC/dbst_v50_e1000_d25_mw10_3.opb.PB06.opb ; SATISFIABLE CPU Time : 21.560s
+PB-DEC/dbst_v50_e1000_d25_mw10_5.opb.PB06.opb ; SATISFIABLE CPU Time : 20.210s
+PB-DEC/dbst_v50_e1000_d25_mw10_6.opb.PB06.opb ; SATISFIABLE CPU Time : 24.550s
+*** Info : (clasp): INTERRUPTED by signal!
+PB-DEC/dbst_v50_e1000_d25_mw10_9.opb.PB06.opb ; CPU Time : 13.720s
+PB-DEC/dlx1c.rwmem1.ucl.opb ; UNSATISFIABLE CPU Time : 0.150s
+PB-DEC/dlx1c.rwmem.ucl.opb ; UNSATISFIABLE CPU Time : 0.220s
+PB-DEC/dlx1c.ucl.opb ; UNSATISFIABLE CPU Time : 0.130s
+PB-DEC/elf.rf10.ucl.opb ; UNSATISFIABLE CPU Time : 2.330s
+PB-DEC/elf.rf6.ucl.opb ; UNSATISFIABLE CPU Time : 0.000s
+PB-DEC/elf.rf7.ucl.opb ; UNSATISFIABLE CPU Time : 0.010s
+PB-DEC/elf.rf8.ucl.opb ; UNSATISFIABLE CPU Time : 0.110s
+PB-DEC/elf.rf9.ucl.opb ; UNSATISFIABLE CPU Time : 0.550s
+PB-DEC/neos808444.opb ; SATISFIABLE CPU Time : 0.300s
+*** Info : (clasp): INTERRUPTED by signal!
+PB-DEC/neos-820146.opb ; CPU Time : 595.600s
+*** Info : (clasp): INTERRUPTED by signal!
+PB-DEC/neos-820157.opb ; CPU Time : 598.830s
+PB-DEC/neos-849702.opb ; SATISFIABLE CPU Time : 47.040s
+PB-DEC/ooo.burch_dill.2.accl.ucl.opb ; UNSATISFIABLE CPU Time : 0.230s
+PB-DEC/ooo.burch_dill.3.accl.ucl.opb ; UNSATISFIABLE CPU Time : 1.180s
+PB-DEC/ooo.burch_dill.4.accl.ucl.opb ; UNSATISFIABLE CPU Time : 0.060s
+*** Info : (clasp): INTERRUPTED by signal!
+PB-DEC/ooo.burch_dill.6.accl.ucl.opb ; CPU Time : 548.650s
+PB-DEC/ooo.burch_dill.8.accl.ucl.opb ; UNSATISFIABLE CPU Time : 207.280s
+PB-DEC/ooo.ex.br.mem.RobRegValid_bar.ucl.opb ; UNSATISFIABLE CPU Time : 25.840s
+*** Info : (clasp): INTERRUPTED by signal!
+PB-DEC/ooo.ex.br.mem.Src1Valid_Src1ValidBar.ucl.opb ; CPU Time : 382.640s
+*** Info : (clasp): INTERRUPTED by signal!
+PB-DEC/ooo.ex.mem.LdValue.ucl.opb ; CPU Time : 572.960s
+*** Info : (clasp): INTERRUPTED by signal!
+PB-DEC/ooo.ex.mem.LsqHdStrong.ucl.opb ; CPU Time : 338.130s
+PB-DEC/ooo.rf10.ucl.opb ; UNSATISFIABLE CPU Time : 4.310s
+PB-DEC/ooo.rf6.ucl.opb ; UNSATISFIABLE CPU Time : 0.020s
+PB-DEC/ooo.rf7.ucl.opb ; UNSATISFIABLE CPU Time : 0.060s
+PB-DEC/ooo.rf8.ucl.opb ; UNSATISFIABLE CPU Time : 0.260s
+PB-DEC/ooo.rf9.ucl.opb ; UNSATISFIABLE CPU Time : 0.950s
+PB-DEC/ooo.tag10.ucl.opb ; UNSATISFIABLE CPU Time : 1.610s
+PB-DEC/ooo.tag12.ucl.opb ; UNSATISFIABLE CPU Time : 7.440s
+PB-DEC/ooo.tag14.ucl.opb ; UNSATISFIABLE CPU Time : 304.910s
+PB-DEC/ooo.tag8.ucl.opb ; UNSATISFIABLE CPU Time : 0.300s
+PB-DEC/ooo.unbounded.all.ucl.opb ; UNSATISFIABLE CPU Time : 106.780s
+PB-DEC/ppp:1-11,19,21.opb ; SATISFIABLE CPU Time : 6.640s
+PB-DEC/ppp:1-12,16.opb ; SATISFIABLE CPU Time : 0.280s
+PB-DEC/ppp:1-13.opb ; SATISFIABLE CPU Time : 0.300s
+PB-DEC/ppp:1,3-13,19.opb ; SATISFIABLE CPU Time : 0.280s
+PB-DEC/ppp:1-9,16-19.opb ; SATISFIABLE CPU Time : 47.210s
+PB-DEC/ppp:3-13,25,26.opb ; SATISFIABLE CPU Time : 0.380s
+PB-DEC/robin10.opb ; SATISFIABLE CPU Time : 0.120s
+PB-DEC/robin12.opb ; SATISFIABLE CPU Time : 8.600s
+PB-DEC/robin14.opb ; SATISFIABLE CPU Time : 66.830s
+*** Info : (clasp): INTERRUPTED by signal!
+PB-DEC/robin16.opb ; CPU Time : 599.820s
+*** Info : (clasp): INTERRUPTED by signal!
+PB-DEC/robin18.opb ; CPU Time : 599.650s
+PB-DEC/robin8.opb ; SATISFIABLE CPU Time : 0.000s
+PB-DEC/t2001.13queen13.1111220546.opb ; UNSATISFIABLE CPU Time : 0.620s
+PB-DEC/t2001.13queen13.1111220767.opb ; UNSATISFIABLE CPU Time : 0.800s
+PB-DEC/t2001.13queen13.1111221203.opb ; UNSATISFIABLE CPU Time : 0.570s
+PB-DEC/t2001.13queen13.1111222248.opb ; SATISFIABLE CPU Time : 0.170s
+PB-DEC/t2001.13queen13.1111222257.opb ; UNSATISFIABLE CPU Time : 0.650s
+PB-DEC/t2001.13queen13.1111222539.opb ; UNSATISFIABLE CPU Time : 0.680s
+PB-DEC/t2001.13queen13.1111223004.opb ; UNSATISFIABLE CPU Time : 1.480s
+PB-DEC/t3002.11tsp11.1900544463.opb ; SATISFIABLE CPU Time : 0.010s
+PB-DEC/t3002.11tsp11.1900544484.opb ; UNSATISFIABLE CPU Time : 0.960s
+PB-DEC/t3002.11tsp11.1900545610.opb ; UNSATISFIABLE CPU Time : 1.610s
+PB-DEC/t3002.11tsp11.1900546076.opb ; UNSATISFIABLE CPU Time : 0.350s
+PB-DEC/t3002.11tsp11.1900546417.opb ; UNSATISFIABLE CPU Time : 1.180s
+PB-DEC/t3002.11tsp11.1900547334.opb ; SATISFIABLE CPU Time : 0.550s
+PB-DEC/t3002.11tsp11.1900547353.opb ; SATISFIABLE CPU Time : 0.070s
+
+
+for x in New/*; do echo $x ';' $(./convert -f $x -gringo | gringo | clasp --time-limit=600 | grep 'CPU Time\|SATIS'); done
+New/graph10_UNSAT.pb ; UNSATISFIABLE CPU Time : 311.690s
+New/graph1_UNSAT.pb ; UNSATISFIABLE CPU Time : 56.440s
+New/graph2_SAT.pb ; SATISFIABLE CPU Time : 12.130s
+New/graph3_SAT.pb ; SATISFIABLE CPU Time : 12.460s
+*** Info : (clasp): INTERRUPTED by signal!
+New/graph4_UNSAT.pb ; CPU Time : 599.860s
+New/graph5_UNSAT.pb ; UNSATISFIABLE CPU Time : 25.090s
+New/graph6_SAT.pb ; SATISFIABLE CPU Time : 3.970s
+*** Info : (clasp): INTERRUPTED by signal!
+New/graph7_UNSAT.pb ; CPU Time : 599.910s
+*** Info : (clasp): INTERRUPTED by signal!
+New/graph8_SAT.pb ; CPU Time : 599.880s
+New/graph9_SAT.pb ; SATISFIABLE CPU Time : 4.350s
+New/graph9_UNSAT.pb ; UNSATISFIABLE CPU Time : 336.760s
+New/japan1_50_SAT.pb ; SATISFIABLE CPU Time : 0.300s
+*** Info : (clasp): INTERRUPTED by signal!
+New/japan1_50_UNSAT.pb ; CPU Time : 576.800s
+*** ERROR: (clasp): Parse Error: Line 81, Weight Rule: bad or missing weight!
+New/japan1_80_SAT.pb ; CPU Time : 0.000s
+*** ERROR: (clasp): Parse Error: Line 81, Weight Rule: bad or missing weight!
+New/japan1_80_UNSAT.pb ; CPU Time : 0.000s
+New/japan2_100_SAT.pb ; SATISFIABLE CPU Time : 0.000s
+*** Info : (clasp): INTERRUPTED by signal!
+New/japan2_100_UNSAT.pb ; CPU Time : 568.940s
+New/japan2_256_SAT.pb ; SATISFIABLE CPU Time : 0.000s
+New/japan2_256_UNSAT.pb ; SATISFIABLE CPU Time : 0.000s
+*** Info : (clasp): INTERRUPTED by signal!
+New/normalized-cuww1.opb ; CPU Time : 587.830s
+*** Info : (clasp): INTERRUPTED by signal!
+New/normalized-cuww2.opb ; CPU Time : 591.680s
+*** Info : (clasp): INTERRUPTED by signal!
+New/normalized-cuww3.opb ; CPU Time : 585.480s
+*** Info : (clasp): INTERRUPTED by signal!
+New/normalized-cuww5.opb ; CPU Time : 500.720s
+*** Info : (clasp): INTERRUPTED by signal!
+New/normalized-prob1.opb ; CPU Time : 418.950s
+*** Info : (clasp): INTERRUPTED by signal!
+New/normalized-prob2.opb ; CPU Time : 401.980s
+*** Info : (clasp): INTERRUPTED by signal!
+New/normalized-prob3.opb ; CPU Time : 480.010s
+*** Info : (clasp): INTERRUPTED by signal!
+New/normalized-prob4.opb ; CPU Time : 599.940s
+New/normalized-prob5.opb ; SATISFIABLE CPU Time : 76.590s
+*** Info : (clasp): INTERRUPTED by signal!
+New/normalized-prob6.opb ; CPU Time : 599.860s
+New/normalized-prob7.opb ; SATISFIABLE CPU Time : 307.500s
+*** Info : (clasp): INTERRUPTED by signal!
+New/normalized-prob8.opb ; CPU Time : 599.960s
+New/queens10.pb ; UNSATISFIABLE CPU Time : 24.300s
+*** Info : (clasp): INTERRUPTED by signal!
+New/queens1.pb ; CPU Time : 599.920s
+New/queens2.pb ; SATISFIABLE CPU Time : 1.240s
+*** Info : (clasp): INTERRUPTED by signal!
+New/queens3.pb ; CPU Time : 599.950s
+New/queens4.pb ; SATISFIABLE CPU Time : 15.680s
+New/queens5.pb ; SATISFIABLE CPU Time : 0.960s
+New/queens6.pb ; UNSATISFIABLE CPU Time : 22.410s
+*** Info : (clasp): INTERRUPTED by signal!
+New/queens7.pb ; CPU Time : 599.810s
+New/queens8.pb ; SATISFIABLE CPU Time : 225.160s
+New/queens9.pb ; SATISFIABLE CPU Time : 56.610s
