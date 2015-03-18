@@ -1,8 +1,7 @@
-package sorting_network
+package constraints
 
 import (
 	"fmt"
-	//	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sorters"
 	"os"
 	"sort"

@@ -21,26 +21,62 @@ func TestAtMostOne(test *testing.T) {
 		atoms[lits[i].A.Id()] = true
 	}
 
-	t := AtMostOne(Naive, "naive", lits)
-	t = AtMostOne(Split, "split", lits)
-	t = AtMostOne(Sort, "sorter", lits)
-	t = AtMostOne(Heule, "heule", lits)
-	t = AtMostOne(Log, "Log", lits)
+	t := TranslateAtMostOne(Naive, "naive", lits)
+	if t.Clauses.Size() == 0 {
+		test.Fail()
+	}
+	t = TranslateAtMostOne(Split, "split", lits)
+	if t.Clauses.Size() == 0 {
+		test.Fail()
+	}
+	t = TranslateAtMostOne(Sort, "sorter", lits)
+	if t.Clauses.Size() == 0 {
+		test.Fail()
+	}
+	t = TranslateAtMostOne(Heule, "heule", lits)
+	if t.Clauses.Size() == 0 {
+		test.Fail()
+	}
+	t = TranslateAtMostOne(Log, "Log", lits)
+	if t.Clauses.Size() == 0 {
+		test.Fail()
+	}
 
-	fmt.Println()
-	t = AtMostOne(Count, "counter", lits)
-	t.Clauses.PrintDebug()
+	//fmt.Println()
+	t = TranslateAtMostOne(Count, "counter", lits)
+	if t.Clauses.Size() == 0 {
+		test.Fail()
+	}
+	//t.Clauses.PrintDebug()
 	//g := sat.IdGenerator(t.Clauses.Size() * 7)
 	//g.Filename = "out.cnf"
 	//g.PrimaryVars = atoms
 	//g.Solve(t.Clauses)
 	//g.PrintSymbolTable("sym.txt")
 
-	fmt.Println()
-	t = ExactlyOne(Naive, "naive", lits)
-	t = ExactlyOne(Split, "split", lits)
-	t = ExactlyOne(Count, "counter", lits)
-	t = ExactlyOne(Sort, "sorter", lits)
-	t = ExactlyOne(Heule, "heule", lits)
-	t = ExactlyOne(Log, "Log", lits)
+	//fmt.Println()
+	t = TranslateExactlyOne(Naive, "naive", lits)
+	if t.Clauses.Size() == 0 {
+		test.Fail()
+	}
+	t = TranslateExactlyOne(Split, "split", lits)
+	if t.Clauses.Size() == 0 {
+		test.Fail()
+	}
+	t = TranslateExactlyOne(Count, "counter", lits)
+	if t.Clauses.Size() == 0 {
+		test.Fail()
+	}
+	t = TranslateExactlyOne(Sort, "sorter", lits)
+	if t.Clauses.Size() == 0 {
+		test.Fail()
+	}
+	t = TranslateExactlyOne(Heule, "heule", lits)
+	if t.Clauses.Size() == 0 {
+		test.Fail()
+	}
+	t = TranslateExactlyOne(Log, "Log", lits)
+	if t.Clauses.Size() == 0 {
+		test.Fail()
+	}
 }

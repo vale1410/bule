@@ -1,16 +1,43 @@
-package sorting_network
+package constraints
 
 import (
 	//	"fmt"
-	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
 	"github.com/vale1410/bule/sorters"
+	"strconv"
 )
+
+func TranslateBySN(pb *Threshold) (t ThresholdTranslation) {
+	t.Typ = ComplexSN
+	pb.Normalize(AtMost, true)
+	pb.Sort()
+	sn := NewSortingNetwork(*pb)
+	sn.CreateSorter()
+	//PrintThresholdTikZ("sn.tex", []SortingNetwork{sn})
+	wh := 2
+	var which [8]bool
+
+	switch wh {
+	case 1:
+		which = [8]bool{false, false, false, true, true, true, false, false}
+	case 2:
+		which = [8]bool{false, false, false, true, true, true, false, true}
+	case 3:
+		which = [8]bool{false, true, true, true, true, true, true, false}
+	case 4:
+		which = [8]bool{false, true, true, true, true, true, true, true}
+	}
+
+	pred := sat.Pred("auxSN_" + strconv.Itoa(pb.Id))
+	t.Clauses = CreateEncoding(sn.LitIn, which, []sat.Literal{}, "BnB", pred, sn.Sorter)
+	t.Cls = t.Clauses.Size()
+	return
+}
 
 //this construction is based on AtMost threshold constraints
 
 type SortingNetwork struct {
-	pb     constraints.Threshold
+	pb     Threshold
 	Tare   int64
 	Sorter sorters.Sorter
 	Bags   [][]sat.Literal
@@ -19,7 +46,7 @@ type SortingNetwork struct {
 }
 
 // TODO: update construction of sorting network!
-func NewSortingNetwork(pb constraints.Threshold) (sn SortingNetwork) {
+func NewSortingNetwork(pb Threshold) (sn SortingNetwork) {
 	// much more configuration in the future
 	sn.pb = pb
 	sn.typ = sorters.OddEven
@@ -61,7 +88,7 @@ func (t *SortingNetwork) CreateSorter() {
 	tare := layerPow2 - ((t.pb.K + 1) % layerPow2)
 	tare = tare % layerPow2
 	t.Tare = tare
-	bTare := constraints.Binary(tare)
+	bTare := Binary(tare)
 
 	// output of sorter in layer $i-1$
 	bIn := make([]int, 0)
@@ -134,7 +161,7 @@ func (t *SortingNetwork) CreateSorter() {
 // assumes AtMost, positive weights
 func (t *SortingNetwork) CreateBags() {
 
-	nBags := len(constraints.Binary(t.pb.K))
+	nBags := len(Binary(t.pb.K))
 	bins := make([][]int, len(t.pb.Entries))
 	bagPos := make([]int, nBags)
 	bagSize := make([]int, nBags)
@@ -142,7 +169,7 @@ func (t *SortingNetwork) CreateBags() {
 	maxWeight := int64(0)
 
 	for i, e := range t.pb.Entries {
-		bins[i] = constraints.Binary(e.Weight)
+		bins[i] = Binary(e.Weight)
 
 		for j, x := range bins[i] {
 			bagSize[j] += x
@@ -154,7 +181,7 @@ func (t *SortingNetwork) CreateBags() {
 
 	}
 
-	t.Bags = make([][]sat.Literal, len(constraints.Binary(maxWeight)))
+	t.Bags = make([][]sat.Literal, len(Binary(maxWeight)))
 
 	for i, _ := range t.Bags {
 		t.Bags[i] = make([]sat.Literal, bagSize[i])

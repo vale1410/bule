@@ -1,7 +1,6 @@
-package sorting_network
+package constraints
 
 import (
-	"github.com/vale1410/bule/constraints"
 	"testing"
 )
 
@@ -52,16 +51,16 @@ func TestExample(test *testing.T) {
 
 }
 
-func createIgnasi1() (t constraints.Threshold) {
+func createIgnasi1() (t Threshold) {
 
 	weights := []int64{4, 3, 1, 1, 1, 1}
-	return constraints.CreatePB(weights, 5)
+	return CreatePB(weights, 5)
 }
 
-func createIgnasi2() (t constraints.Threshold) {
+func createIgnasi2() (t Threshold) {
 
 	weights := []int64{7, 6, 2, 2, 2, 2, 1, 1, 1, 1, 1}
-	return constraints.CreatePB(weights, 5)
+	return CreatePB(weights, 5)
 }
 
 func TestPBOGeneration(test *testing.T) {

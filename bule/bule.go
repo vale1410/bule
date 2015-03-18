@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/vale1410/bule/config"
 	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/sat"
-	"github.com/vale1410/bule/translation"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -24,9 +24,9 @@ var reformat_flag = flag.Bool("reformat", false, "Reformat PB files into correct
 var gurobi_flag = flag.Bool("gurobi", false, "Reformat to Gurobi input, output to stdout.")
 var solve_flag = flag.Bool("solve", true, "Dont solve just categorize and analyze the constriants.")
 
-//var model = flag.String("model", "model.lp", "path to model file")
-//var solve = flag.Bool("solve", false, "Pass problem to clasp and solve.")
-//var ttimeout = flag.Int("timeout", 10, "Timeout in seconds.")
+var complex_flag = flag.String("complex", "hybrid", "Solve complex PBs with mdd/sn/hybrid. Default is hybrid")
+var timeout_flag = flag.Int("timeout", 10, "Timeout of the overall solving process")
+var maxMDD_flag = flag.Int("maxMDD", 300000, "Maximal Number of MDD Nodes in processing one PB.")
 
 var digitRegexp = regexp.MustCompile("([0-9]+ )*[0-9]+")
 
@@ -53,6 +53,11 @@ License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 There is NO WARRANTY, to the extent permitted by law.`)
 		return
 	}
+
+	// put all configuration here
+	config.Complex_flag = *complex_flag
+	config.Timeout_flag = *timeout_flag
+	config.MaxMDD_flag = *maxMDD_flag
 
 	pbs, err := parse(*filename_flag)
 
@@ -92,7 +97,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 		var clauses sat.ClauseSet
 
-		stats := make([]int, translation.TranslationTypes)
+		stats := make([]int, constraints.TranslationTypes)
 
 		//if len(pbs) < 10 {
 		//	fmt.Println()
@@ -113,7 +118,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 				primaryVars[x.Literal.A.Id()] = true
 			}
 
-			t := translation.Categorize(&pb)
+			t := constraints.Translate(&pb)
 
 			stats[t.Typ]++
 
@@ -146,10 +151,10 @@ There is NO WARRANTY, to the extent permitted by law.`)
 }
 
 func printStats(stats []int) {
-	if len(stats) != int(translation.TranslationTypes) {
+	if len(stats) != int(constraints.TranslationTypes) {
 		panic("Stats for translation errornous")
 	}
-	fmt.Printf("Facts\tClause\tAMO\tEx1\tCard\tBDD\tSN\n")
+	fmt.Printf("Facts\tClause\tAMO\tEx1\tCard\tMDD\tSN\n")
 
 	for i, x := range stats {
 		if i > 0 {

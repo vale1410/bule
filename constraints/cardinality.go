@@ -18,12 +18,13 @@ const (
 )
 
 type CardTranslation struct {
+	PB      *Threshold
 	Typ     OneTranslationType
 	Aux     []sat.Literal
 	Clauses sat.ClauseSet
 }
 
-func AtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans CardTranslation) {
+func TranslateAtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans CardTranslation) {
 
 	var clauses sat.ClauseSet
 
@@ -39,8 +40,8 @@ func AtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans Ca
 	case Sort:
 
 		// TODO: collect the auxiliary variables from sorter
-		sat.SetUp(3, sorters.Pairwise)
-		clauses.AddClauseSet(sat.CreateCardinality(tag, lits, 1, sorters.AtMost))
+		SetUpSorterTranslation(3, sorters.Pairwise)
+		clauses.AddClauseSet(CreateCardinality(lits, 1, AtMost))
 
 	case Split:
 
@@ -50,7 +51,7 @@ func AtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans Ca
 		cutoff := 5
 
 		if len(lits) <= cutoff {
-			return AtMostOne(Naive, tag, lits)
+			return TranslateAtMostOne(Naive, tag, lits)
 		} else {
 			aux := sat.NewAtomP1(sat.Pred("split"), newId())
 			trans.Aux = append(trans.Aux, sat.Literal{true, aux})
@@ -62,8 +63,8 @@ func AtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans Ca
 				clauses.AddTaggedClause(tag, sat.Literal{false, aux}, sat.Neg(l))
 			}
 
-			clauses.AddClauseSet(AtMostOne(typ, tag, lits[:len(lits)/2]).Clauses)
-			clauses.AddClauseSet(AtMostOne(typ, tag, lits[len(lits)/2:]).Clauses)
+			clauses.AddClauseSet(TranslateAtMostOne(typ, tag, lits[:len(lits)/2]).Clauses)
+			clauses.AddClauseSet(TranslateAtMostOne(typ, tag, lits[len(lits)/2:]).Clauses)
 
 		}
 	case Count:
@@ -74,7 +75,10 @@ func AtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans Ca
 		auxs := make([]sat.Literal, len(lits))
 		for i, _ := range auxs {
 			auxs[i] = sat.Literal{true, sat.NewAtomP2(pred, counterId, i)}
-		} // S_i -> S_{i-1}
+		}
+		trans.Aux = auxs
+
+		// S_i -> S_{i-1}
 		for i := 1; i < len(lits); i++ {
 			clauses.AddTaggedClause(tag+"1", auxs[i-1], sat.Neg(auxs[i]))
 		}
@@ -110,19 +114,19 @@ func AtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans Ca
 			copy(front, lits[:k])
 			front[k] = sat.Literal{true, aux}
 
-			trans2 := AtMostOne(Naive, tag, front)
+			trans2 := TranslateAtMostOne(Naive, tag, front)
 			clauses.AddClauseSet(trans2.Clauses)
 
 			back := make([]sat.Literal, len(lits)-k+1)
 			copy(back, lits[k:])
 			back[len(lits)-k] = sat.Literal{false, aux}
 
-			trans2 = AtMostOne(typ, tag, back)
+			trans2 = TranslateAtMostOne(typ, tag, back)
 			trans.Aux = append(trans.Aux, trans2.Aux...)
 			clauses.AddClauseSet(trans2.Clauses)
 
 		} else {
-			trans2 := AtMostOne(Naive, tag, lits)
+			trans2 := TranslateAtMostOne(Naive, tag, lits)
 			clauses.AddClauseSet(trans2.Clauses)
 		}
 
@@ -140,22 +144,23 @@ func AtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans Ca
 
 }
 
-func ExactlyOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans CardTranslation) {
+func TranslateExactlyOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans CardTranslation) {
 
 	var clauses sat.ClauseSet
 
 	switch typ {
 	case Heule, Log, Naive, Split:
 
-		trans2 := AtMostOne(typ, tag, lits)
+		trans2 := TranslateAtMostOne(typ, tag, lits)
 		trans.Aux = append(trans.Aux, trans2.Aux...)
 		clauses.AddClauseSet(trans2.Clauses)
 		clauses.AddTaggedClause(tag, lits...)
 
 	case Sort:
 
-		sat.SetUp(3, sorters.Pairwise)
-		clauses.AddClauseSet(sat.CreateCardinality(tag, lits, 1, sorters.Equal))
+		// TODO: collect the auxiliary variables from sorter
+		SetUpSorterTranslation(3, sorters.Pairwise)
+		clauses.AddClauseSet(CreateCardinality(lits, 1, Equal))
 
 	case Count:
 
@@ -165,7 +170,10 @@ func ExactlyOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans C
 		auxs := make([]sat.Literal, len(lits))
 		for i, _ := range auxs {
 			auxs[i] = sat.Literal{true, sat.NewAtomP2(pred, counterId, i)}
-		} // S_i -> S_{i-1}
+		}
+		trans.Aux = auxs
+
+		// S_i -> S_{i-1}
 		for i := 1; i < len(lits); i++ {
 			clauses.AddTaggedClause(tag+"1", auxs[i-1], sat.Neg(auxs[i]))
 		}
@@ -205,7 +213,7 @@ func ExactlyOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans C
 
 func buildLogEncoding(pred sat.Pred, uId int, cutoff int, depth int, tag string, lits []sat.Literal) (clauses sat.ClauseSet) {
 	if len(lits) <= cutoff {
-		trans2 := AtMostOne(Naive, tag, lits)
+		trans2 := TranslateAtMostOne(Naive, tag, lits)
 		clauses.AddClauseSet(trans2.Clauses)
 	} else {
 		atom := sat.NewAtomP2(pred, uId, depth)

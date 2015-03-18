@@ -30,6 +30,37 @@ type Threshold struct {
 	Pred    sat.Pred
 }
 
+// assumption is that pb2 is already a subsequece of pb1
+func CommonSlice(e []Entry, l []sat.Literal) (bool, []Entry) {
+	for i, x := range e {
+		if x.Literal == l[0] {
+			return true, e[i : i+len(l)]
+		}
+	}
+	return false, []Entry{}
+}
+
+// assumption is that pb2 is already a subsequece of pb1
+func PositionSlice(e1 []Entry, e2 []Entry) (bool, []int) {
+	//find min coefficient, to subtract
+	pos := make([]int, len(e2))
+
+	j := 0
+	for i, x := range e1 {
+		if j == len(pos) {
+			break
+		}
+		if x.Literal == e2[j].Literal {
+			pos[j] = i
+			j++
+		}
+	}
+	if j != len(pos) {
+		return false, []int{}
+	}
+	return false, pos
+}
+
 // creates an AtMost constraint
 // with coefficients in weights,
 // variables x1..xm
@@ -202,24 +233,22 @@ func (t *Threshold) SumWeights() (total int64) {
 	return
 }
 
-type ThresholdVariables Threshold
-
-func (a ThresholdVariables) Len() int      { return len(a.Entries) }
-func (a ThresholdVariables) Swap(i, j int) { a.Entries[i], a.Entries[j] = a.Entries[j], a.Entries[i] }
-func (a ThresholdVariables) Less(i, j int) bool {
-	return a.Entries[i].Literal.A.Id() <= a.Entries[j].Literal.A.Id()
-}
-
 func (t *Threshold) SortVar() {
-	sort.Sort(ThresholdVariables(*t))
+	sort.Sort(EntriesVariables(t.Entries))
 }
-
-type ThresholdAscending Threshold
-
-func (a ThresholdAscending) Len() int           { return len(a.Entries) }
-func (a ThresholdAscending) Swap(i, j int)      { a.Entries[i], a.Entries[j] = a.Entries[j], a.Entries[i] }
-func (a ThresholdAscending) Less(i, j int) bool { return a.Entries[i].Weight > a.Entries[j].Weight }
-
 func (t *Threshold) Sort() {
-	sort.Sort(ThresholdAscending(*t))
+	sort.Sort(EntriesAscending(t.Entries))
 }
+
+type EntriesVariables []Entry
+type EntriesAscending []Entry
+
+func (a EntriesVariables) Len() int      { return len(a) }
+func (a EntriesVariables) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a EntriesVariables) Less(i, j int) bool {
+	return a[i].Literal.A.Id() <= a[j].Literal.A.Id()
+}
+
+func (a EntriesAscending) Len() int           { return len(a) }
+func (a EntriesAscending) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a EntriesAscending) Less(i, j int) bool { return a[i].Weight > a[j].Weight }
