@@ -121,11 +121,11 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			}
 
 			t := constraints.Translate(&pb)
-
 			stats[t.Typ]++
 
 			clauses.AddClauseSet(t.Clauses)
-			//t.Clauses.PrintDebug()
+			pb.Print10()
+			t.Clauses.PrintDebug()
 			//pb.Print10()
 			//fmt.Println()
 		}
@@ -139,7 +139,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			}
 			fmt.Println()
 		} else {
-			//printStats(stats)
+			printStats(stats)
 			fmt.Print(*filename_flag)
 			g := sat.IdGenerator(clauses.Size() * 7)
 			g.Filename = *out

@@ -1,7 +1,7 @@
 package constraints
 
 import (
-	//	"fmt"
+	"fmt"
 	"github.com/vale1410/bule/config"
 	"github.com/vale1410/bule/sat"
 	"math"
@@ -18,9 +18,9 @@ const (
 	Cardinality
 	ComplexMDD
 	ComplexSN
+	TranslationTypes
 	ComplexMDDChain
 	ComplexSNChain
-	TranslationTypes
 )
 
 type ThresholdTranslation struct {
@@ -134,9 +134,9 @@ func TranslateComplexThreshold(pb *Threshold) (t ThresholdTranslation) {
 			panic(err1.Error())
 		}
 
-		//fmt.Println("Complex, SN:", tSN.Cls, " mdd:", tMDD.Cls)
+		fmt.Println("Complex, SN:", tSN.Cls, " mdd:", tMDD.Cls)
 
-		if err2 != nil && tMDD.Cls < tSN.Cls {
+		if err2 == nil && tMDD.Cls < tSN.Cls {
 			t.Clauses = tMDD.Clauses
 			t.Typ = ComplexMDD
 		} else {
