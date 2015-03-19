@@ -8,6 +8,30 @@ import (
 	"strconv"
 )
 
+func (c Lits) Print() {
+
+	for i, x := range c {
+		fmt.Print(x.ToTxt())
+		if i != len(c)-1 {
+			fmt.Print(",")
+		} else {
+			fmt.Println()
+		}
+	}
+}
+
+func (c Chain) Print() {
+
+	for i, x := range c {
+		fmt.Print(x.ToTxt())
+		if i != len(c)-1 {
+			fmt.Print(" <-")
+		} else {
+			fmt.Println()
+		}
+	}
+}
+
 func (t *Threshold) Print2() {
 	fmt.Println(t.Desc)
 

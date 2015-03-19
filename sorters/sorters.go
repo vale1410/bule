@@ -166,12 +166,12 @@ func (sorter *Sorter) RemoveOutput() {
 
 // Normalize
 // renames the ids in the comparators from 1 to |2*comparator|
-// If array in is empty, replaces ids by offset, offset+1 ...
-// Otherwise use ides in In array for renaming, and only replace all other ids
-// Then Replaces In array with argument
+// If array is empty, replaces ids by offset, offset+1 ...
+// Otherwise use ides in array for renaming, and only replace all other ids
+// Then Replaces array with argument
 // Then renames new ids starting with offset
 // Returns last offset + 1
-// All Ids with -1,0,1 in C,D of a comparator are ignored and not renamed
+// Ids -1,0,1 in C,D of a comparator are ignored and not renamed
 func (s *Sorter) Normalize(offset int, in []int) (maxId int) {
 
 	mapping := make(map[int]int, len(s.In)+2*len(s.Comparators))
@@ -238,10 +238,10 @@ func (s *Sorter) Normalize(offset int, in []int) (maxId int) {
 }
 
 // PropagateOrdering
+// TODO, this is essentially a MERGER!!!
 // cut >= 0, cut=-1 means no cut
 // from 0..cut-1 sorted and from cut .. length-1 sorted
 // propagated and remove comparators
-// this is essentially a merger!
 func (sorter *Sorter) PropagateOrdering(cut int) {
 
 	if cut < 0 { // signal for no cut

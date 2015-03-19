@@ -1,7 +1,7 @@
 package constraints
 
 import (
-	"fmt"
+	//	"fmt"
 	"github.com/vale1410/bule/config"
 	"github.com/vale1410/bule/sat"
 	"math"
@@ -31,6 +31,7 @@ type ThresholdTranslation struct {
 	Clauses sat.ClauseSet
 }
 
+//TODO
 func group(pb []*Threshold) {
 }
 
@@ -111,18 +112,31 @@ func Translate(pb *Threshold) (t ThresholdTranslation) {
 
 func TranslateComplexThreshold(pb *Threshold) (t ThresholdTranslation) {
 
+	var err error
 	switch config.Complex_flag {
 	case "mdd":
-		t = TranslateByMDD(pb)
+		t, err = TranslateByMDD(pb)
+		if err != nil {
+			panic(err.Error())
+		}
+		//fmt.Println(" mdd:", t.Cls)
 	case "sn":
-		t = TranslateBySN(pb)
+		t, err = TranslateBySN(pb)
+		if err != nil {
+			panic(err.Error())
+		}
+		//fmt.Println("Complex, SN:", t.Cls)
 	case "hybrid":
-		tSN := TranslateBySN(pb)
-		tMDD := TranslateByMDD(pb)
+		tSN, err1 := TranslateBySN(pb)
+		tMDD, err2 := TranslateByMDD(pb)
 
-		//	fmt.Println("Complex, SN:", tSN.Cls, " mdd:", tMDD.Cls)
+		if err1 != nil {
+			panic(err1.Error())
+		}
 
-		if tMDD.Cls < tSN.Cls {
+		//fmt.Println("Complex, SN:", tSN.Cls, " mdd:", tMDD.Cls)
+
+		if err2 != nil && tMDD.Cls < tSN.Cls {
 			t.Clauses = tMDD.Clauses
 			t.Typ = ComplexMDD
 		} else {
@@ -137,7 +151,7 @@ func TranslateComplexThreshold(pb *Threshold) (t ThresholdTranslation) {
 
 // returns if preprocessing was successful
 // returns if it cant do the preprocessing
-func PreprocessExactly(pb1 *Threshold, pb2 *Threshold) bool {
+func PreprocessPBwithExactly(pb1 *Threshold, pb2 *Threshold) bool {
 
 	//assumptions:
 	//check for correct property of pb2
@@ -193,17 +207,33 @@ func PreprocessExactly(pb1 *Threshold, pb2 *Threshold) bool {
 }
 
 // returns if preprocessing was successful
-// Uses the translation of pb2 (count translation) and rewrites pb1
+// Uses the translation of pb2 (count translation)
 func TranslatePBwithAMO(pb *Threshold, amo CardTranslation) (t ThresholdTranslation) {
+
+	b := PreprocessPBwithAMO(pb, amo)
+	if !b {
+		panic("Translate PB with AMO called on wrong input")
+	}
+	chain := CleanChain(pb.Entries, amo.Aux)
+	t, err := TranslateByMDDChain(pb, chain)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return t
+}
+
+// returns if preprocessing was successful
+// Uses the translation of pb2 (count translation)
+func PreprocessPBwithAMO(pb *Threshold, amo CardTranslation) bool {
 
 	//assumptions:
 	//check for correct property of pb2
 	//check for overlap of literals
-	//both pb1 and pb2 are sorted in variable ordering!
+	//both pb1 and amo are sorted in variable ordering!
 
-	fmt.Println(amo)
-
-	b, es := CommonSlice(pb.Entries, amo.Aux)
+	b, es := CommonSlice(pb.Entries, amo.PB.Entries)
+	//fmt.Println(amo.PB.Entries, es)
 
 	if !b {
 		panic("Check if amo fits  with the pb1")
@@ -212,22 +242,14 @@ func TranslatePBwithAMO(pb *Threshold, amo CardTranslation) (t ThresholdTranslat
 	last := int64(0)
 	for i, e := range es {
 		es[i].Weight = e.Weight - last
+		es[i].Literal = amo.Aux[i]
 		last = e.Weight
 	}
 
 	pb.RemoveZeros()
-	t.PB = pb
+	//	pb.Print10()
 
-	// mdd := createMDDChain(pb1, amoLiterals)
-	// translateByMDDChain(pb1, amoLiterals)
-
-	return
-}
-
-func TranslateByMDDChain(pb *Threshold, literals []sat.Literal) (t ThresholdTranslation) {
-	// check for overlap of variables
-	// just do a rewrite, and call translateByMDD, reuse variables
-	return
+	return true
 }
 
 func TranslateBySNChain(pb *Threshold, literals []sat.Literal) (t ThresholdTranslation) {

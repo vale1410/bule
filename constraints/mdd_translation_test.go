@@ -1,7 +1,7 @@
 package constraints
 
 import (
-	//	"fmt"
+	"fmt"
 	"github.com/vale1410/bule/config"
 	"github.com/vale1410/bule/mdd"
 	"github.com/vale1410/bule/sat"
@@ -18,34 +18,36 @@ import (
 //}
 
 func TestMDD1(test *testing.T) {
+	fmt.Println("TestMDD1")
 
-	config.MaxMDD_flag = 300000
+	config.MDD_max_flag = 300000
+	config.MDD_redundant_flag = false
 
 	var t Threshold
 	t.Entries = createEntries([]int64{1, 2, 1, 1, 3, 1})
 	t.Typ = AtMost
 	t.K = 5
-	t.Print10()
+	//t.Print10()
 
-	b1 := mdd.Init(len(t.Entries))
-	_, _, _, s1 := CreateMDD(&b1, t.K, t.Entries)
-	//b1.Debug(true)
+	store := mdd.Init(len(t.Entries))
+	_, _, _, s1 := CreateMDD(&store, t.K, t.Entries)
+	//store.Debug(true)
 	if s1 != nil {
 		test.Fail()
 	}
 
+	literals := t.Literals() //createLiterals(i, 3)
+
 	for i := 0; i < 4; i++ {
 		//	fmt.Println("\n\n Chain on index", i, i+3)
-		literals := createLiterals(i, 3)
 
-		b1 = mdd.Init(len(t.Entries))
-		_, _, _, s1 := CreateMDDChain(&b1, t.K, t.Entries, literals)
+		store = mdd.Init(len(t.Entries))
+		_, _, _, s1 := CreateMDDChain(&store, t.K, t.Entries, literals[i:i+3])
 
 		if s1 != nil {
 			test.Fail()
 		}
-
-		//	b1.Debug(true)
+		//store.Debug(true)
 	}
 }
 

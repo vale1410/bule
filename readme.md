@@ -3,10 +3,11 @@ Bule: A simple CNF Generator
 
 Bule is a framework that helps to create good CNF (conjunctive normal form) encodings.
 
-At the current stage it supports these basic constraints. 
+At the current stage it supports the following features
 
+* Special Treatment of atmost1 and ex1, and other minor special cases
 * Cardinality Constraints through sorting networks
-* Pseudo Boolean Constraints through sorting networks 
+* hybrid translation of Pseudo Boolean Constraints through sorting networks and MDDs
 
 Furthermore, it helps debugging the CNF by a human readable output of the clauses and statistics. 
 
@@ -15,13 +16,18 @@ a incremental grounding technique, and several enumeration techniques for
 optimization problems. It will in the future link to fast SAT solvers. 
 
 
+Features
+----------
+* Cardinality and Weight Constraints (Pseudo Booleans) through sorters [done]
+* Grounding to CNF and statistics [done]
+* Bule solves PB decision problems [done]
+
 Milestones
 ----------
 
-* Cardinality and Weight Constraints (Pseudo Booleans) through sorters [done]
-* Grounding to CNF and statistics [done]
-* Bule solves PB problems [done]
-* Counter and BDD based translation of PBs
+* MDD based translation of PBs
+* Combinators of translation (PB + AMO/EX1)
+* Counter Based encoding for Cardinality
 * Incremental/enumeration of optimization statements 
 * Calling SAT solvers through the framework, consolidate their statistics
     (minisat, lingeling, cmsat, (some other fast ones) , local search solvers,

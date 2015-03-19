@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func TranslateBySN(pb *Threshold) (t ThresholdTranslation) {
+func TranslateBySN(pb *Threshold) (t ThresholdTranslation, err error) {
 	t.Typ = ComplexSN
 	pb.Normalize(AtMost, true)
 	pb.Sort()
@@ -31,7 +31,7 @@ func TranslateBySN(pb *Threshold) (t ThresholdTranslation) {
 	pred := sat.Pred("auxSN_" + strconv.Itoa(pb.Id))
 	t.Clauses = CreateEncoding(sn.LitIn, which, []sat.Literal{}, "BnB", pred, sn.Sorter)
 	t.Cls = t.Clauses.Size()
-	return
+	return t, nil
 }
 
 //this construction is based on AtMost threshold constraints

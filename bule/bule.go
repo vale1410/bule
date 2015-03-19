@@ -25,8 +25,9 @@ var gurobi_flag = flag.Bool("gurobi", false, "Reformat to Gurobi input, output t
 var solve_flag = flag.Bool("solve", true, "Dont solve just categorize and analyze the constriants.")
 
 var complex_flag = flag.String("complex", "hybrid", "Solve complex PBs with mdd/sn/hybrid. Default is hybrid")
-var timeout_flag = flag.Int("timeout", 10, "Timeout of the overall solving process")
-var maxMDD_flag = flag.Int("maxMDD", 300000, "Maximal Number of MDD Nodes in processing one PB.")
+var timeout_flag = flag.Int("timeout", 100, "Timeout of the overall solving process")
+var mdd_max_flag = flag.Int("mdd_max", 300000, "Maximal Number of MDD Nodes in processing one PB.")
+var mdd_redundant_flag = flag.Bool("mdd_redundant", true, "Reduce MDD by redundant nodes.")
 
 var digitRegexp = regexp.MustCompile("([0-9]+ )*[0-9]+")
 
@@ -57,7 +58,8 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	// put all configuration here
 	config.Complex_flag = *complex_flag
 	config.Timeout_flag = *timeout_flag
-	config.MaxMDD_flag = *maxMDD_flag
+	config.MDD_max_flag = *mdd_max_flag
+	config.MDD_redundant_flag = *mdd_redundant_flag
 
 	pbs, err := parse(*filename_flag)
 

@@ -2,26 +2,55 @@ package constraints
 
 import (
 	"errors"
+	//	"fmt"
 	"github.com/vale1410/bule/mdd"
 	"github.com/vale1410/bule/sat"
 	"math"
 	"strconv"
 )
 
-func TranslateByMDD(pb *Threshold) (t ThresholdTranslation) {
+func TranslateByMDD(pb *Threshold) (t ThresholdTranslation, err error) {
 	t.Typ = ComplexMDD
+	t.PB = pb
 	pb.Normalize(AtMost, true)
 	pb.Sort()
-	// maybe do some sorting or such kinds?
-	store := mdd.Init(len(pb.Entries)) //space-out for nodes for one mdd construction
+	// maybe do some more smart sorting?
+	store := mdd.Init(len(pb.Entries))
 	topId, _, _, err := CreateMDD(&store, pb.K, pb.Entries)
+	if err != nil {
+		//t.Cls = math.MaxInt32
+		return t, err
+	} else {
+		t.Clauses = convertMDD2Clauses(store, pb, topId)
+		t.Cls = t.Clauses.Size()
+	}
+	return t, err
+}
+
+func TranslateByMDDChain(pb *Threshold, chain Chain) (t ThresholdTranslation, err error) {
+
+	//pb.Print10()
+	//chain.Print()
+
+	if len(chain) <= 1 {
+		panic("Chain is smaller equal 1!!!")
+	}
+
+	t.Typ = ComplexMDDChain
+	t.PB = pb
+
+	store := mdd.Init(len(pb.Entries))
+	topId, _, _, err := CreateMDDChain(&store, pb.K, pb.Entries, chain)
+	//store.Debug(true)
+
 	if err != nil {
 		//fmt.Println(err.Error())
 		t.Cls = math.MaxInt32
 	} else {
-		t.Clauses = convertMDD2Clauses(pb, topId, store)
+		t.Clauses = convertMDDChainIntoClauses(store, pb, topId)
 		t.Cls = t.Clauses.Size()
 	}
+
 	return
 }
 
@@ -29,14 +58,15 @@ func TranslateByMDD(pb *Threshold) (t ThresholdTranslation) {
 // include some type of configuration
 // Translate monotone MDDs to SAT
 // If several children: assume literals in sequence of the PB
-func convertMDD2Clauses(pb *Threshold, id int, b mdd.MddStore) (clauses sat.ClauseSet) {
+func convertMDD2Clauses(store mdd.MddStore, pb *Threshold, id int) (clauses sat.ClauseSet) {
 
-	pred := sat.Pred("auxmdd_" + strconv.Itoa(pb.Id))
+	pred := sat.Pred("mdd" + strconv.Itoa(pb.Id))
 
 	top_lit := sat.Literal{true, sat.NewAtomP1(pred, id)}
 	clauses.AddTaggedClause("Top", top_lit)
-	for _, n := range b.Nodes {
-		v_id, l, vds := b.ClauseIds(*n)
+
+	for _, n := range store.Nodes {
+		v_id, l, vds := store.ClauseIds(*n)
 		//fmt.Println(v_id, l, vds)
 		if !n.IsZero() && !n.IsOne() {
 
@@ -63,7 +93,6 @@ func convertMDD2Clauses(pb *Threshold, id int, b mdd.MddStore) (clauses sat.Clau
 			v_lit := sat.Literal{true, sat.NewAtomP1(pred, v_id)}
 			clauses.AddTaggedClause("True", v_lit)
 		}
-
 	}
 
 	return
@@ -72,32 +101,29 @@ func convertMDD2Clauses(pb *Threshold, id int, b mdd.MddStore) (clauses sat.Clau
 // Translate monotone MDDs to SAT
 // Together with AMO translation
 // TODO: complete implementation
-func convertMDDChainIntoClauses(pb *Threshold, id int, b mdd.MddStore) (clauses sat.ClauseSet) {
+func convertMDDChainIntoClauses(store mdd.MddStore, pb *Threshold, id int) (clauses sat.ClauseSet) {
 
-	pred := sat.Pred("auxmdd_" + strconv.Itoa(pb.Id))
+	pred := sat.Pred("mdd" + strconv.Itoa(pb.Id))
 
 	top_lit := sat.Literal{true, sat.NewAtomP1(pred, id)}
 	clauses.AddTaggedClause("Top", top_lit)
-	for _, n := range b.Nodes {
-		v_id, l, vds := b.ClauseIds(*n)
-		//fmt.Println(v_id, l, vds)
+	for _, n := range store.Nodes {
+		v_id, l, vds := store.ClauseIds(*n)
 		if !n.IsZero() && !n.IsOne() {
 
 			v_lit := sat.Literal{false, sat.NewAtomP1(pred, v_id)}
+			last_id := -1
 			for i, vd_id := range vds {
-				vd_lit := sat.Literal{true, sat.NewAtomP1(pred, vd_id)}
-				if i > 0 {
-					literal := pb.Entries[len(pb.Entries)-l].Literal
-					//if vd_id != 0 { // vd is not true
-					clauses.AddTaggedClause("1B", v_lit, sat.Neg(literal), vd_lit)
-					//} else {
-					//	clauses.AddClause(sat.Neg(v_lit), sat.Neg(pb.Entries[len(pb.Entries)-l].Literal))
-					//}
-				} else {
-					//if vd_id != 1 { // vd is not true
-					clauses.AddTaggedClause("0B", v_lit, vd_lit)
-					//}
+				if last_id != vd_id {
+					vd_lit := sat.Literal{true, sat.NewAtomP1(pred, vd_id)}
+					if i > 0 {
+						literal := pb.Entries[len(pb.Entries)-l+i-1].Literal
+						clauses.AddTaggedClause("1B", v_lit, sat.Neg(literal), vd_lit)
+					} else {
+						clauses.AddTaggedClause("0B", v_lit, vd_lit)
+					}
 				}
+				last_id = vd_id
 			}
 		} else if n.IsZero() {
 			v_lit := sat.Literal{false, sat.NewAtomP1(pred, v_id)}
@@ -116,7 +142,7 @@ func convertMDDChainIntoClauses(pb *Threshold, id int, b mdd.MddStore) (clauses 
 // TODO: assumption: chain is in order with entries, starts somewhere
 // TODO: chain is same polarity as entries, and coefficients in entries are ascending for chain
 // TODO: extend to sequence of chains!!!
-func CreateMDDChain(store *mdd.MddStore, K int64, entries []Entry, chain []sat.Literal) (int, int64, int64, error) {
+func CreateMDDChain(store *mdd.MddStore, K int64, entries []Entry, chain Chain) (int, int64, int64, error) {
 
 	l := len(entries) ///level
 
@@ -124,6 +150,7 @@ func CreateMDDChain(store *mdd.MddStore, K int64, entries []Entry, chain []sat.L
 		return 0, 0, 0, errors.New("mdd max nodes reached")
 	}
 
+	//chain.Print()
 	//fmt.Println(l, K, entries)
 
 	if id, wmin_cache, wmax_cache := store.GetByWeight(l, K); id != -1 {

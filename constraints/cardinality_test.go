@@ -9,8 +9,7 @@ import (
 )
 
 func TestAtMostOne(test *testing.T) {
-
-	fmt.Println("Test for Pure Cardinality.")
+	fmt.Println("TestTranslateAtMostOne")
 	k := 6
 
 	lits := make([]sat.Literal, k)

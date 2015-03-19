@@ -2,6 +2,7 @@ package constraints
 
 import (
 	"fmt"
+	"github.com/vale1410/bule/config"
 	"github.com/vale1410/bule/sat"
 	"testing"
 )
@@ -21,7 +22,7 @@ func TestRewriteExactly1(test *testing.T) {
 	//pb1.Print10()
 	//pb2.Print10()
 
-	b := PreprocessExactly(&pb1, &pb2)
+	b := PreprocessPBwithExactly(&pb1, &pb2)
 	if !b && len(pb1.Entries) != 4 {
 		test.Fail()
 	}
@@ -45,7 +46,7 @@ func TestRewriteExactly2(test *testing.T) {
 	//pb1.Print10()
 	//pb2.Print10()
 
-	b := PreprocessExactly(&pb1, &pb2)
+	b := PreprocessPBwithExactly(&pb1, &pb2)
 
 	//pb1.Print10()
 
@@ -68,7 +69,7 @@ func TestRewriteExactly3(test *testing.T) {
 	//pb1.Print10()
 	//pb2.Print10()
 
-	b := PreprocessExactly(&pb1, &pb2)
+	b := PreprocessPBwithExactly(&pb1, &pb2)
 
 	//pb1.Print10()
 	//pb1.SortVar()
@@ -89,7 +90,7 @@ func TestRewriteExactly4(test *testing.T) {
 	pb2.Typ = Equal
 	pb2.Entries[2].Literal = sat.Neg(pb2.Entries[2].Literal)
 
-	b := PreprocessExactly(&pb1, &pb2)
+	b := PreprocessPBwithExactly(&pb1, &pb2)
 
 	if b {
 		test.Fail()
@@ -101,21 +102,85 @@ func TestRewriteAMO(test *testing.T) {
 	fmt.Println("TestRewriteAMO1")
 
 	pb1 := CreatePB([]int64{2, 2, 3, 4, 1, 1}, 6)
-
 	pb2 := CreatePB([]int64{1, 1, 1, 1}, 1)
 
-	pb1.Print10()
-	pb2.Print10()
+	//pb1.Print10()
+	//pb2.Print10()
 
 	//translate AMO, i.e. pb2
-	//b, literals := pb2.Cardinality()
-	//	amo := AtMostOne(Count, "count", literals)
-	//
-	//	t := TranslatePBwithAMO(&pb1, amo)
-	//	fmt.Println(t)
-	//
-	//	if !b || len(pb1.Entries) != 5 {
-	//		test.Fail()
-	//	}
+	b, literals := pb2.Cardinality()
+	amo := TranslateAtMostOne(Count, "count", literals)
+	amo.PB = &pb2
 
+	b = PreprocessPBwithAMO(&pb1, amo)
+
+	if !b || len(pb1.Entries) != 5 {
+		test.Fail()
+	}
+
+	if sumE(pb1) != 6 {
+		test.Fail()
+	}
+}
+
+func TestTranslateAMO1(test *testing.T) {
+	fmt.Println("TestTranslateAMO1")
+	config.MDD_max_flag = 300000
+	config.MDD_redundant_flag = false
+
+	pb1 := CreatePB([]int64{2, 2, 3, 4, 2, 3}, 6)
+	pb2 := CreatePB([]int64{1, 1, 1, 1}, 1)
+
+	//	pb1.Print10()
+	//	pb2.Print10()
+
+	//translate AMO, i.e. pb2
+	b, literals := pb2.Cardinality()
+	amo := TranslateAtMostOne(Count, "count", literals)
+	amo.PB = &pb2
+
+	t := TranslatePBwithAMO(&pb1, amo)
+
+	if !b || t.Clauses.Size() != 13 {
+		fmt.Println("translation size incorrect", t.Clauses.Size())
+		t.Clauses.PrintDebug()
+		test.Fail()
+	}
+}
+
+func TestTranslateAMO2(test *testing.T) {
+	fmt.Println("TestTranslateAMO2")
+	config.MDD_max_flag = 300000
+	config.MDD_redundant_flag = false
+
+	results := []int{40, 33, 29}
+
+	for i := 0; i < 3; i++ {
+
+		fmt.Println()
+		pb1 := CreatePB([]int64{2, 2, 3, 4, 4, 5, 2, 1}, 8)
+		//pb1.Print10()
+		pb2 := CreatePBOffset(i, []int64{1, 1, 1, 1}, 1)
+		//pb2.Print10()
+
+		b, literals := pb2.Cardinality()
+		amo := TranslateAtMostOne(Count, "c", literals)
+		amo.PB = &pb2
+
+		t := TranslatePBwithAMO(&pb1, amo)
+
+		if !b || t.Clauses.Size() != results[i] {
+			fmt.Println("translation size incorrect", t.Clauses.Size(), "!=", results[i])
+			//t.Clauses.PrintDebug()
+			test.Fail()
+		}
+	}
+
+}
+
+func sumE(pb Threshold) (r int64) {
+	for _, x := range pb.Entries {
+		r += x.Weight
+	}
+	return
 }

@@ -21,50 +21,28 @@ type Entry struct {
 }
 
 type Threshold struct {
-	Id   int // unique id to reference Threshold in encodings
-	Desc string
-
+	Id      int // unique id to reference Threshold in encodings
+	Desc    string
 	Entries []Entry
 	K       int64
 	Typ     EquationType
 	Pred    sat.Pred
 }
 
-// assumption is that pb2 is already a subsequece of pb1
-func CommonSlice(e []Entry, l []sat.Literal) (bool, []Entry) {
-	for i, x := range e {
-		if x.Literal == l[0] {
-			return true, e[i : i+len(l)]
-		}
-	}
-	return false, []Entry{}
-}
-
-// assumption is that pb2 is already a subsequece of pb1
-func PositionSlice(e1 []Entry, e2 []Entry) (bool, []int) {
-	//find min coefficient, to subtract
-	pos := make([]int, len(e2))
-
-	j := 0
-	for i, x := range e1 {
-		if j == len(pos) {
-			break
-		}
-		if x.Literal == e2[j].Literal {
-			pos[j] = i
-			j++
-		}
-	}
-	if j != len(pos) {
-		return false, []int{}
-	}
-	return false, pos
-}
+type Chain []sat.Literal
+type Lits []sat.Literal
 
 // creates an AtMost constraint
 // with coefficients in weights,
 // variables x1..xm
 func CreatePB(weights []int64, K int64) (pb Threshold) {
+	return CreatePBOffset(0, weights, K)
+}
+
+// creates an AtMost constraint
+// with coefficients in weights,
+// variables x1..xm
+func CreatePBOffset(offset int, weights []int64, K int64) (pb Threshold) {
 
 	pb.Entries = make([]Entry, len(weights))
 	pb.Typ = AtMost
@@ -72,7 +50,7 @@ func CreatePB(weights []int64, K int64) (pb Threshold) {
 
 	p := sat.Pred("x")
 	for i := 0; i < len(weights); i++ {
-		l := sat.Literal{true, sat.NewAtomP1(p, i)}
+		l := sat.Literal{true, sat.NewAtomP1(p, i+offset)}
 		pb.Entries[i] = Entry{l, weights[i]}
 	}
 	return
@@ -82,17 +60,28 @@ func CreatePB(weights []int64, K int64) (pb Threshold) {
 // removes such entries from the pb
 // threshold can become empty!
 func (t *Threshold) RemoveZeros() {
-	c := len(t.Entries)
 
-	for i := 0; i < c; i++ {
-		if t.Entries[i].Weight == 0 {
-			//fmt.Println(i, c)
-			c--
-			t.Entries[i] = t.Entries[c]
-			i--
+	entries := make([]Entry, len(t.Entries))
+	copy(entries, t.Entries)
+
+	// alternative faster implementation that does not
+	// keeps order
+	j := 0
+	for _, x := range t.Entries {
+		if x.Weight != 0 {
+			entries[j] = x
+			j++
 		}
 	}
-	t.Entries = t.Entries[:c]
+	t.Entries = entries[:j]
+}
+
+func (t *Threshold) Literals() (lits []sat.Literal) {
+	lits = make([]sat.Literal, len(t.Entries))
+	for i, x := range t.Entries {
+		lits[i] = x.Literal
+	}
+	return
 }
 
 // finds trivially implied facts, returns set of facts
@@ -223,6 +212,65 @@ func (t *Threshold) Normalize(typ EquationType, posWeights bool) {
 		t.NormalizePositiveLiterals()
 	}
 	return
+}
+
+// finds the subexpression of chain1 in e and
+// removes the entries of chain1 not existing in e anymore.
+func CleanChain(entries []Entry, chain1 Chain) (chain2 Chain) {
+
+	chain2 = make(Chain, len(chain1))
+
+	e := 0
+	for i, x := range entries {
+		if x.Literal == chain1[0] {
+			e = i
+		}
+	}
+
+	j2 := 0
+	for j1, l := range chain1 {
+		//fmt.Println("e", e, "j1", j1, "j2", j2)
+		if e+j2 == len(entries) {
+			break
+		}
+		if l == entries[e+j2].Literal {
+			chain2[j2] = chain1[j1]
+			j2++
+		}
+	}
+
+	return chain2[:j2]
+}
+
+// assumption is that pb2 is already a subsequece of pb1
+func CommonSlice(e1 []Entry, e2 []Entry) (bool, []Entry) {
+	for i, x := range e1 {
+		if x.Literal == e2[0].Literal {
+			return true, e1[i : i+len(e2)]
+		}
+	}
+	return false, []Entry{}
+}
+
+// assumption is that pb2 is already a subsequece of pb1
+func PositionSlice(e1 []Entry, e2 []Entry) (bool, []int) {
+	//find min coefficient, to subtract
+	pos := make([]int, len(e2))
+
+	j := 0
+	for i, x := range e1 {
+		if j == len(pos) {
+			break
+		}
+		if x.Literal == e2[j].Literal {
+			pos[j] = i
+			j++
+		}
+	}
+	if j != len(pos) {
+		return false, []int{}
+	}
+	return false, pos
 }
 
 // sums up all weights

@@ -129,7 +129,7 @@ func (g *Gen) Solve(cs ClauseSet) {
 			fmt.Print(";UNSATISFIABLE")
 		}
 	case <-timeout:
-		fmt.Print(";TIMEOUT")
+		fmt.Print(";TIMEOUT\n")
 	}
 
 	close(result)

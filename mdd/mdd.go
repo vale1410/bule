@@ -47,7 +47,7 @@ type MddStore struct {
 func Init(size int) (b MddStore) {
 	b.storage = rbtree.NewTree(Compare)
 	b.Nodes = make([]*Node, 2)
-	b.MaxNodes = config.MaxMDD_flag
+	b.MaxNodes = config.MDD_max_flag
 
 	b.Nodes[0] = &Node{Id: 0, Level: 0, Wmin: math.MinInt64 + 100000, Wmax: -1} // id 0
 	b.Nodes[1] = &Node{Id: 1, Level: 0, Wmin: 0, Wmax: math.MaxInt64 - 100000}  // id 1
@@ -123,13 +123,14 @@ func (mddStore *MddStore) GetByWeight(level int, weight int64) (id int, wmin, wm
 
 func (mddStore *MddStore) Insert(n Node) (id int) {
 
-	//check code start
+	//check code start TODO: remove for performance
 	if a := mddStore.storage.Get(n); a != nil {
 		fmt.Println("FAIL")
 		printNode(a.(Node))
 		panic("node should not exist")
 	}
 	//check code end
+
 	n.Id = mddStore.NextId
 	mddStore.Nodes = append(mddStore.Nodes, &n)
 	mddStore.NextId++
@@ -137,5 +138,6 @@ func (mddStore *MddStore) Insert(n Node) (id int) {
 		panic("nextId calculation and length of Nodes list is wrong")
 	}
 	mddStore.storage.Insert(n)
+
 	return n.Id
 }

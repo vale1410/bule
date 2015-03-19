@@ -1,10 +1,12 @@
 package constraints
 
 import (
+	"fmt"
 	"testing"
 )
 
-func TestExample(test *testing.T) {
+func TestSNTranslation(test *testing.T) {
+	fmt.Println("TestSortingNetworkTranslation")
 
 	filename := "test"
 	//typ := sorters.Bubble
