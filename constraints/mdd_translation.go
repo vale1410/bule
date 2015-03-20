@@ -17,13 +17,11 @@ func TranslateByMDD(pb *Threshold) (t ThresholdTranslation, err error) {
 	// maybe do some more smart sorting?
 	store := mdd.Init(len(pb.Entries))
 	topId, _, _, err := CreateMDD(&store, pb.K, pb.Entries)
+	store.Top = topId
 	if err != nil {
-		//t.Cls = math.MaxInt32
 		return t, err
-	} else {
-		t.Clauses = convertMDD2Clauses(store, pb, topId)
-		t.Cls = t.Clauses.Size()
 	}
+	t.Clauses = convertMDD2Clauses(store, pb)
 	return t, err
 }
 
@@ -41,15 +39,14 @@ func TranslateByMDDChain(pb *Threshold, chain Chain) (t ThresholdTranslation, er
 
 	store := mdd.Init(len(pb.Entries))
 	topId, _, _, err := CreateMDDChain(&store, pb.K, pb.Entries, chain)
+	store.Top = topId
 	//store.Debug(true)
 
 	if err != nil {
-		//fmt.Println(err.Error())
-		t.Cls = math.MaxInt32
-	} else {
-		t.Clauses = convertMDDChainIntoClauses(store, pb, topId)
-		t.Cls = t.Clauses.Size()
+		return t, err
 	}
+
+	t.Clauses = convertMDDChainIntoClauses(store, pb)
 
 	return
 }
@@ -58,11 +55,11 @@ func TranslateByMDDChain(pb *Threshold, chain Chain) (t ThresholdTranslation, er
 // include some type of configuration
 // Translate monotone MDDs to SAT
 // If several children: assume literals in sequence of the PB
-func convertMDD2Clauses(store mdd.MddStore, pb *Threshold, id int) (clauses sat.ClauseSet) {
+func convertMDD2Clauses(store mdd.MddStore, pb *Threshold) (clauses sat.ClauseSet) {
 
 	pred := sat.Pred("mdd" + strconv.Itoa(pb.Id))
 
-	top_lit := sat.Literal{true, sat.NewAtomP1(pred, id)}
+	top_lit := sat.Literal{true, sat.NewAtomP1(pred, store.Top)}
 	clauses.AddTaggedClause("Top", top_lit)
 
 	for _, n := range store.Nodes {
@@ -101,11 +98,11 @@ func convertMDD2Clauses(store mdd.MddStore, pb *Threshold, id int) (clauses sat.
 // Translate monotone MDDs to SAT
 // Together with AMO translation
 // TODO: complete implementation
-func convertMDDChainIntoClauses(store mdd.MddStore, pb *Threshold, id int) (clauses sat.ClauseSet) {
+func convertMDDChainIntoClauses(store mdd.MddStore, pb *Threshold) (clauses sat.ClauseSet) {
 
-	pred := sat.Pred("mdd" + strconv.Itoa(pb.Id))
+	pred := sat.Pred("mddc" + strconv.Itoa(pb.Id))
 
-	top_lit := sat.Literal{true, sat.NewAtomP1(pred, id)}
+	top_lit := sat.Literal{true, sat.NewAtomP1(pred, store.Top)}
 	clauses.AddTaggedClause("Top", top_lit)
 	for _, n := range store.Nodes {
 		v_id, l, vds := store.ClauseIds(*n)

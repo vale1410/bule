@@ -12,6 +12,7 @@ var sorterType sorters.SortingNetworkType
 
 // which sets the type of clauses translated from sorting networks
 // see below CreateEncoding for ids wrt clauses
+// Note: this only works for AtMost
 // 0: false, false, false, true, true, true, false, false
 // 1: false, false, false, true, true, true, false, true
 // 2: false, true, true, true, true, true, true, false
@@ -23,13 +24,14 @@ func SetUpSorterTranslation(which int, typ sorters.SortingNetworkType) {
 
 // CreateCardinality takes set of literals and creates a sorting network
 // encoding.
-func CreateCardinality(input []sat.Literal, K int, typ EquationType) sat.ClauseSet {
+func CreateCardinality(pb *Threshold) sat.ClauseSet {
 
-	sx := strconv.Itoa(K) + "\\" + strconv.Itoa(len(input))
+	literals := pb.Literals()
+	sx := strconv.Itoa(int(pb.K)) + "\\" + strconv.Itoa(len(literals))
 	var s string
 	var sorterEqTyp sorters.EquationType
 
-	switch typ {
+	switch pb.Typ {
 	case AtMost:
 		SetUpSorterTranslation(4, sorters.Pairwise)
 		sorterEqTyp = sorters.AtMost
@@ -42,6 +44,8 @@ func CreateCardinality(input []sat.Literal, K int, typ EquationType) sat.ClauseS
 		SetUpSorterTranslation(4, sorters.Pairwise)
 		s = "pb=SN" + sx
 		sorterEqTyp = sorters.Equal
+	default:
+		panic("Not supported")
 	}
 
 	var which [8]bool
@@ -59,15 +63,15 @@ func CreateCardinality(input []sat.Literal, K int, typ EquationType) sat.ClauseS
 		panic("sorterClauses in sat module not set")
 	}
 
-	sorter := sorters.CreateCardinalityNetwork(len(input), K, sorterEqTyp, sorterType)
+	sorter := sorters.CreateCardinalityNetwork(len(literals), int(pb.K), sorterEqTyp, sorterType)
 
 	sorter.RemoveOutput()
 
-	pred := sat.Pred("sort" + strconv.Itoa(uniqueId))
+	pred := sat.Pred("sort" + strconv.Itoa(pb.Id))
 
 	output := make([]sat.Literal, 0)
 
-	return CreateEncoding(input, which, output, s, pred, sorter)
+	return CreateEncoding(literals, which, output, s, pred, sorter)
 }
 
 // Create Encoding for Sorting Network

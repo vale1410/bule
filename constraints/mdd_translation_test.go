@@ -2,7 +2,7 @@ package constraints
 
 import (
 	"fmt"
-	"github.com/vale1410/bule/config"
+	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/mdd"
 	"github.com/vale1410/bule/sat"
 	"testing"
@@ -20,8 +20,8 @@ import (
 func TestMDD1(test *testing.T) {
 	fmt.Println("TestMDD1")
 
-	config.MDD_max_flag = 300000
-	config.MDD_redundant_flag = false
+	glob.MDD_max_flag = 300000
+	glob.MDD_redundant_flag = false
 
 	var t Threshold
 	t.Entries = createEntries([]int64{1, 2, 1, 1, 3, 1})

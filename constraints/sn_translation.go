@@ -30,7 +30,6 @@ func TranslateBySN(pb *Threshold) (t ThresholdTranslation, err error) {
 
 	pred := sat.Pred("auxSN_" + strconv.Itoa(pb.Id))
 	t.Clauses = CreateEncoding(sn.LitIn, which, []sat.Literal{}, "BnB", pred, sn.Sorter)
-	t.Cls = t.Clauses.Size()
 	return t, nil
 }
 

@@ -3,7 +3,6 @@ package constraints
 import (
 	//  "fmt"
 	"github.com/vale1410/bule/sat"
-	"github.com/vale1410/bule/sorters"
 )
 
 type OneTranslationType int
@@ -36,12 +35,6 @@ func TranslateAtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) 
 				clauses.AddTaggedClause(tag, sat.Neg(l), sat.Neg(lits[j]))
 			}
 		}
-
-	case Sort:
-
-		// TODO: collect the auxiliary variables from sorter
-		SetUpSorterTranslation(3, sorters.Pairwise)
-		clauses.AddClauseSet(CreateCardinality(lits, 1, AtMost))
 
 	case Split:
 
@@ -134,6 +127,10 @@ func TranslateAtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) 
 
 		cutoff := 5 //will be a parameter of this encoding
 		clauses = buildLogEncoding(sat.Pred("logE"), newId(), cutoff, 0, tag, lits)
+	case Sort:
+		panic("CNF translation for this type not implemented yet")
+	default:
+		panic("CNF translation for this type not implemented yet")
 
 	}
 
@@ -155,12 +152,6 @@ func TranslateExactlyOne(typ OneTranslationType, tag string, lits []sat.Literal)
 		trans.Aux = append(trans.Aux, trans2.Aux...)
 		clauses.AddClauseSet(trans2.Clauses)
 		clauses.AddTaggedClause(tag, lits...)
-
-	case Sort:
-
-		// TODO: collect the auxiliary variables from sorter
-		SetUpSorterTranslation(3, sorters.Pairwise)
-		clauses.AddClauseSet(CreateCardinality(lits, 1, Equal))
 
 	case Count:
 
@@ -199,9 +190,10 @@ func TranslateExactlyOne(typ OneTranslationType, tag string, lits []sat.Literal)
 
 		clauses.AddTaggedClause(tag+"Ex1", auxs[0])
 
+	case Sort:
+		panic("CNF translation for this type not implemented yet")
 	default:
 		panic("CNF translation for this type not implemented yet")
-
 	}
 
 	trans.Typ = typ

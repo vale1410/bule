@@ -28,10 +28,10 @@ func TestAtMostOne(test *testing.T) {
 	if t.Clauses.Size() == 0 {
 		test.Fail()
 	}
-	t = TranslateAtMostOne(Sort, "sorter", lits)
-	if t.Clauses.Size() == 0 {
-		test.Fail()
-	}
+	//	t = TranslateAtMostOne(Sort, "sorter", lits)
+	//	if t.Clauses.Size() == 0 {
+	//		test.Fail()
+	//	}
 	t = TranslateAtMostOne(Heule, "heule", lits)
 	if t.Clauses.Size() == 0 {
 		test.Fail()
@@ -66,10 +66,10 @@ func TestAtMostOne(test *testing.T) {
 	if t.Clauses.Size() == 0 {
 		test.Fail()
 	}
-	t = TranslateExactlyOne(Sort, "sorter", lits)
-	if t.Clauses.Size() == 0 {
-		test.Fail()
-	}
+	//t = TranslateExactlyOne(Sort, "sorter", lits)
+	//if t.Clauses.Size() == 0 {
+	//	test.Fail()
+	//}
 	t = TranslateExactlyOne(Heule, "heule", lits)
 	if t.Clauses.Size() == 0 {
 		test.Fail()

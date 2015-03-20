@@ -3,7 +3,7 @@ package sat
 import (
 	"bufio"
 	"fmt"
-	"github.com/vale1410/bule/config"
+	"github.com/vale1410/bule/glob"
 	"io"
 	"os"
 	"os/exec"
@@ -96,7 +96,7 @@ func (g *Gen) Solve(cs ClauseSet) {
 
 	result := make(chan Result)
 	timeout := make(chan bool, 1)
-	ttimeout := config.Timeout_flag //timeout in seconds
+	ttimeout := glob.Timeout_flag //timeout in seconds
 
 	go func() {
 		time.Sleep(time.Duration(ttimeout) * time.Second)

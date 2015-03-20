@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/vale1410/bule/config"
 	"github.com/vale1410/bule/constraints"
+	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/sat"
 	"io/ioutil"
 	"os"
@@ -18,11 +18,11 @@ var out = flag.String("o", "out.cnf", "Path of output file.")
 var ver = flag.Bool("ver", false, "Show version info.")
 
 //var check_clause = flag.Bool("clause", true, "Checks if Pseudo-Boolean is not just a simple clause.")
-var dbg = flag.Bool("d", false, "Print debug information.")
-var dbgfile = flag.String("df", "", "File to print debug information.")
+var debug_flag = flag.Bool("d", false, "Print debug information.")
+var debug_filename = flag.String("df", "", "File to print debug information.")
 var reformat_flag = flag.Bool("reformat", false, "Reformat PB files into correct format. Decompose = into >= and <=")
 var gurobi_flag = flag.Bool("gurobi", false, "Reformat to Gurobi input, output to stdout.")
-var solve_flag = flag.Bool("solve", true, "Dont solve just categorize and analyze the constriants.")
+var solve_flag = flag.Bool("dep_solve", false, "Dont solve just categorize and analyze the constriants.")
 
 var complex_flag = flag.String("complex", "hybrid", "Solve complex PBs with mdd/sn/hybrid. Default is hybrid")
 var timeout_flag = flag.Int("timeout", 100, "Timeout of the overall solving process")
@@ -36,16 +36,15 @@ var dbgoutput *os.File
 func main() {
 	flag.Parse()
 
-	if *dbgfile != "" {
+	if *debug_filename != "" {
 		var err error
-		dbgoutput, err = os.Create(*dbgfile)
+		glob.Debug_filename = *debug_filename
+		glob.Debug_output, err = os.Create(*debug_filename)
 		if err != nil {
 			panic(err)
 		}
-		defer dbgoutput.Close()
+		defer glob.Debug_output.Close()
 	}
-
-	debug("Running Debug Mode...")
 
 	if *ver {
 		fmt.Println(`Bule CNF Grounder: Tag 0.4 Pseudo Booleans
@@ -56,10 +55,13 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	}
 
 	// put all configuration here
-	config.Complex_flag = *complex_flag
-	config.Timeout_flag = *timeout_flag
-	config.MDD_max_flag = *mdd_max_flag
-	config.MDD_redundant_flag = *mdd_redundant_flag
+	glob.Debug_flag = *debug_flag
+	glob.Complex_flag = *complex_flag
+	glob.Timeout_flag = *timeout_flag
+	glob.MDD_max_flag = *mdd_max_flag
+	glob.MDD_redundant_flag = *mdd_redundant_flag
+
+	glob.D("Running Debug Mode...")
 
 	pbs, err := parse(*filename_flag)
 
@@ -99,38 +101,26 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 		var clauses sat.ClauseSet
 
-		stats := make([]int, constraints.TranslationTypes)
-
-		//if len(pbs) < 10 {
-		//	fmt.Println()
-		//	for _, pb := range pbs {
-		//		pb.Print10()
-		//	}
-		//	fmt.Println()
-		//}
-
-		primaryVars := make(map[string]bool, 0)
-
-		for i, pb := range pbs {
-
-			pb.Id = i
-			//pb.Print10()
-
-			for _, x := range pb.Entries {
-				primaryVars[x.Literal.A.Id()] = true
+		if !*solve_flag {
+			ppbs := make([]*constraints.Threshold, len(pbs))
+			for i, _ := range pbs {
+				pbs[i].Id = i
+				ppbs[i] = &pbs[i]
+			}
+			constraints.Categorize(ppbs)
+		} else if *solve_flag {
+			stats := make([]int, constraints.TranslationTypes)
+			primaryVars := make(map[string]bool, 0)
+			for i, pb := range pbs {
+				pbs[i].Id = i
+				for _, x := range pb.Entries {
+					primaryVars[x.Literal.A.Id()] = true
+				}
+				t := constraints.DEPRICATED_Translate(&pb)
+				stats[t.Typ]++
+				clauses.AddClauseSet(t.Clauses)
 			}
 
-			t := constraints.Translate(&pb)
-			stats[t.Typ]++
-
-			clauses.AddClauseSet(t.Clauses)
-			pb.Print10()
-			t.Clauses.PrintDebug()
-			//pb.Print10()
-			//fmt.Println()
-		}
-
-		if !*solve_flag {
 			fmt.Print(*filename_flag, ";", len(primaryVars), ";", len(pbs), ";")
 			for i, x := range stats {
 				if i > 0 {
@@ -138,8 +128,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 				}
 			}
 			fmt.Println()
-		} else {
-			printStats(stats)
+			//printStats(stats)
 			fmt.Print(*filename_flag)
 			g := sat.IdGenerator(clauses.Size() * 7)
 			g.Filename = *out
@@ -164,29 +153,6 @@ func printStats(stats []int) {
 		}
 	}
 	fmt.Println()
-}
-
-func debug(arg ...interface{}) {
-	if *dbg {
-		if *dbgfile == "" {
-			fmt.Print("dbg: ")
-			for _, s := range arg {
-				fmt.Print(s, " ")
-			}
-			fmt.Println()
-		} else {
-			ss := "dbg: "
-			for _, s := range arg {
-				ss += fmt.Sprintf("%v", s) + " "
-			}
-			ss += "\n"
-
-			if _, err := dbgoutput.Write([]byte(ss)); err != nil {
-				panic(err)
-			}
-		}
-
-	}
 }
 
 func parse(filename string) (pbs []constraints.Threshold, err error) {
@@ -221,15 +187,15 @@ func parse(filename string) (pbs []constraints.Threshold, err error) {
 		switch state {
 		case 0:
 			{
-				debug(l)
+				glob.D(l)
 				var b1 error
 				count, b1 = strconv.Atoi(elements[4])
 				vars, b2 := strconv.Atoi(elements[2])
 				if b1 != nil || b2 != nil {
-					debug("cant convert to threshold:", l)
+					glob.D("cant convert to threshold:", l)
 					panic("bad conversion of numbers")
 				}
-				debug("Found PB file with", count, "constraints and", vars, "variables")
+				glob.D("Found PB file with", count, "constraints and", vars, "variables")
 				pbs = make([]constraints.Threshold, count)
 				state = 1
 			}
@@ -250,7 +216,7 @@ func parse(filename string) (pbs []constraints.Threshold, err error) {
 					//variable, b2 := strconv.Atoi(digitRegexp.FindString(elements[i]))
 
 					if b1 != nil {
-						debug("cant convert to threshold:", l)
+						glob.D("cant convert to threshold:", l)
 						panic("bad conversion of numbers")
 					}
 					atom := sat.NewAtomP(sat.Pred(elements[i]))
@@ -267,7 +233,7 @@ func parse(filename string) (pbs []constraints.Threshold, err error) {
 				} else if typS == "==" || typS == "=" {
 					pbs[t].Typ = constraints.Equal
 				} else {
-					debug("cant convert to threshold:", l)
+					glob.D("cant convert to threshold:", l)
 					panic("bad conversion of symbols" + typS)
 				}
 				t++

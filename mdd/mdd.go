@@ -2,7 +2,7 @@ package mdd
 
 import (
 	"fmt"
-	"github.com/vale1410/bule/config"
+	"github.com/vale1410/bule/glob"
 	"github.com/yasushi-saito/rbtree"
 	"math"
 )
@@ -41,13 +41,14 @@ type MddStore struct {
 	NextId   int
 	Nodes    []*Node
 	MaxNodes int
+	Top      int
 	storage  *rbtree.Tree
 }
 
 func Init(size int) (b MddStore) {
 	b.storage = rbtree.NewTree(Compare)
 	b.Nodes = make([]*Node, 2)
-	b.MaxNodes = config.MDD_max_flag
+	b.MaxNodes = glob.MDD_max_flag
 
 	b.Nodes[0] = &Node{Id: 0, Level: 0, Wmin: math.MinInt64 + 100000, Wmax: -1} // id 0
 	b.Nodes[1] = &Node{Id: 1, Level: 0, Wmin: 0, Wmax: math.MaxInt64 - 100000}  // id 1

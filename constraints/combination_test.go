@@ -2,13 +2,13 @@ package constraints
 
 import (
 	"fmt"
-	"github.com/vale1410/bule/config"
+	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/sat"
 	"testing"
 )
 
 func TestRewriteExactly1(test *testing.T) {
-	fmt.Println("TestExactly1")
+	glob.D("TestExactly1")
 
 	//+2 x1 +2 x2 +3 x3 +4 x4 +1 x5 +1 x6 <= 6 ;
 	//+1 x1 +1 x2 +1 x3 +1 x4 = 1 ;
@@ -32,7 +32,7 @@ func TestRewriteExactly1(test *testing.T) {
 }
 
 func TestRewriteExactly2(test *testing.T) {
-	fmt.Println("TestExactly2")
+	glob.D("TestExactly2")
 
 	//+2 x1 +2 x2 +3 x3 +4 x4 +1 x5 +1 x6 <= 6 ;
 	//+1 x1 +1 x2 +1 x3 +1 x4 = 2 ;
@@ -57,7 +57,7 @@ func TestRewriteExactly2(test *testing.T) {
 }
 
 func TestRewriteExactly3(test *testing.T) {
-	fmt.Println("TestExactly3")
+	glob.D("TestExactly3")
 
 	pb1 := CreatePB([]int64{2, 2, 3, 4, 1, 1}, 6)
 	pb1.Typ = AtMost
@@ -81,7 +81,7 @@ func TestRewriteExactly3(test *testing.T) {
 }
 
 func TestRewriteExactly4(test *testing.T) {
-	fmt.Println("TestExactly3")
+	glob.D("TestExactly3")
 
 	pb1 := CreatePB([]int64{2, 2, 3, 4, 1, 1}, 6)
 	pb1.Typ = AtMost
@@ -99,7 +99,7 @@ func TestRewriteExactly4(test *testing.T) {
 }
 
 func TestRewriteAMO(test *testing.T) {
-	fmt.Println("TestRewriteAMO1")
+	glob.D("TestRewriteAMO1")
 
 	pb1 := CreatePB([]int64{2, 2, 3, 4, 1, 1}, 6)
 	pb2 := CreatePB([]int64{1, 1, 1, 1}, 1)
@@ -124,9 +124,9 @@ func TestRewriteAMO(test *testing.T) {
 }
 
 func TestTranslateAMO1(test *testing.T) {
-	fmt.Println("TestTranslateAMO1")
-	config.MDD_max_flag = 300000
-	config.MDD_redundant_flag = false
+	glob.D("TestTranslateAMO1")
+	glob.MDD_max_flag = 300000
+	glob.MDD_redundant_flag = false
 
 	pb1 := CreatePB([]int64{2, 2, 3, 4, 2, 3}, 6)
 	pb2 := CreatePB([]int64{1, 1, 1, 1}, 1)
@@ -149,9 +149,9 @@ func TestTranslateAMO1(test *testing.T) {
 }
 
 func TestTranslateAMO2(test *testing.T) {
-	fmt.Println("TestTranslateAMO2")
-	config.MDD_max_flag = 300000
-	config.MDD_redundant_flag = false
+	glob.D("TestTranslateAMO2")
+	glob.MDD_max_flag = 300000
+	glob.MDD_redundant_flag = false
 
 	results := []int{40, 33, 29}
 
@@ -168,6 +168,7 @@ func TestTranslateAMO2(test *testing.T) {
 		amo.PB = &pb2
 
 		t := TranslatePBwithAMO(&pb1, amo)
+		//t.Clauses.PrintDebug()
 
 		if !b || t.Clauses.Size() != results[i] {
 			fmt.Println("translation size incorrect", t.Clauses.Size(), "!=", results[i])

@@ -4,6 +4,7 @@ import (
 	//	"fmt"
 	"github.com/vale1410/bule/sat"
 	"sort"
+	"strconv"
 )
 
 type EquationType int
@@ -27,6 +28,14 @@ type Threshold struct {
 	K       int64
 	Typ     EquationType
 	Pred    sat.Pred
+}
+
+func (pb Threshold) Empty() bool {
+	return len(pb.Entries) == 0
+}
+
+func (pb *Threshold) IdS() string {
+	return strconv.Itoa(pb.Id)
 }
 
 type Chain []sat.Literal
@@ -89,17 +98,13 @@ func (t *Threshold) Literals() (lits []sat.Literal) {
 // threshold can become empty!
 func (t *Threshold) Simplify() (cs sat.ClauseSet) {
 
-	if t.Typ == Equal {
-		t.Normalize(Equal, true)
-	} else {
-		t.Normalize(AtMost, true)
-	}
+	t.Normalize(AtMost, true)
 
 	entries := make([]Entry, 0, len(t.Entries))
 
 	for _, x := range t.Entries {
 		if x.Weight > t.K {
-			cs.AddTaggedClause("Trivial", sat.Neg(x.Literal))
+			cs.AddTaggedClause(t.IdS()+":Fact", sat.Neg(x.Literal))
 		} else {
 			entries = append(entries, x)
 		}
@@ -196,13 +201,11 @@ func (t *Threshold) Multiply(c int64) {
 }
 
 // normalizes the threshold
+// Change EquationType in case of AtMost/AtLeast
+// in case of Equality, only positive weights
 func (t *Threshold) Normalize(typ EquationType, posWeights bool) {
 
-	if t.Typ == Equal {
-		if typ != Equal {
-			panic("cant normalize Equal on threshold that is not Equal")
-		}
-	} else if typ != t.Typ {
+	if (typ == AtMost && t.Typ == AtLeast) || (typ == AtLeast && t.Typ == AtMost) {
 		t.Multiply(-1)
 	}
 
@@ -211,6 +214,7 @@ func (t *Threshold) Normalize(typ EquationType, posWeights bool) {
 	} else {
 		t.NormalizePositiveLiterals()
 	}
+
 	return
 }
 
