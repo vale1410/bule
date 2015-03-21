@@ -121,14 +121,17 @@ There is NO WARRANTY, to the extent permitted by law.`)
 				clauses.AddClauseSet(t.Clauses)
 			}
 
-			fmt.Print(*filename_flag, ";", len(primaryVars), ";", len(pbs), ";")
-			for i, x := range stats {
-				if i > 0 {
-					fmt.Printf("%v;", x)
-				}
-			}
-			fmt.Println()
+			//// stats start
+			//fmt.Print(*filename_flag, ";", len(primaryVars), ";", len(pbs), ";")
+			//for i, x := range stats {
+			//	if i > 0 {
+			//		fmt.Printf("%v;", x)
+			//	}
+			//}
+			//fmt.Println()
 			//printStats(stats)
+			//// stats end
+
 			fmt.Print(*filename_flag)
 			g := sat.IdGenerator(clauses.Size() * 7)
 			g.Filename = *out
