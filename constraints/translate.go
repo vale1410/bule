@@ -59,7 +59,8 @@ type ThresholdTranslation struct {
 	Clauses sat.ClauseSet
 }
 
-func DEPRICATED_Translate(pb *Threshold) (t ThresholdTranslation) {
+//Depricated
+func Translate(pb *Threshold) (t ThresholdTranslation) {
 
 	// this will become much more elaborate in the future
 

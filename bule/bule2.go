@@ -116,7 +116,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 				for _, x := range pb.Entries {
 					primaryVars[x.Literal.A.Id()] = true
 				}
-				t := constraints.DEPRICATED_Translate(&pb)
+				t := constraints.Translate(&pb)
 				stats[t.Typ]++
 				clauses.AddClauseSet(t.Clauses)
 			}

@@ -2,10 +2,10 @@ Today
 =====
 * Do Table for categorization, group benchmarks into interesting and not interesting!
 * Prepare the matching problem of real PBs to constraints 
+* Consider Binary AtMostOne are clauses
 
 This week
 =========
-* Do BDD with AMO
 * Do SN with AMO
 * Restructure paper. 
 * Integrate convert.go into bule.go; call clasp with the program!
