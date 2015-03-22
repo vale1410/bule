@@ -26,16 +26,16 @@ type Constraint struct {
 
 func getEquationType(s string) constraints.EquationType {
 	if s == "E" {
-		return constraints.Equal
+		return constraints.EQ
 	} else if s == "L" {
-		return constraints.AtMost
+		return constraints.LE
 	} else if s == "G" {
-		return constraints.AtLeast
+		return constraints.GE
 	}
 	if s != "N" {
 		panic("UNknown equation type " + s)
 	}
-	return constraints.Optimization
+	return constraints.OPT
 }
 
 func main() {
@@ -239,11 +239,11 @@ func ParsePBO(filename string) (pbs []constraints.Threshold, vars map[string]boo
 				typS := elements[len(elements)-3]
 
 				if typS == ">=" {
-					pbs[t].Typ = constraints.AtLeast
+					pbs[t].Typ = constraints.GE
 				} else if typS == "<=" {
-					pbs[t].Typ = constraints.AtMost
+					pbs[t].Typ = constraints.LE
 				} else if typS == "==" || typS == "=" {
-					pbs[t].Typ = constraints.Equal
+					pbs[t].Typ = constraints.EQ
 				} else {
 					panic("bad conversion of symbols" + typS)
 				}

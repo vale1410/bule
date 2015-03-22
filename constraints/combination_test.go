@@ -14,10 +14,10 @@ func TestRewriteExactly1(test *testing.T) {
 	//+1 x1 +1 x2 +1 x3 +1 x4 = 1 ;
 
 	pb1 := CreatePB([]int64{2, 2, 3, 4, 1, 1}, 6)
-	pb1.Typ = AtMost
+	pb1.Typ = LE
 
 	pb2 := CreatePB([]int64{1, 1, 1, 1}, 1)
-	pb2.Typ = Equal
+	pb2.Typ = EQ
 
 	//pb1.Print10()
 	//pb2.Print10()
@@ -38,10 +38,10 @@ func TestRewriteExactly2(test *testing.T) {
 	//+1 x1 +1 x2 +1 x3 +1 x4 = 2 ;
 
 	pb1 := CreatePB([]int64{2, 2, 3, 4, 1, 1}, 6)
-	pb1.Typ = AtMost
+	pb1.Typ = LE
 
 	pb2 := CreatePB([]int64{1, 1, 1, 1}, 2)
-	pb2.Typ = Equal
+	pb2.Typ = EQ
 
 	//pb1.Print10()
 	//pb2.Print10()
@@ -60,11 +60,11 @@ func TestRewriteExactly3(test *testing.T) {
 	glob.D("TestExactly3")
 
 	pb1 := CreatePB([]int64{2, 2, 3, 4, 1, 1}, 6)
-	pb1.Typ = AtMost
+	pb1.Typ = LE
 	pb1.Sort()
 
 	pb2 := CreatePB([]int64{1, 1, 1, 1}, 2)
-	pb2.Typ = Equal
+	pb2.Typ = EQ
 
 	//pb1.Print10()
 	//pb2.Print10()
@@ -84,10 +84,10 @@ func TestRewriteExactly4(test *testing.T) {
 	glob.D("TestExactly3")
 
 	pb1 := CreatePB([]int64{2, 2, 3, 4, 1, 1}, 6)
-	pb1.Typ = AtMost
+	pb1.Typ = LE
 
 	pb2 := CreatePB([]int64{1, 1, 1, 1}, 2)
-	pb2.Typ = Equal
+	pb2.Typ = EQ
 	pb2.Entries[2].Literal = sat.Neg(pb2.Entries[2].Literal)
 
 	b := PreprocessPBwithExactly(&pb1, &pb2)

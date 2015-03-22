@@ -88,7 +88,7 @@ func printDzn(g QGC) {
 	}
 }
 
-func mapEncoding(e int) (c constraints.CardinalityType) {
+func mapEncoding(e int) (c constraints.OneTranslationType) {
 
 	switch e {
 	case 0:
@@ -202,7 +202,7 @@ func translateBounds(n int) (clauses sat.ClauseSet) {
 
 }
 
-func translateCardDecomposition(n int, typ constraints.CardinalityType) (clauses sat.ClauseSet) {
+func translateCardDecomposition(n int, typ constraints.OneTranslationType) (clauses sat.ClauseSet) {
 
 	p := sat.Pred("v")
 
@@ -213,7 +213,7 @@ func translateCardDecomposition(n int, typ constraints.CardinalityType) (clauses
 				lits[k] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
 			}
 			//clauses.AddTaggedClause("AtLeast", lits...)
-			clauses.AddClauseSet(constraints.ExactlyOne(typ, "ex1Value", lits))
+			clauses.AddClauseSet(constraints.TranslateExactlyOne(typ, "ex1Value", lits).Clauses)
 		}
 	}
 
@@ -224,7 +224,7 @@ func translateCardDecomposition(n int, typ constraints.CardinalityType) (clauses
 				lits[j] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
 			}
 			// in each row each value at most one
-			clauses.AddClauseSet(constraints.ExactlyOne(typ, "ex1Row", lits))
+			clauses.AddClauseSet(constraints.TranslateExactlyOne(typ, "ex1Row", lits).Clauses)
 		}
 	}
 
@@ -235,7 +235,7 @@ func translateCardDecomposition(n int, typ constraints.CardinalityType) (clauses
 				lits[i] = sat.Literal{true, sat.NewAtomP3(p, i, j, k)}
 			}
 			// in each column each value at most one
-			clauses.AddClauseSet(constraints.ExactlyOne(typ, "ex1Column", lits))
+			clauses.AddClauseSet(constraints.TranslateExactlyOne(typ, "ex1Column", lits).Clauses)
 		}
 	}
 

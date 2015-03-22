@@ -3,6 +3,7 @@ package constraints
 import (
 	"errors"
 	//	"fmt"
+	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/mdd"
 	"github.com/vale1410/bule/sat"
 	"math"
@@ -10,9 +11,9 @@ import (
 )
 
 func TranslateByMDD(pb *Threshold) (t ThresholdTranslation, err error) {
-	t.Typ = ComplexMDD
+	t.Typ = CMDD
 	t.PB = pb
-	pb.Normalize(AtMost, true)
+	pb.Normalize(LE, true)
 	pb.Sort()
 	// maybe do some more smart sorting?
 	store := mdd.Init(len(pb.Entries))
@@ -30,11 +31,13 @@ func TranslateByMDDChain(pb *Threshold, chain Chain) (t ThresholdTranslation, er
 	//pb.Print10()
 	//chain.Print()
 
-	if len(chain) <= 1 {
-		panic("Chain is smaller equal 1!!!")
+	glob.A(len(chain) > 0, "Dont call this function with empty chain")
+
+	if len(chain) == 1 { //
+		return TranslateByMDD(pb)
 	}
 
-	t.Typ = ComplexMDDChain
+	t.Typ = CMDDC
 	t.PB = pb
 
 	store := mdd.Init(len(pb.Entries))

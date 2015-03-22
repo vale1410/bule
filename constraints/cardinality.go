@@ -62,7 +62,7 @@ func TranslateAtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) 
 		}
 	case Count:
 
-		pred := sat.Pred("count")
+		pred := sat.Pred("c")
 		counterId := newId()
 
 		auxs := make([]sat.Literal, len(lits))

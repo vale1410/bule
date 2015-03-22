@@ -32,17 +32,17 @@ func CreateCardinality(pb *Threshold) sat.ClauseSet {
 	var sorterEqTyp sorters.EquationType
 
 	switch pb.Typ {
-	case AtMost:
+	case LE:
 		SetUpSorterTranslation(4, sorters.Pairwise)
 		sorterEqTyp = sorters.AtMost
-		s = "pb<SN" + sx
-	case AtLeast:
+		s = pb.IdS() + "pb<SN" + sx
+	case GE:
 		SetUpSorterTranslation(4, sorters.Pairwise)
 		sorterEqTyp = sorters.AtLeast
-		s = "pb>SN" + sx
-	case Equal:
+		s = pb.IdS() + "pb>SN" + sx
+	case EQ:
 		SetUpSorterTranslation(4, sorters.Pairwise)
-		s = "pb=SN" + sx
+		s = pb.IdS() + "pb=SN" + sx
 		sorterEqTyp = sorters.Equal
 	default:
 		panic("Not supported")

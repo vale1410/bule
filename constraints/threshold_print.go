@@ -48,15 +48,17 @@ func (t *Threshold) Print2() {
 		fmt.Print(l.ToTex())
 	}
 	switch t.Typ {
-	case AtMost:
+	case LE:
 		fmt.Print(" <= ")
-	case AtLeast:
+		fmt.Print(BinaryStr(t.K))
+	case GE:
 		fmt.Print(" >= ")
-	case Equal:
+		fmt.Print(BinaryStr(t.K))
+	case EQ:
 		fmt.Print(" == ")
+		fmt.Print(BinaryStr(t.K))
+	case OPT:
 	}
-
-	fmt.Print(BinaryStr(t.K))
 
 	fmt.Println()
 	fmt.Println()
@@ -82,11 +84,11 @@ func (t *Threshold) WriteFormula(base int, file *os.File) {
 		}
 	}
 	switch t.Typ {
-	case AtMost:
+	case LE:
 		file.Write([]byte(" \\leq "))
-	case AtLeast:
+	case GE:
 		file.Write([]byte(" \\geq "))
-	case Equal:
+	case EQ:
 		file.Write([]byte(" = "))
 	}
 	if base == 2 {
@@ -114,11 +116,11 @@ func (t *Threshold) PrintGurobi() {
 		fmt.Print(l.ToTxt())
 	}
 	switch t.Typ {
-	case AtMost:
+	case LE:
 		fmt.Print(" <= ")
-	case AtLeast:
+	case GE:
 		fmt.Print(" >= ")
-	case Equal:
+	case EQ:
 		fmt.Print(" = ")
 	}
 	fmt.Println(t.K)
@@ -135,11 +137,11 @@ func (t *Threshold) PrintPBO() {
 		fmt.Print(x.Weight, " ", l.ToPBO(), " ")
 	}
 	switch t.Typ {
-	case AtMost:
+	case LE:
 		fmt.Print("<= ")
-	case AtLeast:
+	case GE:
 		fmt.Print(">= ")
-	case Equal:
+	case EQ:
 		fmt.Print("= ")
 	}
 	fmt.Println(t.K, ";")
@@ -159,11 +161,11 @@ func (t *Threshold) Print10() {
 		}
 	}
 	switch t.Typ {
-	case AtMost:
+	case LE:
 		fmt.Print(" <= ")
-	case AtLeast:
+	case GE:
 		fmt.Print(" >= ")
-	case Equal:
+	case EQ:
 		fmt.Print(" = ")
 	}
 	fmt.Println(t.K, ";")
@@ -175,13 +177,13 @@ func (t *Threshold) PrintGringo() {
 	if len(t.Entries) > 0 {
 
 		switch t.Typ {
-		case AtMost:
+		case LE:
 			fmt.Print(":- ", t.K+1, " [ ")
-		case AtLeast:
+		case GE:
 			fmt.Print(":- [ ")
-		case Equal:
+		case EQ:
 			fmt.Print(":- not ", t.K, " [ ")
-		case Optimization:
+		case OPT:
 			fmt.Print("#minimize[")
 		}
 
@@ -197,13 +199,13 @@ func (t *Threshold) PrintGringo() {
 		}
 
 		switch t.Typ {
-		case AtMost:
+		case LE:
 			fmt.Print(" ]")
-		case AtLeast:
+		case GE:
 			fmt.Print(" ] ", t.K-1)
-		case Equal:
+		case EQ:
 			fmt.Print(" ] ", t.K)
-		case Optimization:
+		case OPT:
 			fmt.Print("]")
 		}
 		fmt.Println(".")

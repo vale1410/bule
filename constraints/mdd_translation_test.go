@@ -25,7 +25,7 @@ func TestMDD1(test *testing.T) {
 
 	var t Threshold
 	t.Entries = createEntries([]int64{1, 2, 1, 1, 3, 1})
-	t.Typ = AtMost
+	t.Typ = LE
 	t.K = 5
 	//t.Print10()
 

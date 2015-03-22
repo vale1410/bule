@@ -1,8 +1,9 @@
 package constraints
 
 import (
-	//	"fmt"
+	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/sat"
+	"math"
 	"sort"
 	"strconv"
 )
@@ -10,10 +11,10 @@ import (
 type EquationType int
 
 const (
-	AtMost EquationType = iota
-	AtLeast
-	Equal
-	Optimization
+	LE  EquationType = iota //"<="
+	GE                      //">="
+	EQ                      //"=="
+	OPT                     //"MAX"
 )
 
 type Entry struct {
@@ -54,7 +55,7 @@ func CreatePB(weights []int64, K int64) (pb Threshold) {
 func CreatePBOffset(offset int, weights []int64, K int64) (pb Threshold) {
 
 	pb.Entries = make([]Entry, len(weights))
-	pb.Typ = AtMost
+	pb.Typ = LE
 	pb.K = K
 
 	p := sat.Pred("x")
@@ -98,7 +99,7 @@ func (t *Threshold) Literals() (lits []sat.Literal) {
 // threshold can become empty!
 func (t *Threshold) Simplify() (cs sat.ClauseSet) {
 
-	t.Normalize(AtMost, true)
+	t.Normalize(LE, true)
 
 	entries := make([]Entry, 0, len(t.Entries))
 
@@ -111,10 +112,10 @@ func (t *Threshold) Simplify() (cs sat.ClauseSet) {
 	}
 	t.Entries = entries
 
-	if t.Typ == Equal {
-		t.Normalize(Equal, true)
+	if t.Typ == EQ {
+		t.Normalize(EQ, true)
 	} else {
-		t.Normalize(AtLeast, true)
+		t.Normalize(GE, true)
 	}
 
 	if t.SumWeights() == t.K {
@@ -145,7 +146,7 @@ func (t *Threshold) Cardinality() (allSame bool, literals []sat.Literal) {
 
 	if allSame {
 		literals = make([]sat.Literal, len(t.Entries))
-		t.K = t.K / coeff
+		t.K = int64(math.Ceil(float64(t.K) / float64(coeff)))
 		for i, x := range t.Entries {
 			t.Entries[i].Weight = 1
 			literals[i] = x.Literal
@@ -190,10 +191,10 @@ func (t *Threshold) Multiply(c int64) {
 
 	if c < 0 {
 		switch t.Typ {
-		case AtMost:
-			t.Typ = AtLeast
-		case AtLeast:
-			t.Typ = AtMost
+		case LE:
+			t.Typ = GE
+		case GE:
+			t.Typ = LE
 		default:
 			//nothing
 		}
@@ -205,7 +206,7 @@ func (t *Threshold) Multiply(c int64) {
 // in case of Equality, only positive weights
 func (t *Threshold) Normalize(typ EquationType, posWeights bool) {
 
-	if (typ == AtMost && t.Typ == AtLeast) || (typ == AtLeast && t.Typ == AtMost) {
+	if (typ == LE && t.Typ == GE) || (typ == GE && t.Typ == LE) {
 		t.Multiply(-1)
 	}
 
@@ -219,8 +220,9 @@ func (t *Threshold) Normalize(typ EquationType, posWeights bool) {
 }
 
 // finds the subexpression of chain1 in e and
-// removes the entries of chain1 not existing in e anymore.
+// returns the entries of chain1 existing in e.
 func CleanChain(entries []Entry, chain1 Chain) (chain2 Chain) {
+	glob.A(len(chain1) > 0, "no non-empty chains")
 
 	chain2 = make(Chain, len(chain1))
 
@@ -228,7 +230,9 @@ func CleanChain(entries []Entry, chain1 Chain) (chain2 Chain) {
 	for i, x := range entries {
 		if x.Literal == chain1[0] {
 			e = i
+			break
 		}
+		glob.A(i <= len(entries)-1, "chain must exist within entries")
 	}
 
 	j2 := 0
@@ -247,6 +251,7 @@ func CleanChain(entries []Entry, chain1 Chain) (chain2 Chain) {
 }
 
 // assumption is that pb2 is already a subsequece of pb1
+// TODO deprecated
 func CommonSlice(e1 []Entry, e2 []Entry) (bool, []Entry) {
 	for i, x := range e1 {
 		if x.Literal == e2[0].Literal {

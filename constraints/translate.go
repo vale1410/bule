@@ -12,15 +12,15 @@ const (
 	UNKNOWN TranslationType = iota
 	Facts
 	Clause
-	AtMostOne
-	ExactlyOne
-	ExactlyK
-	Cardinality
-	ComplexMDD
-	ComplexSN
+	AMO
+	EX1
+	EXK
+	CARD
+	CMDD
+	CSN
 	TranslationTypes
-	ComplexMDDChain
-	ComplexSNChain
+	CMDDC
+	CSNC
 )
 
 func (t TranslationType) String() (s string) {
@@ -29,24 +29,24 @@ func (t TranslationType) String() (s string) {
 		s = "Fcts"
 	case Clause:
 		s = "Cls"
-	case AtMostOne:
+	case AMO:
 		s = "AMO"
-	case ExactlyOne:
+	case EX1:
 		s = "EX1"
-	case ExactlyK:
+	case EXK:
 		s = "EXK"
-	case Cardinality:
+	case CARD:
 		s = "Card"
-	case ComplexMDD:
+	case CMDD:
 		s = "CMDD"
-	case ComplexSN:
+	case CSN:
 		s = "CSN"
 	case TranslationTypes:
 		s = "TranslationTypes"
-	case ComplexMDDChain:
-		s = "ComplexMDDChain"
-	case ComplexSNChain:
-		s = "ComplexSNChain"
+	case CMDDC:
+		s = "CMDDC"
+	case CSNC:
+		s = "CSNC"
 	default:
 		panic("has not been implemented")
 	}
@@ -60,7 +60,7 @@ type ThresholdTranslation struct {
 }
 
 //Depricated
-func Translate(pb *Threshold) (t ThresholdTranslation) {
+func Categorize1(pb *Threshold) (t ThresholdTranslation) {
 
 	// this will become much more elaborate in the future
 
@@ -78,17 +78,17 @@ func Translate(pb *Threshold) (t ThresholdTranslation) {
 
 			if pb.K == int64(len(pb.Entries)-1) {
 				switch pb.Typ {
-				case AtMost:
-					pb.Normalize(AtLeast, true)
+				case LE:
+					pb.Normalize(GE, true)
 					for i, x := range literals {
 						literals[i] = sat.Neg(x)
 					}
-				case AtLeast:
+				case GE:
 					for i, x := range literals {
 						literals[i] = sat.Neg(x)
 					}
-					pb.Normalize(AtMost, true)
-				case Equal:
+					pb.Normalize(LE, true)
+				case EQ:
 					for i, x := range literals {
 						literals[i] = sat.Neg(x)
 					}
@@ -99,34 +99,34 @@ func Translate(pb *Threshold) (t ThresholdTranslation) {
 
 			if pb.K == 1 {
 				switch pb.Typ {
-				case AtMost: // AMO
-					trans := TranslateAtMostOne(Heule, "HeuleAMO", literals)
+				case LE: // AMO
+					trans := TranslateAtMostOne(Heule, pb.IdS()+"HeuleAMO", literals)
 					t.Clauses.AddClauseSet(trans.Clauses)
-					t.Typ = AtMostOne
-				case AtLeast: // its a clause!
-					t.Clauses.AddTaggedClause("pb->Cls", literals...)
+					t.Typ = AMO
+				case GE: // its a clause!
+					t.Clauses.AddTaggedClause(pb.IdS()+"pb->Cls", literals...)
 					t.Typ = Clause
-				case Equal: // Ex1
-					trans := TranslateExactlyOne(Heule, "HeuleEX1", literals)
+				case EQ: // Ex1
+					trans := TranslateExactlyOne(Heule, pb.IdS()+"HeuleEX1", literals)
 					t.Clauses.AddClauseSet(trans.Clauses)
-					t.Typ = ExactlyOne
+					t.Typ = EX1
 				}
 			} else {
 				t.Clauses.AddClauseSet(CreateCardinality(pb))
-				t.Typ = Cardinality
+				t.Typ = CARD
 			}
 
 		} else {
 			// treat equality as two constraints!
-			if pb.Typ == Equal {
+			if pb.Typ == EQ {
 				glob.D(pb.Id, " decompose in >= amd <=")
-				pb.Typ = AtMost
+				pb.Typ = LE
 				t = TranslateComplexThreshold(pb)
-				pb.Normalize(AtMost, true)
-				pb.Typ = AtLeast
+				pb.Normalize(LE, true)
+				pb.Typ = GE
 				tt := TranslateComplexThreshold(pb) // TODO: same id problem for sorters and mdds, needs attention
 				t.Clauses.AddClauseSet(tt.Clauses)
-				pb.Typ = Equal
+				pb.Typ = EQ
 			} else {
 				t = TranslateComplexThreshold(pb)
 			}
@@ -164,10 +164,10 @@ func TranslateComplexThreshold(pb *Threshold) (t ThresholdTranslation) {
 
 		if err2 == nil && tMDD.Clauses.Size() < tSN.Clauses.Size() {
 			t.Clauses = tMDD.Clauses
-			t.Typ = ComplexMDD
+			t.Typ = CMDD
 		} else {
 			t.Clauses = tSN.Clauses
-			t.Typ = ComplexSN
+			t.Typ = CSN
 		}
 	default:
 		panic("Complex_flag option not available: " + glob.Complex_flag)
@@ -187,7 +187,7 @@ func PreprocessPBwithExactly(pb1 *Threshold, pb2 *Threshold) bool {
 	//check for overlap of literals
 	//both pb1 and pb2 are sorted in variable ordering!
 
-	if pb2.Typ == Equal {
+	if pb2.Typ == EQ {
 		b, _ := pb2.Cardinality()
 		if !b {
 			return false
@@ -237,13 +237,15 @@ func PreprocessPBwithExactly(pb1 *Threshold, pb2 *Threshold) bool {
 
 // returns if preprocessing was successful
 // Uses the translation of pb2 (count translation)
+// TODO deprecated
 func PreprocessPBwithAMO(pb *Threshold, amo CardTranslation) bool {
 
 	//assumptions:
 	//check for correct property of pb2
 	//check for overlap of literals
-	//both pb1 and amo are sorted in variable ordering!
+	//both pb1 and amo are in the same ordering
 
+	glob.A(amo.PB != nil, "amo PB pointer is not set correctly!")
 	b, es := CommonSlice(pb.Entries, amo.PB.Entries)
 	//fmt.Println(amo.PB.Entries, es)
 
@@ -259,7 +261,6 @@ func PreprocessPBwithAMO(pb *Threshold, amo CardTranslation) bool {
 	}
 
 	pb.RemoveZeros()
-	//	pb.Print10()
 
 	return true
 }

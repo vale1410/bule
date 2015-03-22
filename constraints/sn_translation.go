@@ -8,8 +8,8 @@ import (
 )
 
 func TranslateBySN(pb *Threshold) (t ThresholdTranslation, err error) {
-	t.Typ = ComplexSN
-	pb.Normalize(AtMost, true)
+	t.Typ = CSN
+	pb.Normalize(LE, true)
 	pb.Sort()
 	sn := NewSortingNetwork(*pb)
 	sn.CreateSorter()

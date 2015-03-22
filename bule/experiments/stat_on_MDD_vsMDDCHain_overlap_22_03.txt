@@ -1,0 +1,509 @@
+EASY/22s.smv.opb
+EASY/25s.smv.opb
+EASY/37s.smv.opb
+EASY/43s.smv.opb
+EASY/44s.smv.opb
+EASY/46s.smv.opb
+EASY/army8.9bt.opb
+EASY/army8.9ls.opb
+EASY/army9.12bt.opb
+EASY/army9.12ls.opb
+EASY/blast-floppy1-2.ucl.opb
+EASY/blast-floppy1-3.ucl.opb
+EASY/blast-floppy1-4.ucl.opb
+EASY/blast-floppy1-6.ucl.opb
+EASY/blast-floppy1-7.ucl.opb
+EASY/blast-floppy1-8.ucl.opb
+EASY/cache-ibm-q-unbounded.Icl2arity.ucl.opb
+EASY/dlx1c.rwmem1.ucl.opb
+EASY/dlx1c.rwmem.ucl.opb
+EASY/dlx1c.ucl.opb
+EASY/elf.rf10.ucl.opb
+EASY/elf.rf6.ucl.opb
+EASY/elf.rf7.ucl.opb
+EASY/elf.rf8.ucl.opb
+EASY/elf.rf9.ucl.opb
+EASY/ooo.burch_dill.2.accl.ucl.opb
+EASY/ooo.burch_dill.4.accl.ucl.opb
+EASY/ooo.rf6.ucl.opb
+EASY/ooo.rf7.ucl.opb
+EASY/ooo.rf8.ucl.opb
+EASY/ooo.rf9.ucl.opb
+EASY/ppp:1-12,16.opb
+EASY/ppp:1-13.opb
+EASY/ppp:1,3-13,19.opb
+EASY/robin10.opb
+EASY/robin8.opb
+EASY/t2001.13queen13.1111220546.opb
+normal 8071 chain: 11824 overlap 13
+EASY/t2001.13queen13.1111220767.opb
+normal 8254 chain: 11794 overlap 13
+EASY/t2001.13queen13.1111221203.opb
+normal 8187 chain: 11831 overlap 13
+EASY/t2001.13queen13.1111222248.opb
+normal 8810 chain: 11835 overlap 13
+EASY/t2001.13queen13.1111222257.opb
+normal 8166 chain: 11808 overlap 13
+EASY/t2001.13queen13.1111222539.opb
+normal 8806 chain: 11604 overlap 13
+EASY/t2001.13queen13.1111223004.opb
+normal 8038 chain: 11825 overlap 13
+EASY/t3002.11tsp11.1900544463.opb
+EASY/t3002.11tsp11.1900544484.opb
+EASY/t3002.11tsp11.1900545610.opb
+EASY/t3002.11tsp11.1900546076.opb
+EASY/t3002.11tsp11.1900546417.opb
+EASY/t3002.11tsp11.1900547334.opb
+EASY/t3002.11tsp11.1900547353.opb
+ignasi/ex1.pb
+normal 200 chain: 124 overlap 16
+normal 190 chain: 156 overlap 10
+normal 354 chain: 350 overlap 6
+normal 190 chain: 156 overlap 10
+normal 1690 chain: 2701 overlap 10
+normal 1754 chain: 1523 overlap 8
+normal 573 chain: 1147 overlap 7
+normal 24656 chain: 24521 overlap 16
+normal 142 chain: 127 overlap 8
+normal 220 chain: 131 overlap 10
+normal 68 chain: 4 overlap 15
+normal 142 chain: 39 overlap 12
+normal 190 chain: 156 overlap 10
+normal 354 chain: 379 overlap 8
+normal 800 chain: 690 overlap 13
+normal 573 chain: 1147 overlap 7
+normal 354 chain: 250 overlap 8
+normal 1754 chain: 1733 overlap 8
+match/comp1.pb
+normal 34 chain: 15 overlap 4
+match/comp2.pb
+normal 34 chain: 22 overlap 3
+match/comp3.pb
+match/comp4.pb
+normal 34 chain: 15 overlap 4
+match/comp5.pb
+normal 34 chain: 24 overlap 3
+match/comp6.pb
+normal 40 chain: 30 overlap 3
+match/comp7.pb
+normal 40 chain: 25 overlap 4
+match/comp8.pb
+normal 40 chain: 25 overlap 4
+match/comp9.pb
+normal 33 chain: 25 overlap 3
+match/ex1.pb
+normal 190 chain: 156 overlap 10
+normal 190 chain: 156 overlap 10
+normal 354 chain: 250 overlap 8
+normal 68 chain: 4 overlap 15
+normal 24656 chain: 24521 overlap 16
+normal 1690 chain: 2701 overlap 10
+normal 190 chain: 156 overlap 10
+normal 200 chain: 124 overlap 16
+normal 354 chain: 350 overlap 6
+normal 142 chain: 127 overlap 8
+normal 142 chain: 39 overlap 12
+normal 220 chain: 131 overlap 10
+normal 800 chain: 690 overlap 13
+normal 1754 chain: 1523 overlap 8
+normal 573 chain: 1189 overlap 7
+normal 1754 chain: 1523 overlap 8
+normal 354 chain: 379 overlap 8
+normal 573 chain: 1268 overlap 7
+match/t2001.13queen13.1111220546.opb
+normal 8071 chain: 11871 overlap 13
+New/graph10_UNSAT.pb
+New/graph1_UNSAT.pb
+New/graph2_SAT.pb
+New/graph3_SAT.pb
+New/graph4_UNSAT.pb
+New/graph5_UNSAT.pb
+New/graph6_SAT.pb
+New/graph7_UNSAT.pb
+New/graph8_SAT.pb
+New/graph9_SAT.pb
+New/graph9_UNSAT.pb
+New/japan1_50_SAT.pb
+New/japan1_50_UNSAT.pb
+New/japan1_80_SAT.pb
+New/japan1_80_UNSAT.pb
+New/japan2_100_SAT.pb
+New/japan2_100_UNSAT.pb
+New/japan2_256_SAT.pb
+New/japan2_256_UNSAT.pb
+New/normalized-cuww1.opb
+New/normalized-cuww2.opb
+New/normalized-cuww3.opb
+New/normalized-cuww5.opb
+New/normalized-prob1.opb
+New/normalized-prob2.opb
+New/normalized-prob3.opb
+New/normalized-prob4.opb
+New/normalized-prob5.opb
+New/normalized-prob6.opb
+New/normalized-prob7.opb
+New/normalized-prob8.opb
+New/queens10.pb
+New/queens1.pb
+New/queens2.pb
+New/queens3.pb
+New/queens4.pb
+New/queens5.pb
+New/queens6.pb
+New/queens7.pb
+New/queens8.pb
+New/queens9.pb
+PB-DEC/army10.14bt.opb
+PB-DEC/army10.14ls.opb
+PB-DEC/army11.17bt.opb
+PB-DEC/army11.17ls.opb
+PB-DEC/army12.21bt.opb
+PB-DEC/army12.21ls.opb
+PB-DEC/army13.24bt.opb
+PB-DEC/army13.24ls.opb
+PB-DEC/blast-tlan2.ucl.opb
+PB-DEC/blast-tlan3.ucl.opb
+PB-DEC/cache-ibm-q-full.all.ucl.opb
+PB-DEC/cache-ibm-q-unbounded.Ic22arity.ucl.opb
+PB-DEC/cache-ibm-q-unbounded.Ih1arity.ucl.opb
+PB-DEC/cache-ibm-q-unbounded.Ih2arity.ucl.opb
+PB-DEC/cache.inv10.ucl.opb
+PB-DEC/cache.inv12.ucl.opb
+PB-DEC/cache.inv14.ucl.opb
+PB-DEC/cache.inv8.ucl.opb
+PB-DEC/dbst_v30_e350_d15_mw10_1.opb.PB06.opb
+PB-DEC/dbst_v30_e350_d15_mw10_2.opb.PB06.opb
+PB-DEC/dbst_v30_e350_d15_mw10_3.opb.PB06.opb
+PB-DEC/dbst_v30_e350_d15_mw10_8.opb.PB06.opb
+PB-DEC/dbst_v30_e350_d15_mw10_9.opb.PB06.opb
+PB-DEC/dbst_v40_e600_d20_mw10_0.opb.PB06.opb
+PB-DEC/dbst_v40_e600_d20_mw10_2.opb.PB06.opb
+PB-DEC/dbst_v40_e600_d20_mw10_5.opb.PB06.opb
+PB-DEC/dbst_v40_e600_d20_mw10_6.opb.PB06.opb
+PB-DEC/dbst_v40_e600_d20_mw10_9.opb.PB06.opb
+PB-DEC/dbst_v50_e1000_d25_mw10_1.opb.PB06.opb
+PB-DEC/dbst_v50_e1000_d25_mw10_3.opb.PB06.opb
+PB-DEC/dbst_v50_e1000_d25_mw10_5.opb.PB06.opb
+PB-DEC/dbst_v50_e1000_d25_mw10_6.opb.PB06.opb
+PB-DEC/dbst_v50_e1000_d25_mw10_9.opb.PB06.opb
+PB-DEC/neos808444.opb
+normal 214 chain: 169 overlap 6
+normal 286 chain: 223 overlap 8
+normal 178 chain: 133 overlap 6
+normal 115 chain: 79 overlap 5
+normal 160 chain: 115 overlap 6
+normal 178 chain: 133 overlap 6
+normal 241 chain: 178 overlap 8
+normal 205 chain: 142 overlap 8
+normal 187 chain: 124 overlap 8
+normal 178 chain: 133 overlap 6
+normal 241 chain: 178 overlap 8
+normal 205 chain: 142 overlap 8
+normal 187 chain: 124 overlap 8
+normal 178 chain: 133 overlap 6
+normal 241 chain: 178 overlap 8
+normal 178 chain: 133 overlap 6
+normal 196 chain: 151 overlap 6
+normal 277 chain: 223 overlap 7
+normal 187 chain: 151 overlap 5
+normal 205 chain: 142 overlap 8
+normal 178 chain: 133 overlap 6
+normal 178 chain: 133 overlap 6
+normal 349 chain: 286 overlap 8
+normal 205 chain: 142 overlap 8
+normal 187 chain: 124 overlap 8
+normal 214 chain: 160 overlap 7
+normal 214 chain: 169 overlap 6
+normal 241 chain: 178 overlap 8
+normal 115 chain: 88 overlap 4
+normal 178 chain: 133 overlap 6
+normal 187 chain: 124 overlap 8
+normal 286 chain: 223 overlap 8
+normal 160 chain: 115 overlap 6
+normal 196 chain: 151 overlap 6
+normal 205 chain: 142 overlap 8
+normal 286 chain: 223 overlap 8
+normal 178 chain: 133 overlap 6
+normal 115 chain: 88 overlap 4
+normal 196 chain: 160 overlap 5
+normal 286 chain: 223 overlap 8
+normal 214 chain: 169 overlap 6
+normal 178 chain: 133 overlap 6
+normal 196 chain: 160 overlap 5
+normal 178 chain: 133 overlap 6
+normal 178 chain: 133 overlap 6
+normal 205 chain: 142 overlap 8
+normal 241 chain: 178 overlap 8
+normal 106 chain: 88 overlap 3
+normal 277 chain: 223 overlap 7
+normal 205 chain: 142 overlap 8
+normal 106 chain: 88 overlap 3
+normal 187 chain: 151 overlap 5
+normal 205 chain: 142 overlap 8
+normal 205 chain: 142 overlap 8
+normal 205 chain: 142 overlap 8
+normal 115 chain: 79 overlap 5
+normal 205 chain: 142 overlap 8
+normal 187 chain: 151 overlap 5
+normal 178 chain: 133 overlap 6
+normal 106 chain: 88 overlap 3
+normal 115 chain: 88 overlap 4
+normal 115 chain: 79 overlap 5
+normal 196 chain: 160 overlap 5
+normal 187 chain: 124 overlap 8
+normal 178 chain: 133 overlap 6
+normal 106 chain: 88 overlap 3
+normal 187 chain: 124 overlap 8
+normal 178 chain: 133 overlap 6
+normal 106 chain: 88 overlap 3
+normal 205 chain: 142 overlap 8
+normal 115 chain: 79 overlap 5
+normal 178 chain: 133 overlap 6
+normal 241 chain: 178 overlap 8
+normal 241 chain: 178 overlap 8
+normal 349 chain: 286 overlap 8
+normal 277 chain: 223 overlap 7
+normal 241 chain: 178 overlap 8
+normal 178 chain: 133 overlap 6
+normal 214 chain: 178 overlap 5
+normal 214 chain: 169 overlap 6
+normal 115 chain: 79 overlap 5
+normal 241 chain: 178 overlap 8
+normal 178 chain: 133 overlap 6
+normal 214 chain: 178 overlap 5
+normal 205 chain: 142 overlap 8
+normal 205 chain: 142 overlap 8
+normal 214 chain: 160 overlap 7
+normal 115 chain: 79 overlap 5
+normal 169 chain: 142 overlap 4
+normal 286 chain: 223 overlap 8
+normal 349 chain: 286 overlap 8
+normal 169 chain: 142 overlap 4
+normal 115 chain: 88 overlap 4
+normal 205 chain: 142 overlap 8
+normal 196 chain: 151 overlap 6
+normal 196 chain: 151 overlap 6
+normal 178 chain: 133 overlap 6
+normal 160 chain: 97 overlap 8
+normal 205 chain: 142 overlap 8
+normal 178 chain: 133 overlap 6
+normal 187 chain: 151 overlap 5
+normal 115 chain: 79 overlap 5
+normal 214 chain: 178 overlap 5
+normal 286 chain: 223 overlap 8
+normal 115 chain: 79 overlap 5
+normal 178 chain: 133 overlap 6
+normal 349 chain: 286 overlap 8
+normal 187 chain: 124 overlap 8
+normal 214 chain: 160 overlap 7
+normal 187 chain: 124 overlap 8
+normal 115 chain: 79 overlap 5
+normal 178 chain: 133 overlap 6
+normal 115 chain: 79 overlap 5
+normal 241 chain: 178 overlap 8
+normal 115 chain: 88 overlap 4
+normal 160 chain: 97 overlap 8
+normal 241 chain: 178 overlap 8
+normal 214 chain: 178 overlap 5
+normal 178 chain: 133 overlap 6
+normal 178 chain: 133 overlap 6
+normal 205 chain: 142 overlap 8
+normal 160 chain: 115 overlap 6
+normal 205 chain: 142 overlap 8
+normal 349 chain: 286 overlap 8
+normal 178 chain: 133 overlap 6
+normal 205 chain: 142 overlap 8
+normal 178 chain: 133 overlap 6
+normal 169 chain: 142 overlap 4
+normal 187 chain: 151 overlap 5
+normal 196 chain: 151 overlap 6
+normal 214 chain: 160 overlap 7
+normal 196 chain: 160 overlap 5
+normal 178 chain: 133 overlap 6
+normal 214 chain: 160 overlap 7
+normal 178 chain: 133 overlap 6
+normal 205 chain: 142 overlap 8
+normal 187 chain: 151 overlap 5
+normal 241 chain: 178 overlap 8
+normal 178 chain: 133 overlap 6
+normal 160 chain: 115 overlap 6
+normal 187 chain: 151 overlap 5
+normal 196 chain: 151 overlap 6
+normal 160 chain: 115 overlap 6
+normal 115 chain: 79 overlap 5
+normal 178 chain: 133 overlap 6
+normal 277 chain: 223 overlap 7
+normal 178 chain: 133 overlap 6
+normal 241 chain: 178 overlap 8
+normal 205 chain: 142 overlap 8
+normal 178 chain: 133 overlap 6
+normal 205 chain: 142 overlap 8
+normal 349 chain: 286 overlap 8
+normal 205 chain: 142 overlap 8
+normal 214 chain: 169 overlap 6
+normal 214 chain: 169 overlap 6
+normal 187 chain: 151 overlap 5
+normal 349 chain: 286 overlap 8
+normal 178 chain: 133 overlap 6
+normal 277 chain: 223 overlap 7
+normal 106 chain: 88 overlap 3
+normal 196 chain: 160 overlap 5
+normal 178 chain: 133 overlap 6
+normal 205 chain: 142 overlap 8
+normal 196 chain: 160 overlap 5
+normal 205 chain: 142 overlap 8
+normal 178 chain: 133 overlap 6
+normal 241 chain: 178 overlap 8
+normal 205 chain: 142 overlap 8
+normal 115 chain: 79 overlap 5
+normal 205 chain: 142 overlap 8
+normal 214 chain: 178 overlap 5
+normal 115 chain: 88 overlap 4
+normal 214 chain: 160 overlap 7
+normal 115 chain: 79 overlap 5
+normal 178 chain: 133 overlap 6
+normal 115 chain: 79 overlap 5
+normal 178 chain: 133 overlap 6
+normal 214 chain: 178 overlap 5
+normal 106 chain: 88 overlap 3
+normal 277 chain: 223 overlap 7
+normal 205 chain: 142 overlap 8
+normal 115 chain: 79 overlap 5
+normal 178 chain: 133 overlap 6
+normal 214 chain: 178 overlap 5
+normal 349 chain: 286 overlap 8
+normal 196 chain: 151 overlap 6
+normal 160 chain: 115 overlap 6
+normal 196 chain: 160 overlap 5
+normal 205 chain: 142 overlap 8
+normal 241 chain: 178 overlap 8
+normal 178 chain: 133 overlap 6
+normal 115 chain: 88 overlap 4
+normal 196 chain: 160 overlap 5
+normal 178 chain: 133 overlap 6
+normal 160 chain: 97 overlap 8
+normal 115 chain: 79 overlap 5
+normal 178 chain: 133 overlap 6
+normal 205 chain: 142 overlap 8
+normal 115 chain: 88 overlap 4
+normal 178 chain: 133 overlap 6
+normal 205 chain: 142 overlap 8
+normal 187 chain: 124 overlap 8
+normal 169 chain: 142 overlap 4
+normal 160 chain: 115 overlap 6
+normal 178 chain: 133 overlap 6
+normal 277 chain: 223 overlap 7
+normal 187 chain: 151 overlap 5
+normal 205 chain: 142 overlap 8
+normal 178 chain: 133 overlap 6
+normal 178 chain: 133 overlap 6
+normal 178 chain: 133 overlap 6
+normal 160 chain: 97 overlap 8
+normal 205 chain: 142 overlap 8
+normal 241 chain: 178 overlap 8
+normal 178 chain: 133 overlap 6
+normal 106 chain: 88 overlap 3
+normal 205 chain: 142 overlap 8
+normal 196 chain: 151 overlap 6
+normal 241 chain: 178 overlap 8
+normal 205 chain: 142 overlap 8
+normal 160 chain: 115 overlap 6
+normal 214 chain: 178 overlap 5
+normal 286 chain: 223 overlap 8
+normal 160 chain: 97 overlap 8
+normal 205 chain: 142 overlap 8
+normal 205 chain: 142 overlap 8
+normal 205 chain: 142 overlap 8
+normal 178 chain: 133 overlap 6
+normal 196 chain: 151 overlap 6
+normal 115 chain: 79 overlap 5
+normal 169 chain: 142 overlap 4
+normal 178 chain: 133 overlap 6
+normal 178 chain: 133 overlap 6
+normal 178 chain: 133 overlap 6
+normal 241 chain: 178 overlap 8
+normal 205 chain: 142 overlap 8
+normal 241 chain: 178 overlap 8
+normal 178 chain: 133 overlap 6
+normal 115 chain: 79 overlap 5
+normal 214 chain: 169 overlap 6
+normal 169 chain: 142 overlap 4
+normal 178 chain: 133 overlap 6
+normal 214 chain: 178 overlap 5
+normal 196 chain: 160 overlap 5
+normal 214 chain: 160 overlap 7
+normal 178 chain: 133 overlap 6
+normal 286 chain: 223 overlap 8
+normal 169 chain: 142 overlap 4
+normal 115 chain: 88 overlap 4
+normal 160 chain: 97 overlap 8
+normal 178 chain: 133 overlap 6
+normal 205 chain: 142 overlap 8
+normal 205 chain: 142 overlap 8
+normal 205 chain: 142 overlap 8
+normal 214 chain: 169 overlap 6
+normal 205 chain: 142 overlap 8
+normal 196 chain: 151 overlap 6
+normal 169 chain: 142 overlap 4
+normal 214 chain: 160 overlap 7
+normal 169 chain: 142 overlap 4
+normal 106 chain: 88 overlap 3
+normal 214 chain: 178 overlap 5
+normal 214 chain: 169 overlap 6
+normal 277 chain: 223 overlap 7
+normal 286 chain: 223 overlap 8
+normal 214 chain: 169 overlap 6
+normal 205 chain: 142 overlap 8
+normal 160 chain: 97 overlap 8
+normal 106 chain: 88 overlap 3
+normal 214 chain: 160 overlap 7
+normal 241 chain: 178 overlap 8
+normal 160 chain: 97 overlap 8
+normal 169 chain: 142 overlap 4
+normal 115 chain: 79 overlap 5
+normal 214 chain: 160 overlap 7
+normal 187 chain: 124 overlap 8
+normal 349 chain: 286 overlap 8
+normal 205 chain: 142 overlap 8
+normal 286 chain: 223 overlap 8
+normal 160 chain: 97 overlap 8
+normal 160 chain: 115 overlap 6
+normal 187 chain: 151 overlap 5
+normal 277 chain: 223 overlap 7
+PB-DEC/neos-820146.opb
+PB-DEC/neos-820157.opb
+PB-DEC/neos-849702.opb
+PB-DEC/ooo.burch_dill.3.accl.ucl.opb
+PB-DEC/ooo.burch_dill.6.accl.ucl.opb
+PB-DEC/ooo.burch_dill.8.accl.ucl.opb
+PB-DEC/ooo.ex.br.mem.RobRegValid_bar.ucl.opb
+PB-DEC/ooo.ex.br.mem.Src1Valid_Src1ValidBar.ucl.opb
+PB-DEC/ooo.ex.mem.LdValue.ucl.opb
+PB-DEC/ooo.ex.mem.LsqHdStrong.ucl.opb
+PB-DEC/ooo.rf10.ucl.opb
+PB-DEC/ooo.tag10.ucl.opb
+PB-DEC/ooo.tag12.ucl.opb
+PB-DEC/ooo.tag14.ucl.opb
+PB-DEC/ooo.tag8.ucl.opb
+PB-DEC/ooo.unbounded.all.ucl.opb
+PB-DEC/ppp:1-11,19,21.opb
+PB-DEC/ppp:1-9,16-19.opb
+PB-DEC/ppp:3-13,25,26.opb
+PB-DEC/robin12.opb
+PB-DEC/robin14.opb
+PB-DEC/robin16.opb
+PB-DEC/robin18.opb
+Test/equality0.pb
+Test/equality1.pb
+Test/equality2.pb
+Test/equality3.pb
+Test/equality4.pb
+Test/test0.pb
+Test/test1.pb
+Test/test2.pb
+Test/test3.pb
+Test/test4.pb
+Test/test5.pb
+Test/test6.pb
+Test/test7.pb
+Test/test8.pb

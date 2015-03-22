@@ -47,6 +47,7 @@ func D(arg ...interface{}) {
 // An assert function
 func A(check bool, arg ...interface{}) {
 	if !check {
+		fmt.Print("ASSERT FAILED: ")
 		for _, s := range arg {
 			fmt.Print(s, " ")
 		}

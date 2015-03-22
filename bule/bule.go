@@ -22,7 +22,7 @@ var debug_flag = flag.Bool("d", false, "Print debug information.")
 var debug_filename = flag.String("df", "", "File to print debug information.")
 var reformat_flag = flag.Bool("reformat", false, "Reformat PB files into correct format. Decompose = into >= and <=")
 var gurobi_flag = flag.Bool("gurobi", false, "Reformat to Gurobi input, output to stdout.")
-var solve_flag = flag.Bool("dep_solve", false, "Dont solve just categorize and analyze the constriants.")
+var solve_flag = flag.Bool("solve", false, "Dont solve just categorize and analyze the constriants.")
 
 var complex_flag = flag.String("complex", "hybrid", "Solve complex PBs with mdd/sn/hybrid. Default is hybrid")
 var timeout_flag = flag.Int("timeout", 100, "Timeout of the overall solving process")
@@ -47,7 +47,7 @@ func main() {
 	}
 
 	if *ver {
-		fmt.Println(`Bule CNF Grounder: Tag 0.4 Pseudo Booleans
+		fmt.Println(`Bule CNF Grounder: Tag 0.8 Pseudo Booleans
 Copyright (C) NICTA and Valentin Mayer-Eichberger
 License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 There is NO WARRANTY, to the extent permitted by law.`)
@@ -63,18 +63,20 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 	glob.D("Running Debug Mode...")
 
-	pbs, err := parse(*filename_flag)
-
+	opt, pbs, err := parse(*filename_flag)
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		err.Error()
+	}
+
+	if !opt.Empty() {
+		glob.D("Ignoring optimization statement")
 	}
 
 	if *gurobi_flag {
 		fmt.Println("Subject To")
 		atoms := make(map[string]bool, len(pbs))
 		for _, pb := range pbs {
-			pb.Normalize(constraints.AtLeast, false)
+			pb.Normalize(constraints.GE, false)
 			pb.PrintGurobi()
 			for _, x := range pb.Entries {
 				atoms[x.Literal.A.Id()] = true
@@ -87,13 +89,13 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		fmt.Println()
 	} else if *reformat_flag {
 		for _, pb := range pbs {
-			if pb.Typ == constraints.Equal {
-				pb.Typ = constraints.AtLeast
-				pb.Normalize(constraints.AtLeast, false)
+			if pb.Typ == constraints.EQ {
+				pb.Typ = constraints.GE
+				pb.Normalize(constraints.GE, false)
 				pb.Print10()
-				pb.Typ = constraints.AtMost
+				pb.Typ = constraints.LE
 			}
-			pb.Normalize(constraints.AtLeast, false)
+			pb.Normalize(constraints.GE, false)
 			pb.Print10()
 		}
 
@@ -101,22 +103,23 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 		var clauses sat.ClauseSet
 
-		if !*solve_flag {
+		if !*solve_flag { // do statistics
+
 			ppbs := make([]*constraints.Threshold, len(pbs))
 			for i, _ := range pbs {
-				pbs[i].Id = i
+				pbs[i].Sort()
 				ppbs[i] = &pbs[i]
 			}
-			constraints.Categorize(ppbs)
+			constraints.Categorize2(ppbs)
+
 		} else if *solve_flag {
 			stats := make([]int, constraints.TranslationTypes)
 			primaryVars := make(map[string]bool, 0)
-			for i, pb := range pbs {
-				pbs[i].Id = i
-				for _, x := range pb.Entries {
+			for i, _ := range pbs {
+				for _, x := range pbs[i].Entries {
 					primaryVars[x.Literal.A.Id()] = true
 				}
-				t := constraints.Translate(&pb)
+				t := constraints.Categorize1(&pbs[i])
 				stats[t.Typ]++
 				clauses.AddClauseSet(t.Clauses)
 			}
@@ -136,8 +139,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			g := sat.IdGenerator(clauses.Size() * 7)
 			g.Filename = *out
 			g.PrimaryVars = primaryVars
-			//clauses.PrintDebug()
-			//g.PrintDIMACS(clauses)
+			//			clauses.PrintDebug()
 			g.Solve(clauses)
 		}
 	}
@@ -158,20 +160,21 @@ func printStats(stats []int) {
 	fmt.Println()
 }
 
-func parse(filename string) (pbs []constraints.Threshold, err error) {
+func parse(filename string) (opt constraints.Threshold, pbs []constraints.Threshold, err error) {
 
 	input, err := ioutil.ReadFile(filename)
 
 	if err != nil {
-		return pbs, err
+		return opt, pbs, err
 	}
 
 	output, err := os.Create(*out)
 	if err != nil {
-		panic(err)
+		err.Error()
 	}
 	defer output.Close()
 
+	//TODO: use a buffered reader to prevent the whole file being in memory
 	lines := strings.Split(string(input), "\n")
 
 	// 0 : first line, 1 : rest of the lines
@@ -204,44 +207,63 @@ func parse(filename string) (pbs []constraints.Threshold, err error) {
 			}
 		case 1:
 			{
-				if t >= count {
-					panic("Number of constraints incorrectly specified in pb input file " + filename)
+				glob.A(t <= count, "Number of constraints incorrectly specified in pb input file ", filename)
+
+				var n int  // number of entries
+				var f int  // index of entry
+				var o bool //optimization
+				var pb constraints.Threshold
+
+				if "min:" == elements[0] {
+					o = true
+					n = (len(elements) - 2) / 2
+					f = 1
+				} else {
+					o = false
+					n = (len(elements) - 3) / 2
+					f = 0
 				}
-				pbs[t].Desc = l
 
-				n := (len(elements) - 3) / 2
-				pbs[t].Entries = make([]constraints.Entry, n)
+				pb.Entries = make([]constraints.Entry, n)
 
-				for i := 0; i < len(elements)-3; i++ {
+				for i := f; i < 2*n; i++ {
 
 					weight, b1 := strconv.ParseInt(elements[i], 10, 64)
 					i++
-					//variable, b2 := strconv.Atoi(digitRegexp.FindString(elements[i]))
-
 					if b1 != nil {
 						glob.D("cant convert to threshold:", l)
 						panic("bad conversion of numbers")
 					}
 					atom := sat.NewAtomP(sat.Pred(elements[i]))
-					pbs[t].Entries[i/2] = constraints.Entry{sat.Literal{true, atom}, weight}
+					pb.Entries[(i-f)/2] = constraints.Entry{sat.Literal{true, atom}, weight}
 				}
 
-				pbs[t].K, _ = strconv.ParseInt(elements[len(elements)-2], 10, 64)
-				typS := elements[len(elements)-3]
-
-				if typS == ">=" {
-					pbs[t].Typ = constraints.AtLeast
-				} else if typS == "<=" {
-					pbs[t].Typ = constraints.AtMost
-				} else if typS == "==" || typS == "=" {
-					pbs[t].Typ = constraints.Equal
+				if o {
+					pb.Typ = constraints.OPT
+					opt = pb
 				} else {
-					glob.D("cant convert to threshold:", l)
-					panic("bad conversion of symbols" + typS)
+					pb.K, _ = strconv.ParseInt(elements[len(elements)-2], 10, 64)
+					typS := elements[len(elements)-3]
+
+					if typS == ">=" {
+						pb.Typ = constraints.GE
+					} else if typS == "<=" {
+						pb.Typ = constraints.LE
+					} else if typS == "==" || typS == "=" {
+						pb.Typ = constraints.EQ
+					} else {
+						glob.D("cant convert to threshold:", l)
+						panic("bad conversion of symbols" + typS)
+					}
+					pb.Id = t
+					pbs[t] = pb
+					t++
 				}
-				t++
 			}
 		}
 	}
+
+	glob.A(t == count, t, count, "Number of constraints incorrectly specified in pb input file ", filename)
+
 	return
 }
