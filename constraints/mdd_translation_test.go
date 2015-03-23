@@ -18,7 +18,9 @@ import (
 //}
 
 func TestMDD1(test *testing.T) {
-	fmt.Println("TestMDD1")
+	glob.Debug_flag = true
+
+	glob.D("TestMDD1")
 
 	glob.MDD_max_flag = 300000
 	glob.MDD_redundant_flag = false
@@ -27,7 +29,7 @@ func TestMDD1(test *testing.T) {
 	t.Entries = createEntries([]int64{1, 2, 1, 1, 3, 1})
 	t.Typ = LE
 	t.K = 5
-	//t.Print10()
+	t.Print10()
 
 	store := mdd.Init(len(t.Entries))
 	_, _, _, s1 := CreateMDD(&store, t.K, t.Entries)
@@ -36,19 +38,23 @@ func TestMDD1(test *testing.T) {
 		test.Fail()
 	}
 
-	literals := t.Literals() //createLiterals(i, 3)
+	chain := Chain(t.Literals()) //createLiterals(i, 3)
 
 	for i := 0; i < 4; i++ {
-		//	fmt.Println("\n\n Chain on index", i, i+3)
+		fmt.Println("\n\n Chain on index", i, i+3)
+
+		chains := Chains{chain[i : i+3]}
+		chains[0].Print()
 
 		store = mdd.Init(len(t.Entries))
-		_, _, _, s1 := CreateMDDChain(&store, t.K, t.Entries, literals[i:i+3])
+		_, _, _, s1 := CreateMDDChain(&store, t.K, t.Entries, chains)
 
 		if s1 != nil {
 			test.Fail()
 		}
-		//store.Debug(true)
+		store.Debug(true)
 	}
+	glob.Debug_flag = false
 }
 
 func createLiterals(start int, n int) (literals []sat.Literal) {

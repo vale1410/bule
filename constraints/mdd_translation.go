@@ -26,14 +26,15 @@ func TranslateByMDD(pb *Threshold) (t ThresholdTranslation, err error) {
 	return t, err
 }
 
-func TranslateByMDDChain(pb *Threshold, chain Chain) (t ThresholdTranslation, err error) {
+// chains must be in order of pb and be subsets of its literals
+func TranslateByMDDChain(pb *Threshold, chains Chains) (t ThresholdTranslation, err error) {
 
 	//pb.Print10()
 	//chain.Print()
 
-	glob.A(len(chain) > 0, "Dont call this function with empty chain")
+	glob.A(len(chains[0]) > 0, "Dont call this function with empty chain")
 
-	if len(chain) == 1 { //
+	if len(chains) == 1 { //
 		return TranslateByMDD(pb)
 	}
 
@@ -41,7 +42,7 @@ func TranslateByMDDChain(pb *Threshold, chain Chain) (t ThresholdTranslation, er
 	t.PB = pb
 
 	store := mdd.Init(len(pb.Entries))
-	topId, _, _, err := CreateMDDChain(&store, pb.K, pb.Entries, chain)
+	topId, _, _, err := CreateMDDChain(&store, pb.K, pb.Entries, chains)
 	store.Top = topId
 	//store.Debug(true)
 
@@ -138,11 +139,12 @@ func convertMDDChainIntoClauses(store mdd.MddStore, pb *Threshold) (clauses sat.
 	return
 }
 
+// Chains is a set of chains in order of the PB
 // Chain: there are clauses  xi <-xi+1 <- xi+2 ... <- xi+k, and xi .. xi+k are in order of PB
 // TODO: assumption: chain is in order with entries, starts somewhere
 // TODO: chain is same polarity as entries, and coefficients in entries are ascending for chain
 // TODO: extend to sequence of chains!!!
-func CreateMDDChain(store *mdd.MddStore, K int64, entries []Entry, chain Chain) (int, int64, int64, error) {
+func CreateMDDChain(store *mdd.MddStore, K int64, entries []Entry, chains Chains) (int, int64, int64, error) {
 
 	l := len(entries) ///level
 
@@ -166,7 +168,9 @@ func CreateMDDChain(store *mdd.MddStore, K int64, entries []Entry, chain Chain) 
 		var n mdd.Node
 		var err error
 
-		if len(chain) > 0 && chain[0] == entries[0].Literal { //chain mode
+		if len(chains) > 0 && chains[0][0] == entries[0].Literal { //chain mode
+			glob.A(len(chains[0]) > 0, "chains must contain at least 1 element")
+			chain := chains[0]
 			var jumpEntries []Entry
 			if len(entries) <= len(chain) {
 				jumpEntries = []Entry{}
@@ -177,7 +181,7 @@ func CreateMDDChain(store *mdd.MddStore, K int64, entries []Entry, chain Chain) 
 			n.Level = l
 			n.Children = make([]int, len(chain)+1)
 
-			n.Children[0], n.Wmin, n.Wmax, err = CreateMDDChain(store, K, jumpEntries, []sat.Literal{})
+			n.Children[0], n.Wmin, n.Wmax, err = CreateMDDChain(store, K, jumpEntries, chains[1:])
 
 			if err != nil {
 				return 0, 0, 0, err
@@ -188,13 +192,12 @@ func CreateMDDChain(store *mdd.MddStore, K int64, entries []Entry, chain Chain) 
 			//			fmt.Printf("entries:%v  chain: %v", entries, chain)
 			for i, _ := range chain {
 
-				if len(chain) > len(entries) || chain[i] != entries[i].Literal {
-					panic("chain and PB are not aligned!!!! ")
-				}
+				glob.A(len(chain) <= len(entries), "chain and PB are not aligned!!!! ")
+				glob.A(chain[i] == entries[i].Literal, "chain and PB are not aligned!!!! ")
 
 				var wmin2, wmax2 int64
 				acc += entries[i].Weight
-				n.Children[i+1], wmin2, wmax2, err = CreateMDDChain(store, K-acc, jumpEntries, chain)
+				n.Children[i+1], wmin2, wmax2, err = CreateMDDChain(store, K-acc, jumpEntries, chains[1:])
 				n.Wmin = maxx(n.Wmin, wmin2+acc)
 				n.Wmax = min(n.Wmax, wmax2+acc)
 
@@ -215,7 +218,7 @@ func CreateMDDChain(store *mdd.MddStore, K int64, entries []Entry, chain Chain) 
 			for i := int64(0); i < int64(dom); i++ {
 				var wmin2, wmax2 int64
 
-				n.Children[i], wmin2, wmax2, err = CreateMDDChain(store, K-i*entries[0].Weight, entries[1:], chain)
+				n.Children[i], wmin2, wmax2, err = CreateMDDChain(store, K-i*entries[0].Weight, entries[1:], chains)
 
 				n.Wmin = maxx(n.Wmin, wmin2+i*entries[0].Weight)
 				n.Wmax = min(n.Wmax, wmax2+i*entries[0].Weight)

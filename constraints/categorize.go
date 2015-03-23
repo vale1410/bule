@@ -205,7 +205,7 @@ func Categorize2(pbs []*Threshold) {
 		//fmt.Println("rewritten:")
 		//pbs[comp].Print10()
 
-		t, err := TranslateByMDDChain(pbs[comp], chain)
+		t, err := TranslateByMDDChain(pbs[comp], Chains{chain})
 		if err != nil {
 			panic(err.Error())
 		}
@@ -227,8 +227,6 @@ func Categorize2(pbs []*Threshold) {
 
 	return
 }
-
-//Do the matching
 
 type Match struct {
 	comp, simp int // thresholdIds

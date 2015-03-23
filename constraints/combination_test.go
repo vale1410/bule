@@ -123,6 +123,32 @@ func TestRewriteAMO(test *testing.T) {
 	}
 }
 
+func TestTranslateAMO0(test *testing.T) {
+	glob.Debug_flag = true
+	glob.D("TestTranslateAMO0")
+	glob.MDD_max_flag = 300000
+	glob.MDD_redundant_flag = false
+
+	pb1 := CreatePB([]int64{2, 3, 4, 3}, 5)
+	pb2 := CreatePB([]int64{1, 1, 1}, 1)
+
+	pb1.Print10()
+	pb2.Print10()
+
+	//translate AMO, i.e. pb2
+	b, literals := pb2.Cardinality()
+	amo := TranslateAtMostOne(Count, "c", literals)
+	amo.PB = &pb2
+
+	t := TranslatePBwithAMO(&pb1, amo)
+
+	if !b || t.Clauses.Size() != 13 {
+		fmt.Println("translation size incorrect", t.Clauses.Size())
+		t.Clauses.PrintDebug()
+		test.Fail()
+	}
+}
+
 func TestTranslateAMO1(test *testing.T) {
 	glob.D("TestTranslateAMO1")
 	glob.MDD_max_flag = 300000
@@ -136,7 +162,7 @@ func TestTranslateAMO1(test *testing.T) {
 
 	//translate AMO, i.e. pb2
 	b, literals := pb2.Cardinality()
-	amo := TranslateAtMostOne(Count, "count", literals)
+	amo := TranslateAtMostOne(Count, "c", literals)
 	amo.PB = &pb2
 
 	t := TranslatePBwithAMO(&pb1, amo)

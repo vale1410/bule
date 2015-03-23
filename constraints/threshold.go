@@ -40,6 +40,7 @@ func (pb *Threshold) IdS() string {
 }
 
 type Chain []sat.Literal
+type Chains []Chain
 type Lits []sat.Literal
 
 // creates an AtMost constraint

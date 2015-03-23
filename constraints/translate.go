@@ -274,7 +274,7 @@ func TranslatePBwithAMO(pb *Threshold, amo CardTranslation) (t ThresholdTranslat
 		panic("Translate PB with AMO called on wrong input")
 	}
 	chain := CleanChain(pb.Entries, amo.Aux)
-	t, err := TranslateByMDDChain(pb, chain)
+	t, err := TranslateByMDDChain(pb, Chains{chain})
 	if err != nil {
 		panic(err.Error())
 	}
