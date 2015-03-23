@@ -17,6 +17,20 @@ const (
 	OPT                     //"MAX"
 )
 
+func (e EquationType) String() string {
+	switch e {
+	case LE:
+		return "<="
+	case GE:
+		return ">="
+	case EQ:
+		return "=="
+	case OPT:
+		return "MAX"
+	}
+	return ""
+}
+
 type Entry struct {
 	Literal sat.Literal
 	Weight  int64
@@ -31,8 +45,17 @@ type Threshold struct {
 	Pred    sat.Pred
 }
 
-func (pb Threshold) Empty() bool {
+func (pb *Threshold) Empty() bool {
 	return len(pb.Entries) == 0
+}
+
+func (pb *Threshold) Positive() bool {
+	for _, x := range pb.Entries {
+		if x.Weight < 0 {
+			return false
+		}
+	}
+	return true
 }
 
 func (pb *Threshold) IdS() string {
@@ -294,7 +317,7 @@ func (t *Threshold) SumWeights() (total int64) {
 func (t *Threshold) SortVar() {
 	sort.Sort(EntriesVariables(t.Entries))
 }
-func (t *Threshold) Sort() {
+func (t *Threshold) SortWeight() {
 	sort.Sort(EntriesAscending(t.Entries))
 }
 

@@ -137,6 +137,8 @@ func Categorize1(pb *Threshold) (t ThresholdTranslation) {
 }
 
 func TranslateComplexThreshold(pb *Threshold) (t ThresholdTranslation) {
+	pb.Normalize(LE, true)
+	pb.SortWeight()
 
 	var err error
 	switch glob.Complex_flag {

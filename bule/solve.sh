@@ -20,8 +20,8 @@ do
     time -f';%e' timeout 1000 ./bule -f $x -complex=sn -solve
 done
 
-echo hybrid
-for x in $1/*.*pb; 
-do 
-    time -f';%e' timeout 1000 ./bule -f $x -complex=hybrid -solve
-done
+#echo hybrid
+#for x in $1/*.*pb; 
+#do 
+#    time -f';%e' timeout 1000 ./bule -f $x -complex=hybrid -solve
+#done

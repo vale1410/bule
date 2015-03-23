@@ -10,7 +10,7 @@ import (
 func TranslateBySN(pb *Threshold) (t ThresholdTranslation, err error) {
 	t.Typ = CSN
 	pb.Normalize(LE, true)
-	pb.Sort()
+	pb.SortWeight()
 	sn := NewSortingNetwork(*pb)
 	sn.CreateSorter()
 	//PrintThresholdTikZ("sn.tex", []SortingNetwork{sn})
