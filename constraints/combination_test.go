@@ -2,9 +2,10 @@ package constraints
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/sat"
-	"testing"
 )
 
 func TestRewriteExactly1(test *testing.T) {
@@ -124,7 +125,6 @@ func TestRewriteAMO(test *testing.T) {
 }
 
 func TestTranslateAMO0(test *testing.T) {
-	glob.Debug_flag = true
 	glob.D("TestTranslateAMO0")
 	glob.MDD_max_flag = 300000
 	glob.MDD_redundant_flag = false
@@ -132,8 +132,8 @@ func TestTranslateAMO0(test *testing.T) {
 	pb1 := CreatePB([]int64{2, 3, 4, 3}, 5)
 	pb2 := CreatePB([]int64{1, 1, 1}, 1)
 
-	pb1.Print10()
-	pb2.Print10()
+	//pb1.Print10()
+	//pb2.Print10()
 
 	//translate AMO, i.e. pb2
 	b, literals := pb2.Cardinality()
@@ -142,7 +142,7 @@ func TestTranslateAMO0(test *testing.T) {
 
 	t := TranslatePBwithAMO(&pb1, amo)
 
-	if !b || t.Clauses.Size() != 13 {
+	if !b || t.Clauses.Size() != 8 {
 		fmt.Println("translation size incorrect", t.Clauses.Size())
 		t.Clauses.PrintDebug()
 		test.Fail()
@@ -157,8 +157,8 @@ func TestTranslateAMO1(test *testing.T) {
 	pb1 := CreatePB([]int64{2, 2, 3, 4, 2, 3}, 6)
 	pb2 := CreatePB([]int64{1, 1, 1, 1}, 1)
 
-	//	pb1.Print10()
-	//	pb2.Print10()
+	//pb1.Print10()
+	//pb2.Print10()
 
 	//translate AMO, i.e. pb2
 	b, literals := pb2.Cardinality()
@@ -168,7 +168,7 @@ func TestTranslateAMO1(test *testing.T) {
 	t := TranslatePBwithAMO(&pb1, amo)
 
 	if !b || t.Clauses.Size() != 13 {
-		fmt.Println("translation size incorrect", t.Clauses.Size())
+		fmt.Println("translation size incorrect", t.Clauses.Size(), "should be:", 13)
 		t.Clauses.PrintDebug()
 		test.Fail()
 	}
@@ -183,10 +183,11 @@ func TestTranslateAMO2(test *testing.T) {
 
 	for i := 0; i < 3; i++ {
 
-		fmt.Println()
+		//fmt.Println()
 		pb1 := CreatePB([]int64{2, 2, 3, 4, 4, 5, 2, 1}, 8)
-		//pb1.Print10()
 		pb2 := CreatePBOffset(i, []int64{1, 1, 1, 1}, 1)
+
+		//pb1.Print10()
 		//pb2.Print10()
 
 		b, literals := pb2.Cardinality()
@@ -197,7 +198,7 @@ func TestTranslateAMO2(test *testing.T) {
 		//t.Clauses.PrintDebug()
 
 		if !b || t.Clauses.Size() != results[i] {
-			fmt.Println("translation size incorrect", t.Clauses.Size(), "!=", results[i])
+			fmt.Println("translation size incorrect", t.Clauses.Size(), " should be", results[i])
 			//t.Clauses.PrintDebug()
 			test.Fail()
 		}

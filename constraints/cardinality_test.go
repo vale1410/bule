@@ -3,13 +3,13 @@ package constraints
 // test class
 
 import (
-	"fmt"
+	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/sat"
 	"testing"
 )
 
 func TestAtMostOne(test *testing.T) {
-	fmt.Println("TestTranslateAtMostOne")
+	glob.D("TestTranslateAtMostOne")
 	k := 6
 
 	lits := make([]sat.Literal, k)

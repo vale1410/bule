@@ -108,7 +108,7 @@ func Categorize2(pbs []*Threshold) {
 	// for each comp
 	// choose longest matching and align pbs simp and comp
 	for comp, matchings := range amo_matchings {
-		pre_t, _ := TranslateByMDD(pbs[comp]) // TODO: remove, just here to compare sizes
+		//pre_t, _ := TranslateByMDD(pbs[comp]) // TODO: remove, just here to compare sizes
 		pbs[comp].SortVar()
 
 		//fmt.Println("new PB", comp)
@@ -119,99 +119,105 @@ func Categorize2(pbs []*Threshold) {
 
 		sort.Sort(MatchingsBySize(matchings))
 
-		var inter *intsets.Sparse
-		var simp int
-		for _, matching := range matchings { // find the next non-translated one
-			if !translated[matching.simp] {
-				// choose longest matching, that is not translated yet
-				inter = matching.inter
-				simp = matching.simp
-				translated[simp] = true
-				break //take this one!
+		var chains Chains
+		{ //generate chains
+
+			var inter *intsets.Sparse
+			var simp int
+			for _, matching := range matchings { // find the next non-translated one
+				if !translated[matching.simp] {
+					// choose longest matching, that is not translated yet
+					inter = matching.inter
+					simp = matching.simp
+					translated[simp] = true
+					break //take this one!
+				}
 			}
-		}
-		//pbs[simp].Print10()
+			//pbs[simp].Print10()
 
-		ind_entries := make(IndEntries, inter.Len())
-		comp_rest := make([]*Entry, len(pbs[comp].Entries)-inter.Len())
-		simp_rest := make([]*Entry, len(pbs[simp].Entries)-inter.Len())
+			ind_entries := make(IndEntries, inter.Len())
+			comp_rest := make([]*Entry, len(pbs[comp].Entries)-inter.Len())
+			simp_rest := make([]*Entry, len(pbs[simp].Entries)-inter.Len())
 
-		ind_pos := 0
-		rest_pos := 0
-		for i, x := range pbs[comp].Entries {
-			if inter.Has(lit2id[x.Literal]) {
-				ind_entries[ind_pos].c = &pbs[comp].Entries[i]
-				ind_pos++
-			} else {
-				comp_rest[rest_pos] = &pbs[comp].Entries[i]
-				rest_pos++
+			ind_pos := 0
+			rest_pos := 0
+			for i, x := range pbs[comp].Entries {
+				if inter.Has(lit2id[x.Literal]) {
+					ind_entries[ind_pos].c = &pbs[comp].Entries[i]
+					ind_pos++
+				} else {
+					comp_rest[rest_pos] = &pbs[comp].Entries[i]
+					rest_pos++
+				}
 			}
-		}
 
-		ind_pos = 0
-		rest_pos = 0
-		for i, x := range pbs[simp].Entries {
-			if inter.Has(lit2id[x.Literal]) {
-				ind_entries[ind_pos].s = &pbs[simp].Entries[i]
-				ind_pos++
-			} else {
-				simp_rest[rest_pos] = &pbs[simp].Entries[i]
-				rest_pos++
+			ind_pos = 0
+			rest_pos = 0
+			for i, x := range pbs[simp].Entries {
+				if inter.Has(lit2id[x.Literal]) {
+					ind_entries[ind_pos].s = &pbs[simp].Entries[i]
+					ind_pos++
+				} else {
+					simp_rest[rest_pos] = &pbs[simp].Entries[i]
+					rest_pos++
+				}
 			}
-		}
 
-		//fmt.Println("intersection of", litSets[comp].String(), litSets[simp].String())
-		//fmt.Println("intersection", inter.String(), " len:", inter.Len())
-		//fmt.Println(ind_entries)
-		//fmt.Println(comp_rest)
-		//fmt.Println(simp_rest)
+			//fmt.Println("intersection of", litSets[comp].String(), litSets[simp].String())
+			//fmt.Println("intersection", inter.String(), " len:", inter.Len())
+			//fmt.Println(ind_entries)
+			//fmt.Println(comp_rest)
+			//fmt.Println(simp_rest)
 
-		sort.Sort(ind_entries)
+			sort.Sort(ind_entries)
 
-		compEntries := make([]Entry, len(pbs[comp].Entries))
-		simpEntries := make([]Entry, len(pbs[simp].Entries))
-		for i, ie := range ind_entries {
-			compEntries[i] = *ie.c
-			simpEntries[i] = *ie.s
-		}
-		for i := len(ind_entries); i < len(pbs[comp].Entries); i++ {
-			compEntries[i] = *comp_rest[i-len(ind_entries)]
-		}
-		for i := len(ind_entries); i < len(pbs[simp].Entries); i++ {
-			simpEntries[i] = *simp_rest[i-len(ind_entries)]
-		}
+			compEntries := make([]Entry, len(pbs[comp].Entries))
+			simpEntries := make([]Entry, len(pbs[simp].Entries))
+			for i, ie := range ind_entries {
+				compEntries[i] = *ie.c
+				simpEntries[i] = *ie.s
+			}
+			for i := len(ind_entries); i < len(pbs[comp].Entries); i++ {
+				compEntries[i] = *comp_rest[i-len(ind_entries)]
+			}
+			for i := len(ind_entries); i < len(pbs[simp].Entries); i++ {
+				simpEntries[i] = *simp_rest[i-len(ind_entries)]
+			}
 
-		pbs[comp].Entries = compEntries
-		pbs[simp].Entries = simpEntries
-		//fmt.Println("reordering accoring to weights:")
-		//pbs[comp].Print10()
-		//pbs[simp].Print10()
+			pbs[comp].Entries = compEntries
+			pbs[simp].Entries = simpEntries
+			//fmt.Println("reordering accoring to weights:")
+			//pbs[comp].Print10()
+			//pbs[simp].Print10()
 
-		simp_translation := TranslateAtMostOne(Count, pbs[simp].IdS()+"count", pbs[simp].Literals())
-		simp_translation.PB = pbs[simp]
-		// replaces Preprocesss with AMO
-		last := int64(0)
-		for i, _ := range ind_entries {
-			tmp := compEntries[i].Weight
-			compEntries[i].Weight -= last
-			glob.A(compEntries[i].Weight >= 0, "After rewriting PB weights cannot be negative")
-			compEntries[i].Literal = simp_translation.Aux[i]
-			last = tmp
-		}
-		pbs[comp].RemoveZeros()
-		chain := CleanChain(pbs[comp].Entries, simp_translation.Aux)
-		//fmt.Println("chain:")
-		//chain.Print()
-		//fmt.Println("rewritten:")
-		//pbs[comp].Print10()
+			simp_translation := TranslateAtMostOne(Count, pbs[simp].IdS()+"count", pbs[simp].Literals())
+			simp_translation.PB = pbs[simp]
+			// replaces Preprocesss with AMO
+			last := int64(0)
+			for i, _ := range ind_entries {
+				tmp := compEntries[i].Weight
+				compEntries[i].Weight -= last
+				glob.A(compEntries[i].Weight >= 0, "After rewriting PB weights cannot be negative")
+				compEntries[i].Literal = simp_translation.Aux[i]
+				last = tmp
+			}
+			pbs[comp].RemoveZeros()
+			chain := CleanChain(pbs[comp].Entries, simp_translation.Aux)
+			//fmt.Println("chain:")
+			//chain.Print()
+			//fmt.Println("rewritten:")
+			//pbs[comp].Print10()
+			chains = append(chains, chain)
+		} //generated chains
 
-		t, err := TranslateByMDDChain(pbs[comp], Chains{chain})
+		t, err := TranslateByMDDChain(pbs[comp], chains)
 		if err != nil {
 			panic(err.Error())
 		}
 
 		//fmt.Println("normal", pre_t.Clauses.Size(), "chain:", t.Clauses.Size(), "overlap", len(ind_entries))
-		fmt.Println(comp, "\t;", pre_t.Clauses.Size(), "\t;", t.Clauses.Size(), "\t;", inter.Len())
+		//fmt.Println(comp, "\t;", pre_t.Clauses.Size(), "\t;", t.Clauses.Size(), "\t;", inter.Len())
+		fmt.Println(comp, "\t;", t.Clauses.Size(), "\t;")
 		//fmt.Println()
 
 	}

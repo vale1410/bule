@@ -1,7 +1,7 @@
 package constraints
 
 import (
-	"fmt"
+	//	"fmt"
 	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/mdd"
 	"github.com/vale1410/bule/sat"
@@ -17,10 +17,11 @@ import (
 //
 //}
 
-func TestMDD1(test *testing.T) {
-	glob.Debug_flag = true
+func TestMDDChain(test *testing.T) {
+	//glob.Debug_flag = true
+	//glob.Debug_flag = false
 
-	glob.D("TestMDD1")
+	glob.D("TestMDDChain")
 
 	glob.MDD_max_flag = 300000
 	glob.MDD_redundant_flag = false
@@ -29,7 +30,7 @@ func TestMDD1(test *testing.T) {
 	t.Entries = createEntries([]int64{1, 2, 1, 1, 3, 1})
 	t.Typ = LE
 	t.K = 5
-	t.Print10()
+	//t.Print10()
 
 	store := mdd.Init(len(t.Entries))
 	_, _, _, s1 := CreateMDD(&store, t.K, t.Entries)
@@ -41,10 +42,10 @@ func TestMDD1(test *testing.T) {
 	chain := Chain(t.Literals()) //createLiterals(i, 3)
 
 	for i := 0; i < 4; i++ {
-		fmt.Println("\n\n Chain on index", i, i+3)
+		//fmt.Println("\n\n Chain on index", i, i+3)
 
 		chains := Chains{chain[i : i+3]}
-		chains[0].Print()
+		//chains[0].Print()
 
 		store = mdd.Init(len(t.Entries))
 		_, _, _, s1 := CreateMDDChain(&store, t.K, t.Entries, chains)
@@ -52,9 +53,94 @@ func TestMDD1(test *testing.T) {
 		if s1 != nil {
 			test.Fail()
 		}
-		store.Debug(true)
+		//store.Debug(true)
 	}
-	glob.Debug_flag = false
+}
+
+func TestMDDChains1(test *testing.T) {
+	//glob.Debug_flag = true
+
+	glob.D("TestMDDChains1")
+
+	glob.MDD_max_flag = 300000
+	glob.MDD_redundant_flag = false
+
+	var t Threshold
+	t.Entries = createEntries([]int64{1, 2, 1, 1, 3, 1})
+	t.Typ = LE
+	t.K = 5
+	//t.Print10()
+
+	{ // check
+		store := mdd.Init(len(t.Entries))
+		_, _, _, s1 := CreateMDD(&store, t.K, t.Entries)
+		//store.Debug(true)
+		if s1 != nil {
+			test.Fail()
+		}
+	}
+
+	chain := Chain(t.Literals()) //createLiterals(i, 3)
+
+	//fmt.Println("\n\n Chain on index", i, i+3)
+
+	chains := Chains{chain[0:3], chain[3:6]}
+	//chains[0].Print()
+
+	store := mdd.Init(len(t.Entries))
+	_, _, _, s1 := CreateMDDChain(&store, t.K, t.Entries, chains)
+
+	if s1 != nil {
+		test.Fail()
+	}
+	if len(store.Nodes) != 6 {
+		store.Debug(true)
+		test.Fail()
+	}
+	//glob.Debug_flag = false
+}
+
+func TestMDDChains2(test *testing.T) {
+	//glob.Debug_flag = true
+
+	glob.D("TestMDDChains")
+
+	glob.MDD_max_flag = 300000
+	glob.MDD_redundant_flag = false
+
+	var t Threshold
+	t.Entries = createEntries([]int64{1, 2, 1, 1, 3, 1, 3, 2, 1, 1, 1})
+	t.Typ = LE
+	t.K = 10
+	//t.Print10()
+
+	{ // check
+		store := mdd.Init(len(t.Entries))
+		_, _, _, s1 := CreateMDD(&store, t.K, t.Entries)
+		//store.Debug(true)
+		if s1 != nil {
+			test.Fail()
+		}
+	}
+
+	chain := Chain(t.Literals()) //createLiterals(i, 3)
+
+	//fmt.Println("\n\n Chain on index", i, i+3)
+
+	chains := Chains{chain[1:3], chain[5:9]}
+	//chains[0].Print()
+
+	store := mdd.Init(len(t.Entries))
+	_, _, _, s1 := CreateMDDChain(&store, t.K, t.Entries, chains)
+
+	if s1 != nil {
+		test.Fail()
+	}
+	if len(store.Nodes) != 31 {
+		store.Debug(true)
+		test.Fail()
+	}
+	//glob.Debug_flag = false
 }
 
 func createLiterals(start int, n int) (literals []sat.Literal) {

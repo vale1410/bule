@@ -1,12 +1,13 @@
 package constraints
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/vale1410/bule/glob"
 )
 
 func TestTranslate(test *testing.T) {
-	fmt.Println("TestTranslate")
+	glob.D("TestTranslate")
 
 	pb1 := CreatePB([]int64{1, 1, 1}, 1)
 	t := Categorize1(&pb1)

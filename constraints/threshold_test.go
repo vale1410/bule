@@ -3,10 +3,12 @@ package constraints
 import (
 	"fmt"
 	"testing"
+
+	"github.com/vale1410/bule/glob"
 )
 
 func TestRemoveZeros(test *testing.T) {
-	fmt.Println("TestRemoveZeros")
+	glob.D("TestRemoveZeros")
 
 	pb1 := CreatePB([]int64{1, 2, 3, 0, 321, 0, 0, -123, 0}, 1347)
 	c := len(pb1.Entries)
@@ -18,7 +20,7 @@ func TestRemoveZeros(test *testing.T) {
 }
 
 func TestCleanChain(test *testing.T) {
-	fmt.Println("TestCleanChain")
+	glob.D("TestCleanChain")
 
 	pb := CreatePB([]int64{1, 2, 3, 0, 321, 0, 1, -123, 0}, 1347)
 	results := []int{3, 3, 2, 0, 3, 0}

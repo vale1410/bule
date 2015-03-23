@@ -29,14 +29,11 @@ func TranslateByMDD(pb *Threshold) (t ThresholdTranslation, err error) {
 // chains must be in order of pb and be subsets of its literals
 func TranslateByMDDChain(pb *Threshold, chains Chains) (t ThresholdTranslation, err error) {
 
-	//pb.Print10()
-	//chain.Print()
-
 	glob.A(len(chains[0]) > 0, "Dont call this function with empty chain")
 
-	if len(chains) == 1 { //
-		return TranslateByMDD(pb)
-	}
+	//if len(chains) == 1 { //
+	//	return TranslateByMDD(pb)
+	//}
 
 	t.Typ = CMDDC
 	t.PB = pb
@@ -141,9 +138,7 @@ func convertMDDChainIntoClauses(store mdd.MddStore, pb *Threshold) (clauses sat.
 
 // Chains is a set of chains in order of the PB
 // Chain: there are clauses  xi <-xi+1 <- xi+2 ... <- xi+k, and xi .. xi+k are in order of PB
-// TODO: assumption: chain is in order with entries, starts somewhere
-// TODO: chain is same polarity as entries, and coefficients in entries are ascending for chain
-// TODO: extend to sequence of chains!!!
+// assumption: chains are subsets of literals of PB and in their order
 func CreateMDDChain(store *mdd.MddStore, K int64, entries []Entry, chains Chains) (int, int64, int64, error) {
 
 	l := len(entries) ///level
@@ -168,8 +163,8 @@ func CreateMDDChain(store *mdd.MddStore, K int64, entries []Entry, chains Chains
 		var n mdd.Node
 		var err error
 
+		glob.A(len(chains) == 0 || len(chains[0]) > 0, "if exists, then chain must contain at least 1 element")
 		if len(chains) > 0 && chains[0][0] == entries[0].Literal { //chain mode
-			glob.A(len(chains[0]) > 0, "chains must contain at least 1 element")
 			chain := chains[0]
 			var jumpEntries []Entry
 			if len(entries) <= len(chain) {

@@ -1,14 +1,15 @@
 package constraints
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/vale1410/bule/glob"
 )
 
 func TestSNTranslation(test *testing.T) {
-	fmt.Println("TestSortingNetworkTranslation")
+	glob.D("TestSortingNetworkTranslation")
 
-	filename := "test"
+	//filename := "test"
 	//typ := sorters.Bubble
 	//typ := sorters.Pairwise
 	//typ := sorters.Bitonic
@@ -41,15 +42,15 @@ func TestSNTranslation(test *testing.T) {
 	//t := createJapan2(3)
 	//filename := "japan2_3"
 
-	t1 := createIgnasi1()
-	t2 := createIgnasi2()
+	//t1 := createIgnasi1()
+	//t2 := createIgnasi2()
 
-	s1 := NewSortingNetwork(t1)
-	s2 := NewSortingNetwork(t2)
+	//s1 := NewSortingNetwork(t1)
+	//s2 := NewSortingNetwork(t2)
 
 	//fmt.Println(t)
 
-	PrintThresholdTikZ(filename+".tex", []SortingNetwork{s1, s2})
+	//PrintThresholdTikZ(filename+".tex", []SortingNetwork{s1, s2})
 
 }
 
