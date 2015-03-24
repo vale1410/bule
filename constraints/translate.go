@@ -100,14 +100,14 @@ func Categorize1(pb *Threshold) (t ThresholdTranslation) {
 			if pb.K == 1 {
 				switch pb.Typ {
 				case LE: // AMO
-					trans := TranslateAtMostOne(Heule, pb.IdS()+"HeuleAMO", literals)
+					trans := TranslateAtMostOne(Heule, "H_AMO", literals)
 					t.Clauses.AddClauseSet(trans.Clauses)
 					t.Typ = AMO
 				case GE: // its a clause!
-					t.Clauses.AddTaggedClause(pb.IdS()+"pb->Cls", literals...)
+					t.Clauses.AddTaggedClause("Cls", literals...)
 					t.Typ = Clause
 				case EQ: // Ex1
-					trans := TranslateExactlyOne(Heule, pb.IdS()+"HeuleEX1", literals)
+					trans := TranslateExactlyOne(Heule, "H_EX1", literals)
 					t.Clauses.AddClauseSet(trans.Clauses)
 					t.Typ = EX1
 				}

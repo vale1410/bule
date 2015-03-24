@@ -23,6 +23,8 @@ var debug_filename = flag.String("df", "", "File to print debug information.")
 var reformat_flag = flag.Bool("reformat", false, "Reformat PB files into correct format. Decompose = into >= and <=")
 var gurobi_flag = flag.Bool("gurobi", false, "Reformat to Gurobi input, output to stdout.")
 var solve_flag = flag.Bool("solve", false, "Dont solve just categorize and analyze the constriants.")
+var stat_flag = flag.Bool("stat", false, "Do statistics.")
+var cat_flag = flag.Int("cat", 1, "Categorize method 1, or 2. (default 1).")
 
 var complex_flag = flag.String("complex", "hybrid", "Solve complex PBs with mdd/sn/hybrid. Default is hybrid")
 var timeout_flag = flag.Int("timeout", 100, "Timeout of the overall solving process")
@@ -55,6 +57,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	}
 
 	// put all configuration here
+	glob.Filename_flag = *filename_flag
 	glob.Debug_flag = *debug_flag
 	glob.Complex_flag = *complex_flag
 	glob.Timeout_flag = *timeout_flag
@@ -101,42 +104,47 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 	} else {
 
+		stats := make([]int, constraints.TranslationTypes)
+		primaryVars := make(map[string]bool, 0)
+		for i, _ := range pbs {
+			for _, x := range pbs[i].Entries {
+				primaryVars[x.Literal.A.Id()] = true
+			}
+		}
+
 		var clauses sat.ClauseSet
 
-		//if *stats {
-		//// stats start
-		//fmt.Print(*filename_flag, ";", len(primaryVars), ";", len(pbs), ";")
-		//for i, x := range stats {
-		//	if i > 0 {
-		//		fmt.Printf("%v;", x)
-		//	}
-		//}
-		//fmt.Println()
-		//printStats(stats)
-		//// stats end
-		//	}
-
-		if !*solve_flag { // do statistics
-
+		switch *cat_flag {
+		case 1:
+			for i, _ := range pbs {
+				t := constraints.Categorize1(&pbs[i])
+				stats[t.Typ]++
+				clauses.AddClauseSet(t.Clauses)
+			}
+		case 2:
 			ppbs := make([]*constraints.Threshold, len(pbs))
 			for i, _ := range pbs {
 				pbs[i].SortWeight()
 				ppbs[i] = &pbs[i]
 			}
-			constraints.Categorize2(ppbs)
+			clauses = constraints.Categorize2(ppbs)
+			//clauses.PrintDebug()
+			//fmt.Println(*filename_flag, ";", clauses.Size())
+		default:
+		}
 
-		} else if *solve_flag {
-			stats := make([]int, constraints.TranslationTypes)
-			primaryVars := make(map[string]bool, 0)
-			for i, _ := range pbs {
-				for _, x := range pbs[i].Entries {
-					primaryVars[x.Literal.A.Id()] = true
+		if *stat_flag {
+			fmt.Print(*filename_flag, ";", len(primaryVars), ";", len(pbs), ";")
+			for i, x := range stats {
+				if i > 0 {
+					fmt.Printf("%v;", x)
 				}
-				t := constraints.Categorize1(&pbs[i])
-				stats[t.Typ]++
-				clauses.AddClauseSet(t.Clauses)
 			}
+			fmt.Println()
+			printStats(stats)
+		}
 
+		if *solve_flag {
 			fmt.Print(*filename_flag)
 			g := sat.IdGenerator(clauses.Size() * 7)
 			g.Filename = *out
@@ -191,6 +199,7 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 		}
 
 		elements := strings.Fields(l)
+		fmt.Println(elements)
 
 		switch state {
 		case 0:
@@ -204,12 +213,12 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 					panic("bad conversion of numbers")
 				}
 				glob.D("Found PB file with", count, "constraints and", vars, "variables")
-				pbs = make([]constraints.Threshold, count)
+				pbs = make([]constraints.Threshold, 0, count)
 				state = 1
 			}
 		case 1:
 			{
-				glob.A(t <= count, "Number of constraints incorrectly specified in pb input file ", filename)
+				glob.D(t <= count, t, count, "Number of constraints incorrectly specified in pb input file ", filename)
 
 				var n int  // number of entries
 				var f int  // index of entry
@@ -233,7 +242,7 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 					weight, b1 := strconv.ParseInt(elements[i], 10, 64)
 					i++
 					if b1 != nil {
-						glob.D("cant convert to threshold:", l)
+						glob.D("cant convert to threshold:", elements[i], "\nin PB\n", l)
 						panic("bad conversion of numbers")
 					}
 					atom := sat.NewAtomP(sat.Pred(elements[i]))
@@ -258,7 +267,7 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 						panic("bad conversion of symbols" + typS)
 					}
 					pb.Id = t
-					pbs[t] = pb
+					pbs = append(pbs, pb)
 					t++
 				}
 			}

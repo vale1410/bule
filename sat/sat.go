@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/vale1410/bule/glob"
-	"io"
 	"os"
 	"os/exec"
 	"strconv"
@@ -33,10 +32,6 @@ func (g *Gen) putAtom(a Atom) {
 		id := g.nextId
 		g.mapping[a.Id()] = id
 		g.idMap = append(g.idMap, a)
-		// id check code:
-		//		if g.mapping[g.idMap[id].Id()] != id {
-		//			panic("wrong id mapping stuff")
-		//		}
 	}
 }
 
@@ -86,9 +81,9 @@ func (g *Gen) Solve(cs ClauseSet) {
 
 	// check a filename
 
-	if g.Filename == "" { // in the future dont
-		panic("generator has not filled filenmane, is needed for SAT solving")
-	}
+	glob.A(g.Filename != "", "No filename, is needed for SAT solving.")
+	glob.A(cs.Size() > 0, "Needs to contain at least 1 clause.")
+	fmt.Print(";", cs.Size())
 
 	g.PrintDIMACS(cs)
 
@@ -104,6 +99,7 @@ func (g *Gen) Solve(cs ClauseSet) {
 	}()
 
 	go g.solveProblem(result)
+
 	assignment := make([]bool, len(g.idMap))
 
 	select {
@@ -116,7 +112,6 @@ func (g *Gen) Solve(cs ClauseSet) {
 			for _, x := range ss {
 				id, _ := strconv.Atoi(x)
 				if id != 0 {
-					//fmt.Println(id)
 					if id < 0 {
 						assignment[-id] = false
 					} else {
@@ -124,13 +119,13 @@ func (g *Gen) Solve(cs ClauseSet) {
 					}
 				}
 			}
-			//g.printAssignment(assignment)
 		} else {
 			fmt.Print(";UNSATISFIABLE")
 		}
 	case <-timeout:
-		fmt.Print(";TIMEOUT\n")
+		fmt.Print(";TIMEOUT")
 	}
+	//fmt.Println()
 
 	close(result)
 	close(timeout)
@@ -196,42 +191,45 @@ type Result struct {
 
 func (g *Gen) solveProblem(result chan<- Result) {
 
-	clasp := exec.Command("clasp", g.Filename)
-	stdout, _ := clasp.StdoutPipe()
+	solver := exec.Command("clasp", g.Filename, "--time-limit", strconv.Itoa(glob.Timeout_flag))
+	//solver := exec.Command("clasp", g.Filename)
+	//solver := exec.Command("cmsat", g.Filename)
+	//solver := exec.Command("minisat", g.Filename)
+	stdout, _ := solver.StdoutPipe()
 
-	clasp.Start()
+	solver.Start()
 
 	r := bufio.NewReader(stdout)
-	line, isPrefix, err := r.ReadLine()
+	s, err := r.ReadString('\n')
+	var res Result
 
 	assignment := ""
 
-	for err == nil && !isPrefix {
-		s := string(line)
+	for {
 		if strings.HasPrefix(s, "v ") {
 			assignment += s[1:]
 		} else if strings.HasPrefix(s, "s ") {
-			r := Result{true, assignment}
+			res = Result{true, assignment}
 			if strings.Contains(s, "UNSATISFIABLE") {
-				r.satisfiable = false
+				res.satisfiable = false
 			} else if strings.Contains(s, "SATISFIABLE") {
-				r.satisfiable = true
+				res.satisfiable = true
 			} else {
 				fmt.Println(s)
 				panic("whats up? result of sat solver does not contain proper answer!")
 			}
-			result <- r
+			break
 		}
-		line, isPrefix, err = r.ReadLine()
+		s, err = r.ReadString('\n')
+		if err != nil {
+			panic(err.Error())
+		}
 	}
-	if isPrefix {
-		fmt.Println("buffer size to small")
-		return
+
+	if err = solver.Process.Kill(); err != nil {
+		panic(err.Error())
 	}
-	if err != io.EOF {
-		fmt.Println(err)
-		return
-	}
+	result <- res
 }
 
 //#########################################################3

@@ -7,6 +7,7 @@ import (
 
 // global configuration accessible from everywhere
 
+var Filename_flag string
 var Debug_output *os.File
 var Debug_filename string
 var Debug_flag bool
@@ -17,6 +18,7 @@ var MDD_redundant_flag bool
 
 func PringConfig() {
 	fmt.Println("Configuration")
+	fmt.Println("Filename_flag :\t", Filename_flag)
 	fmt.Println("Debug_flag :\t", Debug_flag)
 	fmt.Println("Complex_flag :\t", Complex_flag)
 	fmt.Println("Timeout_flag :\t", Timeout_flag)
@@ -61,14 +63,3 @@ func DT(check bool, arg ...interface{}) {
 		D(arg)
 	}
 }
-
-// These constants are for future implementations
-
-// MDD translation by which clauses? implications over branchens? @ignasis implementation
-
-// Use of what type of sorting networks:
-
-// Use Mergers
-
-//var SortersT int
-//var EquationT int

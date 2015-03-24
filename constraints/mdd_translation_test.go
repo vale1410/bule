@@ -1,21 +1,33 @@
 package constraints
 
 import (
-	//	"fmt"
+	//"fmt"
 	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/mdd"
 	"github.com/vale1410/bule/sat"
 	"testing"
 )
 
-//func TestSlice(test *testing.T) {
-//
-//	b := []int{0, 1, 2, 3, 4}
-//	c := []int{0, 1, 2, 3, 4}
-//
-//	fmt.Println(b[len(c)])
-//
-//}
+func TestMDDRedundant(test *testing.T) {
+	//glob.Debug_flag = true
+	//glob.Debug_flag = false
+
+	glob.D("TestMDDRedundant")
+	glob.MDD_max_flag = 300000
+	glob.MDD_redundant_flag = false
+
+	var t Threshold
+	t.Entries = createEntries([]int64{1, 2, 1, 1, 3, 1})
+	t.Typ = LE
+	t.K = 5
+
+	store := mdd.Init(len(t.Entries))
+	CreateMDD(&store, t.K, t.Entries)
+
+	if store.RemoveRedundants() != 5 {
+		test.Fail()
+	}
+}
 
 func TestMDDChain(test *testing.T) {
 	//glob.Debug_flag = true
@@ -125,10 +137,7 @@ func TestMDDChains2(test *testing.T) {
 
 	chain := Chain(t.Literals()) //createLiterals(i, 3)
 
-	//fmt.Println("\n\n Chain on index", i, i+3)
-
 	chains := Chains{chain[1:3], chain[5:9]}
-	//chains[0].Print()
 
 	store := mdd.Init(len(t.Entries))
 	_, _, _, s1 := CreateMDDChain(&store, t.K, t.Entries, chains)

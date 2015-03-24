@@ -2,22 +2,16 @@
 
 go build bule.go
 
-echo mdd
-for x in $1/*.*pb; 
-do 
-    time -f';%e' timeout 1000 ./bule -f $x -complex=mdd -mdd_redundant=false -solve
-done
-
-#echo mdd + redundant
+#echo cat 1 "; ;"
 #for x in $1/*.*pb; 
 #do 
-#    time -f';%e' timeout 1000 ./bule -f $x -complex=mdd -mdd_redundant=true
+#    time -f';%e' timeout 1000 ./bule -f $x -cat 1 -solve -timeout 20 -mdd_redundant=false
 #done
 
-echo sn
+echo cat 2"; ;" 
 for x in $1/*.*pb; 
 do 
-    time -f';%e' timeout 1000 ./bule -f $x -complex=sn -solve
+    time -f';%e' timeout 1000 ./bule -f $x -cat 2 -solve -timeout 20 -mdd_redundant=false
 done
 
 #echo hybrid

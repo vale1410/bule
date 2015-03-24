@@ -35,6 +35,11 @@ func TranslateByMDDChain(pb *Threshold, chains Chains) (t ThresholdTranslation, 
 		return t, err
 	}
 
+	if glob.MDD_redundant_flag {
+		removed := store.RemoveRedundants()
+		glob.D("remove redundant nodes in MDD", removed)
+	}
+
 	t.Clauses = convertMDD2Clauses(store, pb)
 
 	return t, err

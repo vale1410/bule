@@ -25,7 +25,7 @@ func (node Node) IsOne() bool {
 	return node.Wmax >= math.MaxInt64-10000000
 }
 
-func printNode(node Node) bool {
+func printNode(node Node) {
 	if node.IsZero() {
 		fmt.Print(node.Id, "\t", node.Level, "\t[ -∞,", node.Wmax, "]")
 	} else if node.IsOne() {
@@ -33,8 +33,7 @@ func printNode(node Node) bool {
 	} else {
 		fmt.Print(node.Id, "\t", node.Level, "\t[", node.Wmin, ",", node.Wmax, "]")
 	}
-	fmt.Println(" children ", node.Children)
-	return true
+	fmt.Println(" c: ", node.Children)
 }
 
 type MddStore struct {
@@ -76,6 +75,38 @@ func Compare(aa, bb rbtree.Item) int {
 	}
 }
 
+// cleans the bdd from redundant nodes
+func (store *MddStore) RemoveRedundants() (removed int) {
+
+	rep := make(map[int]int, len(store.Nodes))
+	for i, node := range store.Nodes {
+		if i > 1 {
+			equal := true
+			id := (*node).Children[0]
+			for j, child := range (*node).Children {
+				equal = equal && (id == child)
+
+				if child_new, b := rep[child]; b {
+					(*node).Children[j] = child_new
+				}
+			}
+			if equal {
+				if id_deep, b := rep[id]; b {
+					id = id_deep
+				}
+				rep[node.Id] = id
+				*node = Node{}
+				removed++
+			}
+		}
+	}
+	if id, b := rep[store.Top]; b {
+		store.Top = id
+	}
+
+	return
+}
+
 //preparation for MDDs, gives out ids of decendancts
 func (b *MddStore) ClauseIds(n Node) (v int, level int, des []int) {
 	//children = []int{b.checkId(n.left), b.checkId(n.right)}
@@ -92,20 +123,26 @@ func (b *MddStore) checkId(id int) int {
 	}
 }
 
-func (mddStore *MddStore) Debug(withTable bool) {
+func (store *MddStore) Debug(withTable bool) {
 
 	fmt.Println("Mdd Nodes:")
-	fmt.Println("#nodes rb-data\t:", mddStore.storage.Len())
-
+	count := 0
 	if withTable {
 		fmt.Println("id\tlevel\tinterval")
-
-		iter := mddStore.storage.Min()
-		for !iter.Limit() {
-			printNode(iter.Item().(Node))
-			iter = iter.Next()
+		for i, node := range store.Nodes {
+			if i == 0 || (*node).Id > 1 {
+				count++
+				printNode(*node)
+			}
 		}
+
+		//iter := mddStore.storage.Min()
+		//for !iter.Limit() {
+		//	printNode(iter.Item().(Node))
+		//	iter = iter.Next()
+		//}
 	}
+	fmt.Println("#nodes rb-data\t:", count)
 
 }
 
@@ -135,9 +172,9 @@ func (mddStore *MddStore) Insert(n Node) (id int) {
 	n.Id = mddStore.NextId
 	mddStore.Nodes = append(mddStore.Nodes, &n)
 	mddStore.NextId++
-	if mddStore.NextId != len(mddStore.Nodes) {
-		panic("nextId calculation and length of Nodes list is wrong")
-	}
+
+	glob.A(mddStore.NextId == len(mddStore.Nodes), "nextId calculation and length of Nodes list is wrong")
+
 	mddStore.storage.Insert(n)
 
 	return n.Id
