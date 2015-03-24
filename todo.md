@@ -1,13 +1,11 @@
 Today
 =====
 * Do Table for categorization, group benchmarks into interesting and not interesting!
-* Prepare the matching problem of real PBs to constraints 
-* Consider Binary AtMostOne are clauses
+* Do SN with AMO
+* Restructure paper. 
 
 This week
 =========
-* Do SN with AMO
-* Restructure paper. 
 * Integrate convert.go into bule.go; call clasp with the program!
 * Simple Match PB with AMO with auxiliary variables(counter encoding)  
        and apply it on BDD. 
@@ -41,6 +39,7 @@ Ideas
 
 Done
 ====
+* Prepare the matching problem of real PBs to constraints 
 * Do Rewrite EX1 and PB
 * Structure paper, touch and update, print for Monday
 * Finish the test suite, a mix of problems (did some stuff)
@@ -51,4 +50,5 @@ Done
 * Get bug (number of results on current test set incorrect)
 * Write three more test for categorize cardinality
 * Design the integration of matchings
+* Consider Binary AtMostOne are clauses
 * Finish the test suite, a mix of problems.

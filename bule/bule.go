@@ -199,7 +199,6 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 		}
 
 		elements := strings.Fields(l)
-		fmt.Println(elements)
 
 		switch state {
 		case 0:
@@ -212,7 +211,7 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 					glob.D("cant convert to threshold:", l)
 					panic("bad conversion of numbers")
 				}
-				glob.D("Found PB file with", count, "constraints and", vars, "variables")
+				glob.D("File PB file with", count, "constraints and", vars, "variables")
 				pbs = make([]constraints.Threshold, 0, count)
 				state = 1
 			}
@@ -225,13 +224,18 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 				var o bool //optimization
 				var pb constraints.Threshold
 
+				offset_back := 0
+				if elements[len(elements)-1] != ";" {
+					offset_back = 1
+				}
+
 				if "min:" == elements[0] {
 					o = true
-					n = (len(elements) - 2) / 2
+					n = (len(elements) + offset_back - 2) / 2
 					f = 1
 				} else {
 					o = false
-					n = (len(elements) - 3) / 2
+					n = (len(elements) + offset_back - 3) / 2
 					f = 0
 				}
 
@@ -253,8 +257,12 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 					pb.Typ = constraints.OPT
 					opt = pb
 				} else {
-					pb.K, _ = strconv.ParseInt(elements[len(elements)-2], 10, 64)
-					typS := elements[len(elements)-3]
+					pb.K, err = strconv.ParseInt(elements[len(elements)-2+offset_back], 10, 64)
+
+					if err != nil {
+						glob.A(false, " cant parse threshold, error", err.Error(), pb.K)
+					}
+					typS := elements[len(elements)-3+offset_back]
 
 					if typS == ">=" {
 						pb.Typ = constraints.GE
@@ -263,8 +271,7 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 					} else if typS == "==" || typS == "=" {
 						pb.Typ = constraints.EQ
 					} else {
-						glob.D("cant convert to threshold:", l)
-						panic("bad conversion of symbols" + typS)
+						glob.A(false, "cant convert to threshold, equationtype typS:", typS)
 					}
 					pb.Id = t
 					pbs = append(pbs, pb)
@@ -274,7 +281,7 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 		}
 	}
 
-	glob.A(t == count, t, count, "Number of constraints incorrectly specified in pb input file ", filename)
+	glob.D("Number", count, "of constraints incorrectly specified in pb input file ", filename, ", in reality it was", t)
 
 	return
 }

@@ -11,6 +11,13 @@ import (
 	"time"
 )
 
+type Assignment map[string]int
+
+type Optimizer interface {
+	Evaluate(Assignment) (int64, error)
+	Translate(int64) ClauseSet
+}
+
 type Gen struct {
 	nextId      int
 	mapping     map[string]int
@@ -77,7 +84,7 @@ func (g *Gen) PrintSymbolTable(filename string) {
 
 }
 
-func (g *Gen) Solve(cs ClauseSet) {
+func (g *Gen) Solve(cs ClauseSet, opt Optimizer) {
 
 	// check a filename
 
@@ -131,6 +138,10 @@ func (g *Gen) Solve(cs ClauseSet) {
 	close(timeout)
 
 	//print output from mapping
+
+}
+
+func (g *Gen) evaluateAssignment(assignment []bool, opt Optimizer) {
 
 }
 

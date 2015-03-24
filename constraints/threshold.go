@@ -45,6 +45,22 @@ type Threshold struct {
 	Pred    sat.Pred
 }
 
+func (pb *Threshold) Translate(K int64) (clauses sat.ClauseSet) {
+	return
+}
+
+func (pb *Threshold) Evaluate(a sat.Assignment) (r int64) {
+
+	for _, e := range pb.Entries {
+		if e.Literal.Sign {
+			r += int64(a[e.Literal.A.Id()]) * e.Weight
+		} else {
+			r += (1 - int64(a[e.Literal.A.Id()])) * e.Weight
+		}
+	}
+	return r
+}
+
 func (pb *Threshold) Empty() bool {
 	return len(pb.Entries) == 0
 }
