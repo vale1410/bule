@@ -45,19 +45,27 @@ type Threshold struct {
 	Pred    sat.Pred
 }
 
+// returns the encoding of this PB
 func (pb *Threshold) Translate(K int64) (clauses sat.ClauseSet) {
+	pb_K := *pb
+	pb_K.K = K
+	pb_K.Typ = LE
+	clauses = Categorize1(&pb_K).Clauses
 	return
 }
 
 func (pb *Threshold) Evaluate(a sat.Assignment) (r int64) {
 
 	for _, e := range pb.Entries {
+		v, b := a[e.Literal.A.Id()]
+		glob.A(b, "Literal not found in assignment: ", e.Literal.ToTxt())
 		if e.Literal.Sign {
-			r += int64(a[e.Literal.A.Id()]) * e.Weight
+			r += int64(v) * e.Weight
 		} else {
-			r += (1 - int64(a[e.Literal.A.Id()])) * e.Weight
+			r += (1 - int64(v)) * e.Weight
 		}
 	}
+
 	return r
 }
 

@@ -3,19 +3,34 @@ package sat
 import (
 	"bufio"
 	"fmt"
-	"github.com/vale1410/bule/glob"
+	"log"
+	"math"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/vale1410/bule/glob"
 )
 
+// from atom.Id() -> 0/1
 type Assignment map[string]int
 
 type Optimizer interface {
-	Evaluate(Assignment) (int64, error)
+	Evaluate(Assignment) int64
 	Translate(int64) ClauseSet
+	Empty() bool
+}
+
+type Result struct {
+	Solved      bool
+	Satisfiable bool
+	Optimal     bool
+	Timeout     bool
+	Value       int64
+	Time        int64 // total time to solution
+	Assignment  Assignment
 }
 
 type Gen struct {
@@ -84,65 +99,105 @@ func (g *Gen) PrintSymbolTable(filename string) {
 
 }
 
-func (g *Gen) Solve(cs ClauseSet, opt Optimizer) {
+func (g *Gen) Solve(cs ClauseSet, opt Optimizer) (result Result) {
 
-	// check a filename
-
-	glob.A(g.Filename != "", "No filename, is needed for SAT solving.")
+	glob.A(g.Filename != "", "Set filename for SAT solving.")
 	glob.A(cs.Size() > 0, "Needs to contain at least 1 clause.")
-	fmt.Print(";", cs.Size())
-
-	g.PrintDIMACS(cs)
 
 	//generate the reverse mapping
 
-	result := make(chan Result)
+	result_chan := make(chan rawResult)
 	timeout := make(chan bool, 1)
-	ttimeout := glob.Timeout_flag //timeout in seconds
 
 	go func() {
-		time.Sleep(time.Duration(ttimeout) * time.Second)
+		time.Sleep(time.Duration(glob.Timeout_flag) * time.Second)
 		timeout <- true
 	}()
 
-	go g.solveProblem(result)
+	finished := false
+	current := cs
+	result.Assignment = make(Assignment, len(g.idMap))
+	result.Value = math.MaxInt64
 
-	assignment := make([]bool, len(g.idMap))
+	for !finished {
 
-	select {
-	case r := <-result:
+		log.Println("Writing", current.Size(), "clauses")
+		g.PrintDIMACS(cs)
 
-		if r.satisfiable {
-			fmt.Print(";SATISFIABLE")
-			ss := strings.Split(r.s, " ")
+		log.Println("solving...", result.Value)
+		go g.solveProblem(result_chan)
 
-			for _, x := range ss {
-				id, _ := strconv.Atoi(x)
-				if id != 0 {
-					if id < 0 {
-						assignment[-id] = false
-					} else {
-						assignment[id] = true
+		select {
+		case r := <-result_chan:
+			result.Solved = r.solved
+			if r.solved {
+				result.Satisfiable = r.satisfiable
+				if r.satisfiable {
+					ss := strings.Split(strings.TrimSpace(r.assignment), " ")
+
+					count := 0
+					for _, x := range ss {
+						x = strings.TrimSpace(x)
+						if x == "" {
+							continue
+						}
+						id, err := strconv.Atoi(x)
+						if err != nil {
+							glob.A(false, err.Error())
+						}
+						if id != 0 {
+							sign := 1
+							if id < 0 {
+								sign = 0
+								id = -id
+							}
+
+							atom := g.idMap[id]
+							if g.PrimaryVars[atom.Id()] {
+								count++
+								result.Assignment[atom.Id()] = sign
+							}
+
+						}
 					}
+
+					glob.A(count == len(result.Assignment), "count != assignment")
+
+					v := opt.Evaluate(result.Assignment)
+					fmt.Println(v, result.Value)
+					glob.A(v < result.Value, v, "<", result.Value, "no improvement ... cant be ")
+					result.Value = v
+
+					if !opt.Empty() {
+						current = cs
+						//current.AddClauseSet(opt.Translate(result.Value - 1))
+						//current.PrintDebug()
+						fmt.Println("result.Value", result.Value)
+
+						//current.AddClauseSet(opt.Translate(result.Value - 2))
+						//current.PrintDebug()
+						finished = true
+					} else {
+						finished = true
+					}
+
+				} else {
+					finished = true
+					result.Optimal = true
+					log.Println("lower bound proven")
 				}
 			}
-		} else {
-			fmt.Print(";UNSATISFIABLE")
+		case <-timeout:
+			finished = true
+			result.Solved = false
+			result.Timeout = true
 		}
-	case <-timeout:
-		fmt.Print(";TIMEOUT")
 	}
-	//fmt.Println()
 
-	close(result)
+	close(result_chan)
 	close(timeout)
 
-	//print output from mapping
-
-}
-
-func (g *Gen) evaluateAssignment(assignment []bool, opt Optimizer) {
-
+	return
 }
 
 func (g *Gen) printAssignment(assignment []bool) {
@@ -195,12 +250,13 @@ func (g *Gen) printAssignment(assignment []bool) {
 	fmt.Println()
 }
 
-type Result struct {
+type rawResult struct {
+	solved      bool
 	satisfiable bool
-	s           string
+	assignment  string
 }
 
-func (g *Gen) solveProblem(result chan<- Result) {
+func (g *Gen) solveProblem(result chan<- rawResult) {
 
 	solver := exec.Command("clasp", g.Filename, "--time-limit", strconv.Itoa(glob.Timeout_flag))
 	//solver := exec.Command("clasp", g.Filename)
@@ -212,22 +268,21 @@ func (g *Gen) solveProblem(result chan<- Result) {
 
 	r := bufio.NewReader(stdout)
 	s, err := r.ReadString('\n')
-	var res Result
-
-	assignment := ""
+	var res rawResult
 
 	for {
 		if strings.HasPrefix(s, "v ") {
-			assignment += s[1:]
+			res.assignment += s[1:]
 		} else if strings.HasPrefix(s, "s ") {
-			res = Result{true, assignment}
 			if strings.Contains(s, "UNSATISFIABLE") {
+				res.solved = true
 				res.satisfiable = false
 			} else if strings.Contains(s, "SATISFIABLE") {
+				res.solved = true
 				res.satisfiable = true
 			} else {
-				fmt.Println(s)
-				panic("whats up? result of sat solver does not contain proper answer!")
+				res.solved = false
+				glob.D("whats up? result of sat solver does not contain proper answer!")
 			}
 			break
 		}

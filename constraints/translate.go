@@ -57,24 +57,21 @@ type ThresholdTranslation struct {
 	PB      *Threshold
 	Typ     TranslationType
 	Clauses sat.ClauseSet
+	Chains  Chains
 }
 
-//Depricated
 func Categorize1(pb *Threshold) (t ThresholdTranslation) {
 
-	// this will become much more elaborate in the future
-
+	// per default all information that can be simplified will be in form of facts
 	t.Clauses.AddClauseSet(pb.Simplify())
-	// per default all information is simplified and in form of facts
+
 	t.Typ = Facts
 	t.PB = pb
 	if len(pb.Entries) == 0 {
-		glob.D(pb.Id, ": simplifed completely")
+		glob.D(pb.Id, "was simplified completely")
 	} else {
 
 		if b, literals := pb.Cardinality(); b {
-
-			glob.D(pb.Id, " Cardinality")
 
 			if pb.K == int64(len(pb.Entries)-1) {
 				switch pb.Typ {

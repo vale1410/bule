@@ -106,8 +106,16 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 		stats := make([]int, constraints.TranslationTypes)
 		primaryVars := make(map[string]bool, 0)
-		for i, _ := range pbs {
-			for _, x := range pbs[i].Entries {
+
+		if opt.Empty() {
+
+			for i, _ := range pbs {
+				for _, x := range pbs[i].Entries {
+					primaryVars[x.Literal.A.Id()] = true
+				}
+			}
+		} else {
+			for _, x := range opt.Entries {
 				primaryVars[x.Literal.A.Id()] = true
 			}
 		}
@@ -150,7 +158,8 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			g.Filename = *out
 			g.PrimaryVars = primaryVars
 			//clauses.PrintDebug()
-			g.Solve(clauses)
+			res := g.Solve(clauses, &opt)
+			fmt.Printf("%#v\n", res)
 		}
 	}
 
@@ -217,7 +226,6 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 			}
 		case 1:
 			{
-				glob.D(t <= count, t, count, "Number of constraints incorrectly specified in pb input file ", filename)
 
 				var n int  // number of entries
 				var f int  // index of entry
@@ -281,7 +289,9 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 		}
 	}
 
-	glob.D("Number", count, "of constraints incorrectly specified in pb input file ", filename, ", in reality it was", t)
+	if count != t {
+		glob.D("Number", count, "of constraints incorrectly specified in pb input file ", filename, ", in reality it was", t)
+	}
 
 	return
 }

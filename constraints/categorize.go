@@ -1,7 +1,6 @@
 package constraints
 
 import (
-	//	"fmt"
 	"sort"
 
 	"github.com/vale1410/bule/glob"
@@ -25,8 +24,12 @@ func addToCategory(nextId *int, pb *Threshold, cat map[sat.Literal][]int, lit2id
 }
 
 func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet) {
-	// this is becoming much more elaborate NOW
 
+	// 1) categorize constraints, fill litSets and occurence lists
+	// 2) find matchings by scan through occurence lists
+	// 3) for each complex pb and its list of matchings translate through chains
+
+	//1)
 	simplOcc := make(map[sat.Literal][]int, len(pbs)) // literal to list of implyfiers it occurs in
 	complOcc := make(map[sat.Literal][]int, len(pbs)) // literal to list of complex pbs it occurs in
 	litSets := make([]intsets.Sparse, len(pbs))       // pb.Id -> intsSet of literalIds
@@ -42,6 +45,7 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet) {
 		pb.SortWeight()
 
 		t := CatSimpl(pb)
+		clauses.AddClauseSet(t.Clauses)
 
 		switch t.Typ {
 		case UNKNOWN:
@@ -53,23 +57,23 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet) {
 		default: // already translated
 			glob.A(t.Clauses.Size() > 0, "Translated pbs should contain clauses, special case?")
 			translated[i] = true
-			clauses.AddClauseSet(t.Clauses)
 		}
 	}
+
+	//2)
 
 	checked := make(map[Match]bool, 0)
 
 	ex_matchings := make(map[int][]Matching, 0)  // compl_id -> []Matchings
-	amo_matchings := make(map[int][]Matching, 0) // compl_id ->  []Matchings
+	amo_matchings := make(map[int][]Matching, 0) // compl_id -> []Matchings
 
 	for lit, list := range complOcc {
 		//id2lit[lit2id[lit]] = lit
 		for _, c := range list {
 			for _, s := range simplOcc[lit] {
 
-				// of comp c and simpl s there is at least
-
 				if !checked[Match{c, s}] {
+					// of comp c and simpl s there is at least
 					checked[Match{c, s}] = true
 					// 0 means it has not been checked,
 					// as there is at least one intersection
@@ -91,12 +95,12 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet) {
 		}
 	}
 
-	//sort comp wrt. matchings size, currently suboptimal (order in the file...)
+	//3)
 
 	for comp, _ := range pbs {
 		if matchings, b := amo_matchings[comp]; b {
 			//pre_t, _ := TranslateByMDD(pbs[comp]) // TODO: remove, just here to compare sizes
-			//pbs[comp].SortWeight()                // because of comparison before
+			//pbs[comp].SortWeight()                // because TranslateByMDD might reorder entries
 
 			//fmt.Println("new PB", comp)
 			//pbs[comp].Print10()
@@ -106,118 +110,108 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet) {
 			sort.Sort(MatchingsBySize(matchings))
 
 			var chains Chains
-			{ //generate chains
+			inter := &intsets.Sparse{}
+			var comp_offset int                  // the  new first position of Entries in comp
+			for _, matching := range matchings { // find the next non-translated one
+				if !translated[matching.simp] {
+					// choose longest matching, that is not translated yet
+					//fmt.Println("check matching: simp", matching.simp, "inter", matching.inter.String())
+					matching.inter.IntersectionWith(&litSets[comp]) //update matching
+					inter = matching.inter
+					if inter.Len() > 2 {
+						simp := matching.simp
+						//pbs[simp].Print10()
+						//fmt.Println("comp_pos", comp_offset)
 
-				inter := &intsets.Sparse{}
-				var comp_offset int                  // the  new first position of Entries in comp
-				for _, matching := range matchings { // find the next non-translated one
-					if !translated[matching.simp] {
-						// choose longest matching, that is not translated yet
-						//fmt.Println("check matching: simp", matching.simp, "inter", matching.inter.String())
-						matching.inter.IntersectionWith(&litSets[comp]) //update matching
-						inter = matching.inter
-						if inter.Len() > 2 {
-							simp := matching.simp
-							//pbs[simp].Print10()
-							//fmt.Println("comp_pos", comp_offset)
+						ind_entries := make(IndEntries, inter.Len())
+						comp_rest := make([]*Entry, len(pbs[comp].Entries)-inter.Len()-comp_offset)
+						simp_rest := make([]*Entry, len(pbs[simp].Entries)-inter.Len())
 
-							ind_entries := make(IndEntries, inter.Len())
-							comp_rest := make([]*Entry, len(pbs[comp].Entries)-inter.Len()-comp_offset)
-							simp_rest := make([]*Entry, len(pbs[simp].Entries)-inter.Len())
-
-							ind_pos := 0
-							rest_pos := 0
-							for i := comp_offset; i < len(pbs[comp].Entries); i++ {
-								if inter.Has(lit2id[pbs[comp].Entries[i].Literal]) {
-									ind_entries[ind_pos].c = &pbs[comp].Entries[i]
-									ind_pos++
-								} else {
-									comp_rest[rest_pos] = &pbs[comp].Entries[i]
-									rest_pos++
-								}
+						ind_pos := 0
+						rest_pos := 0
+						for i := comp_offset; i < len(pbs[comp].Entries); i++ {
+							if inter.Has(lit2id[pbs[comp].Entries[i].Literal]) {
+								ind_entries[ind_pos].c = &pbs[comp].Entries[i]
+								ind_pos++
+							} else {
+								comp_rest[rest_pos] = &pbs[comp].Entries[i]
+								rest_pos++
 							}
+						}
 
-							ind_pos = 0
-							rest_pos = 0
-							for i, x := range pbs[simp].Entries {
-								if inter.Has(lit2id[x.Literal]) {
-									ind_entries[ind_pos].s = &pbs[simp].Entries[i]
-									ind_pos++
-								} else {
-									simp_rest[rest_pos] = &pbs[simp].Entries[i]
-									rest_pos++
-								}
+						ind_pos = 0
+						rest_pos = 0
+						for i, x := range pbs[simp].Entries {
+							if inter.Has(lit2id[x.Literal]) {
+								ind_entries[ind_pos].s = &pbs[simp].Entries[i]
+								ind_pos++
+							} else {
+								simp_rest[rest_pos] = &pbs[simp].Entries[i]
+								rest_pos++
 							}
+						}
 
-							//fmt.Println("intersection of", litSets[comp].String(), litSets[simp].String())
-							//fmt.Println("intersection", inter.String(), " len:", inter.Len())
-							litSets[comp].DifferenceWith(inter)
-							//fmt.Println("litSets[comp] is now", litSets[comp].String())
-							//fmt.Println(ind_entries)
-							//fmt.Println(comp_rest)
-							//fmt.Println(simp_rest)
+						//fmt.Println("intersection of", litSets[comp].String(), litSets[simp].String())
+						//fmt.Println("intersection", inter.String(), " len:", inter.Len())
+						litSets[comp].DifferenceWith(inter)
+						//fmt.Println("litSets[comp] is now", litSets[comp].String())
+						//fmt.Println(ind_entries)
+						//fmt.Println(comp_rest)
+						//fmt.Println(simp_rest)
 
-							sort.Sort(ind_entries)
+						sort.Sort(ind_entries)
 
-							compEntries := make([]Entry, len(pbs[comp].Entries))
-							simpEntries := make([]Entry, len(pbs[simp].Entries))
+						compEntries := make([]Entry, len(pbs[comp].Entries))
+						simpEntries := make([]Entry, len(pbs[simp].Entries))
 
-							// fill the compEntries and simpEntries
-							copy(compEntries, pbs[comp].Entries[:comp_offset])
+						// fill the compEntries and simpEntries
+						copy(compEntries, pbs[comp].Entries[:comp_offset])
 
-							for i, ie := range ind_entries {
-								compEntries[i+comp_offset] = *ie.c
-								simpEntries[i] = *ie.s
-							}
-							for i, _ := range comp_rest {
-								//fmt.Println(i, comp_offset, len(ind_entries), comp_rest)
-								compEntries[comp_offset+len(ind_entries)+i] = *comp_rest[i]
-							}
-							for i := len(ind_entries); i < len(pbs[simp].Entries); i++ {
-								simpEntries[i] = *simp_rest[i-len(ind_entries)]
-							}
+						for i, ie := range ind_entries {
+							compEntries[i+comp_offset] = *ie.c
+							simpEntries[i] = *ie.s
+						}
+						for i, _ := range comp_rest {
+							//fmt.Println(i, comp_offset, len(ind_entries), comp_rest)
+							compEntries[comp_offset+len(ind_entries)+i] = *comp_rest[i]
+						}
+						for i := len(ind_entries); i < len(pbs[simp].Entries); i++ {
+							simpEntries[i] = *simp_rest[i-len(ind_entries)]
+						}
 
-							pbs[comp].Entries = compEntries
-							pbs[simp].Entries = simpEntries
-							//fmt.Println("Inserting the stuff:")
-							//pbs[comp].Print10()
-							//pbs[simp].Print10()
+						pbs[comp].Entries = compEntries
+						pbs[simp].Entries = simpEntries
+						//pbs[comp].Print10()
+						//pbs[simp].Print10()
 
-							simp_translation := TranslateAtMostOne(Count, pbs[simp].IdS()+"count", pbs[simp].Literals())
-							translated[simp] = true
-							clauses.AddClauseSet(simp_translation.Clauses)
-							simp_translation.PB = pbs[simp]
-							// replaces Preprocesss with AMO
-							last := int64(0)
-							for i, _ := range ind_entries {
-								tmp := compEntries[i+comp_offset].Weight
-								compEntries[i+comp_offset].Weight -= last
-								glob.A(compEntries[i+comp_offset].Weight >= 0, "After rewriting PB weights cannot be negative")
-								compEntries[i+comp_offset].Literal = simp_translation.Aux[i]
-								last = tmp
-							}
-							pbs[comp].RemoveZeros()
-							chain := CleanChain(pbs[comp].Entries, simp_translation.Aux) // real intersection
-							comp_offset += len(chain)
-							chains = append(chains, chain)
+						simp_translation := TranslateAtMostOne(Count, pbs[simp].IdS()+"count", pbs[simp].Literals())
+						translated[simp] = true
+						clauses.AddClauseSet(simp_translation.Clauses)
+						simp_translation.PB = pbs[simp]
+						// replaces entries with auxiliaries of the AMO
+						last := int64(0)
+						for i, _ := range ind_entries {
+							tmp := compEntries[i+comp_offset].Weight
+							compEntries[i+comp_offset].Weight -= last
+							glob.A(compEntries[i+comp_offset].Weight >= 0, "After rewriting PB weights cannot be negative")
+							compEntries[i+comp_offset].Literal = simp_translation.Aux[i]
+							last = tmp
+						}
+						pbs[comp].RemoveZeros()
+						chain := CleanChain(pbs[comp].Entries, simp_translation.Aux) // real intersection
+						comp_offset += len(chain)
+						chains = append(chains, chain)
 
-							//fmt.Println("chain:")
-							//chain.Print()
-							//fmt.Println("rewritten:")
-							//pbs[comp].Print10()
-							//break //take this one!
-						} //else {
-						//		fmt.Println("matching not taken, it looks after updated intersection:", inter.String())
-						//	}
+						//fmt.Println("chain:")
+						//chain.Print()
+						//fmt.Println("rewritten:")
+						//pbs[comp].Print10()
 					}
+					//else {
+					//		fmt.Println("matching not taken, it looks after updated intersection:", inter.String())
+					//	}
 				}
-
 			}
-
-			//pbs[comp].Print10()
-			//for _, chain := range chains {
-			//	chain.Print()
-			//}
 
 			t, err := TranslateByMDDChain(pbs[comp], chains)
 			translated[comp] = true
@@ -276,7 +270,6 @@ func (a MatchingsBySize) Less(i, j int) bool { return a[i].inter.Len() > a[j].in
 func CatSimpl(pb *Threshold) (t ThresholdTranslation) {
 
 	glob.A(!pb.Empty(), "pb should not be empty")
-
 	t.Clauses.AddClauseSet(pb.Simplify())
 	t.PB = pb
 
