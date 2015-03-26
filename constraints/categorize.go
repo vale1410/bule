@@ -1,6 +1,7 @@
 package constraints
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/vale1410/bule/glob"
@@ -8,7 +9,7 @@ import (
 	"golang.org/x/tools/container/intsets"
 )
 
-// adds pb to the map literal -> pb.Id; as well as recording
+// adds pb to the map literal -> pb.Id; as well as recording litSets
 func addToCategory(nextId *int, pb *Threshold, cat map[sat.Literal][]int, lit2id map[sat.Literal]int, litSet *intsets.Sparse) {
 	pb.Normalize(LE, true)
 	for _, x := range pb.Entries {
@@ -23,7 +24,7 @@ func addToCategory(nextId *int, pb *Threshold, cat map[sat.Literal][]int, lit2id
 	}
 }
 
-func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet) {
+func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet, opt_trans ThresholdTranslation) {
 
 	// 1) categorize constraints, fill litSets and occurence lists
 	// 2) find matchings by scan through occurence lists
@@ -40,7 +41,11 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet) {
 
 	for i, pb := range pbs {
 
-		glob.A(!pb.Empty(), "pb should be non-empty. pb.Id", pb.Id)
+		if pb.Empty() {
+			glob.D("pb should be non-empty. pb.Id", pb.Id)
+			continue
+		}
+
 		pb.Normalize(LE, true)
 		pb.SortWeight()
 
@@ -49,10 +54,8 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet) {
 
 		switch t.Typ {
 		case UNKNOWN:
-			//groups = append(groups, Group{pb, []*Threshold{}})
 			addToCategory(&nextId, pb, complOcc, lit2id, &litSets[pb.Id])
 		case AMO, EX1, EXK:
-			//simps = append(simps, pb)
 			addToCategory(&nextId, pb, simplOcc, lit2id, &litSets[pb.Id])
 		default: // already translated
 			glob.A(t.Clauses.Size() > 0, "Translated pbs should contain clauses, special case?")
@@ -95,6 +98,9 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet) {
 		}
 	}
 
+	glob.D("amo_matchings:", len(amo_matchings))
+	glob.D("ex_matchings:", len(ex_matchings))
+
 	//3)
 
 	for comp, _ := range pbs {
@@ -120,8 +126,10 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet) {
 					inter = matching.inter
 					if inter.Len() > 2 {
 						simp := matching.simp
+
+						//pbs[comp].Print10()
 						//pbs[simp].Print10()
-						//fmt.Println("comp_pos", comp_offset)
+						//fmt.Println("entries", comp, litSets[comp].String(), simp, litSets[simp].String(), inter.String())
 
 						ind_entries := make(IndEntries, inter.Len())
 						comp_rest := make([]*Entry, len(pbs[comp].Entries)-inter.Len()-comp_offset)
@@ -213,12 +221,19 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet) {
 				}
 			}
 
-			t, err := TranslateByMDDChain(pbs[comp], chains)
-			translated[comp] = true
-			clauses.AddClauseSet(t.Clauses)
+			// just add this to t!
+			if pbs[comp].Typ == OPT {
+				opt_trans.PB = pbs[comp]
+				opt_trans.Chains = chains
+				fmt.Println("translating also optimization", pbs[comp], chains)
+			} else {
+				t, err := TranslateByMDDChain(pbs[comp], chains)
+				if err != nil {
+					panic(err.Error())
+				}
+				translated[comp] = true
+				clauses.AddClauseSet(t.Clauses)
 
-			if err != nil {
-				panic(err.Error())
 			}
 
 			//fmt.Println(glob.Filename_flag, "\t;", pre_t.Clauses.Size(), "\t;", t.Clauses.Size(), "\t;", len(chains))
@@ -270,6 +285,12 @@ func (a MatchingsBySize) Less(i, j int) bool { return a[i].inter.Len() > a[j].in
 func CatSimpl(pb *Threshold) (t ThresholdTranslation) {
 
 	glob.A(!pb.Empty(), "pb should not be empty")
+	if pb.Typ == OPT {
+		t.Typ = UNKNOWN // will be decided later?
+		// this might become a problem with rewriting ...
+		return t
+	}
+
 	t.Clauses.AddClauseSet(pb.Simplify())
 	t.PB = pb
 

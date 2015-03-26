@@ -1,20 +1,22 @@
 package constraints
 
 import (
-	//	"fmt"
+	"strconv"
+
+	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/sat"
 	"github.com/vale1410/bule/sorters"
-	"strconv"
 )
 
 func TranslateBySN(pb *Threshold) (t ThresholdTranslation, err error) {
 	t.Typ = CSN
 	pb.Normalize(LE, true)
+	glob.A(pb.Typ == LE, "does not work on OPT or ==, but is", pb.Typ)
 	pb.SortWeight()
 	sn := NewSortingNetwork(*pb)
 	sn.CreateSorter()
 	//PrintThresholdTikZ("sn.tex", []SortingNetwork{sn})
-	wh := 2
+	wh := 1
 	var which [8]bool
 
 	switch wh {

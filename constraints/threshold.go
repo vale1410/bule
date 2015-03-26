@@ -153,7 +153,7 @@ func (t *Threshold) Simplify() (cs sat.ClauseSet) {
 
 	for _, x := range t.Entries {
 		if x.Weight > t.K {
-			cs.AddTaggedClause(t.IdS()+":Fact", sat.Neg(x.Literal))
+			cs.AddTaggedClause(t.IdS()+"-simpl", sat.Neg(x.Literal))
 		} else {
 			entries = append(entries, x)
 		}

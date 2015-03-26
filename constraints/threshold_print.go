@@ -147,29 +147,40 @@ func (t *Threshold) PrintPBO() {
 	fmt.Println(t.K, ";")
 }
 
-func (t *Threshold) Print10() {
+func (t *Threshold) String() (s string) {
+	if t.Typ == OPT {
+		s += "min: "
+	}
 	for _, x := range t.Entries {
 		l := x.Literal
 
 		if x.Weight > 0 {
-			fmt.Printf(" +")
+			s += " +"
 		}
 		if x.Weight == 1 {
-			fmt.Print(l.ToTxt())
+			s += l.ToTxt()
 		} else {
-			fmt.Print(" ", x.Weight, l.ToTxt())
+			s += " " + strconv.FormatInt(x.Weight, 10) + l.ToTxt()
 		}
 	}
 	switch t.Typ {
 	case LE:
-		fmt.Print(" <= ")
+		s += " <= "
+		s += strconv.FormatInt(t.K, 10) + ";"
 	case GE:
-		fmt.Print(" >= ")
+		s += " >= "
+		s += strconv.FormatInt(t.K, 10) + ";"
 	case EQ:
-		fmt.Print(" = ")
+		s += " = "
+		s += strconv.FormatInt(t.K, 10) + ";"
+	case OPT:
+		//s += " bound <=  "
 	}
-	fmt.Println(t.K, ";")
+	return
+}
 
+func (t *Threshold) Print10() {
+	fmt.Println(t.String())
 }
 
 func (t *Threshold) PrintGringo() {

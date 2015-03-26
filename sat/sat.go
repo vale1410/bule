@@ -136,7 +136,11 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 		log.Println("Writing", current.Size(), "clauses")
 		//		current.PrintDebug()
 		g.PrintDIMACS(current)
-		log.Println("solving for opt <= ", maxS(result.Value-1), "...")
+		if opt.Empty() {
+			log.Println("solving...")
+		} else {
+			log.Println("solving for opt <= ", maxS(result.Value-1), "...")
+		}
 		go g.solveProblem(result_chan)
 
 		select {
@@ -175,30 +179,34 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 
 					glob.A(count == len(result.Assignment), "count != assignment")
 
-					v := opt.Evaluate(result.Assignment)
-					//					fmt.Println(v, result.Value)
-					glob.A(v < result.Value, v, "<", result.Value, "no improvement ... cant be ")
-					result.Value = v
-
 					if !opt.Empty() {
 						if result.Value == 0 {
 							log.Println("optimal")
 							finished = true
 							result.Optimal = true
 						} else {
-							log.Println("SAT for opt=", result.Value)
 
+							v := opt.Evaluate(result.Assignment)
+							glob.A(v < result.Value, v, "<", result.Value, "no improvement ... cant be ")
+							result.Value = v
+							log.Println("SAT for opt=", result.Value)
 							current = cs
 							current.AddClauseSet(opt.Translate(result.Value - 1))
 						}
 					} else {
+						log.Println("SAT")
 						finished = true
 					}
 
 				} else {
 					finished = true
 					result.Optimal = true
-					log.Println("UNSAT at", maxS(result.Value-1), "lower bound proven for ", maxS(result.Value))
+					if !opt.Empty() {
+						log.Println("UNSAT at", maxS(result.Value-1), ", lower bound proven for ", maxS(result.Value))
+					} else {
+
+						log.Println("UNSAT")
+					}
 				}
 			} else {
 				result.Solved = false

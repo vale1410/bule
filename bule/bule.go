@@ -32,7 +32,7 @@ var mdd_max_flag = flag.Int("mdd-max", 300000, "Maximal Number of MDD Nodes in p
 var mdd_redundant_flag = flag.Bool("mdd-redundant", true, "Reduce MDD by redundant nodes.")
 var opt_bound_flag = flag.Int64("opt-bound", -1, "initial bound for optimization function <= value.")
 var solver_flag = flag.String("solver", "clasp", "Choose Solver: minisat/clasp/lingeling/glucose/CCandr/cmsat.")
-var seed_flag = flag.Int64("seed", 4123, "Random seed.")
+var seed_flag = flag.Int64("seed", 31415, "Random seed.")
 
 var digitRegexp = regexp.MustCompile("([0-9]+ )*[0-9]+")
 
@@ -42,9 +42,11 @@ func main() {
 	flag.Parse()
 
 	if *debug_filename != "" {
+
 		var err error
-		glob.Debug_filename = *debug_filename
+
 		glob.Debug_output, err = os.Create(*debug_filename)
+
 		if err != nil {
 			panic(err)
 		}
@@ -72,12 +74,13 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	glob.D("Running Debug Mode...")
 
 	opt, pbs, err := parse(*filename_flag)
-	if err != nil {
-		err.Error()
-	}
 
 	if !opt.Empty() {
-		glob.D("Ignoring optimization statement")
+		opt.Normalize(constraints.LE, true)
+	}
+
+	if err != nil {
+		err.Error()
 	}
 
 	if *gurobi_flag {
@@ -113,7 +116,6 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		primaryVars := make(map[string]bool, 0)
 
 		if opt.Empty() {
-
 			for i, _ := range pbs {
 				for _, x := range pbs[i].Entries {
 					primaryVars[x.Literal.A.Id()] = true
@@ -126,6 +128,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		}
 
 		var clauses sat.ClauseSet
+		var opt_trans constraints.ThresholdTranslation
 
 		switch *cat_flag {
 		case 1:
@@ -134,16 +137,19 @@ There is NO WARRANTY, to the extent permitted by law.`)
 				stats[t.Typ]++
 				clauses.AddClauseSet(t.Clauses)
 			}
+			opt_trans.PB = &opt
 		case 2:
-			ppbs := make([]*constraints.Threshold, len(pbs))
+			ppbs := make([]*constraints.Threshold, len(pbs)+1)
+			ppbs[0] = &opt
 			for i, _ := range pbs {
 				pbs[i].SortWeight()
-				ppbs[i] = &pbs[i]
+				ppbs[i+1] = &pbs[i]
 			}
-			clauses = constraints.Categorize2(ppbs)
+			clauses, opt_trans = constraints.Categorize2(ppbs)
 			//clauses.PrintDebug()
 			//fmt.Println(*filename_flag, ";", clauses.Size())
 		default:
+			glob.A(false, "Categorization of constriants does not exist:", *cat_flag)
 		}
 
 		if *stat_flag {
@@ -165,7 +171,6 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			fmt.Println()
 		}
 	}
-
 }
 
 func printStats(stats []int) {
@@ -190,30 +195,37 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 		return opt, pbs, err
 	}
 
-	output, err := os.Create(*out)
-	if err != nil {
-		err.Error()
-	}
-	defer output.Close()
+	//output, err := os.Create(*out)
+	//if err != nil {
+	//	err.Error()
+	//}
+	//defer output.Close()
 
 	//TODO: use a buffered reader to prevent the whole file being in memory
 	lines := strings.Split(string(input), "\n")
 
 	// 0 : first line, 1 : rest of the lines
 	var count int
-	state := 0
+	state := 1
 	t := 0
+	pbs = make([]constraints.Threshold, 0)
+
+	hasOptimization := false
 
 	for _, l := range lines {
 
-		if state > 0 && (l == "" || strings.HasPrefix(l, "%") || strings.HasPrefix(l, "*")) {
+		if l == "" || strings.HasPrefix(l, "%") || strings.HasPrefix(l, "*") {
 			continue
 		}
 
 		elements := strings.Fields(l)
 
+		if len(elements) == 1 { // quick hack to ignore single element lines (not neccessary)
+			continue
+		}
+
 		switch state {
-		case 0:
+		case 0: // deprecated: for parsing the "header" of pb files, now parser is flexible
 			{
 				glob.D(l)
 				var b1 error
@@ -224,7 +236,6 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 					panic("bad conversion of numbers")
 				}
 				glob.D("File PB file with", count, "constraints and", vars, "variables")
-				pbs = make([]constraints.Threshold, 0, count)
 				state = 1
 			}
 		case 1:
@@ -241,6 +252,7 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 				}
 
 				if "min:" == elements[0] {
+					hasOptimization = true
 					o = true
 					n = (len(elements) + offset_back - 2) / 2
 					f = 1
@@ -263,10 +275,12 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 					atom := sat.NewAtomP(sat.Pred(elements[i]))
 					pb.Entries[(i-f)/2] = constraints.Entry{sat.Literal{true, atom}, weight}
 				}
-
+				pb.Id = t
+				t++
 				if o {
 					pb.Typ = constraints.OPT
 					opt = pb
+					glob.D("Scanned optimization statement")
 				} else {
 					pb.K, err = strconv.ParseInt(elements[len(elements)-2+offset_back], 10, 64)
 
@@ -284,17 +298,18 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 					} else {
 						glob.A(false, "cant convert to threshold, equationtype typS:", typS)
 					}
-					pb.Id = t
 					pbs = append(pbs, pb)
-					t++
+					if hasOptimization {
+						glob.A(len(pbs) == t-1, "Id of constraint must correspond to position")
+					} else {
+						glob.A(len(pbs) == t, "Id of constraint must correspond to position")
+					}
 				}
+				fmt.Println(pb.Id)
+				pb.Print10()
 			}
 		}
 	}
-
-	if count != t {
-		glob.D("Number", count, "of constraints incorrectly specified in pb input file ", filename, ", in reality it was", t)
-	}
-
+	glob.D("Scanned", t, "PB constraints (including opt)")
 	return
 }
