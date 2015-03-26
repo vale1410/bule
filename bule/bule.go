@@ -28,8 +28,11 @@ var cat_flag = flag.Int("cat", 1, "Categorize method 1, or 2. (default 1).")
 
 var complex_flag = flag.String("complex", "hybrid", "Solve complex PBs with mdd/sn/hybrid. Default is hybrid")
 var timeout_flag = flag.Int("timeout", 100, "Timeout of the overall solving process")
-var mdd_max_flag = flag.Int("mdd_max", 300000, "Maximal Number of MDD Nodes in processing one PB.")
-var mdd_redundant_flag = flag.Bool("mdd_redundant", true, "Reduce MDD by redundant nodes.")
+var mdd_max_flag = flag.Int("mdd-max", 300000, "Maximal Number of MDD Nodes in processing one PB.")
+var mdd_redundant_flag = flag.Bool("mdd-redundant", true, "Reduce MDD by redundant nodes.")
+var opt_bound_flag = flag.Int64("opt-bound", -1, "initial bound for optimization function <= value.")
+var solver_flag = flag.String("solver", "clasp", "Choose Solver: minisat/clasp/lingeling/glucose/CCandr/cmsat.")
+var seed_flag = flag.Int64("seed", 4123, "Random seed.")
 
 var digitRegexp = regexp.MustCompile("([0-9]+ )*[0-9]+")
 
@@ -63,6 +66,8 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	glob.Timeout_flag = *timeout_flag
 	glob.MDD_max_flag = *mdd_max_flag
 	glob.MDD_redundant_flag = *mdd_redundant_flag
+	glob.Solver_flag = *solver_flag
+	glob.Seed_flag = *seed_flag
 
 	glob.D("Running Debug Mode...")
 
@@ -153,13 +158,11 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		}
 
 		if *solve_flag {
-			fmt.Print(*filename_flag)
 			g := sat.IdGenerator(clauses.Size() * 7)
 			g.Filename = *out
 			g.PrimaryVars = primaryVars
-			//clauses.PrintDebug()
-			res := g.Solve(clauses, &opt)
-			fmt.Printf("%#v\n", res)
+			g.Solve(clauses, &opt, *opt_bound_flag)
+			fmt.Println()
 		}
 	}
 

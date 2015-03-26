@@ -1,0 +1,92 @@
+ignasi/ex10-opt.pb 1
+2015/03/25 19:28:13 Writing 248622 clauses
+2015/03/25 19:28:15 solving... +∞
+2015/03/25 20:20:50 solution for 172
+
+ignasi/ex1-opt.pb 1
+2015/03/25 20:20:51 Writing 249137 clauses
+2015/03/25 20:20:53 solving... +∞
+
+ignasi/ex2-opt.pb 1
+2015/03/25 21:20:52 Writing 247748 clauses
+2015/03/25 21:20:54 solving... +∞
+
+ignasi/ex3-opt.pb 1
+2015/03/25 22:20:53 Writing 248123 clauses
+2015/03/25 22:20:55 solving... +∞
+
+ignasi/ex4-opt.pb 1
+2015/03/25 23:20:54 Writing 249723 clauses
+2015/03/25 23:20:56 solving... +∞
+2015/03/25 23:53:57 solution for 235
+
+ignasi/ex5-opt.pb 1
+2015/03/25 23:53:58 Writing 249245 clauses
+2015/03/25 23:54:00 solving... +∞
+2015/03/25 23:54:14 solution for 216
+
+ignasi/ex6-opt.pb 1
+2015/03/25 23:54:15 Writing 247400 clauses
+2015/03/25 23:54:17 solving... +∞
+
+ignasi/ex7-opt.pb 1
+2015/03/26 00:54:17 Writing 247324 clauses
+2015/03/26 00:54:18 solving... +∞
+
+ignasi/ex8-opt.pb 1
+2015/03/26 01:54:18 Writing 251196 clauses
+2015/03/26 01:54:19 solving... +∞
+2015/03/26 02:52:10 solution for 257
+
+ignasi/ex9-opt.pb 1
+2015/03/26 02:52:11 Writing 248613 clauses
+2015/03/26 02:52:13 solving... +∞
+2015/03/26 03:18:38 solution for 186
+
+ignasi/ex10-opt.pb 2
+2015/03/26 03:18:39 Writing 242163 clauses
+2015/03/26 03:18:41 solving... +∞
+2015/03/26 03:47:09 solution for 214
+
+ignasi/ex1-opt.pb 2
+2015/03/26 03:47:11 Writing 242283 clauses
+2015/03/26 03:47:12 solving... +∞
+2015/03/26 04:18:46 solution for 233
+
+ignasi/ex2-opt.pb 2
+2015/03/26 04:18:47 Writing 242353 clauses
+2015/03/26 04:18:49 solving... +∞
+2015/03/26 04:47:35 solution for 170
+
+ignasi/ex3-opt.pb 2
+2015/03/26 04:47:36 Writing 242392 clauses
+2015/03/26 04:47:37 solving... +∞
+
+ignasi/ex4-opt.pb 2
+2015/03/26 05:47:37 Writing 242430 clauses
+2015/03/26 05:47:39 solving... +∞
+2015/03/26 06:07:07 solution for 253
+
+ignasi/ex5-opt.pb 2
+2015/03/26 06:07:09 Writing 242406 clauses
+2015/03/26 06:07:10 solving... +∞
+2015/03/26 06:07:15 solution for 263
+
+ignasi/ex6-opt.pb 2
+2015/03/26 06:07:16 Writing 242274 clauses
+2015/03/26 06:07:18 solving... +∞
+2015/03/26 06:12:00 solution for 136
+
+ignasi/ex7-opt.pb 2
+2015/03/26 06:12:01 Writing 242199 clauses
+2015/03/26 06:12:02 solving... +∞
+
+ignasi/ex8-opt.pb 2
+2015/03/26 07:12:02 Writing 242743 clauses
+2015/03/26 07:12:04 solving... +∞
+
+ignasi/ex9-opt.pb 2
+2015/03/26 08:12:03 Writing 242171 clauses
+2015/03/26 08:12:05 solving... +∞
+2015/03/26 08:21:46 solution for 200
+

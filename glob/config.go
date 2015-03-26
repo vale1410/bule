@@ -15,6 +15,8 @@ var Complex_flag string
 var Timeout_flag int
 var MDD_max_flag int
 var MDD_redundant_flag bool
+var Solver_flag string
+var Seed_flag int64
 
 func PringConfig() {
 	fmt.Println("Configuration")
@@ -24,6 +26,8 @@ func PringConfig() {
 	fmt.Println("Timeout_flag :\t", Timeout_flag)
 	fmt.Println("MDD_max_flag :\t", MDD_max_flag)
 	fmt.Println("MDD_redundant_flag :\t", MDD_redundant_flag)
+	fmt.Println("Solver_flag :\t", Solver_flag)
+	fmt.Println("Seed_flag :\t", Solver_flag)
 }
 
 func D(arg ...interface{}) {

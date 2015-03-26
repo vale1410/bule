@@ -3,6 +3,7 @@ package sat
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"math"
 	"os"
@@ -46,6 +47,12 @@ func IdGenerator(m int) (g Gen) {
 	g.mapping = make(map[string]int, m)
 	g.idMap = make([]Atom, 1, m)
 	return
+}
+
+func (g *Gen) refresh() {
+	g.mapping = make(map[string]int)
+	g.idMap = make([]Atom, 1)
+	g.nextId = 0
 }
 
 func (g *Gen) putAtom(a Atom) {
@@ -99,7 +106,7 @@ func (g *Gen) PrintSymbolTable(filename string) {
 
 }
 
-func (g *Gen) Solve(cs ClauseSet, opt Optimizer) (result Result) {
+func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 
 	glob.A(g.Filename != "", "Set filename for SAT solving.")
 	glob.A(cs.Size() > 0, "Needs to contain at least 1 clause.")
@@ -116,15 +123,20 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer) (result Result) {
 
 	finished := false
 	current := cs
-	result.Assignment = make(Assignment, len(g.idMap))
+
 	result.Value = math.MaxInt64
+	if init >= 0 {
+		current.AddClauseSet(opt.Translate(init))
+		result.Value = init + 1
+	}
+	result.Assignment = make(Assignment, len(g.idMap))
 
 	for !finished {
 
 		log.Println("Writing", current.Size(), "clauses")
-		g.PrintDIMACS(cs)
-
-		log.Println("solving...", result.Value)
+		//		current.PrintDebug()
+		g.PrintDIMACS(current)
+		log.Println("solving for opt <= ", maxS(result.Value-1), "...")
 		go g.solveProblem(result_chan)
 
 		select {
@@ -164,19 +176,21 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer) (result Result) {
 					glob.A(count == len(result.Assignment), "count != assignment")
 
 					v := opt.Evaluate(result.Assignment)
-					fmt.Println(v, result.Value)
+					//					fmt.Println(v, result.Value)
 					glob.A(v < result.Value, v, "<", result.Value, "no improvement ... cant be ")
 					result.Value = v
 
 					if !opt.Empty() {
-						current = cs
-						//current.AddClauseSet(opt.Translate(result.Value - 1))
-						//current.PrintDebug()
-						fmt.Println("result.Value", result.Value)
+						if result.Value == 0 {
+							log.Println("optimal")
+							finished = true
+							result.Optimal = true
+						} else {
+							log.Println("SAT for opt=", result.Value)
 
-						//current.AddClauseSet(opt.Translate(result.Value - 2))
-						//current.PrintDebug()
-						finished = true
+							current = cs
+							current.AddClauseSet(opt.Translate(result.Value - 1))
+						}
 					} else {
 						finished = true
 					}
@@ -184,10 +198,15 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer) (result Result) {
 				} else {
 					finished = true
 					result.Optimal = true
-					log.Println("lower bound proven")
+					log.Println("UNSAT at", maxS(result.Value-1), "lower bound proven for ", maxS(result.Value))
 				}
+			} else {
+				result.Solved = false
+				log.Println("Result received not solved, why?")
+				finished = true
 			}
 		case <-timeout:
+			log.Println("timeout")
 			finished = true
 			result.Solved = false
 			result.Timeout = true
@@ -198,6 +217,14 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer) (result Result) {
 	close(timeout)
 
 	return
+}
+
+func maxS(v int64) string {
+	if v > math.MaxInt64/2 {
+		return "+∞"
+	} else {
+		return strconv.Itoa(int(v))
+	}
 }
 
 func (g *Gen) printAssignment(assignment []bool) {
@@ -258,10 +285,24 @@ type rawResult struct {
 
 func (g *Gen) solveProblem(result chan<- rawResult) {
 
-	solver := exec.Command("clasp", g.Filename, "--time-limit", strconv.Itoa(glob.Timeout_flag))
-	//solver := exec.Command("clasp", g.Filename)
-	//solver := exec.Command("cmsat", g.Filename)
-	//solver := exec.Command("minisat", g.Filename)
+	var solver *exec.Cmd
+	switch glob.Solver_flag {
+	case "minisat":
+		solver = exec.Command("minisat", g.Filename)
+	case "glucose":
+		solver = exec.Command("glucose", g.Filename)
+	case "clasp":
+		solver = exec.Command("clasp", g.Filename, "--time-limit", strconv.Itoa(glob.Timeout_flag))
+	case "lingeling":
+		solver = exec.Command("lingeling", g.Filename)
+	case "cmsat":
+		solver = exec.Command("cmsat", g.Filename)
+	case "local":
+		solver = exec.Command("CCAnr", g.Filename, strconv.FormatInt(glob.Seed_flag, 10))
+	default:
+		glob.A(false, "Solver not available", glob.Solver_flag)
+	}
+
 	stdout, _ := solver.StdoutPipe()
 
 	solver.Start()
@@ -284,9 +325,11 @@ func (g *Gen) solveProblem(result chan<- rawResult) {
 				res.solved = false
 				glob.D("whats up? result of sat solver does not contain proper answer!")
 			}
-			break
 		}
 		s, err = r.ReadString('\n')
+		if err == io.EOF {
+			break
+		}
 		if err != nil {
 			panic(err.Error())
 		}
@@ -340,7 +383,7 @@ func (g *Gen) generateIds(cs ClauseSet) {
 	// assuming full regeneration of Ids
 	// might change existing mappings
 
-	g.nextId = 0
+	g.refresh()
 
 	for _, c := range cs.list {
 		for _, l := range c.Literals {

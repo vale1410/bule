@@ -1,8 +1,8 @@
 NAME=test
 
 clean: 
-	rm -fr *.cnf
-
+	rm -fr *.cnf 
+	rm -fr bule
 
 #rm -fr tmp
 #rm -fr *.log
