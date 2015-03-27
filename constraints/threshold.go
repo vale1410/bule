@@ -45,6 +45,14 @@ type Threshold struct {
 	Pred    sat.Pred
 }
 
+// creates copy of pb, new allocation of Entry slice
+func (pb *Threshold) Copy() (pb2 Threshold) {
+	pb2 = *pb
+	pb2.Entries = make([]Entry, len(pb.Entries))
+	copy(pb2.Entries, pb.Entries)
+	return
+}
+
 // returns the encoding of this PB
 func (pb *Threshold) Translate(K int64) (clauses sat.ClauseSet) {
 	pb_K := *pb
@@ -146,6 +154,11 @@ func (t *Threshold) Literals() (lits []sat.Literal) {
 // removes such entries from the pb
 // threshold can become empty!
 func (t *Threshold) Simplify() (cs sat.ClauseSet) {
+
+	if t.Typ == OPT {
+		glob.D(t.IdS(), " is not simplyfied because is OPT")
+		return
+	}
 
 	t.Normalize(LE, true)
 
@@ -250,8 +263,8 @@ func (t *Threshold) Multiply(c int64) {
 }
 
 // normalizes the threshold
-// Change EquationType in case of AtMost/AtLeast
-// in case of Equality, only positive weights
+// Change EquationType in case of LE/GE
+// in case of EQ and OPT, positive weights
 func (t *Threshold) Normalize(typ EquationType, posWeights bool) {
 
 	if (typ == LE && t.Typ == GE) || (typ == GE && t.Typ == LE) {

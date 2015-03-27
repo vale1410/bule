@@ -122,6 +122,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 				}
 			}
 		} else {
+			opt.SortWeight()
 			for _, x := range opt.Entries {
 				primaryVars[x.Literal.A.Id()] = true
 			}
@@ -139,15 +140,22 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			}
 			opt_trans.PB = &opt
 		case 2:
-			ppbs := make([]*constraints.Threshold, len(pbs)+1)
-			ppbs[0] = &opt
+			ppbs := make([]*constraints.Threshold, 0, len(pbs)+1)
+			if !opt.Empty() {
+				ppbs = append(ppbs, &opt)
+			}
 			for i, _ := range pbs {
 				pbs[i].SortWeight()
-				ppbs[i+1] = &pbs[i]
+				ppbs = append(ppbs, &pbs[i])
 			}
 			clauses, opt_trans = constraints.Categorize2(ppbs)
+			if !opt.Empty() { // add variables of auxiliaries added in the transformation
+				for _, x := range opt.Entries {
+					primaryVars[x.Literal.A.Id()] = true
+				}
+			}
 			//clauses.PrintDebug()
-			//fmt.Println(*filename_flag, ";", clauses.Size())
+			fmt.Println(*filename_flag, ";", clauses.Size())
 		default:
 			glob.A(false, "Categorization of constriants does not exist:", *cat_flag)
 		}
@@ -305,8 +313,8 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 						glob.A(len(pbs) == t, "Id of constraint must correspond to position")
 					}
 				}
-				fmt.Println(pb.Id)
-				pb.Print10()
+				//fmt.Println(pb.Id)
+				//pb.Print10()
 			}
 		}
 	}

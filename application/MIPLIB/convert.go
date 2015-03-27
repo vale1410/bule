@@ -82,7 +82,6 @@ func PrintPBO(pbs []constraints.Threshold, vars map[string]bool) {
 		t.NormalizePositiveLiterals()
 		t.PrintPBO()
 	}
-
 }
 
 func ParseMPS(f string) (pbs []constraints.Threshold, vars map[string]bool) {

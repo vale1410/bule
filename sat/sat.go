@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
 	"math"
 	"os"
 	"os/exec"
@@ -21,6 +20,7 @@ type Assignment map[string]int
 type Optimizer interface {
 	Evaluate(Assignment) int64
 	Translate(int64) ClauseSet
+	String() string
 	Empty() bool
 }
 
@@ -126,26 +126,31 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 
 	result.Value = math.MaxInt64
 	if init >= 0 {
+		glob.D("init set", init)
 		current.AddClauseSet(opt.Translate(init))
 		result.Value = init + 1
 	}
+
 	result.Assignment = make(Assignment, len(g.idMap))
 
 	for !finished {
 
-		log.Println("Writing", current.Size(), "clauses")
-		//		current.PrintDebug()
+		glob.D("Writing", current.Size(), "clauses")
+		current.PrintDebug()
 		g.PrintDIMACS(current)
 		if opt.Empty() {
-			log.Println("solving...")
+			glob.D("solving...")
 		} else {
-			log.Println("solving for opt <= ", maxS(result.Value-1), "...")
+			glob.D("solving for opt <= ", maxS(result.Value-1), "...")
+			//glob.D(opt.String())
 		}
+		time_before := time.Now()
 		go g.solveProblem(result_chan)
 
 		select {
 		case r := <-result_chan:
 			result.Solved = r.solved
+			glob.D("Time: ", time.Since(time_before).Seconds(), "s")
 			if r.solved {
 				result.Satisfiable = r.satisfiable
 				if r.satisfiable {
@@ -180,21 +185,21 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 					glob.A(count == len(result.Assignment), "count != assignment")
 
 					if !opt.Empty() {
-						if result.Value == 0 {
-							log.Println("optimal")
+						if result.Value == 1 {
+							glob.D("UNSAT for <= -1")
 							finished = true
 							result.Optimal = true
 						} else {
-
 							v := opt.Evaluate(result.Assignment)
 							glob.A(v < result.Value, v, "<", result.Value, "no improvement ... cant be ")
 							result.Value = v
-							log.Println("SAT for opt=", result.Value)
+							glob.D("SAT for opt=", result.Value)
 							current = cs
 							current.AddClauseSet(opt.Translate(result.Value - 1))
+							g.printAssignment(result.Assignment)
 						}
 					} else {
-						log.Println("SAT")
+						glob.D("SAT")
 						finished = true
 					}
 
@@ -202,19 +207,18 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 					finished = true
 					result.Optimal = true
 					if !opt.Empty() {
-						log.Println("UNSAT at", maxS(result.Value-1), ", lower bound proven for ", maxS(result.Value))
+						glob.D("UNSAT at", maxS(result.Value-1), ", lower bound proven for ", maxS(result.Value))
 					} else {
-
-						log.Println("UNSAT")
+						glob.D("UNSAT")
 					}
 				}
 			} else {
 				result.Solved = false
-				log.Println("Result received not solved, why?")
+				glob.D("Result received not solved, why?")
 				finished = true
 			}
 		case <-timeout:
-			log.Println("timeout")
+			glob.D("timeout")
 			finished = true
 			result.Solved = false
 			result.Timeout = true
@@ -235,12 +239,12 @@ func maxS(v int64) string {
 	}
 }
 
-func (g *Gen) printAssignment(assignment []bool) {
+func (g *Gen) printAssignment(assignment Assignment) {
 
-	count := -1
-	fmt.Println("Primary Variables:")
-	for i, x := range assignment {
-		if i > 0 && g.PrimaryVars[g.idMap[i].Id()] {
+	count := 2
+	fmt.Print("Vars: ")
+	for idS := range g.PrimaryVars {
+		if value, b := assignment[idS]; value == 1 && b {
 			count++
 			if count%10 == 0 {
 				fmt.Println()
@@ -249,22 +253,19 @@ func (g *Gen) printAssignment(assignment []bool) {
 				break
 			}
 
-			if x {
-				fmt.Print(" ")
-			} else {
-				fmt.Print(" -")
-			}
-			fmt.Print(g.idMap[i].Id())
+			fmt.Print(idS)
+			fmt.Print(":", value, " ")
 		}
 	}
 	fmt.Println()
-	count = -1
+	count = 0
 
 	first := true
-	for i, x := range assignment {
-		if i > 0 && !g.PrimaryVars[g.idMap[i].Id()] {
+	for idS, value := range assignment {
+		if value == 1 && !g.PrimaryVars[idS] {
 			if first {
-				fmt.Println("Auxiliary Variables:")
+				fmt.Print("Aux: ")
+				count = 2
 				first = false
 			}
 			count++
@@ -274,12 +275,9 @@ func (g *Gen) printAssignment(assignment []bool) {
 				fmt.Println("\n... ")
 				break
 			}
-			if x {
-				fmt.Print(" ")
-			} else {
-				fmt.Print(" -")
-			}
-			fmt.Print(g.idMap[i].Id())
+
+			fmt.Print(idS)
+			fmt.Print(":", value, " ")
 		}
 	}
 	fmt.Println()

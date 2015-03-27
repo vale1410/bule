@@ -1,7 +1,6 @@
 package constraints
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/vale1410/bule/glob"
@@ -31,7 +30,7 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet, opt_trans ThresholdTr
 	// 3) for each complex pb and its list of matchings translate through chains
 
 	//1)
-	simplOcc := make(map[sat.Literal][]int, len(pbs)) // literal to list of implyfiers it occurs in
+	simplOcc := make(map[sat.Literal][]int, len(pbs)) // literal to list of simplifiers it occurs in
 	complOcc := make(map[sat.Literal][]int, len(pbs)) // literal to list of complex pbs it occurs in
 	litSets := make([]intsets.Sparse, len(pbs))       // pb.Id -> intsSet of literalIds
 
@@ -42,7 +41,7 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet, opt_trans ThresholdTr
 	for i, pb := range pbs {
 
 		if pb.Empty() {
-			glob.D("pb should be non-empty. pb.Id", pb.Id)
+			glob.D("pb is empty. pb.Id:", pb.Id)
 			continue
 		}
 
@@ -225,7 +224,7 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet, opt_trans ThresholdTr
 			if pbs[comp].Typ == OPT {
 				opt_trans.PB = pbs[comp]
 				opt_trans.Chains = chains
-				fmt.Println("translating also optimization", pbs[comp], chains)
+				glob.D("translating optimization statement with chains: ", pbs[comp])
 			} else {
 				t, err := TranslateByMDDChain(pbs[comp], chains)
 				if err != nil {
@@ -244,7 +243,7 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet, opt_trans ThresholdTr
 	// translate the rest
 
 	for i, _ := range pbs {
-		if !translated[i] {
+		if !translated[i] && pbs[i].Typ != OPT {
 			t := Categorize1(pbs[i])
 			clauses.AddClauseSet(t.Clauses)
 		}
@@ -285,9 +284,10 @@ func (a MatchingsBySize) Less(i, j int) bool { return a[i].inter.Len() > a[j].in
 func CatSimpl(pb *Threshold) (t ThresholdTranslation) {
 
 	glob.A(!pb.Empty(), "pb should not be empty")
+
 	if pb.Typ == OPT {
-		t.Typ = UNKNOWN // will be decided later?
-		// this might become a problem with rewriting ...
+		glob.D(pb.IdS(), " is not simplyfied because is OPT")
+		t.Typ = UNKNOWN
 		return t
 	}
 

@@ -11,7 +11,7 @@ import (
 func TranslateBySN(pb *Threshold) (t ThresholdTranslation, err error) {
 	t.Typ = CSN
 	pb.Normalize(LE, true)
-	glob.A(pb.Typ == LE, "does not work on OPT or ==, but is", pb.Typ)
+	glob.A(pb.Typ == LE, "does not work on OPT or ==, but we have", pb.Typ)
 	pb.SortWeight()
 	sn := NewSortingNetwork(*pb)
 	sn.CreateSorter()

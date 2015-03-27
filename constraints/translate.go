@@ -68,7 +68,7 @@ func Categorize1(pb *Threshold) (t ThresholdTranslation) {
 	t.Typ = Facts
 	t.PB = pb
 	if len(pb.Entries) == 0 {
-		glob.D(pb.Id, "was simplified completely")
+		//glob.D(pb.Id, "was simplified completely")
 	} else {
 
 		if b, literals := pb.Cardinality(); b {
