@@ -33,6 +33,9 @@ var mdd_redundant_flag = flag.Bool("mdd-redundant", true, "Reduce MDD by redunda
 var opt_bound_flag = flag.Int64("opt-bound", -1, "initial bound for optimization function <= value.")
 var solver_flag = flag.String("solver", "clasp", "Choose Solver: minisat/clasp/lingeling/glucose/CCandr/cmsat.")
 var seed_flag = flag.Int64("seed", 31415, "Random seed.")
+var opt_rewrite_flag = flag.Bool("opt-rewrite", true, "Rewrites opt with chains from AMO and other constraint.")
+var amo_reuse_flag = flag.Bool("amo-reuse", false, "Reuses AMO constraints for rewriting complex PBs.")
+var rewrite_same_flag = flag.Bool("rewrite-same", false, "Groups same coefficients and introduces sorter and chains for them.")
 
 var digitRegexp = regexp.MustCompile("([0-9]+ )*[0-9]+")
 
@@ -70,10 +73,14 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	glob.MDD_redundant_flag = *mdd_redundant_flag
 	glob.Solver_flag = *solver_flag
 	glob.Seed_flag = *seed_flag
+	glob.Opt_rewrite_flag = *opt_rewrite_flag
+	glob.Amo_reuse_flag = *amo_reuse_flag
+	glob.Rewrite_same_flag = *rewrite_same_flag
 
 	glob.D("Running Debug Mode...")
 
-	opt, pbs, err := parse(*filename_flag)
+	pbs, err := parse(*filename_flag)
+	opt := pbs[0] // per convention first in pbs is opt statement (possibly empty)
 
 	if !opt.Empty() {
 		opt.Normalize(constraints.LE, true)
@@ -122,52 +129,58 @@ There is NO WARRANTY, to the extent permitted by law.`)
 				}
 			}
 		} else {
-			opt.SortWeight()
 			for _, x := range opt.Entries {
 				primaryVars[x.Literal.A.Id()] = true
 			}
 		}
 
-		var clauses sat.ClauseSet
-		var opt_trans constraints.ThresholdTranslation
-
 		switch *cat_flag {
 		case 1:
-			for i, _ := range pbs {
-				t := constraints.Categorize1(&pbs[i])
-				stats[t.Typ]++
-				clauses.AddClauseSet(t.Clauses)
+
+			for _, pb := range pbs[1:] {
+				pb.Categorize1()
 			}
-			opt_trans.PB = &opt
+
 		case 2:
-			ppbs := make([]*constraints.Threshold, 0, len(pbs)+1)
-			if !opt.Empty() {
-				ppbs = append(ppbs, &opt)
+
+			var tmp_opt constraints.Threshold
+			if !glob.Opt_rewrite_flag {
+				tmp_opt = (*opt).Copy()
+				opt = &constraints.Threshold{}
 			}
-			for i, _ := range pbs {
-				pbs[i].SortWeight()
-				ppbs = append(ppbs, &pbs[i])
+
+			constraints.Categorize2(pbs)
+
+			if !glob.Opt_rewrite_flag {
+				opt = &tmp_opt
 			}
-			clauses, opt_trans = constraints.Categorize2(ppbs)
-			if !opt.Empty() { // add variables of auxiliaries added in the transformation
+
+			if !opt.Empty() { // add new variables of auxiliaries added in the transformation
 				for _, x := range opt.Entries {
 					primaryVars[x.Literal.A.Id()] = true
 				}
 			}
-			//clauses.PrintDebug()
-			fmt.Println(*filename_flag, ";", clauses.Size())
 		default:
-			glob.A(false, "Categorization of constriants does not exist:", *cat_flag)
+			glob.A(false, "Categorization of constraints does not exist:", *cat_flag)
 		}
 
+		var clauses sat.ClauseSet
+		for _, pb := range pbs[1:] {
+			glob.A(pb.Translated, "pbs", pb.Id, "has not been translated", pb)
+			stats[pb.TransTyp]++
+			//fmt.Println(pb.Id, pb.Clauses.Size())
+			clauses.AddClauseSet(pb.Clauses)
+		}
+		//clauses.PrintDebug()
+
 		if *stat_flag {
-			fmt.Print(*filename_flag, ";", len(primaryVars), ";", len(pbs), ";")
-			for i, x := range stats {
-				if i > 0 {
-					fmt.Printf("%v;", x)
-				}
-			}
-			fmt.Println()
+			//fmt.Print(*filename_flag, ";", len(primaryVars), ";", len(pbs), ";")
+			//for i, x := range stats {
+			//	if i > 0 {
+			//		fmt.Printf("%v;", x)
+			//	}
+			//}
+			//fmt.Println()
 			printStats(stats)
 		}
 
@@ -175,39 +188,43 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			g := sat.IdGenerator(clauses.Size() * 7)
 			g.Filename = *out
 			g.PrimaryVars = primaryVars
-			g.Solve(clauses, &opt, *opt_bound_flag)
+			if !opt.Empty() && opt.SumWeights() <= *opt_bound_flag {
+				glob.D("opt.SumWeights <= *opt_bound", opt.SumWeights(), "<=", *opt_bound_flag)
+				*opt_bound_flag = -1
+			}
+			g.Solve(clauses, opt, *opt_bound_flag)
 			fmt.Println()
 		}
 	}
 }
 
 func printStats(stats []int) {
-	if len(stats) != int(constraints.TranslationTypes) {
-		panic("Stats for translation errornous")
-	}
-	fmt.Printf("Facts\tClause\tAMO\tEx1\tCard\tMDD\tSN\n")
 
-	for i, x := range stats {
+	glob.A(len(stats) == int(constraints.TranslationTypes), "Stats for translation errornous")
+
+	trans := constraints.Facts
+	for i := trans; i < constraints.TranslationTypes; i++ {
 		if i > 0 {
-			fmt.Printf("%v\t", x)
+			fmt.Printf("%v\t", constraints.TranslationType(i))
+		}
+	}
+	fmt.Println()
+	for i := trans; i < constraints.TranslationTypes; i++ {
+		if i > 0 {
+			fmt.Printf("%v\t", stats[i])
 		}
 	}
 	fmt.Println()
 }
 
-func parse(filename string) (opt constraints.Threshold, pbs []constraints.Threshold, err error) {
+// returns list of *pb; first one is optimization statement, possibly empty
+func parse(filename string) (pbs []*constraints.Threshold, err error) {
 
 	input, err := ioutil.ReadFile(filename)
 
 	if err != nil {
-		return opt, pbs, err
+		return pbs, err
 	}
-
-	//output, err := os.Create(*out)
-	//if err != nil {
-	//	err.Error()
-	//}
-	//defer output.Close()
 
 	//TODO: use a buffered reader to prevent the whole file being in memory
 	lines := strings.Split(string(input), "\n")
@@ -216,9 +233,7 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 	var count int
 	state := 1
 	t := 0
-	pbs = make([]constraints.Threshold, 0)
-
-	hasOptimization := false
+	pbs = make([]*constraints.Threshold, 0, len(lines))
 
 	for _, l := range lines {
 
@@ -260,7 +275,6 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 				}
 
 				if "min:" == elements[0] {
-					hasOptimization = true
 					o = true
 					n = (len(elements) + offset_back - 2) / 2
 					f = 1
@@ -283,11 +297,14 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 					atom := sat.NewAtomP(sat.Pred(elements[i]))
 					pb.Entries[(i-f)/2] = constraints.Entry{sat.Literal{true, atom}, weight}
 				}
+				// fake empty opt in case it does not exist
+				if t == 0 && !o {
+					pbs = append(pbs, &constraints.Threshold{})
+					t++
+				}
 				pb.Id = t
-				t++
 				if o {
 					pb.Typ = constraints.OPT
-					opt = pb
 					glob.D("Scanned optimization statement")
 				} else {
 					pb.K, err = strconv.ParseInt(elements[len(elements)-2+offset_back], 10, 64)
@@ -306,18 +323,17 @@ func parse(filename string) (opt constraints.Threshold, pbs []constraints.Thresh
 					} else {
 						glob.A(false, "cant convert to threshold, equationtype typS:", typS)
 					}
-					pbs = append(pbs, pb)
-					if hasOptimization {
-						glob.A(len(pbs) == t-1, "Id of constraint must correspond to position")
-					} else {
-						glob.A(len(pbs) == t, "Id of constraint must correspond to position")
-					}
 				}
+
+				pbs = append(pbs, &pb)
+				t++
 				//fmt.Println(pb.Id)
 				//pb.Print10()
 			}
 		}
 	}
+
+	glob.A(len(pbs) == t, "Id of constraint must correspond to position")
 	glob.D("Scanned", t, "PB constraints (including opt)")
 	return
 }

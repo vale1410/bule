@@ -140,11 +140,11 @@ func TestTranslateAMO0(test *testing.T) {
 	amo := TranslateAtMostOne(Count, "c", literals)
 	amo.PB = &pb2
 
-	t := TranslatePBwithAMO(&pb1, amo)
+	TranslatePBwithAMO(&pb1, amo)
 
-	if !b || t.Clauses.Size() != 8 {
-		fmt.Println("translation size incorrect", t.Clauses.Size())
-		t.Clauses.PrintDebug()
+	if !b || pb1.Clauses.Size() != 8 {
+		fmt.Println("translation size incorrect", pb1.Clauses.Size())
+		pb1.Clauses.PrintDebug()
 		test.Fail()
 	}
 }
@@ -165,11 +165,11 @@ func TestTranslateAMO1(test *testing.T) {
 	amo := TranslateAtMostOne(Count, "c", literals)
 	amo.PB = &pb2
 
-	t := TranslatePBwithAMO(&pb1, amo)
+	TranslatePBwithAMO(&pb1, amo)
 
-	if !b || t.Clauses.Size() != 13 {
-		fmt.Println("translation size incorrect", t.Clauses.Size(), "should be:", 13)
-		t.Clauses.PrintDebug()
+	if !b || pb1.Clauses.Size() != 13 {
+		fmt.Println("translation size incorrect", pb1.Clauses.Size(), "should be:", 13)
+		pb1.Clauses.PrintDebug()
 		test.Fail()
 	}
 }
@@ -194,11 +194,11 @@ func TestTranslateAMO2(test *testing.T) {
 		amo := TranslateAtMostOne(Count, "c", literals)
 		amo.PB = &pb2
 
-		t := TranslatePBwithAMO(&pb1, amo)
+		TranslatePBwithAMO(&pb1, amo)
 		//t.Clauses.PrintDebug()
 
-		if !b || t.Clauses.Size() != results[i] {
-			fmt.Println("translation size incorrect", t.Clauses.Size(), " should be", results[i])
+		if !b || pb1.Clauses.Size() != results[i] {
+			fmt.Println("translation size incorrect", pb1.Clauses.Size(), " should be", results[i])
 			//t.Clauses.PrintDebug()
 			test.Fail()
 		}

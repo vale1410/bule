@@ -18,9 +18,9 @@ const (
 	CARD
 	CMDD
 	CSN
-	TranslationTypes
 	CMDDC
 	CSNC
+	TranslationTypes
 )
 
 func (t TranslationType) String() (s string) {
@@ -53,20 +53,15 @@ func (t TranslationType) String() (s string) {
 	return
 }
 
-type ThresholdTranslation struct {
-	PB      *Threshold
-	Typ     TranslationType
-	Clauses sat.ClauseSet
-	Chains  Chains
-}
-
-func Categorize1(pb *Threshold) (t ThresholdTranslation) {
+func (pb *Threshold) Categorize1() {
 
 	// per default all information that can be simplified will be in form of facts
-	t.Clauses.AddClauseSet(pb.Simplify())
+	pb.Simplify()
+	//	glob.D("simplifierClauses", simplifierClauses.Size())
+	//pb.Clauses.AddClauseSet(simplifierClauses)
+	pb.TransTyp = Facts
+	pb.Translated = true
 
-	t.Typ = Facts
-	t.PB = pb
 	if len(pb.Entries) == 0 {
 		//glob.D(pb.Id, "was simplified completely")
 	} else {
@@ -98,81 +93,83 @@ func Categorize1(pb *Threshold) (t ThresholdTranslation) {
 				switch pb.Typ {
 				case LE: // AMO
 					trans := TranslateAtMostOne(Heule, "H_AMO", literals)
-					t.Clauses.AddClauseSet(trans.Clauses)
-					t.Typ = AMO
+					pb.Clauses.AddClauseSet(trans.Clauses)
+					pb.TransTyp = AMO
 				case GE: // its a clause!
-					t.Clauses.AddTaggedClause("Cls", literals...)
-					t.Typ = Clause
+					pb.Clauses.AddTaggedClause("Cls", literals...)
+					pb.TransTyp = Clause
 				case EQ: // Ex1
 					trans := TranslateExactlyOne(Heule, "H_EX1", literals)
-					t.Clauses.AddClauseSet(trans.Clauses)
-					t.Typ = EX1
+					pb.Clauses.AddClauseSet(trans.Clauses)
+					pb.TransTyp = EX1
 				}
 			} else {
-				t.Clauses.AddClauseSet(CreateCardinality(pb))
-				t.Typ = CARD
+				pb.Clauses.AddClauseSet(CreateCardinality(pb))
+				pb.TransTyp = CARD
 			}
 
 		} else {
 			// treat equality as two constraints!
 			if pb.Typ == EQ {
 				glob.D(pb.Id, " decompose in >= amd <=")
-				pb.Typ = LE
-				t = TranslateComplexThreshold(pb)
-				pb.Normalize(LE, true)
-				pb.Typ = GE
-				tt := TranslateComplexThreshold(pb) // TODO: same id problem for sorters and mdds, needs attention
-				t.Clauses.AddClauseSet(tt.Clauses)
-				pb.Typ = EQ
+				pbLE := pb.Copy()
+				pbLE.Typ = LE
+				pbGE := pb.Copy()
+				pbGE.Typ = GE
+				pbLE.TranslateComplexThreshold()
+				pbGE.TranslateComplexThreshold()
+				pb.Clauses.AddClauseSet(pbLE.Clauses)
+				pb.Clauses.AddClauseSet(pbGE.Clauses)
 			} else {
-				t = TranslateComplexThreshold(pb)
+				pb.TranslateComplexThreshold()
 			}
 		}
 	}
-
 	return
 }
 
-func TranslateComplexThreshold(pb *Threshold) (t ThresholdTranslation) {
+func (pb *Threshold) TranslateComplexThreshold() {
 	pb.Normalize(LE, true)
-	pb.SortWeight()
+	pb.SortAscending()
 
 	var err error
 	switch glob.Complex_flag {
 	case "mdd":
-		t, err = TranslateByMDD(pb)
-		if err != nil {
+		pb.TranslateByMDD()
+		if pb.Err != nil {
 			panic(err.Error())
 		}
-		glob.D(pb.Id, " mdd:", t.Clauses.Size())
+		glob.D(pb.Id, " mdd:", pb.Clauses.Size())
 	case "sn":
-		t, err = TranslateBySN(pb)
-		if err != nil {
+		pb.TranslateBySN()
+		if pb.Err != nil {
 			panic(err.Error())
 		}
-		glob.D(pb.Id, " Complex, SN:", t.Clauses.Size())
+		glob.D(pb.Id, " Complex, SN:", pb.Clauses.Size())
 	case "hybrid":
-		tSN, err1 := TranslateBySN(pb)
-		tMDD, err2 := TranslateByMDD(pb)
+		tSN := pb.Copy()
+		tMDD := pb.Copy()
+		tSN.TranslateBySN()
+		tMDD.TranslateByMDD()
 
-		if err1 != nil {
-			panic(err1.Error())
+		if tSN.Err != nil {
+			panic(tSN.Err.Error())
 		}
 
 		glob.D(pb.Id, "Complex, SN:", tSN.Clauses.Size(), " mdd:", tMDD.Clauses.Size())
 
-		if err2 == nil && tMDD.Clauses.Size() < tSN.Clauses.Size() {
-			t.Clauses = tMDD.Clauses
-			t.Typ = CMDD
+		if tMDD.Err == nil && tMDD.Clauses.Size() < tSN.Clauses.Size() {
+			pb.Clauses = tMDD.Clauses
+			pb.TransTyp = CMDD
 		} else {
-			t.Clauses = tSN.Clauses
-			t.Typ = CSN
+			pb.Clauses = tSN.Clauses
+			pb.TransTyp = CSN
 		}
 	default:
 		panic("Complex_flag option not available: " + glob.Complex_flag)
 	}
 
-	glob.A(t.Clauses.Size() > 0, pb.Id, " non-trivial pb should produce some clauses...")
+	glob.A(pb.Clauses.Size() > 0, pb.Id, " non-trivial pb should produce some clauses...")
 
 	return
 }
@@ -266,22 +263,20 @@ func PreprocessPBwithAMO(pb *Threshold, amo CardTranslation) bool {
 
 // returns if preprocessing was successful
 // Uses the translation of pb2 (count translation)
-func TranslatePBwithAMO(pb *Threshold, amo CardTranslation) (t ThresholdTranslation) {
+func TranslatePBwithAMO(pb *Threshold, amo CardTranslation) {
 
 	b := PreprocessPBwithAMO(pb, amo)
 	if !b {
 		panic("Translate PB with AMO called on wrong input")
 	}
 	chain := CleanChain(pb.Entries, amo.Aux)
-	t, err := TranslateByMDDChain(pb, Chains{chain})
-	if err != nil {
-		panic(err.Error())
+	pb.TranslateByMDDChain(Chains{chain})
+	if pb.Err != nil {
+		panic(pb.Err.Error())
 	}
-
-	return t
 }
 
-func TranslateBySNChain(pb *Threshold, literals []sat.Literal) (t ThresholdTranslation) {
+func TranslateBySNChain(pb *Threshold, literals []sat.Literal) {
 	// check for overlap of variables
 	// just do a rewrite, and call translateByMDD, reuse variables
 	return

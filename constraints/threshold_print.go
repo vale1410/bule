@@ -33,7 +33,6 @@ func (c Chain) Print() {
 }
 
 func (t *Threshold) Print2() {
-	fmt.Println(t.Desc)
 
 	first := true
 	for _, x := range t.Entries {

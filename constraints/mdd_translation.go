@@ -9,22 +9,21 @@ import (
 	"strconv"
 )
 
-func TranslateByMDD(pb *Threshold) (t ThresholdTranslation, err error) {
-	return TranslateByMDDChain(pb, Chains{})
+func (pb *Threshold) TranslateByMDD() {
+	pb.TranslateByMDDChain(Chains{})
 }
 
 // chains must be in order of pb and be subsets of its literals
-func TranslateByMDDChain(pb *Threshold, chains Chains) (t ThresholdTranslation, err error) {
+func (pb *Threshold) TranslateByMDDChain(chains Chains) {
 	glob.A(!pb.Empty(), "works only for non-empyt mdds")
 	glob.A(pb.Positive(), "Weights need to be positive")
 	glob.A(pb.Typ == LE, "works only on LE, but is", pb.Typ)
 
 	if len(chains) == 0 {
-		t.Typ = CMDD
+		pb.TransTyp = CMDD
 	} else {
-		t.Typ = CMDDC
+		pb.TransTyp = CMDDC
 	}
-	t.PB = pb
 
 	store := mdd.Init(len(pb.Entries))
 	topId, _, _, err := CreateMDDChain(&store, pb.K, pb.Entries, chains)
@@ -32,7 +31,8 @@ func TranslateByMDDChain(pb *Threshold, chains Chains) (t ThresholdTranslation, 
 	//store.Debug(true)
 
 	if err != nil {
-		return t, err
+		pb.Err = err
+		return
 	}
 
 	if glob.MDD_redundant_flag {
@@ -40,9 +40,7 @@ func TranslateByMDDChain(pb *Threshold, chains Chains) (t ThresholdTranslation, 
 		glob.D("remove redundant nodes in MDD", removed)
 	}
 
-	t.Clauses = convertMDD2Clauses(store, pb)
-
-	return t, err
+	pb.Clauses.AddClauseSet(convertMDD2Clauses(store, pb))
 }
 
 // Translate monotone MDDs to SAT

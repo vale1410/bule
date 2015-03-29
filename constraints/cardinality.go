@@ -73,25 +73,25 @@ func TranslateAtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) 
 
 		// S_i -> S_{i-1}
 		for i := 1; i < len(lits); i++ {
-			clauses.AddTaggedClause(tag+"1", auxs[i-1], sat.Neg(auxs[i]))
+			clauses.AddTaggedClause(tag, auxs[i-1], sat.Neg(auxs[i]))
 		}
 
 		// X_i -> S_i
 		for i := 0; i < len(lits); i++ {
-			clauses.AddTaggedClause(tag+"2", auxs[i], sat.Neg(lits[i]))
+			clauses.AddTaggedClause(tag, auxs[i], sat.Neg(lits[i]))
 		}
 
 		// X_i-1 -> -S_i
 		for i := 1; i < len(lits); i++ {
-			clauses.AddTaggedClause(tag+"3", sat.Neg(auxs[i]), sat.Neg(lits[i-1]))
+			clauses.AddTaggedClause(tag, sat.Neg(auxs[i]), sat.Neg(lits[i-1]))
 		}
 
 		// (S_i-1 /\ -S_i) -> X_i-1
 		for i := 1; i <= len(lits); i++ {
 			if i != len(lits) {
-				clauses.AddTaggedClause(tag+"4", sat.Neg(auxs[i-1]), auxs[i], lits[i-1])
+				clauses.AddTaggedClause(tag, sat.Neg(auxs[i-1]), auxs[i], lits[i-1])
 			} else {
-				clauses.AddTaggedClause(tag+"4", sat.Neg(auxs[i-1]), lits[i-1])
+				clauses.AddTaggedClause(tag, sat.Neg(auxs[i-1]), lits[i-1])
 			}
 		}
 
@@ -166,25 +166,25 @@ func TranslateExactlyOne(typ OneTranslationType, tag string, lits []sat.Literal)
 
 		// S_i -> S_{i-1}
 		for i := 1; i < len(lits); i++ {
-			clauses.AddTaggedClause(tag+"1", auxs[i-1], sat.Neg(auxs[i]))
+			clauses.AddTaggedClause(tag, auxs[i-1], sat.Neg(auxs[i]))
 		}
 
 		// X_i -> S_i
 		for i := 0; i < len(lits); i++ {
-			clauses.AddTaggedClause(tag+"2", auxs[i], sat.Neg(lits[i]))
+			clauses.AddTaggedClause(tag, auxs[i], sat.Neg(lits[i]))
 		}
 
 		// X_i-1 -> -S_i
 		for i := 1; i < len(lits); i++ {
-			clauses.AddTaggedClause(tag+"3", sat.Neg(auxs[i]), sat.Neg(lits[i-1]))
+			clauses.AddTaggedClause(tag, sat.Neg(auxs[i]), sat.Neg(lits[i-1]))
 		}
 
 		// (S_i-1 /\ -S_i) -> X_i-1
 		for i := 1; i <= len(lits); i++ {
 			if i != len(lits) {
-				clauses.AddTaggedClause(tag+"4", sat.Neg(auxs[i-1]), auxs[i], lits[i-1])
+				clauses.AddTaggedClause(tag, sat.Neg(auxs[i-1]), auxs[i], lits[i-1])
 			} else {
-				clauses.AddTaggedClause(tag+"4", sat.Neg(auxs[i-1]), lits[i-1])
+				clauses.AddTaggedClause(tag, sat.Neg(auxs[i-1]), lits[i-1])
 			}
 		}
 

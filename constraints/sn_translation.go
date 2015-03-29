@@ -8,11 +8,11 @@ import (
 	"github.com/vale1410/bule/sorters"
 )
 
-func TranslateBySN(pb *Threshold) (t ThresholdTranslation, err error) {
-	t.Typ = CSN
+func (pb *Threshold) TranslateBySN() {
+	pb.TransTyp = CSN
 	pb.Normalize(LE, true)
 	glob.A(pb.Typ == LE, "does not work on OPT or ==, but we have", pb.Typ)
-	pb.SortWeight()
+	pb.SortDescending()
 	sn := NewSortingNetwork(*pb)
 	sn.CreateSorter()
 	//PrintThresholdTikZ("sn.tex", []SortingNetwork{sn})
@@ -31,8 +31,7 @@ func TranslateBySN(pb *Threshold) (t ThresholdTranslation, err error) {
 	}
 
 	pred := sat.Pred("auxSN_" + strconv.Itoa(pb.Id))
-	t.Clauses = CreateEncoding(sn.LitIn, which, []sat.Literal{}, "BnB", pred, sn.Sorter)
-	return t, nil
+	pb.Clauses.AddClauseSet(CreateEncoding(sn.LitIn, which, []sat.Literal{}, "BnB", pred, sn.Sorter))
 }
 
 //this construction is based on AtMost threshold constraints

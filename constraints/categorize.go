@@ -23,7 +23,7 @@ func addToCategory(nextId *int, pb *Threshold, cat map[sat.Literal][]int, lit2id
 	}
 }
 
-func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet, opt_trans ThresholdTranslation) {
+func Categorize2(pbs []*Threshold) {
 
 	// 1) categorize constraints, fill litSets and occurence lists
 	// 2) find matchings by scan through occurence lists
@@ -36,7 +36,6 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet, opt_trans ThresholdTr
 
 	nextId := 0
 	lit2id := make(map[sat.Literal]int, 0) // literal to its id
-	translated := make([]bool, len(pbs))
 
 	for i, pb := range pbs {
 
@@ -46,19 +45,20 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet, opt_trans ThresholdTr
 		}
 
 		pb.Normalize(LE, true)
-		pb.SortWeight()
+		pb.SortVar()
 
-		t := CatSimpl(pb)
-		clauses.AddClauseSet(t.Clauses)
+		pb.CatSimpl()
 
-		switch t.Typ {
+		switch pb.TransTyp {
 		case UNKNOWN:
-			addToCategory(&nextId, pb, complOcc, lit2id, &litSets[pb.Id])
+			addToCategory(&nextId, pb, complOcc, lit2id, &litSets[i])
 		case AMO, EX1, EXK:
-			addToCategory(&nextId, pb, simplOcc, lit2id, &litSets[pb.Id])
+			//fmt.Println(pb.Id, len(pbs))
+			//pb.Print10()
+			addToCategory(&nextId, pb, simplOcc, lit2id, &litSets[i])
 		default: // already translated
-			glob.A(t.Clauses.Size() > 0, "Translated pbs should contain clauses, special case?")
-			translated[i] = true
+			glob.DT(pb.Clauses.Size() == 0, "Translated pbs should contain clauses, special case?")
+			pb.Translated = true
 		}
 	}
 
@@ -105,12 +105,11 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet, opt_trans ThresholdTr
 	for comp, _ := range pbs {
 		if matchings, b := amo_matchings[comp]; b {
 			//pre_t, _ := TranslateByMDD(pbs[comp]) // TODO: remove, just here to compare sizes
-			//pbs[comp].SortWeight()                // because TranslateByMDD might reorder entries
+			//pbs[comp].SortVar()                // because TranslateByMDD might reorder entries
 
-			//fmt.Println("new PB", comp)
-			//pbs[comp].Print10()
+			glob.D("chaining PB", comp, ":", pbs[comp])
 
-			glob.A(!translated[comp], "comp", comp, "should not have been translated yet")
+			glob.A(!pbs[comp].Translated, "comp", comp, "should not have been translated yet")
 
 			sort.Sort(MatchingsBySize(matchings))
 
@@ -118,7 +117,7 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet, opt_trans ThresholdTr
 			inter := &intsets.Sparse{}
 			var comp_offset int                  // the  new first position of Entries in comp
 			for _, matching := range matchings { // find the next non-translated one
-				if !translated[matching.simp] {
+				if glob.Amo_reuse_flag || !pbs[matching.simp].Translated {
 					// choose longest matching, that is not translated yet
 					//fmt.Println("check matching: simp", matching.simp, "inter", matching.inter.String())
 					matching.inter.IntersectionWith(&litSets[comp]) //update matching
@@ -175,11 +174,11 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet, opt_trans ThresholdTr
 						copy(compEntries, pbs[comp].Entries[:comp_offset])
 
 						for i, ie := range ind_entries {
+							glob.A(ie.c.Literal == ie.s.Literal, "Indicator entries should be aligned but", ie.c.Literal, ie.s.Literal)
 							compEntries[i+comp_offset] = *ie.c
 							simpEntries[i] = *ie.s
 						}
 						for i, _ := range comp_rest {
-							//fmt.Println(i, comp_offset, len(ind_entries), comp_rest)
 							compEntries[comp_offset+len(ind_entries)+i] = *comp_rest[i]
 						}
 						for i := len(ind_entries); i < len(pbs[simp].Entries); i++ {
@@ -188,12 +187,12 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet, opt_trans ThresholdTr
 
 						pbs[comp].Entries = compEntries
 						pbs[simp].Entries = simpEntries
-						//pbs[comp].Print10()
-						//pbs[simp].Print10()
+						glob.D(pbs[comp])
+						glob.D(pbs[simp])
 
-						simp_translation := TranslateAtMostOne(Count, pbs[simp].IdS()+"count", pbs[simp].Literals())
-						translated[simp] = true
-						clauses.AddClauseSet(simp_translation.Clauses)
+						simp_translation := TranslateAtMostOne(Count, pbs[simp].IdS()+"-cnt", pbs[simp].Literals())
+						pbs[simp].Translated = true
+						pbs[simp].Clauses.AddClauseSet(simp_translation.Clauses)
 						simp_translation.PB = pbs[simp]
 						// replaces entries with auxiliaries of the AMO
 						last := int64(0)
@@ -210,28 +209,27 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet, opt_trans ThresholdTr
 						chains = append(chains, chain)
 
 						//fmt.Println("chain:")
-						//chain.Print()
 						//fmt.Println("rewritten:")
-						//pbs[comp].Print10()
+						//glob.D(pbs[comp])
+						//glob.D(pbs[simp])
+						pbs[simp].SortVar()
+						//glob.D("resorting:", pbs[simp])
 					}
-					//else {
-					//		fmt.Println("matching not taken, it looks after updated intersection:", inter.String())
-					//	}
 				}
 			}
 
+			pbs[comp].Chains = chains
 			// just add this to t!
 			if pbs[comp].Typ == OPT {
-				opt_trans.PB = pbs[comp]
-				opt_trans.Chains = chains
+				//opt_trans.PB = pbs[comp]
+				//opt_trans.Chains = chains
 				glob.D("translating optimization statement with chains: ", pbs[comp])
 			} else {
-				t, err := TranslateByMDDChain(pbs[comp], chains)
-				if err != nil {
-					panic(err.Error())
+				pbs[comp].TranslateByMDDChain(chains)
+				if pbs[comp].Err != nil {
+					panic(pbs[comp].Err.Error())
 				}
-				translated[comp] = true
-				clauses.AddClauseSet(t.Clauses)
+				pbs[comp].Translated = true
 
 			}
 
@@ -243,13 +241,11 @@ func Categorize2(pbs []*Threshold) (clauses sat.ClauseSet, opt_trans ThresholdTr
 	// translate the rest
 
 	for i, _ := range pbs {
-		if !translated[i] && pbs[i].Typ != OPT {
-			t := Categorize1(pbs[i])
-			clauses.AddClauseSet(t.Clauses)
+		if !pbs[i].Translated && pbs[i].Typ != OPT {
+			pbs[i].Categorize1()
+			pbs[i].Translated = true
 		}
 	}
-
-	return
 }
 
 type Match struct {
@@ -281,21 +277,20 @@ func (a MatchingsBySize) Len() int           { return len(a) }
 func (a MatchingsBySize) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a MatchingsBySize) Less(i, j int) bool { return a[i].inter.Len() > a[j].inter.Len() }
 
-func CatSimpl(pb *Threshold) (t ThresholdTranslation) {
+func (pb *Threshold) CatSimpl() {
 
 	glob.A(!pb.Empty(), "pb should not be empty")
 
 	if pb.Typ == OPT {
 		glob.D(pb.IdS(), " is not simplyfied because is OPT")
-		t.Typ = UNKNOWN
-		return t
+		pb.TransTyp = UNKNOWN
+		return
 	}
 
-	t.Clauses.AddClauseSet(pb.Simplify())
-	t.PB = pb
+	pb.Simplify()
 
 	if pb.Empty() {
-		t.Typ = Facts
+		pb.TransTyp = Facts
 		return
 	} else {
 
@@ -326,24 +321,24 @@ func CatSimpl(pb *Threshold) (t ThresholdTranslation) {
 				switch pb.Typ {
 				case LE: // check for binary, which is also a clause ( ~l1 \/ ~l2 )
 					if len(pb.Entries) == 2 {
-						t.Clauses.AddTaggedClause("Cls", sat.Neg(pb.Entries[0].Literal), sat.Neg(pb.Entries[1].Literal))
-						t.Typ = Clause
+						pb.Clauses.AddTaggedClause("Cls", sat.Neg(pb.Entries[0].Literal), sat.Neg(pb.Entries[1].Literal))
+						pb.TransTyp = Clause
 					} else {
-						t.Typ = AMO
+						pb.TransTyp = AMO
 					}
 				case GE: // its a clause!
-					t.Clauses.AddTaggedClause("Cls", literals...)
-					t.Typ = Clause
+					pb.Clauses.AddTaggedClause("Cls", literals...)
+					pb.TransTyp = Clause
 				case EQ:
-					t.Typ = EX1
+					pb.TransTyp = EX1
 				}
 			} else { //cardinality
 				switch pb.Typ {
 				case LE, GE:
-					t.Clauses.AddClauseSet(CreateCardinality(pb))
-					t.Typ = CARD
+					pb.Clauses.AddClauseSet(CreateCardinality(pb))
+					pb.TransTyp = CARD
 				case EQ:
-					t.Typ = EXK
+					pb.TransTyp = EXK
 				}
 			}
 		}

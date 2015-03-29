@@ -17,6 +17,9 @@ var MDD_max_flag int
 var MDD_redundant_flag bool
 var Solver_flag string
 var Seed_flag int64
+var Opt_rewrite_flag bool
+var Amo_reuse_flag bool
+var Rewrite_same_flag bool
 
 func PringConfig() {
 	fmt.Println("Configuration")
@@ -27,7 +30,10 @@ func PringConfig() {
 	fmt.Println("MDD_max_flag :\t", MDD_max_flag)
 	fmt.Println("MDD_redundant_flag :\t", MDD_redundant_flag)
 	fmt.Println("Solver_flag :\t", Solver_flag)
-	fmt.Println("Seed_flag :\t", Solver_flag)
+	fmt.Println("Seed_flag :\t", Seed_flag)
+	fmt.Println("Opt_rewrite_flag :\t", Opt_rewrite_flag)
+	fmt.Println("Amo_reuse_flag :\t", Amo_reuse_flag)
+	fmt.Println("Rewrite_same_flag :\t", Rewrite_same_flag)
 }
 
 func D(arg ...interface{}) {

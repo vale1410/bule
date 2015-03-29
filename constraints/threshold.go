@@ -1,11 +1,12 @@
 package constraints
 
 import (
-	"github.com/vale1410/bule/glob"
-	"github.com/vale1410/bule/sat"
 	"math"
 	"sort"
 	"strconv"
+
+	"github.com/vale1410/bule/glob"
+	"github.com/vale1410/bule/sat"
 )
 
 type EquationType int
@@ -37,28 +38,55 @@ type Entry struct {
 }
 
 type Threshold struct {
-	Id      int // unique id to reference Threshold in encodings
-	Desc    string
-	Entries []Entry
-	K       int64
-	Typ     EquationType
-	Pred    sat.Pred
+	Id         int // unique id to reference Threshold in encodings
+	Entries    []Entry
+	K          int64
+	Typ        EquationType
+	Translated bool //indicates if constraint is translated
+	TransTyp   TranslationType
+	Clauses    sat.ClauseSet
+	Chains     Chains // has to be in order of Entries
+	Err        error  // some error in the translation
 }
 
 // creates copy of pb, new allocation of Entry slice
+// copy empties the clauseSet!
 func (pb *Threshold) Copy() (pb2 Threshold) {
 	pb2 = *pb
 	pb2.Entries = make([]Entry, len(pb.Entries))
 	copy(pb2.Entries, pb.Entries)
+	pb2.Clauses = sat.ClauseSet{}
+	//pb2.Print10()
+	//fmt.Println(pb2.Chains)
 	return
 }
 
 // returns the encoding of this PB
-func (pb *Threshold) Translate(K int64) (clauses sat.ClauseSet) {
-	pb_K := *pb
+func (pb *Threshold) Translate(K int64) sat.ClauseSet {
+	pb_K := pb.Copy()
 	pb_K.K = K
 	pb_K.Typ = LE
-	clauses = Categorize1(&pb_K).Clauses
+	pb_K.Categorize1() // is wrong, because does not take chains into account!
+	//glob.D("# of chains", len(pb_K.Chains))
+	//pb_K.Print10()
+	//pb_K.TranslateByMDDChain(pb_K.Chains)
+	if pb_K.Err != nil {
+		glob.D("Capacity of MDD reached, trying to solve by not taking chains into account")
+		pb_K.Err = nil
+		pb_K.Categorize1()
+	}
+	return pb_K.Clauses
+}
+
+// returns the encoding of this PB
+func (pb *Threshold) RewriteSameWeights() {
+
+	// go to the end of chains
+	// reorder PB after this descending
+	// group variables according to weights
+	// re-encode same weights by a sorter (use createSorter, createEncoding)
+	// generate Chains for this
+
 	return
 }
 
@@ -153,38 +181,33 @@ func (t *Threshold) Literals() (lits []sat.Literal) {
 // finds trivially implied facts, returns set of facts
 // removes such entries from the pb
 // threshold can become empty!
-func (t *Threshold) Simplify() (cs sat.ClauseSet) {
+func (pb *Threshold) Simplify() {
 
-	if t.Typ == OPT {
-		glob.D(t.IdS(), " is not simplyfied because is OPT")
+	if pb.Typ == OPT {
+		glob.D(pb.IdS(), " is not simplyfied because is OPT")
 		return
 	}
 
-	t.Normalize(LE, true)
+	pb.Normalize(LE, true)
 
-	entries := make([]Entry, 0, len(t.Entries))
+	entries := make([]Entry, 0, len(pb.Entries))
 
-	for _, x := range t.Entries {
-		if x.Weight > t.K {
-			cs.AddTaggedClause(t.IdS()+"-simpl", sat.Neg(x.Literal))
+	for _, x := range pb.Entries {
+		if x.Weight > pb.K {
+			pb.Clauses.AddTaggedClause(pb.IdS()+"-simpl", sat.Neg(x.Literal))
 		} else {
 			entries = append(entries, x)
 		}
 	}
-	t.Entries = entries
+	pb.Entries = entries
+	pb.Normalize(GE, true)
 
-	if t.Typ == EQ {
-		t.Normalize(EQ, true)
-	} else {
-		t.Normalize(GE, true)
-	}
-
-	if t.SumWeights() == t.K {
-		for _, x := range t.Entries {
-			cs.AddTaggedClause("Fact", x.Literal)
+	if pb.SumWeights() == pb.K {
+		for _, x := range pb.Entries {
+			pb.Clauses.AddTaggedClause("Fact", x.Literal)
 		}
-		t.Entries = []Entry{}
-		t.K = 0
+		pb.Entries = []Entry{}
+		pb.K = 0
 	}
 
 	return
@@ -193,6 +216,7 @@ func (t *Threshold) Simplify() (cs sat.ClauseSet) {
 // all weights are the same; performs rounding
 // if this is true, then all weights are 1, and K is the cardinality
 func (t *Threshold) Cardinality() (allSame bool, literals []sat.Literal) {
+	glob.A(len(t.Chains) == 0, "cant reorder Entries with chains")
 
 	t.NormalizePositiveCoefficients()
 	allSame = true
@@ -219,6 +243,7 @@ func (t *Threshold) Cardinality() (allSame bool, literals []sat.Literal) {
 }
 
 func (t *Threshold) NormalizePositiveCoefficients() {
+	glob.A(len(t.Chains) == 0, "cant reorder Entries with chains")
 
 	for i, e := range t.Entries {
 		if t.Entries[i].Weight < 0 {
@@ -230,6 +255,7 @@ func (t *Threshold) NormalizePositiveCoefficients() {
 }
 
 func (t *Threshold) NormalizePositiveLiterals() {
+	glob.A(len(t.Chains) == 0, "cant reorder Entries with chains")
 
 	for i, e := range t.Entries {
 		if t.Entries[i].Literal.Sign == false {
@@ -266,6 +292,7 @@ func (t *Threshold) Multiply(c int64) {
 // Change EquationType in case of LE/GE
 // in case of EQ and OPT, positive weights
 func (t *Threshold) Normalize(typ EquationType, posWeights bool) {
+	glob.A(len(t.Chains) == 0, "cant reorder Entries with chains")
 
 	if (typ == LE && t.Typ == GE) || (typ == GE && t.Typ == LE) {
 		t.Multiply(-1)
@@ -354,12 +381,18 @@ func (t *Threshold) SumWeights() (total int64) {
 func (t *Threshold) SortVar() {
 	sort.Sort(EntriesVariables(t.Entries))
 }
-func (t *Threshold) SortWeight() {
+
+func (t *Threshold) SortAscending() {
+	sort.Sort(EntriesAscending(t.Entries))
+}
+
+func (t *Threshold) SortDescending() {
 	sort.Sort(EntriesAscending(t.Entries))
 }
 
 type EntriesVariables []Entry
 type EntriesAscending []Entry
+type EntriesDescending []Entry
 
 func (a EntriesVariables) Len() int      { return len(a) }
 func (a EntriesVariables) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
@@ -369,4 +402,8 @@ func (a EntriesVariables) Less(i, j int) bool {
 
 func (a EntriesAscending) Len() int           { return len(a) }
 func (a EntriesAscending) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a EntriesAscending) Less(i, j int) bool { return a[i].Weight > a[j].Weight }
+func (a EntriesAscending) Less(i, j int) bool { return a[i].Weight >= a[j].Weight }
+
+func (a EntriesDescending) Len() int           { return len(a) }
+func (a EntriesDescending) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a EntriesDescending) Less(i, j int) bool { return a[i].Weight <= a[j].Weight }

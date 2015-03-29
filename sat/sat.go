@@ -125,18 +125,22 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 	current := cs
 
 	result.Value = math.MaxInt64
-	if init >= 0 {
+	if !opt.Empty() && init >= 0 {
 		glob.D("init set", init)
-		current.AddClauseSet(opt.Translate(init))
+		opt_clauses := opt.Translate(init)
+		fmt.Println("opt cls", opt_clauses.Size())
+		current.AddClauseSet(opt_clauses)
 		result.Value = init + 1
 	}
 
 	result.Assignment = make(Assignment, len(g.idMap))
 
+	time_total := time.Now()
+
 	for !finished {
 
-		glob.D("Writing", current.Size(), "clauses")
-		current.PrintDebug()
+		//glob.D("Writing", current.Size(), "clauses")
+		fmt.Println("tot cls", current.Size())
 		g.PrintDIMACS(current)
 		if opt.Empty() {
 			glob.D("solving...")
@@ -150,7 +154,7 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 		select {
 		case r := <-result_chan:
 			result.Solved = r.solved
-			glob.D("Time: ", time.Since(time_before).Seconds(), "s")
+			fmt.Printf("Time: %.3f s\n", time.Since(time_before).Seconds())
 			if r.solved {
 				result.Satisfiable = r.satisfiable
 				if r.satisfiable {
@@ -178,28 +182,32 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 								count++
 								result.Assignment[atom.Id()] = sign
 							}
-
 						}
 					}
 
 					glob.A(count == len(result.Assignment), "count != assignment")
 
 					if !opt.Empty() {
-						if result.Value == 1 {
-							glob.D("UNSAT for <= -1")
+						v := opt.Evaluate(result.Assignment)
+						if v <= 0 {
+							glob.D("SAT for opt = 0")
 							finished = true
 							result.Optimal = true
+							fmt.Println("OPTIMIUM:  0")
 						} else {
-							v := opt.Evaluate(result.Assignment)
 							glob.A(v < result.Value, v, "<", result.Value, "no improvement ... cant be ")
 							result.Value = v
-							glob.D("SAT for opt=", result.Value)
+							fmt.Println("SAT for opt =", result.Value)
 							current = cs
-							current.AddClauseSet(opt.Translate(result.Value - 1))
-							g.printAssignment(result.Assignment)
+							//g.printAssignment(result.Assignment)
+							//fmt.Println()
+							opt_clauses := opt.Translate(result.Value - 1)
+							fmt.Println("opt cls", opt_clauses.Size())
+							//opt_clauses.PrintDebug()
+							current.AddClauseSet(opt_clauses)
 						}
 					} else {
-						glob.D("SAT")
+						fmt.Println("SAT")
 						finished = true
 					}
 
@@ -208,8 +216,9 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 					result.Optimal = true
 					if !opt.Empty() {
 						glob.D("UNSAT at", maxS(result.Value-1), ", lower bound proven for ", maxS(result.Value))
+						fmt.Println("OPTIMIUM: ", maxS(result.Value))
 					} else {
-						glob.D("UNSAT")
+						fmt.Println("UNSAT")
 					}
 				}
 			} else {
@@ -218,12 +227,14 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 				finished = true
 			}
 		case <-timeout:
-			glob.D("timeout")
+			fmt.Println("TIMEOUT")
 			finished = true
 			result.Solved = false
 			result.Timeout = true
 		}
 	}
+
+	fmt.Printf("cTIME: %.3f s\n", time.Since(time_total).Seconds())
 
 	close(result_chan)
 	close(timeout)
@@ -294,6 +305,7 @@ func (g *Gen) solveProblem(result chan<- rawResult) {
 	var solver *exec.Cmd
 	switch glob.Solver_flag {
 	case "minisat":
+		//solver = exec.Command("minisat", g.Filename, "-rnd-seed=", strconv.FormatInt(glob.Seed_flag, 10))
 		solver = exec.Command("minisat", g.Filename)
 	case "glucose":
 		solver = exec.Command("glucose", g.Filename)
