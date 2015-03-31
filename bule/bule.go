@@ -28,7 +28,7 @@ var cat_flag = flag.Int("cat", 1, "Categorize method 1, or 2. (default 1).")
 
 var complex_flag = flag.String("complex", "hybrid", "Solve complex PBs with mdd/sn/hybrid. Default is hybrid")
 var timeout_flag = flag.Int("timeout", 100, "Timeout of the overall solving process")
-var mdd_max_flag = flag.Int("mdd-max", 300000, "Maximal Number of MDD Nodes in processing one PB.")
+var mdd_max_flag = flag.Int("mdd-max", 1000000, "Maximal Number of MDD Nodes in processing one PB.")
 var mdd_redundant_flag = flag.Bool("mdd-redundant", true, "Reduce MDD by redundant nodes.")
 var opt_bound_flag = flag.Int64("opt-bound", -1, "initial bound for optimization function <= value.")
 var solver_flag = flag.String("solver", "clasp", "Choose Solver: minisat/clasp/lingeling/glucose/CCandr/cmsat.")
@@ -146,13 +146,13 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			var tmp_opt constraints.Threshold
 			if !glob.Opt_rewrite_flag {
 				tmp_opt = (*opt).Copy()
-				opt = &constraints.Threshold{}
+				*opt = constraints.Threshold{}
 			}
 
 			constraints.Categorize2(pbs)
 
 			if !glob.Opt_rewrite_flag {
-				opt = &tmp_opt
+				*opt = tmp_opt
 			}
 
 			if !opt.Empty() { // add new variables of auxiliaries added in the transformation
@@ -274,7 +274,7 @@ func parse(filename string) (pbs []*constraints.Threshold, err error) {
 					offset_back = 1
 				}
 
-				if "min:" == elements[0] {
+				if elements[0] == "min:" || elements[0] == "Min" {
 					o = true
 					n = (len(elements) + offset_back - 2) / 2
 					f = 1

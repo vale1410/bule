@@ -63,16 +63,21 @@ func (pb *Threshold) Copy() (pb2 Threshold) {
 
 // returns the encoding of this PB
 func (pb *Threshold) Translate(K int64) sat.ClauseSet {
-	pb_K := pb.Copy()
+	pb_K := pb.Copy() //removes all clauses !
 	pb_K.K = K
 	pb_K.Typ = LE
-	pb_K.Categorize1() // is wrong, because does not take chains into account!
 	//glob.D("# of chains", len(pb_K.Chains))
-	//pb_K.Print10()
-	//pb_K.TranslateByMDDChain(pb_K.Chains)
-	if pb_K.Err != nil {
+	if len(pb_K.Chains) > 0 {
+		pb_K.TranslateByMDDChain(pb_K.Chains)
+	} else {
+		pb_K.Categorize1()
+	}
+
+	if pb_K.Err != nil { // case MDD construction did go wrong!
 		glob.D("Capacity of MDD reached, trying to solve by not taking chains into account")
-		pb_K.Err = nil
+		pb_K := pb.Copy() //removes all clauses !
+		pb_K.K = K
+		pb_K.Typ = LE
 		pb_K.Categorize1()
 	}
 	return pb_K.Clauses
@@ -176,6 +181,18 @@ func (t *Threshold) Literals() (lits []sat.Literal) {
 		lits[i] = x.Literal
 	}
 	return
+}
+
+func (pb *Threshold) GetEntriesAfterChains() []Entry {
+	current := 0
+
+	for _, chain := range pb.Chains {
+		for _, lit := range chain {
+			glob.A(pb.Entries[current].Literal == lit, "chain is not aligned with PB", chain, pb)
+			current++
+		}
+	}
+	return pb.Entries[current:]
 }
 
 // finds trivially implied facts, returns set of facts
@@ -387,7 +404,7 @@ func (t *Threshold) SortAscending() {
 }
 
 func (t *Threshold) SortDescending() {
-	sort.Sort(EntriesAscending(t.Entries))
+	sort.Sort(EntriesDescending(t.Entries))
 }
 
 type EntriesVariables []Entry
@@ -400,10 +417,10 @@ func (a EntriesVariables) Less(i, j int) bool {
 	return a[i].Literal.A.Id() <= a[j].Literal.A.Id()
 }
 
-func (a EntriesAscending) Len() int           { return len(a) }
-func (a EntriesAscending) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a EntriesAscending) Less(i, j int) bool { return a[i].Weight >= a[j].Weight }
-
 func (a EntriesDescending) Len() int           { return len(a) }
 func (a EntriesDescending) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a EntriesDescending) Less(i, j int) bool { return a[i].Weight <= a[j].Weight }
+func (a EntriesDescending) Less(i, j int) bool { return a[i].Weight >= a[j].Weight }
+
+func (a EntriesAscending) Len() int           { return len(a) }
+func (a EntriesAscending) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a EntriesAscending) Less(i, j int) bool { return a[i].Weight <= a[j].Weight }

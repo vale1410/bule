@@ -187,8 +187,8 @@ func Categorize2(pbs []*Threshold) {
 
 						pbs[comp].Entries = compEntries
 						pbs[simp].Entries = simpEntries
-						glob.D(pbs[comp])
-						glob.D(pbs[simp])
+						//glob.D(pbs[comp])
+						//glob.D(pbs[simp])
 
 						simp_translation := TranslateAtMostOne(Count, pbs[simp].IdS()+"-cnt", pbs[simp].Literals())
 						pbs[simp].Translated = true
@@ -219,6 +219,10 @@ func Categorize2(pbs []*Threshold) {
 			}
 
 			pbs[comp].Chains = chains
+
+			// sort the rest
+			sort.Sort(EntriesDescending(pbs[comp].GetEntriesAfterChains()))
+
 			// just add this to t!
 			if pbs[comp].Typ == OPT {
 				//opt_trans.PB = pbs[comp]

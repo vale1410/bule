@@ -29,6 +29,7 @@ type Result struct {
 	Satisfiable bool
 	Optimal     bool
 	Timeout     bool
+	M           string
 	Value       int64
 	Time        int64 // total time to solution
 	Assignment  Assignment
@@ -137,11 +138,15 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 
 	time_total := time.Now()
 
+	iterations := 0
+
 	for !finished {
+		iterations++
 
 		//glob.D("Writing", current.Size(), "clauses")
 		fmt.Println("tot cls", current.Size())
 		g.PrintDIMACS(current)
+
 		if opt.Empty() {
 			glob.D("solving...")
 		} else {
@@ -194,10 +199,12 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 							finished = true
 							result.Optimal = true
 							fmt.Println("OPTIMIUM:  0")
+							result.M = "OPTIMUM"
 						} else {
 							glob.A(v < result.Value, v, "<", result.Value, "no improvement ... cant be ")
 							result.Value = v
 							fmt.Println("SAT for opt =", result.Value)
+							result.M = "SAT"
 							current = cs
 							//g.printAssignment(result.Assignment)
 							//fmt.Println()
@@ -208,6 +215,7 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 						}
 					} else {
 						fmt.Println("SAT")
+						result.M = "SAT"
 						finished = true
 					}
 
@@ -217,27 +225,32 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 					if !opt.Empty() {
 						glob.D("UNSAT at", maxS(result.Value-1), ", lower bound proven for ", maxS(result.Value))
 						fmt.Println("OPTIMIUM: ", maxS(result.Value))
+						result.M = "OPTIMUM"
 					} else {
 						fmt.Println("UNSAT")
+						result.M = "UNSAT"
 					}
 				}
 			} else {
 				result.Solved = false
 				glob.D("Result received not solved, why?")
+				result.M = "ERROR"
 				finished = true
 			}
 		case <-timeout:
 			fmt.Println("TIMEOUT")
+			result.M = "TIMEOUT"
 			finished = true
 			result.Solved = false
 			result.Timeout = true
 		}
 	}
 
-	fmt.Printf("cTIME: %.3f s\n", time.Since(time_total).Seconds())
-
 	close(result_chan)
 	close(timeout)
+
+	fmt.Printf("cTIME: %.3f s\n", time.Since(time_total).Seconds())
+	fmt.Printf("xxx: %v;%v;%v;%.2f;%v;%v;%v\n", glob.Filename_flag, result.M, maxS(result.Value), time.Since(time_total).Seconds(), iterations, cs.Size(), current.Size()-cs.Size())
 
 	return
 }

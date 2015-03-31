@@ -41,12 +41,12 @@ func (t TranslationType) String() (s string) {
 		s = "CMDD"
 	case CSN:
 		s = "CSN"
-	case TranslationTypes:
-		s = "TranslationTypes"
 	case CMDDC:
 		s = "CMDDC"
 	case CSNC:
 		s = "CSNC"
+	case TranslationTypes:
+		s = "TranslationTypes"
 	default:
 		panic("has not been implemented")
 	}
@@ -92,9 +92,14 @@ func (pb *Threshold) Categorize1() {
 			if pb.K == 1 {
 				switch pb.Typ {
 				case LE: // AMO
-					trans := TranslateAtMostOne(Heule, "H_AMO", literals)
-					pb.Clauses.AddClauseSet(trans.Clauses)
-					pb.TransTyp = AMO
+					if len(pb.Entries) == 2 {
+						pb.Clauses.AddTaggedClause("Cls", sat.Neg(pb.Entries[0].Literal), sat.Neg(pb.Entries[1].Literal))
+						pb.TransTyp = Clause
+					} else {
+						trans := TranslateAtMostOne(Heule, "H_AMO", literals)
+						pb.Clauses.AddClauseSet(trans.Clauses)
+						pb.TransTyp = AMO
+					}
 				case GE: // its a clause!
 					pb.Clauses.AddTaggedClause("Cls", literals...)
 					pb.TransTyp = Clause
@@ -130,7 +135,7 @@ func (pb *Threshold) Categorize1() {
 
 func (pb *Threshold) TranslateComplexThreshold() {
 	pb.Normalize(LE, true)
-	pb.SortAscending()
+	pb.SortDescending()
 
 	var err error
 	switch glob.Complex_flag {
@@ -159,10 +164,10 @@ func (pb *Threshold) TranslateComplexThreshold() {
 		glob.D(pb.Id, "Complex, SN:", tSN.Clauses.Size(), " mdd:", tMDD.Clauses.Size())
 
 		if tMDD.Err == nil && tMDD.Clauses.Size() < tSN.Clauses.Size() {
-			pb.Clauses = tMDD.Clauses
+			pb.Clauses.AddClauseSet(tMDD.Clauses)
 			pb.TransTyp = CMDD
 		} else {
-			pb.Clauses = tSN.Clauses
+			pb.Clauses.AddClauseSet(tSN.Clauses)
 			pb.TransTyp = CSN
 		}
 	default:
