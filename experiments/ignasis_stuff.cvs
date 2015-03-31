@@ -36,3 +36,5 @@ xxx: ignasi/ex1-opt.pb;TIMEOUT;174;1800.01;2;242284;70444
 xxx: ignasi/ex10-opt.pb;TIMEOUT;183;1800.01;2;242167;68437
 xxx: ignasi/ex2-opt.pb;TIMEOUT;+∞;1800.01;1;242362;0
 xxx: ignasi/ex3-opt.pb;TIMEOUT;+∞;1800.01;1;242398;0
+xxx: ignasi/ex4-opt.pb;TIMEOUT;241;1800.02;2;242412;76057
+xxx: ignasi/ex5-opt.pb;TIMEOUT;69;1800.02;22;242394;49151

@@ -6,7 +6,7 @@ timeout=1800
 go build; 
 
 echo cat 1
-for x in $1/*opt.pb; 
+for x in $1/*.pb; 
 do 
     ./bule  -cat 1 -solve -timeout $timeout -solver=minisat -f $x | grep xxx; 
 done 
@@ -15,7 +15,7 @@ for amo in 0 1
 do 
     for opt in 0 1 
     do echo opt cat 2 opt $opt amo $amo
-        for x in $1/*opt.pb; 
+        for x in $1/*.pb; 
         do ./bule  -cat 2 -solve -amo-reuse=$amo -opt-rewrite=$opt -timeout $timeout -solver=minisat -f $x | grep xxx; 
         done 
     done 
