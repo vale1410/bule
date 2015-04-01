@@ -43,12 +43,22 @@ func (t TranslationType) String() (s string) {
 		s = "CSN"
 	case CMDDC:
 		s = "CMDDC"
-	case CSNC:
-		s = "CSNC"
 	case TranslationTypes:
 		s = "TranslationTypes"
+	case CSNC:
+		s = "CSNC"
 	default:
 		panic("has not been implemented")
+	}
+	return
+}
+
+func (pb *Threshold) IsComplex() (b bool) {
+	switch pb.TransTyp {
+	case UNKNOWN, CMDD, CSN, CMDDC, CSNC:
+		b = true
+	default:
+		b = false
 	}
 	return
 }
@@ -134,6 +144,7 @@ func (pb *Threshold) Categorize1() {
 }
 
 func (pb *Threshold) TranslateComplexThreshold() {
+	glob.A(len(pb.Chains) == 0, "should not contain a chain")
 	pb.Normalize(LE, true)
 	pb.SortDescending()
 
@@ -175,6 +186,42 @@ func (pb *Threshold) TranslateComplexThreshold() {
 	}
 
 	glob.A(pb.Clauses.Size() > 0, pb.Id, " non-trivial pb should produce some clauses...")
+
+	return
+}
+
+// finds trivially implied facts, returns set of facts
+// removes such entries from the pb
+// threshold can become empty!
+func (pb *Threshold) Simplify() {
+
+	if pb.Typ == OPT {
+		glob.D(pb.IdS(), " is not simplyfied because is OPT")
+		return
+	}
+
+	pb.Normalize(LE, true)
+
+	entries := make([]Entry, 0, len(pb.Entries))
+
+	for _, x := range pb.Entries {
+		if x.Weight > pb.K {
+			pb.Clauses.AddTaggedClause(pb.IdS()+"-simpl", sat.Neg(x.Literal))
+		} else {
+			entries = append(entries, x)
+		}
+	}
+
+	pb.Entries = entries
+	pb.Normalize(GE, true)
+
+	if pb.SumWeights() == pb.K {
+		for _, x := range pb.Entries {
+			pb.Clauses.AddTaggedClause("Fact", x.Literal)
+		}
+		pb.Entries = []Entry{}
+		pb.K = 0
+	}
 
 	return
 }

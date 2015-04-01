@@ -126,6 +126,7 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 	current := cs
 
 	result.Value = math.MaxInt64
+
 	if !opt.Empty() && init >= 0 {
 		glob.D("init set", init)
 		opt_clauses := opt.Translate(init)

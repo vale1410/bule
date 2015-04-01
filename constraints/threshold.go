@@ -7,6 +7,7 @@ import (
 
 	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/sat"
+	"github.com/vale1410/bule/sorters"
 )
 
 type EquationType int
@@ -15,7 +16,7 @@ const (
 	LE  EquationType = iota //"<="
 	GE                      //">="
 	EQ                      //"=="
-	OPT                     //"MAX"
+	OPT                     //"MIN"
 )
 
 func (e EquationType) String() string {
@@ -27,7 +28,7 @@ func (e EquationType) String() string {
 	case EQ:
 		return "=="
 	case OPT:
-		return "MAX"
+		return "MIN"
 	}
 	return ""
 }
@@ -84,15 +85,87 @@ func (pb *Threshold) Translate(K int64) sat.ClauseSet {
 }
 
 // returns the encoding of this PB
+// adds to internal clauses
 func (pb *Threshold) RewriteSameWeights() {
 
+	glob_len_rewrite := 4
+
+	// put following two lines in the code itself
 	// go to the end of chains
 	// reorder PB after this descending
-	// group variables according to weights
-	// re-encode same weights by a sorter (use createSorter, createEncoding)
-	// generate Chains for this
 
-	return
+	entries := pb.GetEntriesAfterChains()
+
+	es := make([]Entry, 0, len(entries))
+	rest := make([]Entry, 0, len(entries))
+	newEntries := make([]Entry, len(entries))
+
+	last := int64(-1)
+
+	rewrite := 0 //number of rewrite chains
+	pos := 0     // current position in newEntries
+	pred := sat.Pred("re-aux")
+
+	for i, x := range entries {
+		if last == x.Weight {
+			es = append(es, entries[i])
+		} else {
+			if len(es) >= glob_len_rewrite {
+				rewrite++
+				output := make(Lits, len(es))
+				input := make(Lits, len(es))
+				for j, _ := range output {
+					output[j] = sat.Literal{true, sat.NewAtomP3(pred, pb.Id, rewrite, j)}
+					newEntries[pos] = Entry{output[j], es[j].Weight}
+					input[j] = es[j].Literal
+					pos++
+				}
+				sorter := sorters.CreateSortingNetwork(len(output), -1, sorters.Pairwise)
+				which := [8]bool{true, true, true, true, true, true, true, true}
+				sn_aux := sat.Pred("SN-" + pb.IdS() + "-" + strconv.Itoa(rewrite))
+				cls := CreateEncoding(input, which, output, pb.IdS()+"re-SN", sn_aux, sorter)
+				//cls.PrintDebug()
+				pb.Clauses.AddClauseSet(cls)
+				pb.Chains = append(pb.Chains, Chain(output))
+			} else {
+				rest = append(rest, es...)
+				//glob.D("dont rewrite this", rest)
+			}
+			es = []Entry{entries[i]}
+		}
+		last = x.Weight
+	}
+	if len(es) >= glob_len_rewrite {
+		rewrite++
+		output := make(Lits, len(es))
+		input := make(Lits, len(es))
+		for j, _ := range output {
+			output[j] = sat.Literal{true, sat.NewAtomP3(pred, pb.Id, rewrite, j)}
+			newEntries[pos] = Entry{output[j], es[j].Weight}
+			input[j] = es[j].Literal
+			pos++
+		}
+		sorter := sorters.CreateSortingNetwork(len(output), -1, sorters.Pairwise)
+		which := [8]bool{true, true, true, true, true, true, true, true}
+
+		sn_aux := sat.Pred("SN-" + pb.IdS() + "-" + strconv.Itoa(rewrite))
+		cls := CreateEncoding(input, which, output, pb.IdS()+"re-SN", sn_aux, sorter)
+		//cls.PrintDebug()
+		pb.Clauses.AddClauseSet(cls)
+		pb.Chains = append(pb.Chains, Chain(output))
+
+	} else {
+		rest = append(rest, es...)
+	}
+
+	for _, x := range rest {
+		newEntries[pos] = x
+		pos++
+	}
+	glob.A(pos == len(newEntries), "Not enough entries copied!!")
+	copy(entries, newEntries)
+
+	//glob.D(pb.Chains)
 }
 
 func (pb *Threshold) Evaluate(a sat.Assignment) (r int64) {
@@ -175,6 +248,14 @@ func (t *Threshold) RemoveZeros() {
 	t.Entries = entries[:j]
 }
 
+func ToLits(entries []*Entry) (lits []sat.Literal) {
+	lits = make([]sat.Literal, len(entries))
+	for i, x := range entries {
+		lits[i] = x.Literal
+	}
+	return
+}
+
 func (t *Threshold) Literals() (lits []sat.Literal) {
 	lits = make([]sat.Literal, len(t.Entries))
 	for i, x := range t.Entries {
@@ -193,41 +274,6 @@ func (pb *Threshold) GetEntriesAfterChains() []Entry {
 		}
 	}
 	return pb.Entries[current:]
-}
-
-// finds trivially implied facts, returns set of facts
-// removes such entries from the pb
-// threshold can become empty!
-func (pb *Threshold) Simplify() {
-
-	if pb.Typ == OPT {
-		glob.D(pb.IdS(), " is not simplyfied because is OPT")
-		return
-	}
-
-	pb.Normalize(LE, true)
-
-	entries := make([]Entry, 0, len(pb.Entries))
-
-	for _, x := range pb.Entries {
-		if x.Weight > pb.K {
-			pb.Clauses.AddTaggedClause(pb.IdS()+"-simpl", sat.Neg(x.Literal))
-		} else {
-			entries = append(entries, x)
-		}
-	}
-	pb.Entries = entries
-	pb.Normalize(GE, true)
-
-	if pb.SumWeights() == pb.K {
-		for _, x := range pb.Entries {
-			pb.Clauses.AddTaggedClause("Fact", x.Literal)
-		}
-		pb.Entries = []Entry{}
-		pb.K = 0
-	}
-
-	return
 }
 
 // all weights are the same; performs rounding

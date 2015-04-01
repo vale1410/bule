@@ -17,9 +17,12 @@ var MDD_max_flag int
 var MDD_redundant_flag bool
 var Solver_flag string
 var Seed_flag int64
+
 var Opt_rewrite_flag bool
 var Amo_reuse_flag bool
 var Rewrite_same_flag bool
+var Ex_chain_flag bool
+var Amo_chain_flag bool
 
 func PringConfig() {
 	fmt.Println("Configuration")
@@ -34,6 +37,8 @@ func PringConfig() {
 	fmt.Println("Opt_rewrite_flag :\t", Opt_rewrite_flag)
 	fmt.Println("Amo_reuse_flag :\t", Amo_reuse_flag)
 	fmt.Println("Rewrite_same_flag :\t", Rewrite_same_flag)
+	fmt.Println("Ex_chain_flag bool :\t", Ex_chain_flag)
+	fmt.Println("Amo_chain_flag bool : \t", Amo_chain_flag)
 }
 
 func D(arg ...interface{}) {
@@ -59,7 +64,6 @@ func D(arg ...interface{}) {
 // An assert function
 func A(check bool, arg ...interface{}) {
 	if !check {
-		fmt.Print("UNSAT")
 		fmt.Print("ASSERT FAILED: ")
 		for _, s := range arg {
 			fmt.Print(s, " ")

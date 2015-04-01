@@ -36,6 +36,8 @@ var seed_flag = flag.Int64("seed", 31415, "Random seed.")
 var opt_rewrite_flag = flag.Bool("opt-rewrite", true, "Rewrites opt with chains from AMO and other constraint.")
 var amo_reuse_flag = flag.Bool("amo-reuse", false, "Reuses AMO constraints for rewriting complex PBs.")
 var rewrite_same_flag = flag.Bool("rewrite-same", false, "Groups same coefficients and introduces sorter and chains for them.")
+var ex_chain_flag = flag.Bool("ex-chain", false, "Rewrites PBs with matching EXK constraints.")
+var amo_chain_flag = flag.Bool("amo-chain", true, "Rewrites PBs with matching AMO.")
 
 var digitRegexp = regexp.MustCompile("([0-9]+ )*[0-9]+")
 
@@ -57,7 +59,7 @@ func main() {
 	}
 
 	if *ver {
-		fmt.Println(`Bule CNF Grounder: Tag 0.8 Pseudo Booleans
+		fmt.Println(`Bule CNF Grounder: Tag 0.91 Pseudo Booleans
 Copyright (C) NICTA and Valentin Mayer-Eichberger
 License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 There is NO WARRANTY, to the extent permitted by law.`)
@@ -76,6 +78,8 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	glob.Opt_rewrite_flag = *opt_rewrite_flag
 	glob.Amo_reuse_flag = *amo_reuse_flag
 	glob.Rewrite_same_flag = *rewrite_same_flag
+	glob.Ex_chain_flag = *ex_chain_flag
+	glob.Amo_chain_flag = *amo_chain_flag
 
 	glob.D("Running Debug Mode...")
 
@@ -89,6 +93,30 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	if err != nil {
 		err.Error()
 	}
+
+	//// TODO: experimental
+	//if glob.Rewrite_same_flag {
+	//	var clauses sat.ClauseSet
+	//	for _, pb := range pbs {
+	//		if !pb.Empty() && pb.Typ != constraints.OPT {
+	//			pb.Print10()
+	//			pb.NormalizePositiveCoefficients()
+	//			pb.SortDescending()
+	//			pb.TranslateByMDD()
+	//			fmt.Println(pb.Clauses.Size())
+	//			pb.Clauses = sat.ClauseSet{}
+	//			fmt.Println(pb.Clauses.Size())
+	//			pb.RewriteSameWeights()
+	//			pb.Print10()
+	//			pb.TranslateByMDDChain(pb.Chains)
+	//			fmt.Println(pb.Clauses.Size())
+	//			//pb.TranslateByMDDChain(pb.Chains)
+	//			clauses.AddClauseSet(pb.Clauses)
+	//		}
+	//	}
+	//	clauses.PrintDebug()
+	//	return
+	//}
 
 	if *gurobi_flag {
 		fmt.Println("Subject To")
@@ -209,9 +237,10 @@ func printStats(stats []int) {
 		}
 	}
 	fmt.Println()
+	fmt.Print(glob.Filename_flag, ";")
 	for i := trans; i < constraints.TranslationTypes; i++ {
 		if i > 0 {
-			fmt.Printf("%v\t", stats[i])
+			fmt.Printf("%v;", stats[i])
 		}
 	}
 	fmt.Println()

@@ -9,27 +9,31 @@ import (
 )
 
 func (c Lits) Print() {
-
-	for i, x := range c {
-		fmt.Print(x.ToTxt())
-		if i != len(c)-1 {
-			fmt.Print(",")
-		} else {
-			fmt.Println()
-		}
-	}
+	fmt.Println(c)
 }
 
 func (c Chain) Print() {
+	fmt.Println(c)
+}
 
+func (c Lits) String() (s string) {
 	for i, x := range c {
-		fmt.Print(x.ToTxt())
+		s += x.ToTxt()
 		if i != len(c)-1 {
-			fmt.Print(" <-")
-		} else {
-			fmt.Println()
+			s += ","
 		}
 	}
+	return
+}
+
+func (c Chain) String() (s string) {
+	for i, x := range c {
+		s += x.ToTxt()
+		if i != len(c)-1 {
+			s += " <-"
+		}
+	}
+	return
 }
 
 func (t *Threshold) Print2() {
