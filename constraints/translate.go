@@ -65,6 +65,7 @@ func (pb *Threshold) IsComplex() (b bool) {
 
 func (pb *Threshold) Categorize1() {
 
+	pb.SortDescending()
 	// per default all information that can be simplified will be in form of facts
 	pb.Simplify()
 	//	glob.D("simplifierClauses", simplifierClauses.Size())
@@ -119,7 +120,7 @@ func (pb *Threshold) Categorize1() {
 					pb.TransTyp = EX1
 				}
 			} else {
-				pb.Clauses.AddClauseSet(CreateCardinality(pb))
+				pb.CreateCardinality()
 				pb.TransTyp = CARD
 			}
 

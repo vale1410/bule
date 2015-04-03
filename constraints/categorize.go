@@ -50,12 +50,12 @@ func Categorize2(pbs []*Threshold) {
 	for _, pb := range pbs {
 		if pb.IsComplex() {
 
-			sort.Sort(EntriesDescending(pb.GetEntriesAfterChains()))
+			sort.Sort(EntriesDescending(pb.Entries[pb.PosAfterChains():]))
 
 			if glob.Rewrite_same_flag {
 
 				pb.RewriteSameWeights()
-				glob.D("rewrite", pb.Id, len(pb.Chains))
+				glob.D("rewrite same weights:", pb.Id, len(pb.Chains))
 
 			}
 
@@ -346,7 +346,7 @@ func (pb *Threshold) CatSimpl() {
 			} else { //cardinality
 				switch pb.Typ {
 				case LE, GE:
-					pb.Clauses.AddClauseSet(CreateCardinality(pb))
+					pb.CreateCardinality()
 					pb.TransTyp = CARD
 				case EQ:
 					pb.TransTyp = EXK

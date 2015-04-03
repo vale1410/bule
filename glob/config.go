@@ -23,6 +23,7 @@ var Amo_reuse_flag bool
 var Rewrite_same_flag bool
 var Ex_chain_flag bool
 var Amo_chain_flag bool
+var Opt_bound_flag int64
 
 func PringConfig() {
 	fmt.Println("Configuration")
@@ -39,6 +40,7 @@ func PringConfig() {
 	fmt.Println("Rewrite_same_flag :\t", Rewrite_same_flag)
 	fmt.Println("Ex_chain_flag bool :\t", Ex_chain_flag)
 	fmt.Println("Amo_chain_flag bool : \t", Amo_chain_flag)
+	fmt.Println("Opt_bound_flag bool : \t", Opt_bound_flag)
 }
 
 func D(arg ...interface{}) {

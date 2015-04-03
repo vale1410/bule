@@ -31,7 +31,7 @@ var timeout_flag = flag.Int("timeout", 100, "Timeout of the overall solving proc
 var mdd_max_flag = flag.Int("mdd-max", 1000000, "Maximal Number of MDD Nodes in processing one PB.")
 var mdd_redundant_flag = flag.Bool("mdd-redundant", true, "Reduce MDD by redundant nodes.")
 var opt_bound_flag = flag.Int64("opt-bound", -1, "initial bound for optimization function <= value.")
-var solver_flag = flag.String("solver", "clasp", "Choose Solver: minisat/clasp/lingeling/glucose/CCandr/cmsat.")
+var solver_flag = flag.String("solver", "minisat", "Choose Solver: minisat/clasp/lingeling/glucose/CCandr/cmsat.")
 var seed_flag = flag.Int64("seed", 31415, "Random seed.")
 var opt_rewrite_flag = flag.Bool("opt-rewrite", true, "Rewrites opt with chains from AMO and other constraint.")
 var amo_reuse_flag = flag.Bool("amo-reuse", false, "Reuses AMO constraints for rewriting complex PBs.")
@@ -80,11 +80,16 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	glob.Rewrite_same_flag = *rewrite_same_flag
 	glob.Ex_chain_flag = *ex_chain_flag
 	glob.Amo_chain_flag = *amo_chain_flag
+	glob.Opt_bound_flag = *opt_bound_flag
 
 	glob.D("Running Debug Mode...")
 
 	pbs, err := parse(*filename_flag)
 	opt := pbs[0] // per convention first in pbs is opt statement (possibly empty)
+	if !opt.Empty() && opt.SumWeights() <= *opt_bound_flag {
+		glob.D("opt.SumWeights <= *opt_bound", opt.SumWeights(), "<=", *opt_bound_flag)
+		*opt_bound_flag = -1
+	}
 
 	if !opt.Empty() {
 		opt.Normalize(constraints.LE, true)
@@ -93,30 +98,6 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	if err != nil {
 		err.Error()
 	}
-
-	//// TODO: experimental
-	//if glob.Rewrite_same_flag {
-	//	var clauses sat.ClauseSet
-	//	for _, pb := range pbs {
-	//		if !pb.Empty() && pb.Typ != constraints.OPT {
-	//			pb.Print10()
-	//			pb.NormalizePositiveCoefficients()
-	//			pb.SortDescending()
-	//			pb.TranslateByMDD()
-	//			fmt.Println(pb.Clauses.Size())
-	//			pb.Clauses = sat.ClauseSet{}
-	//			fmt.Println(pb.Clauses.Size())
-	//			pb.RewriteSameWeights()
-	//			pb.Print10()
-	//			pb.TranslateByMDDChain(pb.Chains)
-	//			fmt.Println(pb.Clauses.Size())
-	//			//pb.TranslateByMDDChain(pb.Chains)
-	//			clauses.AddClauseSet(pb.Clauses)
-	//		}
-	//	}
-	//	clauses.PrintDebug()
-	//	return
-	//}
 
 	if *gurobi_flag {
 		fmt.Println("Subject To")
@@ -193,8 +174,8 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		}
 
 		var clauses sat.ClauseSet
-		for _, pb := range pbs[1:] {
-			glob.A(pb.Translated, "pbs", pb.Id, "has not been translated", pb)
+		for _, pb := range pbs {
+			glob.A(pb.Empty() || pb.Typ == constraints.OPT || pb.Translated, "pbs", pb.Id, "has not been translated", pb)
 			stats[pb.TransTyp]++
 			//fmt.Println(pb.Id, pb.Clauses.Size())
 			clauses.AddClauseSet(pb.Clauses)
@@ -216,10 +197,6 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			g := sat.IdGenerator(clauses.Size() * 7)
 			g.Filename = *out
 			g.PrimaryVars = primaryVars
-			if !opt.Empty() && opt.SumWeights() <= *opt_bound_flag {
-				glob.D("opt.SumWeights <= *opt_bound", opt.SumWeights(), "<=", *opt_bound_flag)
-				*opt_bound_flag = -1
-			}
 			g.Solve(clauses, opt, *opt_bound_flag)
 			fmt.Println()
 		}

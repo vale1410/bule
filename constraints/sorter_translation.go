@@ -2,76 +2,49 @@ package constraints
 
 import (
 	"fmt"
+	"strconv"
+
+	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/sat"
 	"github.com/vale1410/bule/sorters"
-	"strconv"
 )
 
-var sorterClauses int
-var sorterType sorters.SortingNetworkType
-
-// which sets the type of clauses translated from sorting networks
-// see below CreateEncoding for ids wrt clauses
-// Note: this only works for AtMost
-// 0: false, false, false, true, true, true, false, false
-// 1: false, false, false, true, true, true, false, true
-// 2: false, true, true, true, true, true, true, false
-// 3: false, true, true, true, true, true, true, true
-func SetUpSorterTranslation(which int, typ sorters.SortingNetworkType) {
-	sorterClauses = which
-	sorterType = typ
-}
-
 // CreateCardinality takes set of literals and creates a sorting network
-// encoding.
-func CreateCardinality(pb *Threshold) sat.ClauseSet {
+func (pb *Threshold) CreateCardinality() {
+
+	for _, x := range pb.Entries {
+		glob.A(x.Weight == 1, "Prerequisite for this translation")
+	}
 
 	literals := pb.Literals()
 	sx := strconv.Itoa(int(pb.K)) + "\\" + strconv.Itoa(len(literals))
 	var s string
 	var sorterEqTyp sorters.EquationType
+	var w int // which type of clauses
 
 	switch pb.Typ {
 	case LE:
-		SetUpSorterTranslation(4, sorters.Pairwise)
+		w = 0
 		sorterEqTyp = sorters.AtMost
 		s = pb.IdS() + "pb<SN" + sx
 	case GE:
-		SetUpSorterTranslation(4, sorters.Pairwise)
+		w = 3
 		sorterEqTyp = sorters.AtLeast
 		s = pb.IdS() + "pb>SN" + sx
 	case EQ:
-		SetUpSorterTranslation(4, sorters.Pairwise)
+		w = 3
 		s = pb.IdS() + "pb=SN" + sx
 		sorterEqTyp = sorters.Equal
 	default:
 		panic("Not supported")
 	}
 
-	var which [8]bool
-
-	switch sorterClauses {
-	case 1:
-		which = [8]bool{false, false, false, true, true, true, false, false}
-	case 2:
-		which = [8]bool{false, false, false, true, true, true, false, true}
-	case 3:
-		which = [8]bool{false, true, true, true, true, true, true, false}
-	case 4:
-		which = [8]bool{false, true, true, true, true, true, true, true}
-	default:
-		panic("sorterClauses in sat module not set")
-	}
-
-	sorter := sorters.CreateCardinalityNetwork(len(literals), int(pb.K), sorterEqTyp, sorterType)
-
+	sorter := sorters.CreateCardinalityNetwork(len(literals), int(pb.K), sorterEqTyp, sorters.Pairwise)
 	sorter.RemoveOutput()
-
-	pred := sat.Pred("sort" + strconv.Itoa(pb.Id))
-
+	pred := sat.Pred("SN-" + pb.IdS())
 	output := make([]sat.Literal, 0)
+	pb.Clauses.AddClauseSet(CreateEncoding(literals, sorters.WhichCls(w), output, s, pred, sorter))
 
-	return CreateEncoding(literals, which, output, s, pred, sorter)
 }
 
 // Create Encoding for Sorting Network

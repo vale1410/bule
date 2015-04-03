@@ -94,7 +94,10 @@ func (pb *Threshold) RewriteSameWeights() {
 	// go to the end of chains
 	// reorder PB after this descending
 
-	entries := pb.GetEntriesAfterChains()
+	posAfterChains := pb.PosAfterChains()
+	entries := pb.Entries[posAfterChains:]
+
+	//glob.D(pb)
 
 	es := make([]Entry, 0, len(entries))
 	rest := make([]Entry, 0, len(entries))
@@ -112,20 +115,36 @@ func (pb *Threshold) RewriteSameWeights() {
 		} else {
 			if len(es) >= glob_len_rewrite {
 				rewrite++
-				output := make(Lits, len(es))
-				input := make(Lits, len(es))
-				for j, _ := range output {
-					output[j] = sat.Literal{true, sat.NewAtomP3(pred, pb.Id, rewrite, j)}
-					newEntries[pos] = Entry{output[j], es[j].Weight}
-					input[j] = es[j].Literal
-					pos++
+				var most int
+				if pb.Typ == OPT {
+					if glob.Opt_bound_flag >= 0 {
+						most = int(min(int64(len(es)), int64(math.Floor(float64(glob.Opt_bound_flag)/float64(last)))))
+					} else {
+						most = len(es)
+					}
+				} else {
+					most = int(min(int64(len(es)), int64(math.Floor(float64(pb.K)/float64(last)))))
 				}
-				sorter := sorters.CreateSortingNetwork(len(output), -1, sorters.Pairwise)
-				which := [8]bool{true, true, true, true, true, true, true, true}
+
+				output := make(Lits, most)
+				input := make(Lits, len(es))
+				for j, _ := range input {
+					if j < most {
+						output[j] = sat.Literal{true, sat.NewAtomP3(pred, pb.Id, rewrite, j)}
+						newEntries[pos] = Entry{output[j], es[j].Weight}
+						pos++
+					}
+					input[j] = es[j].Literal
+				}
+
+				sorter := sorters.CreateCardinalityNetwork(len(input), most, sorters.AtMost, sorters.Pairwise)
 				sn_aux := sat.Pred("SN-" + pb.IdS() + "-" + strconv.Itoa(rewrite))
-				cls := CreateEncoding(input, which, output, pb.IdS()+"re-SN", sn_aux, sorter)
-				//cls.PrintDebug()
+
+				cls := CreateEncoding(input, sorters.WhichCls(2), output, pb.IdS()+"re-SN", sn_aux, sorter)
+				glob.D(pb.Id, "SN", len(input), most, cls.Size())
+
 				pb.Clauses.AddClauseSet(cls)
+
 				pb.Chains = append(pb.Chains, Chain(output))
 			} else {
 				rest = append(rest, es...)
@@ -137,23 +156,37 @@ func (pb *Threshold) RewriteSameWeights() {
 	}
 	if len(es) >= glob_len_rewrite {
 		rewrite++
-		output := make(Lits, len(es))
-		input := make(Lits, len(es))
-		for j, _ := range output {
-			output[j] = sat.Literal{true, sat.NewAtomP3(pred, pb.Id, rewrite, j)}
-			newEntries[pos] = Entry{output[j], es[j].Weight}
-			input[j] = es[j].Literal
-			pos++
+		var most int
+		if pb.Typ == OPT {
+			if glob.Opt_bound_flag >= 0 {
+				most = int(min(int64(len(es)), int64(math.Floor(float64(glob.Opt_bound_flag)/float64(last)))))
+			} else {
+				most = len(es)
+			}
+		} else {
+			most = int(min(int64(len(es)), int64(math.Floor(float64(pb.K)/float64(last)))))
 		}
-		sorter := sorters.CreateSortingNetwork(len(output), -1, sorters.Pairwise)
-		which := [8]bool{true, true, true, true, true, true, true, true}
 
+		output := make(Lits, most)
+		input := make(Lits, len(es))
+		for j, _ := range input {
+			if j < most {
+				output[j] = sat.Literal{true, sat.NewAtomP3(pred, pb.Id, rewrite, j)}
+				newEntries[pos] = Entry{output[j], es[j].Weight}
+				pos++
+			}
+			input[j] = es[j].Literal
+		}
+
+		sorter := sorters.CreateCardinalityNetwork(len(input), most, sorters.AtMost, sorters.Pairwise)
 		sn_aux := sat.Pred("SN-" + pb.IdS() + "-" + strconv.Itoa(rewrite))
-		cls := CreateEncoding(input, which, output, pb.IdS()+"re-SN", sn_aux, sorter)
-		//cls.PrintDebug()
-		pb.Clauses.AddClauseSet(cls)
-		pb.Chains = append(pb.Chains, Chain(output))
 
+		cls := CreateEncoding(input, sorters.WhichCls(2), output, pb.IdS()+"re-SN", sn_aux, sorter)
+		glob.D(pb.Id, "SN", len(input), most, cls.Size())
+
+		pb.Clauses.AddClauseSet(cls)
+
+		pb.Chains = append(pb.Chains, Chain(output))
 	} else {
 		rest = append(rest, es...)
 	}
@@ -162,9 +195,12 @@ func (pb *Threshold) RewriteSameWeights() {
 		newEntries[pos] = x
 		pos++
 	}
-	glob.A(pos == len(newEntries), "Not enough entries copied!!")
-	copy(entries, newEntries)
 
+	//glob.A(pos == len(newEntries), "Not enough entries copied!!")
+	pb.Entries = pb.Entries[:posAfterChains+pos]
+	copy(pb.Entries[posAfterChains:], newEntries)
+
+	//glob.D(pb)
 	//glob.D(pb.Chains)
 }
 
@@ -264,7 +300,7 @@ func (t *Threshold) Literals() (lits []sat.Literal) {
 	return
 }
 
-func (pb *Threshold) GetEntriesAfterChains() []Entry {
+func (pb *Threshold) PosAfterChains() int {
 	current := 0
 
 	for _, chain := range pb.Chains {
@@ -273,7 +309,7 @@ func (pb *Threshold) GetEntriesAfterChains() []Entry {
 			current++
 		}
 	}
-	return pb.Entries[current:]
+	return current
 }
 
 // all weights are the same; performs rounding

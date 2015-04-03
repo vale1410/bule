@@ -147,6 +147,7 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 		//glob.D("Writing", current.Size(), "clauses")
 		fmt.Println("tot cls", current.Size())
 		g.PrintDIMACS(current)
+		//current.PrintDebug()
 
 		if opt.Empty() {
 			glob.D("solving...")
@@ -422,6 +423,31 @@ func (g *Gen) generateIds(cs ClauseSet) {
 			g.putAtom(l.A)
 		}
 	}
+}
+
+func (g *Gen) createReader(cs ClauseSet) (clsReader io.Reader) {
+	g.generateIds(cs)
+
+	return ClauseReader{g, cs, -1}
+}
+
+type ClauseReader struct {
+	g   *Gen
+	cs  ClauseSet
+	pos int
+}
+
+func (cr ClauseReader) Read(p []byte) (n int, err error) {
+
+	if cr.pos == cr.cs.Size() {
+		return 0, io.EOF
+	}
+	if cr.pos == -1 {
+		p = []byte(fmt.Sprintf("p cnf %v %v\n", cr.g.nextId, cr.cs.Size()))
+		return
+	}
+
+	return
 }
 
 func (g *Gen) PrintDIMACS(cs ClauseSet) {

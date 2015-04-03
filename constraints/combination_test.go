@@ -62,7 +62,7 @@ func TestRewriteExactly3(test *testing.T) {
 
 	pb1 := CreatePB([]int64{2, 2, 3, 4, 1, 1}, 6)
 	pb1.Typ = LE
-	pb1.SortWeight()
+	pb1.SortDescending()
 
 	pb2 := CreatePB([]int64{1, 1, 1, 1}, 2)
 	pb2.Typ = EQ

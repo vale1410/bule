@@ -22,6 +22,22 @@ const (
 	Insertion
 )
 
+// which sets the type of clauses translated from sorting networks
+// see below CreateEncoding for ids wrt clauses
+// Note: this only works for AtMost
+// 0: false, false, false, true, true, true, false, false
+// 1: false, false, false, true, true, true, false, true
+// 2: false, true, true, true, true, true, true, false
+// 3: false, true, true, true, true, true, true, true
+func WhichCls(i int) (b [8]bool) {
+	return [][8]bool{
+		{false, false, false, true, true, true, false, false},
+		{false, false, false, true, true, true, false, true},
+		{false, true, true, true, true, true, true, false},
+		{false, true, true, true, true, true, true, true},
+	}[i]
+}
+
 func (s SortingNetworkType) String() string {
 	switch s {
 	case OddEven:
