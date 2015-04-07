@@ -30,7 +30,7 @@ var complex_flag = flag.String("complex", "hybrid", "Solve complex PBs with mdd/
 var timeout_flag = flag.Int("timeout", 100, "Timeout of the overall solving process")
 var mdd_max_flag = flag.Int("mdd-max", 1000000, "Maximal Number of MDD Nodes in processing one PB.")
 var mdd_redundant_flag = flag.Bool("mdd-redundant", true, "Reduce MDD by redundant nodes.")
-var opt_bound_flag = flag.Int64("opt-bound", -1, "initial bound for optimization function <= value.")
+var opt_bound_flag = flag.Int64("opt-bound", -1, "Initial bound for optimization function <= given value. (-1: no init, -2: opt bound is half of sum of the coefficient in the objective function)")
 var solver_flag = flag.String("solver", "minisat", "Choose Solver: minisat/clasp/lingeling/glucose/CCandr/cmsat.")
 var seed_flag = flag.Int64("seed", 31415, "Random seed.")
 var opt_rewrite_flag = flag.Bool("opt-rewrite", true, "Rewrites opt with chains from AMO and other constraint.")
@@ -89,6 +89,14 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	if !opt.Empty() && opt.SumWeights() <= *opt_bound_flag {
 		glob.D("opt.SumWeights <= *opt_bound", opt.SumWeights(), "<=", *opt_bound_flag)
 		*opt_bound_flag = -1
+	}
+
+	if !opt.Empty() && *opt_bound_flag == -2 {
+		*opt_bound_flag = opt.SumWeights() / 2
+		redundant := opt.Copy()
+		redundant.Typ = constraints.LE
+		pbs = append(pbs, &redundant)
+		opt.Entries = []constraints.Entry{}
 	}
 
 	if !opt.Empty() {
@@ -208,9 +216,10 @@ func printStats(stats []int) {
 	glob.A(len(stats) == int(constraints.TranslationTypes), "Stats for translation errornous")
 
 	trans := constraints.Facts
+	fmt.Print("Name;")
 	for i := trans; i < constraints.TranslationTypes; i++ {
 		if i > 0 {
-			fmt.Printf("%v\t", constraints.TranslationType(i))
+			fmt.Printf("%v;", constraints.TranslationType(i))
 		}
 	}
 	fmt.Println()

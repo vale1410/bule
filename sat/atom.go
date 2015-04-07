@@ -81,15 +81,13 @@ func (l Literal) ToTxt() (s string) {
 	} else {
 		s += " "
 	}
-	//s += "x"
 	s += l.A.Id()
-	//s += " "
 	return
 }
 
 func (l Literal) ToPBO() (s string) {
 	if !l.Sign {
-		panic("PBO prining not accept negated literals!")
+		panic("PBO printing not accept negated literals!")
 	}
 	s = strings.Replace(l.A.Id(), ",", "_", -1)
 	s = strings.Replace(s, "(", "_", -1)
@@ -101,8 +99,6 @@ func (l Literal) ToTex() (s string) {
 	if !l.Sign {
 		s += "\\bar "
 	}
-	//s += "x_{"
 	s += l.A.Id()
-	//s += "}"
 	return
 }
