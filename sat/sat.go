@@ -42,8 +42,6 @@ type Gen struct {
 	mapping     map[string]int
 	idMap       []Atom
 	PrimaryVars map[string]bool
-	Filename    string
-	out         *os.File
 }
 
 func IdGenerator(m int) (g Gen) {
@@ -109,9 +107,10 @@ func (g *Gen) PrintSymbolTable(filename string) {
 
 }
 
-func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
+// opt is having only positive coefficents
+// init >= 0
+func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64, lb int64) (result Result) {
 
-	glob.A(g.Filename != "", "Set filename for SAT solving.")
 	glob.A(cs.Size() > 0, "Needs to contain at least 1 clause.")
 
 	//generate the reverse mapping
@@ -129,7 +128,7 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 
 	result.Value = math.MaxInt64
 
-	if !opt.Empty() && init >= 0 {
+	if !opt.Empty() && init != math.MaxInt64 {
 		glob.D("init set", init)
 		opt_clauses := opt.Translate(init)
 		fmt.Println("opt cls", opt_clauses.Size())
@@ -148,7 +147,6 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 
 		//glob.D("Writing", current.Size(), "clauses")
 		fmt.Println("tot cls", current.Size())
-		//g.PrintDIMACS(current)
 		//current.PrintDebug()
 
 		if opt.Empty() {
@@ -158,6 +156,10 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 			//glob.D(opt.String())
 		}
 		time_before := time.Now()
+
+		if glob.Cnf_tmp_flag != "" {
+			g.PrintDIMACS(current)
+		}
 		go g.solveProblem(current, result_chan)
 
 		select {
@@ -198,11 +200,11 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64) (result Result) {
 
 					if !opt.Empty() {
 						v := opt.Evaluate(result.Assignment)
-						if v <= 0 {
-							glob.D("SAT for opt = 0")
+						if v <= lb {
+							glob.D("SAT opt for trivial lb == ", v)
 							finished = true
 							result.Optimal = true
-							fmt.Println("OPTIMIUM:  0")
+							fmt.Println("OPTIMIUM: ", v)
 							result.M = "OPTIMUM"
 						} else {
 							glob.A(v < result.Value, v, "<", result.Value, "no improvement ... cant be ")
@@ -321,23 +323,6 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 
 	var solver *exec.Cmd
 
-	//switch glob.Solver_flag {
-	//case "minisat":
-	//	//solver = exec.Command("minisat", g.Filename, "-rnd-seed=", strconv.FormatInt(glob.Seed_flag, 10))
-	//	solver = exec.Command("minisat", g.Filename)
-	//case "glucose":
-	//	solver = exec.Command("glucose", g.Filename)
-	//case "clasp":
-	//	solver = exec.Command("clasp", g.Filename, "--time-limit", strconv.Itoa(glob.Timeout_flag))
-	//case "lingeling":
-	//	solver = exec.Command("lingeling", g.Filename)
-	//case "cmsat":
-	//	solver = exec.Command("cmsat", g.Filename)
-	//case "local":
-	//	solver = exec.Command("CCAnr", g.Filename, strconv.FormatInt(glob.Seed_flag, 10))
-	//default:
-	//	glob.A(false, "Solver not available", glob.Solver_flag)
-	//}
 	switch glob.Solver_flag {
 	case "minisat":
 		//solver = exec.Command("minisat", g.Filename, "-rnd-seed=", strconv.FormatInt(glob.Seed_flag, 10))
@@ -417,7 +402,7 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 
 	wg.Wait()
 	err_tmp := solver.Wait()
-	//fmt.Println(res)
+
 	if err_tmp != nil {
 		fmt.Println("return value:", err_tmp.Error())
 	}
@@ -426,43 +411,6 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 	//	panic(err.Error())
 	//}
 	result <- res
-}
-
-//#########################################################3
-
-func (g *Gen) Print(arg ...interface{}) {
-	if g.Filename == "" {
-		for _, s := range arg {
-			fmt.Print(s, " ")
-		}
-	} else { //assuming the file is open!
-		var ss string
-		for _, s := range arg {
-			ss += fmt.Sprintf("%v", s) + " "
-		}
-		if _, err := g.out.Write([]byte(ss)); err != nil {
-			panic(err)
-		}
-	}
-}
-
-func (g *Gen) Println(arg ...interface{}) {
-	if g.Filename == "" {
-		for _, s := range arg {
-			fmt.Print(s, " ")
-		}
-		fmt.Println()
-	} else { //assuming the file is open!
-		var ss string
-		for _, s := range arg {
-			ss += fmt.Sprintf("%v", s) + " "
-		}
-		ss += "\n"
-
-		if _, err := g.out.Write([]byte(ss)); err != nil {
-			panic(err)
-		}
-	}
 }
 
 func (g *Gen) generateIds(cs ClauseSet) {
@@ -483,23 +431,30 @@ func (g *Gen) PrintDIMACS(cs ClauseSet) {
 
 	g.generateIds(cs)
 
-	if g.Filename != "" {
-		var err error
-		g.out, err = os.Create(g.Filename)
+	var out io.Writer
+
+	if glob.Cnf_tmp_flag != "" {
+		file, err := os.Create(glob.Cnf_tmp_flag)
 		if err != nil {
 			panic(err)
 		}
+		out = file
 		defer func() {
-			if err := g.out.Close(); err != nil {
+			if err := file.Close(); err != nil {
 				panic(err)
 			}
 		}()
+	} else {
+		out = os.Stdout
 	}
 
-	g.Println("p cnf", g.nextId, len(cs.list))
+	fmt.Fprintf(out, "p cnf %d %d\n", g.nextId, len(cs.list))
 
 	for _, c := range cs.list {
-		g.Print(string(g.toBytes(c)))
+		if _, err := out.Write(g.toBytes(c)); err != nil {
+			panic(err)
+		}
+
 	}
 }
 

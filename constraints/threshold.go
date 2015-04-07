@@ -43,7 +43,8 @@ type Threshold struct {
 	Entries    []Entry
 	K          int64
 	Typ        EquationType
-	Translated bool //indicates if constraint is translated
+	Offset     int64 // for Typ=Opt; opt= sumWeights - Offset
+	Translated bool  //indicates if constraint is translated
 	TransTyp   TranslationType
 	Clauses    sat.ClauseSet
 	Chains     Chains // has to be in order of Entries
@@ -63,7 +64,8 @@ func (pb *Threshold) Copy() (pb2 Threshold) {
 }
 
 // returns the encoding of this PB
-func (pb *Threshold) Translate(K int64) sat.ClauseSet {
+func (pb *Threshold) Translate(K_lessOffset int64) sat.ClauseSet {
+	K := K_lessOffset + pb.Offset
 	pb_K := pb.Copy() //removes all clauses !
 	pb_K.K = K
 	pb_K.Typ = LE
@@ -88,8 +90,6 @@ func (pb *Threshold) Translate(K int64) sat.ClauseSet {
 // adds to internal clauses
 func (pb *Threshold) RewriteSameWeights() {
 
-	glob_len_rewrite := 4
-
 	// put following two lines in the code itself
 	// go to the end of chains
 	// reorder PB after this descending
@@ -113,7 +113,7 @@ func (pb *Threshold) RewriteSameWeights() {
 		if last == x.Weight {
 			es = append(es, entries[i])
 		} else {
-			if len(es) >= glob_len_rewrite {
+			if len(es) >= glob.Len_rewrite_flag {
 				rewrite++
 				var most int
 				if pb.Typ == OPT {
@@ -154,7 +154,7 @@ func (pb *Threshold) RewriteSameWeights() {
 		}
 		last = x.Weight
 	}
-	if len(es) >= glob_len_rewrite {
+	if len(es) >= glob.Len_rewrite_flag {
 		rewrite++
 		var most int
 		if pb.Typ == OPT {
@@ -216,11 +216,25 @@ func (pb *Threshold) Evaluate(a sat.Assignment) (r int64) {
 		}
 	}
 
-	return r
+	return r - pb.Offset
 }
 
 func (pb *Threshold) Empty() bool {
 	return len(pb.Entries) == 0
+}
+
+// checks if same coefficient for all entries
+func (pb *Threshold) IsComplex() bool {
+	if pb.Empty() {
+		return false
+	}
+	last := pb.Entries[0].Weight
+	for _, x := range pb.Entries {
+		if x.Weight != last && x.Weight != -last {
+			return true
+		}
+	}
+	return false
 }
 
 func (pb *Threshold) Positive() bool {

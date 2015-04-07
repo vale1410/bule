@@ -48,7 +48,7 @@ func Categorize2(pbs []*Threshold) {
 	}
 
 	for _, pb := range pbs {
-		if pb.IsComplex() {
+		if pb.IsComplexTranslation() {
 
 			sort.Sort(EntriesDescending(pb.Entries[pb.PosAfterChains():]))
 
@@ -147,7 +147,7 @@ func doChaining(pbs []*Threshold, complOcc map[sat.Literal][]int, simplOcc map[s
 
 func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 	lit2id map[sat.Literal]int, litSets []intsets.Sparse) {
-	glob.D("chaining PB", comp, ":", pbs[comp])
+	glob.D(comp, "chainings:", len(matchings)) //, ":", pbs[comp])
 	glob.A(!pbs[comp].Translated, "comp", comp, "should not have been translated yet")
 
 	sort.Sort(MatchingsBySize(matchings))

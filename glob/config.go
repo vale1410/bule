@@ -24,6 +24,9 @@ var Rewrite_same_flag bool
 var Ex_chain_flag bool
 var Amo_chain_flag bool
 var Opt_bound_flag int64
+var Cnf_tmp_flag string
+
+const Len_rewrite_flag = 4
 
 func PringConfig() {
 	fmt.Println("Configuration")
