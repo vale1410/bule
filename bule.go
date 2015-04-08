@@ -25,6 +25,7 @@ var debug_filename = flag.String("df", "", "File to print debug information.")
 var reformat_flag = flag.Bool("reformat", false, "Reformat PB files into correct format. Decompose = into >= and <=")
 var gurobi_flag = flag.Bool("gurobi", false, "Reformat to Gurobi input, output to stdout.")
 var solve_flag = flag.Bool("solve", false, "Dont solve just categorize and analyze the constriants.")
+var dimacs_flag = flag.Bool("dimacs", false, "Print readable format of clauses.")
 var stat_flag = flag.Bool("stat", false, "Do statistics.")
 var cat_flag = flag.Int("cat", 1, "Categorize method 1, or 2. (default 1).")
 
@@ -91,12 +92,6 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 	pbs, err := parse(*filename_flag)
 	opt := pbs[0] // per convention first in pbs is opt statement (possibly empty)
-	//	fmt.Println("original opt", opt)
-
-	//if !opt.Empty() && *opt_bound_flag != math.MaxInt64 && opt.SumWeights() <= *opt_bound_flag {
-	//	glob.D("opt.SumWeights <= *opt_bound", opt.SumWeights(), "<=", *opt_bound_flag)
-	//	*opt_bound_flag = math.MaxInt64
-	//}
 
 	//transform opt
 	if !opt.Empty() {
@@ -105,7 +100,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		//if *opt_bound_flag != math.MaxInt64 {
 		//	*opt_bound_flag += opt.Offset
 		//}
-		fmt.Println("offset optimium :", opt.Offset)
+		fmt.Println("offset :", opt.Offset)
 	}
 
 	if *rewrite_equality_flag {
@@ -216,9 +211,14 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			glob.A(pb.Empty() || pb.Typ == constraints.OPT || pb.Translated, "pbs", pb.Id, "has not been translated", pb)
 			stats[pb.TransTyp]++
 			//fmt.Println(pb.Id, pb.Clauses.Size())
+			//pb.Print10()
+			//pb.Clauses.PrintDebug()
 			clauses.AddClauseSet(pb.Clauses)
 		}
-		//		clauses.PrintDebug()
+
+		if *dimacs_flag {
+			clauses.PrintDebug()
+		}
 
 		if *stat_flag {
 			//fmt.Print(*filename_flag, ";", len(primaryVars), ";", len(pbs), ";")

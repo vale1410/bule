@@ -158,14 +158,17 @@ func (pb *Threshold) RewriteSameWeights() {
 		rewrite++
 		var most int
 		if pb.Typ == OPT {
-			if glob.Opt_bound_flag >= 0 {
-				most = int(min(int64(len(es)), int64(math.Floor(float64(glob.Opt_bound_flag)/float64(last)))))
+			if glob.Opt_bound_flag != math.MaxInt64 {
+				//		glob.D(pb.Id, "Check", glob.Opt_bound_flag+pb.Offset)
+				most = int(min(int64(len(es)), int64(math.Floor(float64(glob.Opt_bound_flag+pb.Offset)/float64(last)))))
 			} else {
 				most = len(es)
 			}
 		} else {
 			most = int(min(int64(len(es)), int64(math.Floor(float64(pb.K)/float64(last)))))
 		}
+		//glob.D("most", most, "len(es)", len(es), "K", pb.K, "last", last)
+		sn_aux := sat.Pred("SN-" + pb.IdS() + "-" + strconv.Itoa(rewrite))
 
 		output := make(Lits, most)
 		input := make(Lits, len(es))
@@ -179,7 +182,6 @@ func (pb *Threshold) RewriteSameWeights() {
 		}
 
 		sorter := sorters.CreateCardinalityNetwork(len(input), most, sorters.AtMost, sorters.Pairwise)
-		sn_aux := sat.Pred("SN-" + pb.IdS() + "-" + strconv.Itoa(rewrite))
 
 		cls := CreateEncoding(input, sorters.WhichCls(2), output, pb.IdS()+"re-SN", sn_aux, sorter)
 		glob.D(pb.Id, "SN", len(input), most, cls.Size())
