@@ -15,9 +15,9 @@ func (pb *Threshold) TranslateByMDD() {
 
 // chains must be in order of pb and be subsets of its literals
 func (pb *Threshold) TranslateByMDDChain(chains Chains) {
-	glob.A(!pb.Empty(), "works only for non-empyt mdds")
-	glob.A(pb.Positive(), "Weights need to be positive")
-	glob.A(pb.Typ == LE, "works only on LE, but is", pb.Typ)
+	glob.A(!pb.Empty(), pb.Id, "works only for non-empty mdds")
+	glob.A(pb.Positive(), pb.Id, "Weights need to be positive")
+	glob.A(pb.Typ == LE, pb.Id, "works only on LE, but is", pb.Typ, pb.String())
 
 	if len(chains) == 0 {
 		pb.TransTyp = CMDD

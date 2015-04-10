@@ -58,8 +58,8 @@ func TranslateAtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) 
 
 			clauses.AddClauseSet(TranslateAtMostOne(typ, tag, lits[:len(lits)/2]).Clauses)
 			clauses.AddClauseSet(TranslateAtMostOne(typ, tag, lits[len(lits)/2:]).Clauses)
-
 		}
+
 	case Count:
 
 		pred := sat.Pred("c")

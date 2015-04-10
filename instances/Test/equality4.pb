@@ -1,4 +1,2 @@
-* #variable= 3 #constraint= 2
-+1 x1 +1 x2 +1 x3 = 2 ;
-+1 x1 +1 x2 <= 1 ;
-%#sol=2
+* #variable= 4 #constraint= 2
++3 x1 +4 x2 +4 x3 +5 x4 +1 x5 +1 x6 +1 x7 +1 x8 = 7 ;

@@ -53,7 +53,7 @@ func (t TranslationType) String() (s string) {
 	return
 }
 
-func (pb *Threshold) IsComplex() (b bool) {
+func (pb *Threshold) IsComplexTranslation() (b bool) {
 	switch pb.TransTyp {
 	case UNKNOWN, CMDD, CSN, CMDDC, CSNC:
 		b = true

@@ -3,18 +3,20 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/vale1410/bule/constraints"
-	"github.com/vale1410/bule/glob"
-	"github.com/vale1410/bule/sat"
 	"io/ioutil"
+	"math"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/vale1410/bule/constraints"
+	"github.com/vale1410/bule/glob"
+	"github.com/vale1410/bule/sat"
 )
 
 var filename_flag = flag.String("f", "test.pb", "Path of to PB file.")
-var out = flag.String("o", "out.cnf", "Path of output file.")
+var cnf_tmp_flag = flag.String("out", "", "If set: output cnf to this file.")
 var ver = flag.Bool("ver", false, "Show version info.")
 
 //var check_clause = flag.Bool("clause", true, "Checks if Pseudo-Boolean is not just a simple clause.")
@@ -23,6 +25,7 @@ var debug_filename = flag.String("df", "", "File to print debug information.")
 var reformat_flag = flag.Bool("reformat", false, "Reformat PB files into correct format. Decompose = into >= and <=")
 var gurobi_flag = flag.Bool("gurobi", false, "Reformat to Gurobi input, output to stdout.")
 var solve_flag = flag.Bool("solve", false, "Dont solve just categorize and analyze the constriants.")
+var dimacs_flag = flag.Bool("dimacs", false, "Print readable format of clauses.")
 var stat_flag = flag.Bool("stat", false, "Do statistics.")
 var cat_flag = flag.Int("cat", 1, "Categorize method 1, or 2. (default 1).")
 
@@ -30,7 +33,8 @@ var complex_flag = flag.String("complex", "hybrid", "Solve complex PBs with mdd/
 var timeout_flag = flag.Int("timeout", 100, "Timeout of the overall solving process")
 var mdd_max_flag = flag.Int("mdd-max", 1000000, "Maximal Number of MDD Nodes in processing one PB.")
 var mdd_redundant_flag = flag.Bool("mdd-redundant", true, "Reduce MDD by redundant nodes.")
-var opt_bound_flag = flag.Int64("opt-bound", -1, "Initial bound for optimization function <= given value. (-1: no init, -2: opt bound is half of sum of the coefficient in the objective function)")
+var opt_half_flag = flag.Bool("opt-half", false, " sets opt-bound to half the sum of the weights of the optimiazation function.")
+var opt_bound_flag = flag.Int64("opt-bound", math.MaxInt64, "Initial bound for optimization function <= given value. Values from negative to positive.")
 var solver_flag = flag.String("solver", "minisat", "Choose Solver: minisat/clasp/lingeling/glucose/CCandr/cmsat.")
 var seed_flag = flag.Int64("seed", 31415, "Random seed.")
 var opt_rewrite_flag = flag.Bool("opt-rewrite", true, "Rewrites opt with chains from AMO and other constraint.")
@@ -38,6 +42,7 @@ var amo_reuse_flag = flag.Bool("amo-reuse", false, "Reuses AMO constraints for r
 var rewrite_same_flag = flag.Bool("rewrite-same", false, "Groups same coefficients and introduces sorter and chains for them.")
 var ex_chain_flag = flag.Bool("ex-chain", false, "Rewrites PBs with matching EXK constraints.")
 var amo_chain_flag = flag.Bool("amo-chain", true, "Rewrites PBs with matching AMO.")
+var rewrite_equality_flag = flag.Bool("rewrite_equality", true, "replwrites complex == constraints into >= and <=.")
 
 var digitRegexp = regexp.MustCompile("([0-9]+ )*[0-9]+")
 
@@ -81,27 +86,47 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	glob.Ex_chain_flag = *ex_chain_flag
 	glob.Amo_chain_flag = *amo_chain_flag
 	glob.Opt_bound_flag = *opt_bound_flag
+	glob.Cnf_tmp_flag = *cnf_tmp_flag
 
 	glob.D("Running Debug Mode...")
 
 	pbs, err := parse(*filename_flag)
 	opt := pbs[0] // per convention first in pbs is opt statement (possibly empty)
-	if !opt.Empty() && opt.SumWeights() <= *opt_bound_flag {
-		glob.D("opt.SumWeights <= *opt_bound", opt.SumWeights(), "<=", *opt_bound_flag)
-		*opt_bound_flag = -1
+
+	//transform opt
+	if !opt.Empty() {
+		opt.NormalizePositiveCoefficients()
+		opt.Offset = opt.K
+		//if *opt_bound_flag != math.MaxInt64 {
+		//	*opt_bound_flag += opt.Offset
+		//}
+		fmt.Println("offset :", opt.Offset)
 	}
 
-	if !opt.Empty() && *opt_bound_flag == -2 {
+	if *rewrite_equality_flag {
+		before := len(pbs)
+		for _, x := range pbs {
+			if x.Typ == constraints.EQ && x.IsComplex() {
+				y := x.Copy()
+				x.Typ = constraints.LE
+				y.Typ = constraints.GE
+				y.Id = len(pbs)
+				pbs = append(pbs, &y)
+			}
+		}
+		glob.D("rewriten", len(pbs)-before, "equality constraints into >= and <=.")
+	}
+
+	if !opt.Empty() && *opt_half_flag {
 		*opt_bound_flag = opt.SumWeights() / 2
+		glob.D("initializing opt (respecting offset) with sumWeights/2 = ", *opt_bound_flag)
 		redundant := opt.Copy()
 		redundant.Typ = constraints.LE
 		pbs = append(pbs, &redundant)
 		opt.Entries = []constraints.Entry{}
 	}
 
-	if !opt.Empty() {
-		opt.Normalize(constraints.LE, true)
-	}
+	//	fmt.Println(opt, "minus offset", opt.Offset)
 
 	if err != nil {
 		err.Error()
@@ -186,9 +211,14 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			glob.A(pb.Empty() || pb.Typ == constraints.OPT || pb.Translated, "pbs", pb.Id, "has not been translated", pb)
 			stats[pb.TransTyp]++
 			//fmt.Println(pb.Id, pb.Clauses.Size())
+			//pb.Print10()
+			//pb.Clauses.PrintDebug()
 			clauses.AddClauseSet(pb.Clauses)
 		}
-		//clauses.PrintDebug()
+
+		if *dimacs_flag {
+			clauses.PrintDebug()
+		}
 
 		if *stat_flag {
 			//fmt.Print(*filename_flag, ";", len(primaryVars), ";", len(pbs), ";")
@@ -203,9 +233,9 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 		if *solve_flag {
 			g := sat.IdGenerator(clauses.Size() * 7)
-			g.Filename = *out
 			g.PrimaryVars = primaryVars
-			g.Solve(clauses, opt, *opt_bound_flag)
+			glob.A(opt.Positive(), "opt only has positive coefficients")
+			g.Solve(clauses, opt, *opt_bound_flag, -opt.Offset)
 			fmt.Println()
 		}
 	}
