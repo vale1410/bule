@@ -256,7 +256,7 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64, lb int64) (result R
 	close(timeout)
 
 	fmt.Printf("cTIME: %.3f s\n", time.Since(time_total).Seconds())
-	fmt.Printf("xxx: %v;%v;%v;%.2f;%v;%v;%v\n", glob.Filename_flag, result.M, maxS(result.Value), time.Since(time_total).Seconds(), iterations, cs.Size(), current.Size()-cs.Size())
+	fmt.Printf("xxx%v;%v;%v;%v;%v;%v;%v;%.2f;%v;%v;%v\n", glob.Filename_flag, glob.Seed_flag, glob.Amo_chain_flag, glob.Amo_reuse_flag, glob.Rewrite_same_flag, result.M, maxS(result.Value), time.Since(time_total).Seconds(), iterations, cs.Size(), current.Size()-cs.Size())
 
 	return
 }
@@ -325,12 +325,13 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 
 	switch glob.Solver_flag {
 	case "minisat":
-		//solver = exec.Command("minisat", g.Filename, "-rnd-seed=", strconv.FormatInt(glob.Seed_flag, 10))
-		solver = exec.Command("minisat")
+		//solver = exec.Command("minisat", "-rnd-seed=123")
+		solver = exec.Command("minisat", "-rnd-seed="+strconv.FormatInt(glob.Seed_flag, 10))
+		//solver = exec.Command("minisat")
 	case "glucose":
 		solver = exec.Command("glucose")
 	case "clasp":
-		solver = exec.Command("clasp", "--time-limit", strconv.Itoa(glob.Timeout_flag))
+		solver = exec.Command("clasp")
 	case "lingeling":
 		solver = exec.Command("lingeling")
 	case "cmsat":
