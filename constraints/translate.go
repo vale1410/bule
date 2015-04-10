@@ -19,8 +19,8 @@ const (
 	CMDD
 	CSN
 	CMDDC
-	CSNC
 	TranslationTypes
+	CSNC
 )
 
 func (t TranslationType) String() (s string) {
@@ -173,7 +173,7 @@ func (pb *Threshold) TranslateComplexThreshold() {
 			panic(tSN.Err.Error())
 		}
 
-		glob.D(pb.Id, "Complex, SN:", tSN.Clauses.Size(), " mdd:", tMDD.Clauses.Size())
+		//	glob.D(pb.Id, "Complex, SN:", tSN.Clauses.Size(), " mdd:", tMDD.Clauses.Size())
 
 		if tMDD.Err == nil && tMDD.Clauses.Size() < tSN.Clauses.Size() {
 			pb.Clauses.AddClauseSet(tMDD.Clauses)

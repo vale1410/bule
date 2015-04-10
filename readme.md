@@ -18,20 +18,21 @@ optimization problems. It will in the future link to fast SAT solvers.
 
 Features
 ----------
-* Cardinality and Weight Constraints (Pseudo Booleans) through sorters [done]
-* Grounding to CNF and statistics [done]
-* Bule solves PB decision problems [done]
+
+* Cardinality and Weight Constraints (Pseudo Booleans) through sorters 
+* Grounding to CNF and statistics 
+* Bule solves PB decision problems 
+* MDD based translation of PBs
+* Combinators of translation (PB + AMO/EX1)
+* Incremental/enumeration of optimization statements 
+* Calling SAT solvers from solver
 
 Milestones
 ----------
 
-* MDD based translation of PBs
-* Combinators of translation (PB + AMO/EX1)
+* Consolidate statistic of SAT solvers
+* Portfolio solving in parallel with multiple SAT solvers
 * Counter Based encoding for Cardinality
-* Incremental/enumeration of optimization statements 
-* Calling SAT solvers through the framework, consolidate their statistics
-    (minisat, lingeling, cmsat, (some other fast ones) , local search solvers,
-    compilation to local solver. 
 * DSL Rule language for GOLANG independent use of the framework (similar to gringo maybe)
 * Support for other constraints (sequence, regular, alldiff etc.)
 

@@ -129,7 +129,7 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64, lb int64) (result R
 	result.Value = math.MaxInt64
 
 	if !opt.Empty() && init != math.MaxInt64 {
-		glob.D("init set", init)
+		glob.D("init", init, "lb", lb)
 		opt_clauses := opt.Translate(init)
 		fmt.Println("opt cls", opt_clauses.Size())
 		current.AddClauseSet(opt_clauses)
@@ -358,6 +358,7 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 	wg.Add(2)
 
 	go func() {
+		time_before := time.Now()
 		defer stdin.Close()
 		defer wg.Done()
 		g.generateIds(clauses)
@@ -365,6 +366,7 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 		for _, c := range clauses.list {
 			io.Copy(stdin, bytes.NewReader(g.toBytes(c)))
 		}
+		fmt.Printf("Piping clauses: %.3f s\n", time.Since(time_before).Seconds())
 	}()
 
 	var res rawResult

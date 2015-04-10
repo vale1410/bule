@@ -58,18 +58,22 @@ func (pb *Threshold) Copy() (pb2 Threshold) {
 	pb2.Entries = make([]Entry, len(pb.Entries))
 	copy(pb2.Entries, pb.Entries)
 	pb2.Clauses = sat.ClauseSet{}
-	//pb2.Print10()
-	//fmt.Println(pb2.Chains)
 	return
 }
 
 // returns the encoding of this PB
 func (pb *Threshold) Translate(K_lessOffset int64) sat.ClauseSet {
+	glob.A(pb.Positive(), "no negative coefficients beyond this point")
+
 	K := K_lessOffset + pb.Offset
+	if pb.SumWeights() <= K {
+		glob.D("opt init ignored")
+		return sat.ClauseSet{}
+	}
+
 	pb_K := pb.Copy() //removes all clauses !
 	pb_K.K = K
 	pb_K.Typ = LE
-	//glob.D("# of chains", len(pb_K.Chains))
 	if len(pb_K.Chains) > 0 {
 		pb_K.TranslateByMDDChain(pb_K.Chains)
 	} else {
@@ -77,11 +81,11 @@ func (pb *Threshold) Translate(K_lessOffset int64) sat.ClauseSet {
 	}
 
 	if pb_K.Err != nil { // case MDD construction did go wrong!
-		glob.D("Capacity of MDD reached, trying to solve by not taking chains into account")
-		pb_K := pb.Copy() //removes all clauses !
-		pb_K.K = K
-		pb_K.Typ = LE
-		pb_K.Categorize1()
+		glob.A(false, "Capacity of MDD reached, try to solve by not taking chains into account")
+		//pb_K := pb.Copy() //removes all clauses !
+		//pb_K.K = K
+		//pb_K.Typ = LE
+		//pb_K.Categorize1()
 	}
 	return pb_K.Clauses
 }
@@ -141,7 +145,7 @@ func (pb *Threshold) RewriteSameWeights() {
 				sn_aux := sat.Pred("SN-" + pb.IdS() + "-" + strconv.Itoa(rewrite))
 
 				cls := CreateEncoding(input, sorters.WhichCls(2), output, pb.IdS()+"re-SN", sn_aux, sorter)
-				glob.D(pb.Id, "SN", len(input), most, cls.Size())
+				//glob.D(pb.Id, "SN", len(input), most, cls.Size())
 
 				pb.Clauses.AddClauseSet(cls)
 
@@ -184,7 +188,7 @@ func (pb *Threshold) RewriteSameWeights() {
 		sorter := sorters.CreateCardinalityNetwork(len(input), most, sorters.AtMost, sorters.Pairwise)
 
 		cls := CreateEncoding(input, sorters.WhichCls(2), output, pb.IdS()+"re-SN", sn_aux, sorter)
-		glob.D(pb.Id, "SN", len(input), most, cls.Size())
+		//glob.D(pb.Id, "SN", len(input), most, cls.Size())
 
 		pb.Clauses.AddClauseSet(cls)
 
@@ -430,6 +434,7 @@ func CleanChain(entries []Entry, chain1 Chain) (chain2 Chain) {
 	chain2 = make(Chain, len(chain1))
 
 	e := 0
+	// find start of chain
 	for i, x := range entries {
 		if x.Literal == chain1[0] {
 			e = i

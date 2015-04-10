@@ -30,7 +30,7 @@ var stat_flag = flag.Bool("stat", false, "Do statistics.")
 var cat_flag = flag.Int("cat", 1, "Categorize method 1, or 2. (default 1).")
 
 var complex_flag = flag.String("complex", "hybrid", "Solve complex PBs with mdd/sn/hybrid. Default is hybrid")
-var timeout_flag = flag.Int("timeout", 100, "Timeout of the overall solving process")
+var timeout_flag = flag.Int("timeout", 600, "Timeout of the overall solving process")
 var mdd_max_flag = flag.Int("mdd-max", 1000000, "Maximal Number of MDD Nodes in processing one PB.")
 var mdd_redundant_flag = flag.Bool("mdd-redundant", true, "Reduce MDD by redundant nodes.")
 var opt_half_flag = flag.Bool("opt-half", false, " sets opt-bound to half the sum of the weights of the optimiazation function.")
@@ -93,14 +93,21 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	pbs, err := parse(*filename_flag)
 	opt := pbs[0] // per convention first in pbs is opt statement (possibly empty)
 
+	if !opt.Empty() && *opt_half_flag {
+		redundant := opt.Copy()
+		redundant.K = opt.SumWeights() / 2
+		redundant.Typ = constraints.LE
+		redundant.Id = len(pbs)
+		glob.D("initializing opt sumWeights/2 = ", redundant.K)
+		*opt = constraints.Threshold{}
+		pbs = append(pbs, &redundant)
+	}
+
 	//transform opt
 	if !opt.Empty() {
 		opt.NormalizePositiveCoefficients()
 		opt.Offset = opt.K
-		//if *opt_bound_flag != math.MaxInt64 {
-		//	*opt_bound_flag += opt.Offset
-		//}
-		fmt.Println("offset :", opt.Offset)
+		//fmt.Println("offset :", opt.Offset)
 	}
 
 	if *rewrite_equality_flag {
@@ -114,19 +121,10 @@ There is NO WARRANTY, to the extent permitted by law.`)
 				pbs = append(pbs, &y)
 			}
 		}
-		glob.D("rewriten", len(pbs)-before, "equality constraints into >= and <=.")
+		if len(pbs)-before > 0 {
+			glob.D("rewritten", len(pbs)-before, "equality constraints into >= and <=.")
+		}
 	}
-
-	if !opt.Empty() && *opt_half_flag {
-		*opt_bound_flag = opt.SumWeights() / 2
-		glob.D("initializing opt (respecting offset) with sumWeights/2 = ", *opt_bound_flag)
-		redundant := opt.Copy()
-		redundant.Typ = constraints.LE
-		pbs = append(pbs, &redundant)
-		opt.Entries = []constraints.Entry{}
-	}
-
-	//	fmt.Println(opt, "minus offset", opt.Offset)
 
 	if err != nil {
 		err.Error()
@@ -210,9 +208,6 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		for _, pb := range pbs {
 			glob.A(pb.Empty() || pb.Typ == constraints.OPT || pb.Translated, "pbs", pb.Id, "has not been translated", pb)
 			stats[pb.TransTyp]++
-			//fmt.Println(pb.Id, pb.Clauses.Size())
-			//pb.Print10()
-			//pb.Clauses.PrintDebug()
 			clauses.AddClauseSet(pb.Clauses)
 		}
 
@@ -221,13 +216,6 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		}
 
 		if *stat_flag {
-			//fmt.Print(*filename_flag, ";", len(primaryVars), ";", len(pbs), ";")
-			//for i, x := range stats {
-			//	if i > 0 {
-			//		fmt.Printf("%v;", x)
-			//	}
-			//}
-			//fmt.Println()
 			printStats(stats)
 		}
 
@@ -236,7 +224,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			g.PrimaryVars = primaryVars
 			glob.A(opt.Positive(), "opt only has positive coefficients")
 			g.Solve(clauses, opt, *opt_bound_flag, -opt.Offset)
-			fmt.Println()
+			//fmt.Println()
 		}
 	}
 }
@@ -253,7 +241,7 @@ func printStats(stats []int) {
 		}
 	}
 	fmt.Println()
-	fmt.Print(glob.Filename_flag, ";")
+	fmt.Print("xxx", glob.Filename_flag, ";")
 	for i := trans; i < constraints.TranslationTypes; i++ {
 		if i > 0 {
 			fmt.Printf("%v;", stats[i])

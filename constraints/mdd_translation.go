@@ -36,8 +36,8 @@ func (pb *Threshold) TranslateByMDDChain(chains Chains) {
 	}
 
 	if glob.MDD_redundant_flag {
-		removed := store.RemoveRedundants()
-		glob.D("remove redundant nodes in MDD", removed)
+		store.RemoveRedundants()
+		//glob.D("remove redundant nodes in MDD", removed)
 	}
 
 	pb.Clauses.AddClauseSet(convertMDD2Clauses(store, pb))
@@ -112,6 +112,8 @@ func CreateMDDChain(store *mdd.MddStore, K int64, entries []Entry, chains Chains
 
 		var n mdd.Node
 		var err error
+
+		//glob.D(entries, chains)
 
 		glob.A(len(chains) == 0 || len(chains[0]) > 0, "if exists, then chain must contain at least 1 element")
 		if len(chains) > 0 && chains[0][0] == entries[0].Literal { //chain mode

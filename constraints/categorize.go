@@ -54,9 +54,10 @@ func Categorize2(pbs []*Threshold) {
 			if glob.Rewrite_same_flag {
 
 				pb.RewriteSameWeights()
-				glob.D("rewrite same weights:", pb.Id, len(pb.Chains))
+				//glob.D("rewrite same weights:", pb.Id, len(pb.Chains))
 
 			}
+			//pb.Print10()
 
 			if pb.Typ != OPT && len(pb.Chains) > 0 { //TODO: decide on what to use ...
 				pb.TranslateByMDDChain(pb.Chains)
@@ -69,6 +70,8 @@ func Categorize2(pbs []*Threshold) {
 		}
 
 		if !pb.Translated && pb.Typ != OPT {
+			glob.A(len(pb.Chains) == 0, "At this point no chain.", pb)
+			//glob.A(pb.Clauses.Size() == 0, pb.Id, pb, "not translation means also that there should not be any clauses.")
 			pb.Categorize1()
 			pb.Translated = true
 		}
@@ -101,14 +104,13 @@ func doChaining(pbs []*Threshold, complOcc map[sat.Literal][]int, simplOcc map[s
 
 	checked := make(map[Match]bool, 0)
 
-	ex_matchings := make(map[int][]Matching, 0)  // compl_id -> []Matchings
+	ex_matchings := make(map[int][]Matching, 0)  // simpl_id -> []Matchings
 	amo_matchings := make(map[int][]Matching, 0) // compl_id -> []Matchings
 
 	for lit, list := range complOcc {
 		//id2lit[lit2id[lit]] = lit
 		for _, c := range list {
 			for _, s := range simplOcc[lit] {
-
 				if !checked[Match{c, s}] {
 					// of comp c and simpl s there is at least
 					checked[Match{c, s}] = true
@@ -138,7 +140,6 @@ func doChaining(pbs []*Threshold, complOcc map[sat.Literal][]int, simplOcc map[s
 
 	for comp, _ := range pbs {
 		if matchings, b := amo_matchings[comp]; b {
-			glob.D("good one", comp)
 			workOnMatching(pbs, comp, matchings, lit2id, litSets)
 		}
 	}
@@ -146,7 +147,6 @@ func doChaining(pbs []*Threshold, complOcc map[sat.Literal][]int, simplOcc map[s
 
 func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 	lit2id map[sat.Literal]int, litSets []intsets.Sparse) {
-	glob.D(comp, "chainings:", len(matchings)) //, ":", pbs[comp])
 	glob.A(!pbs[comp].Translated, "comp", comp, "should not have been translated yet")
 
 	var chains Chains
@@ -173,7 +173,7 @@ func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 		//fmt.Println("len(matchings", len(matchings))
 		sort.Sort(MatchingsBySize(matchings))
 		matching := matchings[0]
-		glob.D(comp, matching.simp)
+		//glob.D(comp, matching.simp, matching.inter.Len())
 		// choose longest matching, that is not translated yet
 		//fmt.Println("check matching: simp", matching.simp, "inter", matching.inter.String())
 		//matching.inter.IntersectionWith(&litSets[comp]) //update matching
@@ -188,6 +188,7 @@ func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 		ind_entries := make(IndEntries, inter.Len())
 		comp_rest := make([]*Entry, len(pbs[comp].Entries)-inter.Len()-comp_offset)
 		simp_rest := make([]*Entry, len(pbs[simp].Entries)-inter.Len())
+		simp_offset := len(simp_rest)
 
 		ind_pos := 0
 		rest_pos := 0
@@ -220,16 +221,21 @@ func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 		{ // remove intersecting matchings
 			//fmt.Println("before remove intersecting matches: len", len(matchings))
 			p := len(matchings)
-			for i := 0; i < p; i++ { // find the next non-translated one
-				var tmp intsets.Sparse
-				if tmp.Intersection(inter, matchings[i].inter); !tmp.IsEmpty() {
+			for i := 1; i < p; i++ { // find the next non-translated one
+				//var tmp intsets.Sparse
+				//			glob.D("before", matchings[i].inter.String())
+				//				glob.D("inter", inter.String())
+				matchings[i].inter.DifferenceWith(inter)
+				//			glob.D("after ", matchings[i].inter.String())
+				//if tmp.Intersection(inter, matchings[i].inter); !tmp.IsEmpty() {
+				if matchings[i].inter.IsEmpty() {
 					//			fmt.Println("remove", matchings[i].inter.String())
 					p--
 					matchings[i] = matchings[p]
 					i--
 				}
 			}
-			matchings = matchings[:p]
+			matchings = matchings[1:p]
 			//fmt.Println("after removing intersecting matches: len", len(matchings))
 		}
 
@@ -244,13 +250,13 @@ func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 		for i, ie := range ind_entries {
 			glob.A(ie.c.Literal == ie.s.Literal, "Indicator entries should be aligned but", ie.c.Literal, ie.s.Literal)
 			compEntries[i+comp_offset] = *ie.c
-			simpEntries[i] = *ie.s
+			simpEntries[i+simp_offset] = *ie.s
 		}
 		for i, _ := range comp_rest {
 			compEntries[comp_offset+len(ind_entries)+i] = *comp_rest[i]
 		}
-		for i := len(ind_entries); i < len(pbs[simp].Entries); i++ {
-			simpEntries[i] = *simp_rest[i-len(ind_entries)]
+		for i, _ := range simp_rest {
+			simpEntries[i] = *simp_rest[i]
 		}
 
 		pbs[comp].Entries = compEntries
@@ -266,24 +272,24 @@ func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 			tmp := compEntries[i+comp_offset].Weight
 			compEntries[i+comp_offset].Weight -= last
 			glob.A(compEntries[i+comp_offset].Weight >= 0, "After rewriting PB weights cannot be negative")
-			compEntries[i+comp_offset].Literal = simp_translation.Aux[i]
+			compEntries[i+comp_offset].Literal = simp_translation.Aux[i+simp_offset]
 			last = tmp
 		}
 		pbs[comp].RemoveZeros()
-		chain := CleanChain(pbs[comp].Entries, simp_translation.Aux) // real intersection
+		chain := CleanChain(pbs[comp].Entries, simp_translation.Aux[simp_offset:])
+		//pbs[comp].Print10()
 		//pbs[simp].Print10()
+		//glob.D(len(chain))
 		//glob.D(Chain(simp_translation.Aux))
-		//glob.D(chain)
+		glob.A(len(chain) > 0, "chain has to have at least one element")
 		comp_offset += len(chain)
 		chains = append(chains, chain)
 
 		//fmt.Println("chain:")
 		//fmt.Println("rewritten:")
 		pbs[simp].SortVar() // for reuse of other constraints
-		//glob.D("resorting:", pbs[simp])
 	}
 	pbs[comp].Chains = chains
-	pbs[comp].Print10()
 }
 
 type Match struct {
