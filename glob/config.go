@@ -25,6 +25,7 @@ var Ex_chain_flag bool
 var Amo_chain_flag bool
 var Opt_bound_flag int64
 var Cnf_tmp_flag string
+var Search_strategy_flag string
 
 const Len_rewrite_flag = 4
 
@@ -41,9 +42,10 @@ func PringConfig() {
 	fmt.Println("Opt_rewrite_flag :\t", Opt_rewrite_flag)
 	fmt.Println("Amo_reuse_flag :\t", Amo_reuse_flag)
 	fmt.Println("Rewrite_same_flag :\t", Rewrite_same_flag)
-	fmt.Println("Ex_chain_flag bool :\t", Ex_chain_flag)
-	fmt.Println("Amo_chain_flag bool : \t", Amo_chain_flag)
-	fmt.Println("Opt_bound_flag bool : \t", Opt_bound_flag)
+	fmt.Println("Ex_chain_flag :\t", Ex_chain_flag)
+	fmt.Println("Amo_chain_flag : \t", Amo_chain_flag)
+	fmt.Println("Opt_bound_flag : \t", Opt_bound_flag)
+	fmt.Println("Search_strategy flag : \t", Search_strategy_flag)
 }
 
 func D(arg ...interface{}) {

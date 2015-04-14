@@ -105,32 +105,52 @@ func (t *Threshold) WriteFormula(base int, file *os.File) {
 }
 
 func (t *Threshold) PrintGurobi() {
-	for _, x := range t.Entries {
-		l := x.Literal
+	if len(t.Entries) > 0 {
 
-		if x.Weight > 0 {
-			fmt.Printf(" +")
+		//switch t.Typ {
+		//case LE:
+		//	fmt.Print(":- ", t.K+1, " [ ")
+		//case GE:
+		//	fmt.Print(":- [ ")
+		//case EQ:
+		//	fmt.Print(":- not ", t.K, " [ ")
+		//case OPT:
+		//	fmt.Print("#minimize[")
+		//}
+
+		for _, x := range t.Entries {
+			l := x.Literal
+
+			if x.Weight > 0 {
+				fmt.Print(" + ")
+			}
+			if x.Weight != 1 {
+				fmt.Printf(" ")
+				fmt.Print(x.Weight)
+			}
+			fmt.Print(l.ToTxt())
 		}
 
-		if x.Weight != 1 {
-			fmt.Printf(" ")
-			fmt.Print(x.Weight)
+		switch t.Typ {
+		case LE:
+			fmt.Print(" <= ")
+			fmt.Println(t.K)
+		case GE:
+			fmt.Print(" >= ")
+			fmt.Println(t.K)
+		case EQ:
+			fmt.Print(" = ")
+			fmt.Println(t.K)
+		case OPT:
+			fmt.Println()
 		}
-		fmt.Print(l.ToTxt())
 	}
-	switch t.Typ {
-	case LE:
-		fmt.Print(" <= ")
-	case GE:
-		fmt.Print(" >= ")
-	case EQ:
-		fmt.Print(" = ")
-	}
-	fmt.Println(t.K)
-
 }
 
 func (t *Threshold) PrintPBO() {
+	if t.Typ == OPT {
+		fmt.Print("min: ")
+	}
 	for _, x := range t.Entries {
 		l := x.Literal
 
@@ -142,12 +162,15 @@ func (t *Threshold) PrintPBO() {
 	switch t.Typ {
 	case LE:
 		fmt.Print("<= ")
+		fmt.Print(t.K)
 	case GE:
 		fmt.Print(">= ")
+		fmt.Print(t.K)
 	case EQ:
 		fmt.Print("= ")
+		fmt.Print(t.K)
 	}
-	fmt.Println(t.K, ";")
+	fmt.Println(" ;")
 }
 
 func (t *Threshold) String() (s string) {
@@ -169,14 +192,15 @@ func (t *Threshold) String() (s string) {
 	switch t.Typ {
 	case LE:
 		s += " <= "
-		s += strconv.FormatInt(t.K, 10) + ";"
+		s += strconv.FormatInt(t.K, 10) + " ;"
 	case GE:
 		s += " >= "
-		s += strconv.FormatInt(t.K, 10) + ";"
+		s += strconv.FormatInt(t.K, 10) + " ;"
 	case EQ:
 		s += " = "
-		s += strconv.FormatInt(t.K, 10) + ";"
+		s += strconv.FormatInt(t.K, 10) + " ;"
 	case OPT:
+		s += " ;"
 		//s += " bound <=  "
 	}
 	return
@@ -188,6 +212,7 @@ func (t *Threshold) Print10() {
 
 func (t *Threshold) PrintGringo() {
 
+	fmt.Println("true.")
 	if len(t.Entries) > 0 {
 
 		switch t.Typ {

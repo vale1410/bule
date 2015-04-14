@@ -7,19 +7,18 @@ Today
 This week
 =========
 * Integrate convert.go into bule.go; call clasp with the program!
-* Simple Match PB with AMO with auxiliary variables(counter encoding)  
-       and apply it on BDD. 
+* Simple Match PB with AMO with auxiliary variables(counter encoding) and apply it on BDD. 
 * Prepare the matching problem of real PBs to constraints. 
 
 Long term
-==========
+=========
 * Treat objective function by iterative calls to SAT solver (different solver!!)
 * Treat equality for pseudo booleans with BDDs and SN
 * Introduce IntVar
 * Add solver interface for SAT with several solvers and statistics (cryptominisat, lingeling, ), call them in parallel ...
 
 Open tasks (unspecified due date)
-==========
+=================================
 * Improve SN by smart cardinality networks (ignasis idea)
 * Improve BDDs by pruning units before translating to SAT
 

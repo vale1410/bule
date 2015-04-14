@@ -22,12 +22,13 @@ var ver = flag.Bool("ver", false, "Show version info.")
 //var check_clause = flag.Bool("clause", true, "Checks if Pseudo-Boolean is not just a simple clause.")
 var debug_flag = flag.Bool("d", false, "Print debug information.")
 var debug_filename = flag.String("df", "", "File to print debug information.")
-var reformat_flag = flag.Bool("reformat", false, "Reformat PB files into correct format. Decompose = into >= and <=")
+var pbo_flag = flag.Bool("pbo", false, "Reformat to pbo format, output to stdout.")
+var gringo_flag = flag.Bool("gringo", false, "Reformat to Gringo format, output to stdout.")
 var gurobi_flag = flag.Bool("gurobi", false, "Reformat to Gurobi input, output to stdout.")
 var solve_flag = flag.Bool("solve", false, "Dont solve just categorize and analyze the constriants.")
 var dimacs_flag = flag.Bool("dimacs", false, "Print readable format of clauses.")
 var stat_flag = flag.Bool("stat", false, "Do statistics.")
-var cat_flag = flag.Int("cat", 1, "Categorize method 1, or 2. (default 1).")
+var cat_flag = flag.Int("cat", 2, "Categorize method 1, or 2. (default 2, historic: 1).")
 
 var complex_flag = flag.String("complex", "hybrid", "Solve complex PBs with mdd/sn/hybrid. Default is hybrid")
 var timeout_flag = flag.Int("timeout", 600, "Timeout of the overall solving process")
@@ -42,7 +43,8 @@ var amo_reuse_flag = flag.Bool("amo-reuse", false, "Reuses AMO constraints for r
 var rewrite_same_flag = flag.Bool("rewrite-same", false, "Groups same coefficients and introduces sorter and chains for them.")
 var ex_chain_flag = flag.Bool("ex-chain", false, "Rewrites PBs with matching EXK constraints.")
 var amo_chain_flag = flag.Bool("amo-chain", true, "Rewrites PBs with matching AMO.")
-var rewrite_equality_flag = flag.Bool("rewrite_equality", true, "replwrites complex == constraints into >= and <=.")
+var rewrite_equal_flag = flag.Bool("rewrite-equal", false, "rewrites complex == constraints into >= and <=.")
+var search_strategy_flag = flag.String("search", "iterative", "search objective iterative or binary.")
 
 var digitRegexp = regexp.MustCompile("([0-9]+ )*[0-9]+")
 
@@ -87,11 +89,81 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	glob.Amo_chain_flag = *amo_chain_flag
 	glob.Opt_bound_flag = *opt_bound_flag
 	glob.Cnf_tmp_flag = *cnf_tmp_flag
+	glob.Search_strategy_flag = *search_strategy_flag
 
 	glob.D("Running Debug Mode...")
 
 	pbs, err := parse(*filename_flag)
 	opt := pbs[0] // per convention first in pbs is opt statement (possibly empty)
+
+	if *rewrite_equal_flag {
+		before := len(pbs)
+		for _, x := range pbs {
+			//if x.Typ == constraints.EQ && x.IsComplex() {
+			if x.Typ == constraints.EQ { // rewrite all constraints into this
+				y := x.Copy()
+				x.Typ = constraints.LE
+				y.Typ = constraints.GE
+				y.Id = len(pbs)
+				pbs = append(pbs, &y)
+			}
+		}
+		if len(pbs)-before > 0 {
+			glob.D("c rewritten", len(pbs)-before, "equality constraints into >= and <=.")
+		}
+	}
+
+	if *pbo_flag {
+		atoms := make(map[string]bool, len(pbs))
+
+		for _, pb := range pbs {
+			for _, x := range pb.Entries {
+				atoms[x.Literal.A.Id()] = true
+			}
+		}
+		fmt.Printf("* #variable= %v #constraint= %v\n", len(atoms), len(pbs)-1)
+
+		for _, pb := range pbs {
+			pb.PrintPBO()
+		}
+		return
+	} else if *gringo_flag {
+		fmt.Println("#hide.")
+		atoms := make(map[string]bool, len(pbs))
+
+		for _, pb := range pbs {
+			pb.PrintGringo()
+			for _, x := range pb.Entries {
+				atoms[x.Literal.A.Id()] = true
+			}
+		}
+		for x, _ := range atoms {
+			fmt.Println("{", x, "}.")
+		}
+		return
+	} else if *gurobi_flag {
+		if !opt.Empty() {
+			fmt.Println("Minimize")
+			opt.PrintGurobi()
+		}
+		fmt.Println("Subject To")
+		atoms := make(map[string]bool, len(pbs))
+		for i, pb := range pbs {
+			if i > 0 {
+				pb.Normalize(constraints.GE, false)
+				pb.PrintGurobi()
+				for _, x := range pb.Entries {
+					atoms[x.Literal.A.Id()] = true
+				}
+			}
+		}
+		fmt.Println("Binary")
+		for aS, _ := range atoms {
+			fmt.Print(aS + " ")
+		}
+		fmt.Println()
+		return
+	}
 
 	if !opt.Empty() && *opt_half_flag {
 		redundant := opt.Copy()
@@ -110,54 +182,11 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		//fmt.Println("offset :", opt.Offset)
 	}
 
-	if *rewrite_equality_flag {
-		before := len(pbs)
-		for _, x := range pbs {
-			if x.Typ == constraints.EQ && x.IsComplex() {
-				y := x.Copy()
-				x.Typ = constraints.LE
-				y.Typ = constraints.GE
-				y.Id = len(pbs)
-				pbs = append(pbs, &y)
-			}
-		}
-		if len(pbs)-before > 0 {
-			glob.D("rewritten", len(pbs)-before, "equality constraints into >= and <=.")
-		}
-	}
-
 	if err != nil {
 		err.Error()
 	}
 
-	if *gurobi_flag {
-		fmt.Println("Subject To")
-		atoms := make(map[string]bool, len(pbs))
-		for _, pb := range pbs {
-			pb.Normalize(constraints.GE, false)
-			pb.PrintGurobi()
-			for _, x := range pb.Entries {
-				atoms[x.Literal.A.Id()] = true
-			}
-		}
-		fmt.Println("Binary")
-		for aS, _ := range atoms {
-			fmt.Print("x" + aS + " ")
-		}
-		fmt.Println()
-	} else if *reformat_flag {
-		for _, pb := range pbs {
-			if pb.Typ == constraints.EQ {
-				pb.Typ = constraints.GE
-				pb.Normalize(constraints.GE, false)
-				pb.Print10()
-				pb.Typ = constraints.LE
-			}
-			pb.Normalize(constraints.GE, false)
-			pb.Print10()
-		}
-
-	} else {
+	{
 
 		stats := make([]int, constraints.TranslationTypes)
 		primaryVars := make(map[string]bool, 0)

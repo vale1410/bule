@@ -136,6 +136,8 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64, lb int64) (result R
 		result.Value = init + 1
 	}
 
+	nextOpt := result.Value - 1
+
 	result.Assignment = make(Assignment, len(g.idMap))
 
 	time_total := time.Now()
@@ -152,8 +154,7 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64, lb int64) (result R
 		if opt.Empty() {
 			glob.D("solving...")
 		} else {
-			glob.D("solving for opt <= ", maxS(result.Value-1), "...")
-			//glob.D(opt.String())
+			fmt.Printf("i: %v\tcur: %v\t lb: %v\tbest: %v\n", iterations, maxS(nextOpt), lb, maxS(result.Value))
 		}
 		time_before := time.Now()
 
@@ -165,7 +166,7 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64, lb int64) (result R
 		select {
 		case r := <-result_chan:
 			result.Solved = r.solved
-			fmt.Printf("Time: %.3f s\n", time.Since(time_before).Seconds())
+			fmt.Printf("Time :\t%.3f s\n", time.Since(time_before).Seconds())
 			if r.solved {
 				result.Satisfiable = r.satisfiable
 				if r.satisfiable {
@@ -199,47 +200,59 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64, lb int64) (result R
 					glob.A(count == len(result.Assignment), "count != assignment")
 
 					if !opt.Empty() {
-						v := opt.Evaluate(result.Assignment)
-						if v <= lb {
-							glob.D("SAT opt for trivial lb == ", v)
-							finished = true
-							result.Optimal = true
-							fmt.Println("OPTIMIUM: ", v)
-							result.M = "OPTIMUM"
-						} else {
-							glob.A(v < result.Value, v, "<", result.Value, "no improvement ... cant be ")
-							result.Value = v
-							fmt.Println("SAT for opt =", result.Value)
-							result.M = "SAT"
+						result.Value = opt.Evaluate(result.Assignment)
+						//g.printAssignment(result.Assignment)
+						glob.D("SAT for value =", result.Value)
+						finished, nextOpt = nextOptValue(lb, &result)
+
+						if !finished {
 							current = cs
-							//g.printAssignment(result.Assignment)
-							//fmt.Println()
-							opt_clauses := opt.Translate(result.Value - 1)
+							opt_clauses := opt.Translate(nextOpt)
 							fmt.Println("opt cls", opt_clauses.Size())
-							//opt_clauses.PrintDebug()
 							current.AddClauseSet(opt_clauses)
+						} else {
+							fmt.Println("OPTIMIUM", result.Value)
 						}
+
 					} else {
 						fmt.Println("SAT")
 						result.M = "SAT"
 						finished = true
 					}
 
-				} else {
-					finished = true
-					result.Optimal = true
+				} else { //UNSAT
 					if !opt.Empty() {
-						glob.D("UNSAT at", maxS(result.Value-1), ", lower bound proven for ", maxS(result.Value))
-						fmt.Println("OPTIMIUM: ", maxS(result.Value))
-						result.M = "OPTIMUM"
+						// update lower bound
+						lb = nextOpt + 1
+
+						glob.D("UNSAT for opt <=", maxS(nextOpt))
+						finished, nextOpt = nextOptValue(lb, &result)
+
+						if !finished {
+							current = cs
+							opt_clauses := opt.Translate(nextOpt)
+							fmt.Println("opt cls", opt_clauses.Size())
+							current.AddClauseSet(opt_clauses)
+						} else {
+							if result.Value <= math.MaxInt64-1 {
+								fmt.Println("OPTIMIUM", result.Value)
+							} else {
+								fmt.Println("UNSAT")
+							}
+						}
+						//glob.D("UNSAT at", maxS(result.Value-1), ", lower bound proven for ", maxS(result.Value))
+						//fmt.Println("OPTIMIUM: ", maxS(result.Value))
+						//result.M = "OPTIMUM"
 					} else {
+						finished = true
+						result.Optimal = true
 						fmt.Println("UNSAT")
 						result.M = "UNSAT"
 					}
 				}
 			} else {
 				result.Solved = false
-				glob.D("Result received not solved, why?")
+				glob.D("Error received nothing solved, check log of solver?")
 				result.M = "ERROR"
 				finished = true
 			}
@@ -261,9 +274,47 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64, lb int64) (result R
 	return
 }
 
+func nextOptValue(lb int64, result *Result) (finished bool, nextOpt int64) {
+	switch glob.Search_strategy_flag {
+	case "iterative":
+		finished, nextOpt = nextOptIterative(lb, result)
+	case "binary":
+		finished, nextOpt = nextOptBinary(lb, result)
+	default:
+		glob.A(false, "Search strategy not implemented", glob.Search_strategy_flag)
+	}
+	return
+}
+
+func nextOptBinary(lb int64, result *Result) (bool, int64) {
+
+	if lb == result.Value {
+		result.M = "OPTIMUM"
+		return true, result.Value
+	} else if lb < result.Value {
+		return false, (lb + result.Value) / 2
+	} else {
+		glob.A(false, "lb <= ub")
+		return false, 0
+	}
+}
+
+func nextOptIterative(lb int64, result *Result) (bool, int64) {
+	if lb == result.Value {
+		result.M = "OPTIMUM"
+		return true, result.Value
+	} else if lb < result.Value {
+		return false, result.Value - 1
+	} else {
+		glob.A(false, "lb <= ub")
+		return false, 0
+	}
+}
+
 func maxS(v int64) string {
 	if v > math.MaxInt64/2 {
-		return "+∞"
+		//return "+∞"
+		return "?"
 	} else {
 		return strconv.Itoa(int(v))
 	}
@@ -367,7 +418,7 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 		for _, c := range clauses.list {
 			io.Copy(stdin, bytes.NewReader(g.toBytes(c)))
 		}
-		fmt.Printf("Piping clauses: %.3f s\n", time.Since(time_before).Seconds())
+		fmt.Printf("Read :\t%.3f s\n", time.Since(time_before).Seconds())
 	}()
 
 	var res rawResult
@@ -407,7 +458,7 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 	err_tmp := solver.Wait()
 
 	if err_tmp != nil {
-		fmt.Println("return value:", err_tmp.Error())
+		//glob.D("return value:",err_tmp() )
 	}
 
 	//if err = solver.Process.Kill(); err != nil {

@@ -33,12 +33,12 @@ func Categorize2(pbs []*Threshold) {
 		switch pb.TransTyp {
 		case UNKNOWN:
 			addToCategory(&nextId, pb, complOcc, lit2id, &litSets[i])
-		case AMO, EX1, EXK:
+		case AMO, EX1:
 			//fmt.Println(pb.Id, len(pbs))
 			//pb.Print10()
 			addToCategory(&nextId, pb, simplOcc, lit2id, &litSets[i])
 		default: // already translated
-			glob.DT(pb.Clauses.Size() == 0, "Translated pbs should contain clauses, special case?")
+			glob.DT(pb.Clauses.Size() == 0, "Translated pb should contain clauses, special case?", pb.Id)
 			pb.Translated = true
 		}
 	}
@@ -79,6 +79,7 @@ func Categorize2(pbs []*Threshold) {
 		if pb.Err != nil {
 			panic(pb.Err.Error())
 		}
+		//pb.Print10()
 	}
 }
 
@@ -104,7 +105,7 @@ func doChaining(pbs []*Threshold, complOcc map[sat.Literal][]int, simplOcc map[s
 
 	checked := make(map[Match]bool, 0)
 
-	ex_matchings := make(map[int][]Matching, 0)  // simpl_id -> []Matchings
+	//ex_matchings := make(map[int][]Matching, 0)  // simpl_id -> []Matchings
 	amo_matchings := make(map[int][]Matching, 0) // compl_id -> []Matchings
 
 	for lit, list := range complOcc {
@@ -124,7 +125,8 @@ func doChaining(pbs []*Threshold, complOcc map[sat.Literal][]int, simplOcc map[s
 						}
 					} else if pbs[s].Typ == EQ {
 						if inter.Len() > 1 { //TODO glob.Ex_matching_min
-							ex_matchings[c] = append(amo_matchings[c], Matching{s, &inter})
+							amo_matchings[c] = append(amo_matchings[c], Matching{s, &inter})
+							//ex_matchings[c] = append(amo_matchings[c], Matching{s, &inter})
 						}
 					} else {
 						glob.A(false, "case not treated")
@@ -134,7 +136,8 @@ func doChaining(pbs []*Threshold, complOcc map[sat.Literal][]int, simplOcc map[s
 		}
 	}
 
-	glob.D("amo/ex_matchings:", len(amo_matchings), len(ex_matchings))
+	//glob.D("amo/ex_matchings:", len(amo_matchings), len(ex_matchings))
+	glob.D("amo/ex_matchings:", len(amo_matchings))
 
 	//3) // only do for amo matchings
 
@@ -177,13 +180,15 @@ func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 		// choose longest matching, that is not translated yet
 		//fmt.Println("check matching: simp", matching.simp, "inter", matching.inter.String())
 		//matching.inter.IntersectionWith(&litSets[comp]) //update matching
+		if matching.inter.Len() < 3 {
+			break
+		}
 		inter := matching.inter
-		glob.A(inter.Len() > 2, "matching should have at least that size")
 		simp := matching.simp
 
 		//pbs[comp].Print10()
 		//pbs[simp].Print10()
-		//fmt.Println("entries", comp, litSets[comp].String(), simp, litSets[simp].String(), inter.String())
+		//glob.D("entries", comp, litSets[comp].String(), simp, litSets[simp].String(), inter.String())
 
 		ind_entries := make(IndEntries, inter.Len())
 		comp_rest := make([]*Entry, len(pbs[comp].Entries)-inter.Len()-comp_offset)
@@ -262,7 +267,14 @@ func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 		pbs[comp].Entries = compEntries
 		pbs[simp].Entries = simpEntries
 
-		simp_translation := TranslateAtMostOne(Count, pbs[simp].IdS()+"-cnt", pbs[simp].Literals())
+		var simp_translation CardTranslation
+		if pbs[simp].Typ == EQ {
+			simp_translation = TranslateAtMostOne(Count, pbs[simp].IdS()+"-cnt", pbs[simp].Literals())
+		} else {
+			glob.A(pbs[simp].Typ == LE)
+			simp_translation = TranslateAtMostOne(Count, pbs[simp].IdS()+"-cnt", pbs[simp].Literals())
+		}
+		//simp_translation := TranslateAtMostOne(Count, pbs[simp].IdS()+"-cnt", pbs[simp].Literals())
 		pbs[simp].Translated = true
 		pbs[simp].Clauses.AddClauseSet(simp_translation.Clauses)
 		simp_translation.PB = pbs[simp]
@@ -378,11 +390,9 @@ func (pb *Threshold) CatSimpl() {
 				}
 			} else { //cardinality
 				switch pb.Typ {
-				case LE, GE:
+				case LE, GE, EQ:
 					pb.CreateCardinality()
 					pb.TransTyp = CARD
-				case EQ:
-					pb.TransTyp = EXK
 				}
 			}
 		}
