@@ -155,7 +155,7 @@ func TranslateExactlyOne(typ OneTranslationType, tag string, lits []sat.Literal)
 
 	case Count:
 
-		pred := sat.Pred("count")
+		pred := sat.Pred("cx")
 		counterId := newId()
 
 		auxs := make([]sat.Literal, len(lits))
@@ -188,7 +188,7 @@ func TranslateExactlyOne(typ OneTranslationType, tag string, lits []sat.Literal)
 			}
 		}
 
-		clauses.AddTaggedClause(tag+"Ex1", auxs[0])
+		clauses.AddTaggedClause(tag, auxs[0])
 
 	case Sort:
 		panic("CNF translation for this type not implemented yet")

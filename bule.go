@@ -43,7 +43,7 @@ var amo_reuse_flag = flag.Bool("amo-reuse", false, "Reuses AMO constraints for r
 var rewrite_same_flag = flag.Bool("rewrite-same", false, "Groups same coefficients and introduces sorter and chains for them.")
 var ex_chain_flag = flag.Bool("ex-chain", false, "Rewrites PBs with matching EXK constraints.")
 var amo_chain_flag = flag.Bool("amo-chain", true, "Rewrites PBs with matching AMO.")
-var rewrite_equal_flag = flag.Bool("rewrite-equal", false, "rewrites complex == constraints into >= and <=.")
+var rewrite_equal_flag = flag.Bool("rewrite-equal", true, "rewrites complex == constraints into >= and <=. Should be =true for correctness currently.")
 var search_strategy_flag = flag.String("search", "iterative", "search objective iterative or binary.")
 
 var digitRegexp = regexp.MustCompile("([0-9]+ )*[0-9]+")
@@ -223,12 +223,14 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			if !glob.Opt_rewrite_flag {
 				*opt = tmp_opt
 			}
+			//opt.Print10()
 
 			if !opt.Empty() { // add new variables of auxiliaries added in the transformation
 				for _, x := range opt.Entries {
 					primaryVars[x.Literal.A.Id()] = true
 				}
 			}
+			//fmt.Println(primaryVars)
 		default:
 			glob.A(false, "Categorization of constraints does not exist:", *cat_flag)
 		}

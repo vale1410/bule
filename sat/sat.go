@@ -28,7 +28,7 @@ type Optimizer interface {
 
 type Result struct {
 	Solved      bool
-	Satisfiable bool
+	Satisfiable bool // is satisfiable (opt: there exists at least one solution)
 	Optimal     bool
 	Timeout     bool
 	M           string
@@ -108,8 +108,7 @@ func (g *Gen) PrintSymbolTable(filename string) {
 }
 
 // opt is having only positive coefficents
-// init >= 0
-func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64, lb int64) (result Result) {
+func (g *Gen) Solve(cs ClauseSet, opt Optimizer, nextOpt int64, lb int64) (result Result) {
 
 	glob.A(cs.Size() > 0, "Needs to contain at least 1 clause.")
 
@@ -128,15 +127,13 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64, lb int64) (result R
 
 	result.Value = math.MaxInt64
 
-	if !opt.Empty() && init != math.MaxInt64 {
-		glob.D("init", init, "lb", lb)
-		opt_clauses := opt.Translate(init)
+	if !opt.Empty() && nextOpt != math.MaxInt64 {
+		glob.D("init", nextOpt, "lb", lb)
+		opt_clauses := opt.Translate(nextOpt)
 		fmt.Println("opt cls", opt_clauses.Size())
 		current.AddClauseSet(opt_clauses)
-		result.Value = init + 1
 	}
-
-	nextOpt := result.Value - 1
+	result.Value = math.MaxInt64
 
 	result.Assignment = make(Assignment, len(g.idMap))
 
@@ -168,8 +165,8 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64, lb int64) (result R
 			result.Solved = r.solved
 			fmt.Printf("Time :\t%.3f s\n", time.Since(time_before).Seconds())
 			if r.solved {
-				result.Satisfiable = r.satisfiable
 				if r.satisfiable {
+					result.Satisfiable = true
 					ss := strings.Split(strings.TrimSpace(r.assignment), " ")
 
 					count := 0
@@ -223,30 +220,28 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, init int64, lb int64) (result R
 				} else { //UNSAT
 					if !opt.Empty() {
 						// update lower bound
-						lb = nextOpt + 1
-
 						glob.D("UNSAT for opt <=", maxS(nextOpt))
-						finished, nextOpt = nextOptValue(lb, &result)
 
-						if !finished {
-							current = cs
-							opt_clauses := opt.Translate(nextOpt)
-							fmt.Println("opt cls", opt_clauses.Size())
-							current.AddClauseSet(opt_clauses)
+						if nextOpt == math.MaxInt64 {
+							result.M = "UNSAT"
+							finished = true
 						} else {
-							if result.Value <= math.MaxInt64-1 {
-								fmt.Println("OPTIMIUM", result.Value)
+							lb = nextOpt + 1
+
+							finished, nextOpt = nextOptValue(lb, &result)
+
+							if !finished {
+								current = cs
+								opt_clauses := opt.Translate(nextOpt)
+								fmt.Println("opt cls", opt_clauses.Size())
+								current.AddClauseSet(opt_clauses)
 							} else {
-								fmt.Println("UNSAT")
+								fmt.Println("OPTIMUM", result.Value)
 							}
 						}
-						//glob.D("UNSAT at", maxS(result.Value-1), ", lower bound proven for ", maxS(result.Value))
-						//fmt.Println("OPTIMIUM: ", maxS(result.Value))
-						//result.M = "OPTIMUM"
 					} else {
 						finished = true
 						result.Optimal = true
-						fmt.Println("UNSAT")
 						result.M = "UNSAT"
 					}
 				}

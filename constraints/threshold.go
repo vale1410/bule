@@ -214,7 +214,7 @@ func (pb *Threshold) Evaluate(a sat.Assignment) (r int64) {
 
 	for _, e := range pb.Entries {
 		v, b := a[e.Literal.A.Id()]
-		glob.A(b, "Literal not found in assignment: ", e.Literal.ToTxt())
+		glob.DT(!b, "Literal not found in assignment: ", e.Literal.ToTxt())
 		if e.Literal.Sign {
 			r += int64(v) * e.Weight
 		} else {

@@ -269,7 +269,7 @@ func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 
 		var simp_translation CardTranslation
 		if pbs[simp].Typ == EQ {
-			simp_translation = TranslateAtMostOne(Count, pbs[simp].IdS()+"-cnt", pbs[simp].Literals())
+			simp_translation = TranslateExactlyOne(Count, pbs[simp].IdS()+"-cnt", pbs[simp].Literals())
 		} else {
 			glob.A(pbs[simp].Typ == LE)
 			simp_translation = TranslateAtMostOne(Count, pbs[simp].IdS()+"-cnt", pbs[simp].Literals())
