@@ -107,7 +107,6 @@ func (g *Gen) PrintSymbolTable(filename string) {
 
 }
 
-// opt is having only positive coefficents
 func (g *Gen) Solve(cs ClauseSet, opt Optimizer, nextOpt int64, lb int64) (result Result) {
 
 	glob.A(cs.Size() > 0, "Needs to contain at least 1 clause.")
