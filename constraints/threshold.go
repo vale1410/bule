@@ -117,7 +117,7 @@ func (pb *Threshold) RewriteSameWeights() {
 		if last == x.Weight {
 			es = append(es, entries[i])
 		} else {
-			if len(es) >= glob.Len_rewrite_flag {
+			if len(es) >= glob.Len_rewrite_same_flag {
 				rewrite++
 				var most int
 				if pb.Typ == OPT {
@@ -158,7 +158,7 @@ func (pb *Threshold) RewriteSameWeights() {
 		}
 		last = x.Weight
 	}
-	if len(es) >= glob.Len_rewrite_flag {
+	if len(es) >= glob.Len_rewrite_same_flag {
 		rewrite++
 		var most int
 		if pb.Typ == OPT {

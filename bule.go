@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"math"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -15,40 +14,37 @@ import (
 	"github.com/vale1410/bule/sat"
 )
 
-var filename_flag = flag.String("f", "test.pb", "Path of to PB file.")
-var cnf_tmp_flag = flag.String("out", "", "If set: output cnf to this file.")
-var ver = flag.Bool("ver", false, "Show version info.")
+var (
+	filename_flag = flag.String("f", "test.pb", "Path of to PB file.")
+	cnf_tmp_flag  = flag.String("out", "", "If set: output cnf to this file.")
+	ver           = flag.Bool("ver", false, "Show version info.")
 
-//var check_clause = flag.Bool("clause", true, "Checks if Pseudo-Boolean is not just a simple clause.")
-var debug_flag = flag.Bool("d", false, "Print debug information.")
-var debug_filename = flag.String("df", "", "File to print debug information.")
-var pbo_flag = flag.Bool("pbo", false, "Reformat to pbo format, output to stdout.")
-var gringo_flag = flag.Bool("gringo", false, "Reformat to Gringo format, output to stdout.")
-var gurobi_flag = flag.Bool("gurobi", false, "Reformat to Gurobi input, output to stdout.")
-var solve_flag = flag.Bool("solve", false, "Dont solve just categorize and analyze the constriants.")
-var dimacs_flag = flag.Bool("dimacs", false, "Print readable format of clauses.")
-var stat_flag = flag.Bool("stat", false, "Do statistics.")
-var cat_flag = flag.Int("cat", 2, "Categorize method 1, or 2. (default 2, historic: 1).")
+	debug_flag     = flag.Bool("d", false, "Print debug information.")
+	debug_filename = flag.String("df", "", "File to print debug information.")
+	pbo_flag       = flag.Bool("pbo", false, "Reformat to pbo format, output to stdout.")
+	gringo_flag    = flag.Bool("gringo", false, "Reformat to Gringo format, output to stdout.")
+	gurobi_flag    = flag.Bool("gurobi", false, "Reformat to Gurobi input, output to stdout.")
+	solve_flag     = flag.Bool("solve", true, "Dont solve just categorize and analyze the constraints.")
+	dimacs_flag    = flag.Bool("dimacs", false, "Print readable format of clauses.")
+	stat_flag      = flag.Bool("stat", false, "Extended statistics on types of PBs in problem.")
+	cat_flag       = flag.Int("cat", 2, "Categorize method 1, or 2. (default 2, historic: 1).")
 
-var complex_flag = flag.String("complex", "hybrid", "Solve complex PBs with mdd/sn/hybrid. Default is hybrid")
-var timeout_flag = flag.Int("timeout", 600, "Timeout of the overall solving process")
-var mdd_max_flag = flag.Int("mdd-max", 1000000, "Maximal Number of MDD Nodes in processing one PB.")
-var mdd_redundant_flag = flag.Bool("mdd-redundant", true, "Reduce MDD by redundant nodes.")
-var opt_half_flag = flag.Bool("opt-half", false, " sets opt-bound to half the sum of the weights of the optimiazation function.")
-var opt_bound_flag = flag.Int64("opt-bound", math.MaxInt64, "Initial bound for optimization function <= given value. Values from negative to positive.")
-var solver_flag = flag.String("solver", "minisat", "Choose Solver: minisat/clasp/lingeling/glucose/CCandr/cmsat.")
-var seed_flag = flag.Int64("seed", 31415, "Random seed.")
-var opt_rewrite_flag = flag.Bool("opt-rewrite", true, "Rewrites opt with chains from AMO and other constraint.")
-var amo_reuse_flag = flag.Bool("amo-reuse", false, "Reuses AMO constraints for rewriting complex PBs.")
-var rewrite_same_flag = flag.Bool("rewrite-same", false, "Groups same coefficients and introduces sorter and chains for them.")
-var ex_chain_flag = flag.Bool("ex-chain", false, "Rewrites PBs with matching EXK constraints.")
-var amo_chain_flag = flag.Bool("amo-chain", true, "Rewrites PBs with matching AMO.")
-var rewrite_equal_flag = flag.Bool("rewrite-equal", true, "rewrites complex == constraints into >= and <=. Should be =true for correctness currently.")
-var search_strategy_flag = flag.String("search", "iterative", "search objective iterative or binary.")
-
-var digitRegexp = regexp.MustCompile("([0-9]+ )*[0-9]+")
-
-var dbgoutput *os.File
+	complex_flag         = flag.String("complex", "hybrid", "Solve complex PBs with mdd/sn/hybrid. Default is hybrid")
+	timeout_flag         = flag.Int("timeout", 600, "Timeout of the overall solving process")
+	mdd_max_flag         = flag.Int("mdd-max", 2000000, "Maximal number of MDD Nodes in processing one PB.")
+	mdd_redundant_flag   = flag.Bool("mdd-redundant", true, "Reduce MDD by redundant nodes.")
+	opt_bound_flag       = flag.Int64("opt-bound", math.MaxInt64, "Initial bound for optimization function <= given value. Negative values allowed.")
+	opt_half_flag        = flag.Bool("opt-half", false, "Sets opt-bound to half the sum of the weights of the optimization function.")
+	solver_flag          = flag.String("solver", "minisat", "Choose Solver: minisat/clasp/lingeling/glucose/CCandr/cmsat.")
+	seed_flag            = flag.Int64("seed", 42, "Random seed initializer.")
+	amo_reuse_flag       = flag.Bool("amo-reuse", false, "Reuses AMO constraints for rewriting complex PBs.")
+	rewrite_opt_flag     = flag.Bool("opt-rewrite", true, "Rewrites opt with chains from AMO and other constraint.")
+	rewrite_same_flag    = flag.Bool("rewrite-same", false, "Groups same coefficients and introduces sorter and chains for them.")
+	rewrite_equal_flag   = flag.Bool("rewrite-equal", false, "Rewrites complex == constraints into >= and <=.")
+	ex_chain_flag        = flag.Bool("ex-chain", false, "Rewrites PBs with matching EXK constraints.")
+	amo_chain_flag       = flag.Bool("amo-chain", true, "Rewrites PBs with matching AMO.")
+	search_strategy_flag = flag.String("search", "iterative", "Search objective iterative or binary.")
+)
 
 func main() {
 	flag.Parse()
@@ -66,15 +62,25 @@ func main() {
 	}
 
 	if *ver {
-		fmt.Println(`Bule CNF Grounder: Tag 0.91 Pseudo Booleans
+		fmt.Println(`Bule CNF Grounder: Tag 0.93 Pseudo Booleans
 Copyright (C) NICTA and Valentin Mayer-Eichberger
 License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 There is NO WARRANTY, to the extent permitted by law.`)
 		return
 	}
 
+	if len(flag.Args()) >= 2 {
+		fmt.Println("Command line flags not recognized", flag.Args())
+		return
+	}
+
+	if len(flag.Args()) == 1 {
+		glob.Filename_flag = flag.Args()[0]
+	} else {
+		glob.Filename_flag = *filename_flag
+	}
+
 	// put all configuration here
-	glob.Filename_flag = *filename_flag
 	glob.Debug_flag = *debug_flag
 	glob.Complex_flag = *complex_flag
 	glob.Timeout_flag = *timeout_flag
@@ -82,8 +88,8 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	glob.MDD_redundant_flag = *mdd_redundant_flag
 	glob.Solver_flag = *solver_flag
 	glob.Seed_flag = *seed_flag
-	glob.Opt_rewrite_flag = *opt_rewrite_flag
 	glob.Amo_reuse_flag = *amo_reuse_flag
+	glob.Rewrite_opt_flag = *rewrite_opt_flag
 	glob.Rewrite_same_flag = *rewrite_same_flag
 	glob.Ex_chain_flag = *ex_chain_flag
 	glob.Amo_chain_flag = *amo_chain_flag
@@ -93,7 +99,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 	glob.D("Running Debug Mode...")
 
-	pbs, err := parse(*filename_flag)
+	pbs, err := parse(glob.Filename_flag)
 	opt := pbs[0] // per convention first in pbs is opt statement (possibly empty)
 
 	if *rewrite_equal_flag {
@@ -213,14 +219,14 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		case 2:
 
 			var tmp_opt constraints.Threshold
-			if !glob.Opt_rewrite_flag {
+			if !glob.Rewrite_opt_flag {
 				tmp_opt = (*opt).Copy()
 				*opt = constraints.Threshold{}
 			}
 
 			constraints.Categorize2(pbs)
 
-			if !glob.Opt_rewrite_flag {
+			if !glob.Rewrite_opt_flag {
 				*opt = tmp_opt
 			}
 			//opt.Print10()

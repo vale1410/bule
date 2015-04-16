@@ -106,6 +106,11 @@ func doChaining(pbs []*Threshold, complOcc map[sat.Literal][]int, simplOcc map[s
 	checked := make(map[Match]bool, 0)
 
 	//ex_matchings := make(map[int][]Matching, 0)  // simpl_id -> []Matchings
+	//currently ex and amo matchings are treated equivalently, the only
+	//difference is that ex adds the unit clause of the ladder encoding, thus
+	//the rewrite is correct and after UP the first value in the Ex is propagated.
+	// TODO: explicitly rewrite and remove smallest value
+
 	amo_matchings := make(map[int][]Matching, 0) // compl_id -> []Matchings
 
 	for lit, list := range complOcc {
@@ -120,11 +125,11 @@ func doChaining(pbs []*Threshold, complOcc map[sat.Literal][]int, simplOcc map[s
 					var inter intsets.Sparse
 					inter.Intersection(&litSets[c], &litSets[s])
 					if pbs[s].Typ == LE {
-						if inter.Len() > 2 { //TODO glob.Amo_matching_min
+						if inter.Len() >= glob.Len_rewrite_amo_flag {
 							amo_matchings[c] = append(amo_matchings[c], Matching{s, &inter})
 						}
 					} else if pbs[s].Typ == EQ {
-						if inter.Len() > 1 { //TODO glob.Ex_matching_min
+						if inter.Len() >= glob.Len_rewrite_ex_flag {
 							amo_matchings[c] = append(amo_matchings[c], Matching{s, &inter})
 							//ex_matchings[c] = append(amo_matchings[c], Matching{s, &inter})
 						}
@@ -136,10 +141,9 @@ func doChaining(pbs []*Threshold, complOcc map[sat.Literal][]int, simplOcc map[s
 		}
 	}
 
-	//glob.D("amo/ex_matchings:", len(amo_matchings), len(ex_matchings))
 	glob.D("amo/ex_matchings:", len(amo_matchings))
 
-	//3) // only do for amo matchings
+	//3) amo/ex matchings
 
 	for comp, _ := range pbs {
 		if matchings, b := amo_matchings[comp]; b {
@@ -180,7 +184,7 @@ func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 		// choose longest matching, that is not translated yet
 		//fmt.Println("check matching: simp", matching.simp, "inter", matching.inter.String())
 		//matching.inter.IntersectionWith(&litSets[comp]) //update matching
-		if matching.inter.Len() < 3 {
+		if matching.inter.Len() < glob.Len_rewrite_amo_flag {
 			break
 		}
 		inter := matching.inter
