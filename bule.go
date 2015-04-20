@@ -62,7 +62,7 @@ func main() {
 	}
 
 	if *ver {
-		fmt.Println(`Bule CNF Grounder: Tag 0.93 Pseudo Booleans
+		fmt.Println(`Bule CNF Grounder: Tag 0.94 Pseudo Booleans
 Copyright (C) NICTA and Valentin Mayer-Eichberger
 License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 There is NO WARRANTY, to the extent permitted by law.`)
