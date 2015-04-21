@@ -2,7 +2,7 @@
 
 
 #go build; 
-results=results
+results=results2
 rm -fr $results
 mkdir -p $results
 
@@ -11,18 +11,22 @@ do
     for seed in  42 132 6534 7654 3456 
     do 
 
-        for amo in 0 1 
-        do
-            for x in $1/*.pb; 
-            do 
-            echo ./bule -d -amo-chain=$amo -timeout $timeout -f $x -seed $seed " > "$results/$(basename $x .pb)-amo-$amo-$seed-$timeout.log
-            done 
-        done
+        #for amo in 0 1 
+        #do
+        #    for x in $1/*.pb; 
+        #    do 
+        #    echo ./bule -d -amo-chain=$amo -timeout $timeout -f $x -seed $seed " > "$results/$(basename $x .pb)-amo-$amo-$seed-$timeout.log
+        #    done 
+        #done
         
-        for x in $1/*.pb
+        for x in $1/*.lp
         do 
-            echo ./bule -f $x -gringo '| gringo | clasp --time-limit' $timeout --seed $seed' > '$results/$(basename $x .pb)-clasp-$seed-$timeout.log
+            echo gurobi_cl TimeLimit=$timeout Seed=$seed $x ' > '$results/$(basename $x .pb)-gurobi-$seed-$timeout.log
         done 
+        #for x in $1/*.pb
+        #do 
+        #    echo ./bule -f $x -gringo '| gringo | clasp --time-limit' $timeout --seed $seed' > '$results/$(basename $x .pb)-clasp-$seed-$timeout.log
+        #done 
     done 
 done 
     
