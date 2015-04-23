@@ -212,7 +212,6 @@ func (t *Threshold) Print10() {
 
 func (t *Threshold) PrintGringo() {
 
-	fmt.Println("true.")
 	if len(t.Entries) > 0 {
 
 		switch t.Typ {

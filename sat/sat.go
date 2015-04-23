@@ -383,6 +383,8 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 		solver = exec.Command("cmsat")
 	case "local":
 		solver = exec.Command("CCAnr", strconv.FormatInt(glob.Seed_flag, 10))
+	case "microsat":
+		solver = exec.Command("microsat")
 	default:
 		glob.A(false, "Solver not available", glob.Solver_flag)
 	}
