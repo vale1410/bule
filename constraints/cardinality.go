@@ -14,6 +14,7 @@ const (
 	Count
 	Heule
 	Log
+	Pigeon
 )
 
 type CardTranslation struct {
@@ -22,6 +23,16 @@ type CardTranslation struct {
 	Aux     []sat.Literal
 	Clauses sat.ClauseSet
 }
+
+//// all weights are 1
+//// threshold is K
+//func TranslateCardinality() (pb *Threshold) {
+//
+//	for i, e := range pb.Entries {
+//
+//	}
+//
+//}
 
 func TranslateAtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) (trans CardTranslation) {
 
