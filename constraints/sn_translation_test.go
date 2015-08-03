@@ -9,6 +9,10 @@ import (
 func TestSNTranslation(test *testing.T) {
 	glob.D("TestSortingNetworkTranslation")
 
+	pb := createIgnasi2()
+
+	pb.TranslateBySN()
+
 	//filename := "test"
 	//typ := sorters.Bubble
 	//typ := sorters.Pairwise
@@ -63,7 +67,7 @@ func createIgnasi1() (t Threshold) {
 func createIgnasi2() (t Threshold) {
 
 	weights := []int64{7, 6, 2, 2, 2, 2, 1, 1, 1, 1, 1}
-	return CreatePB(weights, 5)
+	return CreatePB(weights, 12)
 }
 
 func TestPBOGeneration(test *testing.T) {

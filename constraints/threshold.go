@@ -276,10 +276,11 @@ func CreatePBOffset(offset int, weights []int64, K int64) (pb Threshold) {
 	pb.Typ = LE
 	pb.K = K
 
-	p := sat.Pred("x")
+	//	p := sat.Pred("x")
 	for i := 0; i < len(weights); i++ {
-		l := sat.Literal{true, sat.NewAtomP1(p, i+offset)}
+		l := sat.Literal{true, sat.NewAtomP(sat.Pred("x_{" + strconv.Itoa(i+offset) + "}"))}
 		pb.Entries[i] = Entry{l, weights[i]}
+
 	}
 	return
 }

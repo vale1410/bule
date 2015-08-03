@@ -15,7 +15,7 @@ func (pb *Threshold) TranslateBySN() {
 	pb.SortDescending()
 	sn := NewSortingNetwork(*pb)
 	sn.CreateSorter()
-	//PrintThresholdTikZ("sn.tex", []SortingNetwork{sn})
+	PrintThresholdTikZ("sn.tex", []SortingNetwork{sn})
 	wh := 1
 	var which [8]bool
 

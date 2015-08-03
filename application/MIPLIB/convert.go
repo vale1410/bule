@@ -2,7 +2,7 @@ package main
 
 // simple rewriter of mps to opb files
 // assumes that instances come from the BP category,
-// i.e. all variables occurring are 0/1
+// i.e. all variables are binary 0/1
 // and coefficients are integers
 
 import (
