@@ -46,6 +46,64 @@ var (
 	search_strategy_flag = flag.String("search", "iterative", "Search objective iterative or binary.")
 )
 
+type Problem struct {
+	opt *constraints.Threshold
+	pbs []*constraints.Threshold
+}
+
+func (p *Problem) PrintPBO() {
+	atoms := make(map[string]bool, len(p.pbs))
+
+	for _, pb := range p.pbs {
+		for _, x := range pb.Entries {
+			atoms[x.Literal.A.Id()] = true
+		}
+	}
+	fmt.Printf("* #variable= %v #constraint= %v\n", len(atoms), len(p.pbs)-1)
+
+	for _, pb := range p.pbs {
+		pb.PrintPBO()
+	}
+}
+
+func (p *Problem) PrintGringo() {
+	fmt.Println("#hide.")
+	atoms := make(map[string]bool, len(p.pbs))
+
+	for _, pb := range p.pbs {
+		pb.PrintGringo()
+		for _, x := range pb.Entries {
+			atoms[x.Literal.A.Id()] = true
+		}
+	}
+	for x, _ := range atoms {
+		fmt.Println("{", x, "}.")
+	}
+}
+
+func (p *Problem) PrintGurobi() {
+	if !p.opt.Empty() {
+		fmt.Println("Minimize")
+		p.opt.PrintGurobi()
+	}
+	fmt.Println("Subject To")
+	atoms := make(map[string]bool, len(p.pbs))
+	for i, pb := range p.pbs {
+		if i > 0 {
+			pb.Normalize(constraints.GE, false)
+			pb.PrintGurobi()
+			for _, x := range pb.Entries {
+				atoms[x.Literal.A.Id()] = true
+			}
+		}
+	}
+	fmt.Println("Binary")
+	for aS, _ := range atoms {
+		fmt.Print(aS + " ")
+	}
+	fmt.Println()
+}
+
 func main() {
 	flag.Parse()
 
@@ -62,8 +120,8 @@ func main() {
 	}
 
 	if *ver {
-		fmt.Println(`Bule CNF Grounder: Tag 0.94 Pseudo Booleans
-Copyright (C) NICTA and Valentin Mayer-Eichberger
+		fmt.Println(`Bule CNF Grounder: Tag 0.95 Pseudo Booleans
+Copyright (C) Data61 and Valentin Mayer-Eichberger
 License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 There is NO WARRANTY, to the extent permitted by law.`)
 		return
@@ -101,6 +159,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 	pbs, err := parse(glob.Filename_flag)
 	opt := pbs[0] // per convention first in pbs is opt statement (possibly empty)
+	p := Problem{opt, pbs}
 
 	if *rewrite_equal_flag {
 		before := len(pbs)
@@ -119,55 +178,15 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		}
 	}
 
+	//reformatting
 	if *pbo_flag {
-		atoms := make(map[string]bool, len(pbs))
-
-		for _, pb := range pbs {
-			for _, x := range pb.Entries {
-				atoms[x.Literal.A.Id()] = true
-			}
-		}
-		fmt.Printf("* #variable= %v #constraint= %v\n", len(atoms), len(pbs)-1)
-
-		for _, pb := range pbs {
-			pb.PrintPBO()
-		}
+		p.PrintPBO()
 		return
 	} else if *gringo_flag {
-		fmt.Println("#hide.")
-		atoms := make(map[string]bool, len(pbs))
-
-		for _, pb := range pbs {
-			pb.PrintGringo()
-			for _, x := range pb.Entries {
-				atoms[x.Literal.A.Id()] = true
-			}
-		}
-		for x, _ := range atoms {
-			fmt.Println("{", x, "}.")
-		}
+		p.PrintGringo()
 		return
 	} else if *gurobi_flag {
-		if !opt.Empty() {
-			fmt.Println("Minimize")
-			opt.PrintGurobi()
-		}
-		fmt.Println("Subject To")
-		atoms := make(map[string]bool, len(pbs))
-		for i, pb := range pbs {
-			if i > 0 {
-				pb.Normalize(constraints.GE, false)
-				pb.PrintGurobi()
-				for _, x := range pb.Entries {
-					atoms[x.Literal.A.Id()] = true
-				}
-			}
-		}
-		fmt.Println("Binary")
-		for aS, _ := range atoms {
-			fmt.Print(aS + " ")
-		}
-		fmt.Println()
+		p.PrintGurobi()
 		return
 	}
 
