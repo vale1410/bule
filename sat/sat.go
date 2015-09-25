@@ -263,7 +263,7 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, nextOpt int64, lb int64) (resul
 	close(timeout)
 
 	fmt.Printf("cTIME: %.3f s\n", time.Since(time_total).Seconds())
-	fmt.Printf("xxx%v;%v;%v;%v;%v;%v;%v;%.2f;%v;%v;%v\n", glob.Filename_flag, glob.Seed_flag, glob.Amo_chain_flag, glob.Amo_reuse_flag, glob.Rewrite_same_flag, result.M, maxS(result.Value), time.Since(time_total).Seconds(), iterations, cs.Size(), current.Size()-cs.Size())
+	fmt.Printf("%v;%v;%v;%v;%v;%v;%v;%.2f;%v;%v;%v\n", glob.Filename_flag, glob.Seed_flag, glob.Amo_chain_flag, glob.Amo_reuse_flag, glob.Rewrite_same_flag, result.M, maxS(result.Value), time.Since(time_total).Seconds(), iterations, cs.Size(), current.Size()-cs.Size())
 
 	return
 }

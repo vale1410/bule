@@ -1,9 +1,10 @@
 package main
 
 import (
+	"bufio"
+	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"math"
 	"os"
 	"strconv"
@@ -297,7 +298,7 @@ func printStats(stats []int) {
 		}
 	}
 	fmt.Println()
-	fmt.Print("xxx", glob.Filename_flag, ";")
+	fmt.Print(glob.Filename_flag, ";")
 	for i := trans; i < constraints.TranslationTypes; i++ {
 		if i > 0 {
 			fmt.Printf("%v;", stats[i])
@@ -309,23 +310,22 @@ func printStats(stats []int) {
 // returns list of *pb; first one is optimization statement, possibly empty
 func parse(filename string) (pbs []*constraints.Threshold, err error) {
 
-	input, err := ioutil.ReadFile(filename)
-
-	if err != nil {
-		return pbs, err
+	input, err2 := os.Open(filename)
+	defer input.Close()
+	if err2 != nil {
+		err = errors.New("Please specifiy correct path to instance. Does not exist")
+		return
 	}
-
-	//TODO: use a buffered reader to prevent the whole file being in memory
-	lines := strings.Split(string(input), "\n")
+	scanner := bufio.NewScanner(input)
 
 	// 0 : first line, 1 : rest of the lines
 	var count int
 	state := 1
 	t := 0
-	pbs = make([]*constraints.Threshold, 0, len(lines))
+	pbs = make([]*constraints.Threshold, 0)
 
-	for _, l := range lines {
-
+	for scanner.Scan() {
+		l := strings.Trim(scanner.Text(), " ")
 		if l == "" || strings.HasPrefix(l, "%") || strings.HasPrefix(l, "*") {
 			continue
 		}
