@@ -152,6 +152,7 @@ func (pb *Threshold) TranslateComplexThreshold() {
 	var err error
 	switch glob.Complex_flag {
 	case "mdd":
+		pb.Print10()
 		pb.TranslateByMDD()
 		if pb.Err != nil {
 			panic(err.Error())
@@ -173,7 +174,7 @@ func (pb *Threshold) TranslateComplexThreshold() {
 			panic(tSN.Err.Error())
 		}
 
-		//	glob.D(pb.Id, "Complex, SN:", tSN.Clauses.Size(), " mdd:", tMDD.Clauses.Size())
+		glob.D(pb.Id, "Complex, SN:", tSN.Clauses.Size(), " mdd:", tMDD.Clauses.Size())
 
 		if tMDD.Err == nil && tMDD.Clauses.Size() < tSN.Clauses.Size() {
 			pb.Clauses.AddClauseSet(tMDD.Clauses)

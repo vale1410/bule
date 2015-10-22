@@ -61,7 +61,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		if *encoding > -1 {
 			clauses := translateCardDecomposition(n, mapEncoding(*encoding))
 			clauses.AddClauseSet(translateInstance(g))
-			doEncoding(clauses, *out)
+			doEncoding(clauses)
 		} else {
 
 			panic("no support for batch mode")
@@ -111,11 +111,10 @@ func mapEncoding(e int) (c constraints.OneTranslationType) {
 	return c
 }
 
-func doEncoding(clauses sat.ClauseSet, filename string) {
+func doEncoding(clauses sat.ClauseSet) {
 
 	s := sat.IdGenerator(clauses.Size())
 
-	s.Filename = filename
 	s.PrintDIMACS(clauses)
 
 	if *dbg {

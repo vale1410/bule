@@ -15,7 +15,11 @@ func (pb *Threshold) TranslateBySN() {
 	pb.SortDescending()
 	sn := NewSortingNetwork(*pb)
 	sn.CreateSorter()
-	PrintThresholdTikZ("sn.tex", []SortingNetwork{sn})
+
+	glob.D("size of comparators", len(sn.Sorter.Comparators))
+
+	//PrintThresholdTikZ("sn.tex", []SortingNetwork{sn})
+
 	wh := 1
 	var which [8]bool
 

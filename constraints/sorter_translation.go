@@ -59,8 +59,6 @@ func (pb *Threshold) CreateCardinality() {
 // -1,0,1 = *, false, true
 func CreateEncoding(input []sat.Literal, which [8]bool, output []sat.Literal, tag string, pred sat.Pred, sorter sorters.Sorter) (cs sat.ClauseSet) {
 
-	//	sorters.PrintSorterTikZ(sorter, "sorter1.tex")
-
 	//cs.list = make([]Clause, 0, 7*len(sorter.Comparators))
 
 	backup := make(map[int]sat.Literal, len(sorter.Out)+len(sorter.In))

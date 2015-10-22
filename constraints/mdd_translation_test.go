@@ -21,7 +21,7 @@ func TestMDDRedundant(test *testing.T) {
 	t.Typ = LE
 	t.K = 5
 
-	store := mdd.Init(len(t.Entries))
+	store := mdd.InitIntervalMdd(len(t.Entries))
 	CreateMDD(&store, t.K, t.Entries)
 
 	if store.RemoveRedundants() != 5 {
@@ -44,7 +44,7 @@ func TestMDDChain(test *testing.T) {
 	t.K = 5
 	//t.Print10()
 
-	store := mdd.Init(len(t.Entries))
+	store := mdd.InitIntervalMdd(len(t.Entries))
 	_, _, _, s1 := CreateMDD(&store, t.K, t.Entries)
 	//store.Debug(true)
 	if s1 != nil {
@@ -59,7 +59,7 @@ func TestMDDChain(test *testing.T) {
 		chains := Chains{chain[i : i+3]}
 		//chains[0].Print()
 
-		store = mdd.Init(len(t.Entries))
+		store = mdd.InitIntervalMdd(len(t.Entries))
 		_, _, _, s1 := CreateMDDChain(&store, t.K, t.Entries, chains)
 
 		if s1 != nil {
@@ -84,7 +84,7 @@ func TestMDDChains1(test *testing.T) {
 	//t.Print10()
 
 	{ // check
-		store := mdd.Init(len(t.Entries))
+		store := mdd.InitIntervalMdd(len(t.Entries))
 		_, _, _, s1 := CreateMDD(&store, t.K, t.Entries)
 		//store.Debug(true)
 		if s1 != nil {
@@ -99,7 +99,7 @@ func TestMDDChains1(test *testing.T) {
 	chains := Chains{chain[0:3], chain[3:6]}
 	//chains[0].Print()
 
-	store := mdd.Init(len(t.Entries))
+	store := mdd.InitIntervalMdd(len(t.Entries))
 	_, _, _, s1 := CreateMDDChain(&store, t.K, t.Entries, chains)
 
 	if s1 != nil {
@@ -127,7 +127,7 @@ func TestMDDChains2(test *testing.T) {
 	//t.Print10()
 
 	{ // check
-		store := mdd.Init(len(t.Entries))
+		store := mdd.InitIntervalMdd(len(t.Entries))
 		_, _, _, s1 := CreateMDD(&store, t.K, t.Entries)
 		//store.Debug(true)
 		if s1 != nil {
@@ -139,7 +139,7 @@ func TestMDDChains2(test *testing.T) {
 
 	chains := Chains{chain[1:3], chain[5:9]}
 
-	store := mdd.Init(len(t.Entries))
+	store := mdd.InitIntervalMdd(len(t.Entries))
 	_, _, _, s1 := CreateMDDChain(&store, t.K, t.Entries, chains)
 
 	if s1 != nil {

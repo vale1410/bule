@@ -25,7 +25,7 @@ func (pb *Threshold) TranslateByMDDChain(chains Chains) {
 		pb.TransTyp = CMDDC
 	}
 
-	store := mdd.Init(len(pb.Entries))
+	store := mdd.InitIntervalMdd(len(pb.Entries))
 	topId, _, _, err := CreateMDDChain(&store, pb.K, pb.Entries, chains)
 	store.Top = topId
 	//store.Debug(true)
@@ -45,7 +45,7 @@ func (pb *Threshold) TranslateByMDDChain(chains Chains) {
 
 // Translate monotone MDDs to SAT
 // Together with AMO translation
-func convertMDD2Clauses(store mdd.MddStore, pb *Threshold) (clauses sat.ClauseSet) {
+func convertMDD2Clauses(store mdd.IntervalMddStore, pb *Threshold) (clauses sat.ClauseSet) {
 
 	pred := sat.Pred("mdd" + strconv.Itoa(pb.Id))
 
@@ -82,14 +82,14 @@ func convertMDD2Clauses(store mdd.MddStore, pb *Threshold) (clauses sat.ClauseSe
 	return
 }
 
-func CreateMDD(store *mdd.MddStore, K int64, entries []Entry) (int, int64, int64, error) {
+func CreateMDD(store *mdd.IntervalMddStore, K int64, entries []Entry) (int, int64, int64, error) {
 	return CreateMDDChain(store, K, entries, Chains{})
 }
 
 // Chains is a set of chains in order of the PB
 // Chain: there are clauses  xi <-xi+1 <- xi+2 ... <- xi+k, and xi .. xi+k are in order of PB
 // assumption: chains are subsets of literals of PB and in their order
-func CreateMDDChain(store *mdd.MddStore, K int64, entries []Entry, chains Chains) (int, int64, int64, error) {
+func CreateMDDChain(store *mdd.IntervalMddStore, K int64, entries []Entry, chains Chains) (int, int64, int64, error) {
 
 	l := len(entries) ///level
 
@@ -110,7 +110,7 @@ func CreateMDDChain(store *mdd.MddStore, K int64, entries []Entry, chains Chains
 		//domain of variable [0,1], extend to [0..n] soon (MDDs)
 		// entry of variable domain, atom: Dom: 2
 
-		var n mdd.Node
+		var n mdd.IntervalNode
 		var err error
 
 		//glob.D(entries, chains)
