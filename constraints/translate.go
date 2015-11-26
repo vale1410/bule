@@ -45,7 +45,7 @@ func (t TranslationType) String() (s string) {
 		s = "CMDDC"
 	case TranslationTypes:
 		s = "TranslationTypes"
-	case CSNC:
+	case CSNC: // not yet implemented
 		s = "CSNC"
 	default:
 		panic("has not been implemented")

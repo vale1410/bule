@@ -12,6 +12,8 @@ func (mdd *MddStore) encodePrim() {
 		}
 	}
 
-	/// clauses 1 - 3 are units
+	// clauses
+
+	// do encoding as in our paper.
 
 }
