@@ -59,16 +59,7 @@ func NewSortingNetwork(pb Threshold) (sn SortingNetwork) {
 
 func (t *SortingNetwork) CreateSorter() {
 
-	total := t.pb.SumWeights()
-
-	//t.pb.Print10()
-
-	if total <= t.pb.K {
-		panic("sum of weights is lower than threshold!")
-	}
-	if t.pb.K == 0 {
-		panic("Threshold is 0 with positive weights. All negated literals are facts!")
-	}
+	glob.A(!t.pb.Empty(), "No empty at this point.")
 
 	t.CreateBags()
 

@@ -42,7 +42,7 @@ func Categorize2(pbs []*Threshold) {
 			pb.Translated = true
 		}
 	}
-	if glob.Amo_chain_flag || glob.Ex_chain_flag {
+	if *glob.Amo_chain_flag || *glob.Ex_chain_flag {
 		doChaining(pbs, complOcc, simplOcc, lit2id, litSets)
 	}
 
@@ -51,7 +51,7 @@ func Categorize2(pbs []*Threshold) {
 
 			sort.Sort(EntriesDescending(pb.Entries[pb.PosAfterChains():]))
 
-			if glob.Rewrite_same_flag {
+			if *glob.Rewrite_same_flag {
 
 				pb.RewriteSameWeights()
 				//glob.D("rewrite same weights:", pb.Id, len(pb.Chains))
@@ -125,11 +125,11 @@ func doChaining(pbs []*Threshold, complOcc map[sat.Literal][]int, simplOcc map[s
 					var inter intsets.Sparse
 					inter.Intersection(&litSets[c], &litSets[s])
 					if pbs[s].Typ == LE {
-						if inter.Len() >= glob.Len_rewrite_amo_flag {
+						if inter.Len() >= *glob.Len_rewrite_amo_flag {
 							amo_matchings[c] = append(amo_matchings[c], Matching{s, &inter})
 						}
 					} else if pbs[s].Typ == EQ {
-						if inter.Len() >= glob.Len_rewrite_ex_flag {
+						if inter.Len() >= *glob.Len_rewrite_ex_flag {
 							amo_matchings[c] = append(amo_matchings[c], Matching{s, &inter})
 							//ex_matchings[c] = append(amo_matchings[c], Matching{s, &inter})
 						}
@@ -160,7 +160,7 @@ func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 	//inter := &intsets.Sparse{}
 	var comp_offset int // the  new first position of Entries in comp
 
-	if !glob.Amo_reuse_flag {
+	if !*glob.Amo_reuse_flag {
 		//fmt.Println("before remove translated matches: len", len(matchings))
 		// remove translated ones...
 		p := len(matchings)
@@ -184,7 +184,7 @@ func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 		// choose longest matching, that is not translated yet
 		//fmt.Println("check matching: simp", matching.simp, "inter", matching.inter.String())
 		//matching.inter.IntersectionWith(&litSets[comp]) //update matching
-		if matching.inter.Len() < glob.Len_rewrite_amo_flag {
+		if matching.inter.Len() < *glob.Len_rewrite_amo_flag {
 			break
 		}
 		inter := matching.inter

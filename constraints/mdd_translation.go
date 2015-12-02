@@ -35,7 +35,7 @@ func (pb *Threshold) TranslateByMDDChain(chains Chains) {
 		return
 	}
 
-	if glob.MDD_redundant_flag {
+	if *glob.MDD_redundant_flag {
 		store.RemoveRedundants()
 		//glob.D("remove redundant nodes in MDD", removed)
 	}

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/parser"
 	"github.com/vale1410/bule/sat"
@@ -14,7 +13,7 @@ import (
 func main() {
 	glob.Init()
 	if *glob.Ver {
-		fmt.Println(`Bule CNF Grounder: Tag 0.95 Pseudo Booleans
+		fmt.Println(`Approximate Solution Counter: Tag 0.1
 Copyright (C) Data61 and Valentin Mayer-Eichberger
 License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 There is NO WARRANTY, to the extent permitted by law.`)
@@ -46,18 +45,16 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	p := parser.New(*glob.Filename_flag)
 	pbs := p.Pbs
 
-	primaryVars := make(map[string]bool, 0)
-
-	for i, _ := range pbs {
-		for _, x := range pbs[i].Entries {
-			primaryVars[x.Literal.A.Id()] = true
-		}
-	}
-
 	var clauses sat.ClauseSet
-
 	for _, pb := range pbs {
+		fmt.Println(pb)
+		pb.Simplify()
+		//glob.A(pb.Empty() || pb.Typ == constraints.OPT || pb.Translated, "pbs", pb.Id, "has not been translated", pb)
+		if pb.Empty() {
+			continue
+		}
 		pb.TranslateComplexThreshold()
+
 		clauses.AddClauseSet(pb.Clauses)
 	}
 
@@ -65,32 +62,11 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		clauses.PrintDebug()
 	}
 
-	//if *glob.Solve_flag {
-	//	g := sat.IdGenerator(clauses.Size() * 7)
-	//	g.PrimaryVars = primaryVars
-	//	glob.A(opt.Positive(), "opt only has positive coefficients")
-	//	g.Solve(clauses, opt, *glob.Opt_bound_flag, -opt.Offset)
-	//	//fmt.Println()
-	//}
-}
-
-func printStats(stats []int) {
-
-	glob.A(len(stats) == int(constraints.TranslationTypes), "Stats for translation errornous")
-
-	trans := constraints.Facts
-	fmt.Print("Name;")
-	for i := trans; i < constraints.TranslationTypes; i++ {
-		if i > 0 {
-			fmt.Printf("%v;", constraints.TranslationType(i))
-		}
+	if *glob.Solve_flag {
+		g := sat.IdGenerator(clauses.Size() * 7)
+		g.PrimaryVars = primaryVars
+		glob.A(opt.Positive(), "opt only has positive coefficients")
+		g.Solve(clauses, opt, *glob.Opt_bound_flag, -opt.Offset)
+		//fmt.Println()
 	}
-	fmt.Println()
-	fmt.Print(*glob.Filename_flag, ";")
-	for i := trans; i < constraints.TranslationTypes; i++ {
-		if i > 0 {
-			fmt.Printf("%v;", stats[i])
-		}
-	}
-	fmt.Println()
 }

@@ -68,8 +68,6 @@ func (pb *Threshold) Categorize1() {
 	pb.SortDescending()
 	// per default all information that can be simplified will be in form of facts
 	pb.Simplify()
-	//	glob.D("simplifierClauses", simplifierClauses.Size())
-	//pb.Clauses.AddClauseSet(simplifierClauses)
 	pb.TransTyp = Facts
 	pb.Translated = true
 
@@ -145,12 +143,15 @@ func (pb *Threshold) Categorize1() {
 }
 
 func (pb *Threshold) TranslateComplexThreshold() {
+
+	glob.A(!pb.Empty(), "No Empty at this point.")
 	glob.A(len(pb.Chains) == 0, "should not contain a chain")
+
 	pb.Normalize(LE, true)
 	pb.SortDescending()
 
 	var err error
-	switch glob.Complex_flag {
+	switch *glob.Complex_flag {
 	case "mdd":
 		pb.Print10()
 		pb.TranslateByMDD()
@@ -184,7 +185,7 @@ func (pb *Threshold) TranslateComplexThreshold() {
 			pb.TransTyp = CSN
 		}
 	default:
-		panic("Complex_flag option not available: " + glob.Complex_flag)
+		panic("Complex_flag option not available: " + *glob.Complex_flag)
 	}
 
 	glob.A(pb.Clauses.Size() > 0, pb.Id, " non-trivial pb should produce some clauses...")
@@ -222,7 +223,14 @@ func (pb *Threshold) Simplify() {
 			pb.Clauses.AddTaggedClause("Fact", x.Literal)
 		}
 		pb.Entries = []Entry{}
-		pb.K = 0
+	}
+
+	if pb.SumWeights() < pb.K {
+		pb.Entries = []Entry{}
+	}
+
+	if pb.Empty() {
+		pb.Translated = true
 	}
 
 	return

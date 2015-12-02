@@ -45,7 +45,7 @@ type IntervalMddStore struct {
 func InitIntervalMdd(size int) (b IntervalMddStore) {
 	b.storage = rbtree.NewTree(Compare)
 	b.Nodes = make([]*IntervalNode, 2)
-	b.MaxNodes = glob.MDD_max_flag
+	b.MaxNodes = *glob.MDD_max_flag
 
 	b.Nodes[0] = &IntervalNode{Id: 0, Level: 0, Wmin: math.MinInt64 + 100000, Wmax: -1} // id 0
 	b.Nodes[1] = &IntervalNode{Id: 1, Level: 0, Wmin: 0, Wmax: math.MaxInt64 - 100000}  // id 1
