@@ -436,7 +436,7 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 					res.satisfiable = true
 				} else {
 					res.solved = false
-					glob.D("whats up? result of sat solver does not contain proper answer!")
+					glob.D("whats up? Result of sat solver does not contain proper answer!")
 				}
 			}
 			s, err = r.ReadString('\n')
@@ -457,18 +457,28 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 		//glob.D("return value:",err_tmp() )
 	}
 
+	// TODO: why is this uncommented?
 	//if err = solver.Process.Kill(); err != nil {
 	//	panic(err.Error())
 	//}
+
 	result <- res
 }
 
-func (g *Gen) generateIds(cs ClauseSet) {
+func (g *Gen) generateIds(cs ClauseSet, inferPrimeVars bool) {
 	// recalculates new sat ids for each atom:
 	// assuming full regeneration of Ids
 	// might change existing mappings
 
 	g.refresh()
+
+	if inferPrimeVars {
+		// try to take Ids from name of prim variabls:
+		// strategy: extract number from name
+		// if doesnt exist then assign that,
+		// if it exists: fail.
+		// find highest number.
+	}
 
 	for _, c := range cs.list {
 		for _, l := range c.Literals {

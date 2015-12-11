@@ -13,7 +13,7 @@ import (
 func main() {
 	glob.Init()
 	if *glob.Ver {
-		fmt.Println(`Approximate Solution Counter: Tag 0.1
+		fmt.Println(`Approximate Model Counter: Tag 0.1
 Copyright (C) Data61 and Valentin Mayer-Eichberger
 License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 There is NO WARRANTY, to the extent permitted by law.`)
@@ -62,11 +62,19 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		clauses.PrintDebug()
 	}
 
-	if *glob.Solve_flag {
-		g := sat.IdGenerator(clauses.Size() * 7)
-		g.PrimaryVars = primaryVars
-		glob.A(opt.Positive(), "opt only has positive coefficients")
-		g.Solve(clauses, opt, *glob.Opt_bound_flag, -opt.Offset)
-		//fmt.Println()
+	primaryVars := make(map[string]bool, 0)
+
+	for i, _ := range pbs {
+		for _, x := range pbs[i].Entries {
+			primaryVars[x.Literal.A.Id()] = true
+		}
 	}
+
+	g := sat.IdGenerator(clauses.Size() * 7)
+	g.PrimaryVars = primaryVars
+
+	//g.Solve(clauses, opt, *glob.Opt_bound_flag, -opt.Offset)
+
+	g.PrintDIMACS(clauses)
+	//fmt.Println()
 }
