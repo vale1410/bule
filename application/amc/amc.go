@@ -11,7 +11,9 @@ import (
 )
 
 func main() {
+
 	glob.Init()
+
 	if *glob.Ver {
 		fmt.Println(`Approximate Model Counter: Tag 0.1
 Copyright (C) Data61 and Valentin Mayer-Eichberger
@@ -47,7 +49,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 	var clauses sat.ClauseSet
 	for _, pb := range pbs {
-		fmt.Println(pb)
+		//fmt.Println(pb)
 		pb.Simplify()
 		//glob.A(pb.Empty() || pb.Typ == constraints.OPT || pb.Translated, "pbs", pb.Id, "has not been translated", pb)
 		if pb.Empty() {
@@ -70,11 +72,14 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		}
 	}
 
+	//clauses.PrintDebug()
+
 	g := sat.IdGenerator(clauses.Size() * 7)
 	g.PrimaryVars = primaryVars
 
 	//g.Solve(clauses, opt, *glob.Opt_bound_flag, -opt.Offset)
 
-	g.PrintDIMACS(clauses)
+	inferPrimeVars := true
+	g.PrintDIMACS(clauses, inferPrimeVars)
 	//fmt.Println()
 }

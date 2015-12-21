@@ -155,7 +155,7 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, nextOpt int64, lb int64) (resul
 		time_before := time.Now()
 
 		if *glob.Cnf_tmp_flag != "" {
-			g.PrintDIMACS(current)
+			g.PrintDIMACS(current, false)
 		}
 		go g.solveProblem(current, result_chan)
 
@@ -409,7 +409,7 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 		time_before := time.Now()
 		defer stdin.Close()
 		defer wg.Done()
-		g.generateIds(clauses)
+		g.generateIds(clauses, false)
 		io.Copy(stdin, bytes.NewReader([]byte(fmt.Sprintf("p cnf %v %v\n", g.nextId, len(clauses.list)))))
 		for _, c := range clauses.list {
 			io.Copy(stdin, bytes.NewReader(g.toBytes(c)))
@@ -465,20 +465,39 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 	result <- res
 }
 
-func (g *Gen) generateIds(cs ClauseSet, inferPrimeVars bool) {
-	// recalculates new sat ids for each atom:
+func (g *Gen) generateIds(cs ClauseSet, inferPrimeVars bool) { // recalculates new sat ids for each atom:
 	// assuming full regeneration of Ids
 	// might change existing mappings
 
 	g.refresh()
 
 	if inferPrimeVars {
-		// try to take Ids from name of prim variabls:
-		// strategy: extract number from name
-		// if doesnt exist then assign that,
-		// if it exists: fail.
-		// find highest number.
+		// try to take Ids from name of prim variables:
+		// strategy: extract number from name,
+		// the assumption is that the structure is v<N> -> then it has variable name N
+		// Resize varMap to N variables, fill map and slice.
+		// Set next value to highest value + 1
+		for _, c := range cs.list {
+			for _, l := range c.Literals {
+				a := l.A
+				if _, b := g.mapping[a.Id()]; !b {
+					id, err := strconv.Atoi(strings.TrimLeft(a.Id(), "v"))
+					v := strings.TrimRight(a.Id(), "0123456789")
+					if v == "v" && err == nil {
+						if id > g.nextId {
+							g.idMap = append(g.idMap, make([]Atom, id-g.nextId+1)...)
+							g.nextId = id + 1
+						}
+						g.mapping[a.Id()] = id
+						// nextId is size of map
+						g.idMap[id] = a
+					}
+				}
+			}
+		}
 	}
+
+	fmt.Println("c auxiliary Ids start with", g.nextId)
 
 	for _, c := range cs.list {
 		for _, l := range c.Literals {
@@ -487,9 +506,9 @@ func (g *Gen) generateIds(cs ClauseSet, inferPrimeVars bool) {
 	}
 }
 
-func (g *Gen) PrintDIMACS(cs ClauseSet) {
+func (g *Gen) PrintDIMACS(cs ClauseSet, inferPrimeVars bool) {
 
-	g.generateIds(cs)
+	g.generateIds(cs, inferPrimeVars)
 
 	var out io.Writer
 
