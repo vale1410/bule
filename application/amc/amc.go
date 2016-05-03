@@ -11,9 +11,11 @@ import (
 )
 
 func main() {
+
 	glob.Init()
+
 	if *glob.Ver {
-		fmt.Println(`Approximate Solution Counter: Tag 0.1
+		fmt.Println(`Approximate Model Counter: Tag 0.1
 Copyright (C) Data61 and Valentin Mayer-Eichberger
 License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 There is NO WARRANTY, to the extent permitted by law.`)
@@ -55,7 +57,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 	var clauses sat.ClauseSet
 	for _, pb := range pbs {
-		fmt.Println(pb)
+		//fmt.Println(pb)
 		pb.Simplify()
 		//glob.A(pb.Empty() || pb.Typ == constraints.OPT || pb.Translated, "pbs", pb.Id, "has not been translated", pb)
 		if pb.Empty() {
@@ -73,6 +75,20 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	if *glob.Solve_flag {
 		g := sat.IdGenerator(clauses.Size() * 7)
 		g.PrimaryVars = primaryVars
+		//fmt.Println()
+		primaryVars := make(map[string]bool, 0)
+
+		for i, _ := range pbs {
+			for _, x := range pbs[i].Entries {
+				primaryVars[x.Literal.A.Id()] = true
+			}
+		}
+
+		//clauses.PrintDebug()
+		//g.Solve(clauses, opt, *glob.Opt_bound_flag, -opt.Offset)
+
+		inferPrimeVars := true
+		g.PrintDIMACS(clauses, inferPrimeVars)
 		//fmt.Println()
 	}
 }
