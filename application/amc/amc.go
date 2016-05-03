@@ -45,6 +45,14 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	p := parser.New(*glob.Filename_flag)
 	pbs := p.Pbs
 
+	primaryVars := make(map[string]bool, 0)
+
+	for i, _ := range pbs {
+		for _, x := range pbs[i].Entries {
+			primaryVars[x.Literal.A.Id()] = true
+		}
+	}
+
 	var clauses sat.ClauseSet
 	for _, pb := range pbs {
 		fmt.Println(pb)
@@ -65,8 +73,6 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	if *glob.Solve_flag {
 		g := sat.IdGenerator(clauses.Size() * 7)
 		g.PrimaryVars = primaryVars
-		glob.A(opt.Positive(), "opt only has positive coefficients")
-		g.Solve(clauses, opt, *glob.Opt_bound_flag, -opt.Offset)
 		//fmt.Println()
 	}
 }
