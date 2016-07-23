@@ -132,6 +132,8 @@ func (t *SortingNetwork) CreateSorter() {
 
 	// outLastLayer identifies the nth output in the last layer
 	outLastLayer := ((t.pb.K + 1 + tare) / int64(layerPow2)) - 1
+    glob.D(len(bIn),outLastLayer)
+    glob.D(t.pb.K+1+tare, layerPow2, outLastLayer)
 	idSetToZero := bIn[outLastLayer]
 
 	// and propagate the rest backwards

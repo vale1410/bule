@@ -8,6 +8,7 @@ import (
 	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/parser"
 	"github.com/vale1410/bule/sat"
+	"github.com/vale1410/bule/constraints"
 )
 
 func main() {
@@ -56,6 +57,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	}
 
 	var clauses sat.ClauseSet
+
 	for _, pb := range pbs {
 		//fmt.Println(pb)
 		pb.Simplify()
@@ -63,7 +65,29 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		if pb.Empty() {
 			continue
 		}
-		pb.TranslateComplexThreshold()
+		//pb.TranslateComplexThreshold()
+
+	    pb.Normalize(constraints.LE, true)
+	    pb.SortDescending()
+
+		tSN := pb.Copy()
+		tMDD := pb.Copy()
+		tSN.TranslateBySN()
+		tMDD.TranslateByMDD()
+
+		if tSN.Err != nil {
+			panic(tSN.Err.Error())
+		}
+
+		fmt.Println("c", "Size:", len(pb.Entries), "SN:", tSN.Clauses.Size(), " MDD:", tMDD.Clauses.Size())
+
+		if tMDD.Err == nil && tMDD.Clauses.Size() < tSN.Clauses.Size() {
+			pb.Clauses.AddClauseSet(tMDD.Clauses)
+			pb.TransTyp = constraints.CMDD
+		} else {
+			pb.Clauses.AddClauseSet(tSN.Clauses)
+			pb.TransTyp = constraints.CSN
+		}
 
 		clauses.AddClauseSet(pb.Clauses)
 	}
@@ -87,8 +111,8 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		//clauses.PrintDebug()
 		//g.Solve(clauses, opt, *glob.Opt_bound_flag, -opt.Offset)
 
-		inferPrimeVars := true
-		g.PrintDIMACS(clauses, inferPrimeVars)
+		//inferPrimeVars := true
+		//g.PrintDIMACS(clauses, inferPrimeVars)
 		//fmt.Println()
 	}
 }

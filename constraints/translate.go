@@ -295,7 +295,6 @@ func PreprocessPBwithExactly(pb1 *Threshold, pb2 *Threshold) bool {
 
 // returns if preprocessing was successful
 // Uses the translation of pb2 (count translation)
-// TODO deprecated
 func PreprocessPBwithAMO(pb *Threshold, amo CardTranslation) bool {
 
 	//assumptions:
