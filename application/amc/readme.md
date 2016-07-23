@@ -1,4 +1,4 @@
-ASC: Approximate Solution Counter
+AMC: Approximate Model Counter
 =================================
 
 usage: 

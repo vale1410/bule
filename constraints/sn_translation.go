@@ -132,12 +132,15 @@ func (t *SortingNetwork) CreateSorter() {
 
 	// outLastLayer identifies the nth output in the last layer
 	outLastLayer := ((t.pb.K + 1 + tare) / int64(layerPow2)) - 1
-    glob.D(len(bIn),outLastLayer)
-    glob.D(t.pb.K+1+tare, layerPow2, outLastLayer)
+
+	// debug stuff:
+	glob.D("len last layer:", len(bIn), "kth output in last layer: ", outLastLayer)
+	glob.D("K+1+tar", t.pb.K+1+tare, "n layers", layerPow2)
+
 	idSetToZero := bIn[outLastLayer]
 
 	// and propagate the rest backwards
-	setTo := -1
+	setTo := -1 // dont care
 	for _, id := range t.Sorter.ComputeOut() {
 		if id == idSetToZero {
 			setTo = 0
@@ -155,7 +158,7 @@ func (t *SortingNetwork) CreateSorter() {
 
 }
 
-// assumes AtMost, positive weights
+// assumes LE, positive weights
 func (t *SortingNetwork) CreateBags() {
 
 	nBags := len(Binary(t.pb.K))
@@ -192,4 +195,5 @@ func (t *SortingNetwork) CreateBags() {
 			}
 		}
 	}
+
 }

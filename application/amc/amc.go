@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/vale1410/bule/constraints"
 	"github.com/vale1410/bule/glob"
 	"github.com/vale1410/bule/parser"
 	"github.com/vale1410/bule/sat"
-	"github.com/vale1410/bule/constraints"
 )
 
 func main() {
@@ -59,16 +59,17 @@ There is NO WARRANTY, to the extent permitted by law.`)
 	var clauses sat.ClauseSet
 
 	for _, pb := range pbs {
-		//fmt.Println(pb)
+		fmt.Println("size before:", len(pb.Entries))
 		pb.Simplify()
+		fmt.Println("size after:", len(pb.Entries))
 		//glob.A(pb.Empty() || pb.Typ == constraints.OPT || pb.Translated, "pbs", pb.Id, "has not been translated", pb)
-		if pb.Empty() {
+		if pb.Translated {
 			continue
 		}
 		//pb.TranslateComplexThreshold()
 
-	    pb.Normalize(constraints.LE, true)
-	    pb.SortDescending()
+		pb.Normalize(constraints.LE, true)
+		pb.SortDescending()
 
 		tSN := pb.Copy()
 		tMDD := pb.Copy()
