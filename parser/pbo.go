@@ -87,10 +87,12 @@ func parse(filename string) (pbs []*constraints.Threshold, err error) {
 	input, err2 := os.Open(filename)
 	defer input.Close()
 	if err2 != nil {
-		err = errors.New("Please specifiy correct path to instance. Does not exist")
+		err = errors.New("Please specify correct path to instance. Does not exist")
 		return
 	}
 	scanner := bufio.NewScanner(input)
+    buf := make([]byte, 0, 64*1024)
+    scanner.Buffer(buf, 1024*1024)
 
 	// 0 : first line, 1 : rest of the lines
 	var count int
@@ -106,7 +108,7 @@ func parse(filename string) (pbs []*constraints.Threshold, err error) {
 
 		elements := strings.Fields(l)
 
-		if len(elements) == 1 { // quick hack to ignore single element lines (not neccessary)
+		if len(elements) == 1 { // quick hack to ignore single element lines (not necessary)
 			continue
 		}
 
@@ -198,7 +200,7 @@ func parse(filename string) (pbs []*constraints.Threshold, err error) {
 
 	glob.A(len(pbs) == t, "Id of constraint must correspond to position")
 	glob.D("Scanned", t-1, "PB constraints.")
-	if !pbs[0].Empty() {
+	if len(pbs) > 0 && !pbs[0].Empty() {
 		glob.D("Scanned OPT statement.")
 	}
 	return

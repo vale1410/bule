@@ -16,7 +16,7 @@ func (pb *Threshold) TranslateBySN() {
 	sn := NewSortingNetwork(*pb)
 	sn.CreateSorter()
 
-	glob.D("size of comparators", len(sn.Sorter.Comparators))
+	//glob.D("size of comparators", len(sn.Sorter.Comparators))
 
 	//PrintThresholdTikZ("sn.tex", []SortingNetwork{sn})
 
@@ -134,8 +134,8 @@ func (t *SortingNetwork) CreateSorter() {
 	outLastLayer := ((t.pb.K + 1 + tare) / int64(layerPow2)) - 1
 
 	// debug stuff:
-	glob.D("len last layer:", len(bIn), "kth output in last layer: ", outLastLayer)
-	glob.D("K+1+tar", t.pb.K+1+tare, "n layers", layerPow2)
+	//glob.D("len last layer:", len(bIn), "kth output in last layer: ", outLastLayer)
+	//glob.D("K+1+tar", t.pb.K+1+tare, "n layers", layerPow2)
 
 	idSetToZero := bIn[outLastLayer]
 

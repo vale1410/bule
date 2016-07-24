@@ -225,7 +225,16 @@ func (pb *Threshold) Simplify() {
 		pb.Entries = []Entry{}
 	}
 
+
 	if pb.SumWeights() < pb.K {
+		pb.Entries = []Entry{}
+        pb.K = -1 
+        // is unsatisfied: how to do that?
+	}
+
+	pb.Normalize(LE, true)
+    glob.D("sumweights:",pb.SumWeights(), "K",pb.K)
+	if pb.SumWeights() <= pb.K {
 		pb.Entries = []Entry{}
 	}
 

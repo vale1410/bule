@@ -53,7 +53,7 @@ func IdGenerator(m int) (g Gen) {
 func (g *Gen) refresh() {
 	g.mapping = make(map[string]int)
 	g.idMap = make([]Atom, 1)
-	g.nextId = 0
+	g.nextId = *glob.First_aux_id_flag
 }
 
 func (g *Gen) putAtom(a Atom) {
