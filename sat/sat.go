@@ -52,29 +52,30 @@ func IdGenerator(m int) (g Gen) {
 
 func (g *Gen) refresh() {
 	g.mapping = make(map[string]int)
-	g.idMap = make([]Atom, 1)
-	g.nextId = *glob.First_aux_id_flag
+	g.idMap = make([]Atom, *glob.First_aux_id_flag)
+	g.nextId = *glob.First_aux_id_flag - 1
 }
 
 func (g *Gen) putAtom(a Atom) {
 	if _, b := g.mapping[a.Id()]; !b {
-		g.nextId++
-		id := g.nextId
-		g.mapping[a.Id()] = id
-		g.idMap = append(g.idMap, a)
+		succ := false
+		if *glob.Infer_var_ids {
+			id, err := strconv.Atoi(strings.TrimLeft(a.Id(), "v"))
+			v := strings.TrimRight(a.Id(), "0123456789")
+			if v == "v" && err == nil {
+				glob.A(*glob.First_aux_id_flag > id, "Inferred number ID if higher than First_aux_id. Use values for first_aux  that a larger than id in all variables v<id>.")
+				succ = true
+				g.mapping[a.Id()] = id
+				g.idMap[id] = a
+			}
+		}
+		if !succ {
+			g.nextId++
+			g.mapping[a.Id()] = g.nextId
+			g.idMap = append(g.idMap, a)
+		}
+
 	}
-}
-
-func (g *Gen) getId(a Atom) (id int) {
-	id, b := g.mapping[a.Id()]
-
-	if !b {
-		g.nextId++
-		id = g.nextId
-		g.mapping[a.Id()] = id
-	}
-
-	return id
 }
 
 func (g *Gen) PrintSymbolTable(filename string) {
@@ -471,33 +472,7 @@ func (g *Gen) generateIds(cs ClauseSet, inferPrimeVars bool) { // recalculates n
 
 	g.refresh()
 
-	if inferPrimeVars {
-		// try to take Ids from name of prim variables:
-		// strategy: extract number from name,
-		// the assumption is that the structure is v<N> -> then it has variable name N
-		// Resize varMap to N variables, fill map and slice.
-		// Set next value to highest value + 1
-		for _, c := range cs.list {
-			for _, l := range c.Literals {
-				a := l.A
-				if _, b := g.mapping[a.Id()]; !b {
-					id, err := strconv.Atoi(strings.TrimLeft(a.Id(), "v"))
-					v := strings.TrimRight(a.Id(), "0123456789")
-					if v == "v" && err == nil {
-						if id > g.nextId {
-							g.idMap = append(g.idMap, make([]Atom, id-g.nextId+1)...)
-							g.nextId = id + 1
-						}
-						g.mapping[a.Id()] = id
-						// nextId is size of map
-						g.idMap[id] = a
-					}
-				}
-			}
-		}
-	}
-
-	fmt.Println("c auxiliary Ids start with", g.nextId)
+	glob.D("c auxiliary Ids start with", g.nextId)
 
 	for _, c := range cs.list {
 		for _, l := range c.Literals {
@@ -527,7 +502,9 @@ func (g *Gen) PrintDIMACS(cs ClauseSet, inferPrimeVars bool) {
 		out = os.Stdout
 	}
 
-	fmt.Fprintf(out, "p cnf %d %d\n", g.nextId, len(cs.list))
+	if !*glob.Infer_var_ids {
+		fmt.Fprintf(out, "p cnf %d %d\n", g.nextId, len(cs.list))
+	}
 
 	for _, c := range cs.list {
 		if _, err := out.Write(g.toBytes(c)); err != nil {

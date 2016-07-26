@@ -40,5 +40,6 @@ var (
 	Len_rewrite_same_flag = flag.Int("len-rewrite-same", 3, "Min length to rewrite PB.")
 	Len_rewrite_amo_flag  = flag.Int("len-rewrite-amo", 3, "Min length to rewrite PB.")
 	Len_rewrite_ex_flag   = flag.Int("len-rewrite-ex", 3, "Min length to rewrite PB.")
-	First_aux_id_flag          = flag.Int("aux-id", 0, "Set initial variable counter.")
+	First_aux_id_flag     = flag.Int("aux-id", 1, "Set initial variable counter.")
+	Infer_var_ids         = flag.Bool("infer-ids", false, "Tries to infer SAT variables Ids by convention v<id>.")
 )

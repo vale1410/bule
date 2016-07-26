@@ -109,8 +109,8 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		//clauses.PrintDebug()
 		//g.Solve(clauses, opt, *glob.Opt_bound_flag, -opt.Offset)
 
-		//inferPrimeVars := true
-		//g.PrintDIMACS(clauses, inferPrimeVars)
+		inferPrimeVars := true
+		g.PrintDIMACS(clauses, inferPrimeVars)
 		//fmt.Println()
 	}
 }

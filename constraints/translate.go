@@ -225,16 +225,16 @@ func (pb *Threshold) Simplify() {
 		pb.Entries = []Entry{}
 	}
 
-
 	if pb.SumWeights() < pb.K {
+		glob.D("c PB", pb.Id, "is UNSAT")
 		pb.Entries = []Entry{}
-        pb.K = -1 
-        // is unsatisfied: how to do that?
+		pb.K = -1
+		// is unsatisfied: how to do that?
 	}
 
 	pb.Normalize(LE, true)
-    glob.D("sumweights:",pb.SumWeights(), "K",pb.K)
 	if pb.SumWeights() <= pb.K {
+		glob.D("c PB", pb.Id, "is redundant")
 		pb.Entries = []Entry{}
 	}
 
