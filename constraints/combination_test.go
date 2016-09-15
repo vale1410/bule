@@ -126,8 +126,8 @@ func TestRewriteAMO(test *testing.T) {
 
 func TestTranslateAMO0(test *testing.T) {
 	glob.D("TestTranslateAMO0")
-	glob.MDD_max_flag = 300000
-	glob.MDD_redundant_flag = false
+	*glob.MDD_max_flag = 300000
+	*glob.MDD_redundant_flag = false
 
 	pb1 := CreatePB([]int64{2, 3, 4, 3}, 5)
 	pb2 := CreatePB([]int64{1, 1, 1}, 1)
@@ -151,8 +151,8 @@ func TestTranslateAMO0(test *testing.T) {
 
 func TestTranslateAMO1(test *testing.T) {
 	glob.D("TestTranslateAMO1")
-	glob.MDD_max_flag = 300000
-	glob.MDD_redundant_flag = false
+	*glob.MDD_max_flag = 300000
+	*glob.MDD_redundant_flag = false
 
 	pb1 := CreatePB([]int64{2, 2, 3, 4, 2, 3}, 6)
 	pb2 := CreatePB([]int64{1, 1, 1, 1}, 1)
@@ -176,8 +176,8 @@ func TestTranslateAMO1(test *testing.T) {
 
 func TestTranslateAMO2(test *testing.T) {
 	glob.D("TestTranslateAMO2")
-	glob.MDD_max_flag = 300000
-	glob.MDD_redundant_flag = false
+	*glob.MDD_max_flag = 300000
+	*glob.MDD_redundant_flag = false
 
 	results := []int{40, 33, 29}
 

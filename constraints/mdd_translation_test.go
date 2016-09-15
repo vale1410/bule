@@ -13,8 +13,8 @@ func TestMDDRedundant(test *testing.T) {
 	//glob.Debug_flag = false
 
 	glob.D("TestMDDRedundant")
-	glob.MDD_max_flag = 300000
-	glob.MDD_redundant_flag = false
+	*glob.MDD_max_flag = 300000
+	*glob.MDD_redundant_flag = false
 
 	var t Threshold
 	t.Entries = createEntries([]int64{1, 2, 1, 1, 3, 1})
@@ -35,8 +35,8 @@ func TestMDDChain(test *testing.T) {
 
 	glob.D("TestMDDChain")
 
-	glob.MDD_max_flag = 300000
-	glob.MDD_redundant_flag = false
+	*glob.MDD_max_flag = 300000
+	*glob.MDD_redundant_flag = false
 
 	var t Threshold
 	t.Entries = createEntries([]int64{1, 2, 1, 1, 3, 1})
@@ -74,8 +74,8 @@ func TestMDDChains1(test *testing.T) {
 
 	glob.D("TestMDDChains1")
 
-	glob.MDD_max_flag = 300000
-	glob.MDD_redundant_flag = false
+	*glob.MDD_max_flag = 300000
+	*glob.MDD_redundant_flag = false
 
 	var t Threshold
 	t.Entries = createEntries([]int64{1, 2, 1, 1, 3, 1})
@@ -117,8 +117,8 @@ func TestMDDChains2(test *testing.T) {
 
 	glob.D("TestMDDChains")
 
-	glob.MDD_max_flag = 300000
-	glob.MDD_redundant_flag = false
+	*glob.MDD_max_flag = 300000
+	*glob.MDD_redundant_flag = false
 
 	var t Threshold
 	t.Entries = createEntries([]int64{1, 2, 1, 1, 3, 1, 3, 2, 1, 1, 1})

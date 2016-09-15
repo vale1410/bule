@@ -43,8 +43,25 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 	glob.D("Running Debug Mode...")
 
-	p := parser.New(*glob.Filename_flag)
-	pbs := p.Pbs
+	problem := parser.New(*glob.Filename_flag)
+
+	if *glob.Pbo_flag {
+		problem.PrintPBO()
+		return
+	}
+
+	if *glob.Gringo_flag {
+		problem.PrintGringo()
+		return
+	}
+
+	if *glob.Gurobi_flag {
+		problem.PrintGurobi()
+		return
+	}
+
+	pbs := problem.Pbs[1:]
+	opt := problem.Opt
 
 	primaryVars := make(map[string]bool, 0)
 
@@ -56,22 +73,40 @@ There is NO WARRANTY, to the extent permitted by law.`)
 
 	var clauses sat.ClauseSet
 
-	for _, pb := range pbs {
-		pb.TranslateComplexThreshold()
-		clauses.AddClauseSet(pb.Clauses)
+	// Categorize Version 1 (deprecated)
+	switch *glob.Cat_flag {
+	case 1:
+		{
+			for _, pb := range pbs {
+				pb.Print10()
+				pb.CategorizeTranslate1()
+				clauses.AddClauseSet(pb.Clauses)
+			}
+		}
+	case 2:
+		{
+			constraints.CategorizeTranslate2(pbs)
+			for _, pb := range pbs {
+				clauses.AddClauseSet(pb.Clauses)
+			}
+
+		}
+	default:
+		panic("Category not implemented")
 	}
 
 	if *glob.Dimacs_flag {
 		clauses.PrintDebug()
 	}
 
-	//if *glob.Solve_flag {
-	//	g := sat.IdGenerator(clauses.Size() * 7)
-	//	g.PrimaryVars = primaryVars
-	//	glob.A(opt.Positive(), "opt only has positive coefficients")
-	//	g.Solve(clauses, opt, *glob.Opt_bound_flag, -opt.Offset)
-	//	//fmt.Println()
-	//}
+	if *glob.Solve_flag {
+		g := sat.IdGenerator(clauses.Size()*7 + 1)
+		g.PrimaryVars = primaryVars
+		opt.NormalizePositiveCoefficients()
+		glob.A(opt.Positive(), "opt only has positive coefficients")
+		g.Solve(clauses, opt, *glob.Opt_bound_flag, -opt.Offset)
+		//fmt.Println()
+	}
 }
 
 func printStats(stats []int) {

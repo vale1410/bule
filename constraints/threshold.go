@@ -77,15 +77,15 @@ func (pb *Threshold) Translate(K_lessOffset int64) sat.ClauseSet {
 	if len(pb_K.Chains) > 0 {
 		pb_K.TranslateByMDDChain(pb_K.Chains)
 	} else {
-		pb_K.Categorize1()
+		pb_K.CategorizeTranslate1()
 	}
 
 	if pb_K.Err != nil { // case MDD construction did go wrong!
 		glob.A(false, "Capacity of MDD reached, try to solve by not taking chains into account")
-		//pb_K := pb.Copy() //removes all clauses !
-		//pb_K.K = K
-		//pb_K.Typ = LE
-		//pb_K.Categorize1()
+		pb_K := pb.Copy() //removes all clauses !
+		pb_K.K = K
+		pb_K.Typ = LE
+		pb_K.CategorizeTranslate1()
 	}
 	return pb_K.Clauses
 }
@@ -352,7 +352,8 @@ func (t *Threshold) Cardinality() (allSame bool, literals []sat.Literal) {
 
 	if allSame {
 		literals = make([]sat.Literal, len(t.Entries))
-		t.K = int64(math.Ceil(float64(t.K) / float64(coeff)))
+		/// was ceil before, what happened here?
+		t.K = int64(math.Floor(float64(t.K) / float64(coeff)))
 		for i, x := range t.Entries {
 			t.Entries[i].Weight = 1
 			literals[i] = x.Literal

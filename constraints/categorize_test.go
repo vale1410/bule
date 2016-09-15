@@ -10,7 +10,7 @@ func TestTranslate(test *testing.T) {
 	glob.D("TestTranslate")
 
 	pb1 := CreatePB([]int64{1, 1, 1}, 1)
-	pb1.Categorize1()
+	pb1.CategorizeTranslate1()
 	if pb1.TransTyp != AMO {
 		pb1.Print10()
 		test.Errorf("1: Does not classify atmostOne")
@@ -18,7 +18,7 @@ func TestTranslate(test *testing.T) {
 
 	pb2 := CreatePB([]int64{1, 1, 1}, 1)
 	pb2.Typ = GE
-	pb2.Categorize1()
+	pb2.CategorizeTranslate1()
 	if pb2.TransTyp != Clause {
 		pb2.Print10()
 		test.Errorf("2: Does not classify a clause")
@@ -26,7 +26,7 @@ func TestTranslate(test *testing.T) {
 
 	pb3 := CreatePB([]int64{1, 1, 1}, 1)
 	pb3.Typ = EQ
-	pb3.Categorize1()
+	pb3.CategorizeTranslate1()
 
 	if pb3.TransTyp != EX1 {
 		pb3.Print10()
@@ -35,7 +35,7 @@ func TestTranslate(test *testing.T) {
 
 	pb4 := CreatePB([]int64{1, 1, -1}, 0)
 	pb4.Typ = EQ
-	pb4.Categorize1()
+	pb4.CategorizeTranslate1()
 
 	if pb4.TransTyp != EX1 {
 		pb4.Print10()
@@ -44,7 +44,7 @@ func TestTranslate(test *testing.T) {
 
 	pb5 := CreatePB([]int64{-3, 3, -3}, 0)
 	pb5.Typ = LE
-	pb5.Categorize1()
+	pb5.CategorizeTranslate1()
 
 	if pb5.TransTyp != Clause { // should be different
 		pb5.Print10()
@@ -53,7 +53,7 @@ func TestTranslate(test *testing.T) {
 
 	pb6 := CreatePB([]int64{1, 1, 1, 1, 1}, 4)
 	pb6.Typ = EQ
-	pb6.Categorize1()
+	pb6.CategorizeTranslate1()
 
 	if pb6.TransTyp != EX1 {
 		test.Errorf("6: Does not classify ExactlyOne", pb6)

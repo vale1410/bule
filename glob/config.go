@@ -35,7 +35,7 @@ var (
 	Rewrite_same_flag     = flag.Bool("rewrite-same", false, "Groups same coefficients and introduces sorter and chains for them.")
 	Rewrite_equal_flag    = flag.Bool("rewrite-equal", false, "Rewrites complex == constraints into >= and <=.")
 	Ex_chain_flag         = flag.Bool("ex-chain", false, "Rewrites PBs with matching EXK constraints.")
-	Amo_chain_flag        = flag.Bool("amo-chain", true, "Rewrites PBs with matching AMO.")
+	Amo_chain_flag        = flag.Bool("amo-chain", false, "Rewrites PBs with matching AMO. (buggy)")
 	Search_strategy_flag  = flag.String("search", "iterative", "Search objective iterative or binary.")
 	Len_rewrite_same_flag = flag.Int("len-rewrite-same", 3, "Min length to rewrite PB.")
 	Len_rewrite_amo_flag  = flag.Int("len-rewrite-amo", 3, "Min length to rewrite PB.")

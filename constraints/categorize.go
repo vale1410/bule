@@ -8,7 +8,7 @@ import (
 	"golang.org/x/tools/container/intsets"
 )
 
-func Categorize2(pbs []*Threshold) {
+func CategorizeTranslate2(pbs []*Threshold) {
 
 	//1) Categorize
 	simplOcc := make(map[sat.Literal][]int, len(pbs)) // literal to list of simplifiers it occurs in
@@ -72,7 +72,7 @@ func Categorize2(pbs []*Threshold) {
 		if !pb.Translated && pb.Typ != OPT {
 			glob.A(len(pb.Chains) == 0, "At this point no chain.", pb)
 			//glob.A(pb.Clauses.Size() == 0, pb.Id, pb, "not translation means also that there should not be any clauses.")
-			pb.Categorize1()
+			pb.CategorizeTranslate1()
 			pb.Translated = true
 		}
 

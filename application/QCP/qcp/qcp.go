@@ -115,7 +115,7 @@ func doEncoding(clauses sat.ClauseSet) {
 
 	s := sat.IdGenerator(clauses.Size())
 
-	s.PrintDIMACS(clauses)
+	s.PrintDIMACS(clauses, false)
 
 	if *dbg {
 		clauses.PrintDebug()

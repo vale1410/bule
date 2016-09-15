@@ -14,6 +14,7 @@ import (
 )
 
 type Problem struct {
+	// note that Opt points to first element in Pbs (for further analysis)
 	Opt *constraints.Threshold
 	Pbs []*constraints.Threshold
 }
@@ -91,8 +92,8 @@ func parse(filename string) (pbs []*constraints.Threshold, err error) {
 		return
 	}
 	scanner := bufio.NewScanner(input)
-    buf := make([]byte, 0, 64*1024)
-    scanner.Buffer(buf, 1024*1024)
+	buf := make([]byte, 0, 64*1024)
+	scanner.Buffer(buf, 1024*1024)
 
 	// 0 : first line, 1 : rest of the lines
 	var count int

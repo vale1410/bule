@@ -263,8 +263,10 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, nextOpt int64, lb int64) (resul
 	close(result_chan)
 	close(timeout)
 
-	fmt.Printf("cTIME: %.3f s\n", time.Since(time_total).Seconds())
-	fmt.Printf("%v;%v;%v;%v;%v;%v;%v;%.2f;%v;%v;%v\n", *glob.Filename_flag, *glob.Seed_flag, *glob.Amo_chain_flag, *glob.Amo_reuse_flag, *glob.Rewrite_same_flag, result.M, maxS(result.Value), time.Since(time_total).Seconds(), iterations, cs.Size(), current.Size()-cs.Size())
+	//	fmt.Printf("cTIME: %.3f s\n", time.Since(time_total).Seconds())
+	//	fmt.Printf("%v;%v;%v;%v;%v;%v;%v;%.2f;%v;%v;%v\n", "name", "seed", "Amo_chain", "Amo_reuse", "Rewrite_same", "result.M", "maxS(result.Value)", "time ins", "iterations", "cs.Size()", "current.Size()-cs.Size()")
+	//	fmt.Printf("%v;%v;%v;%v;%v;%v;%v;%.2f;%v;%v;%v\n", *glob.Filename_flag, *glob.Seed_flag, *glob.Amo_chain_flag, *glob.Amo_reuse_flag, *glob.Rewrite_same_flag, result.M, maxS(result.Value), time.Since(time_total).Seconds(), iterations, cs.Size(), current.Size()-cs.Size())
+	fmt.Printf("%v;%v;%v;%.2f\n", *glob.Filename_flag, result.M, maxS(result.Value), time.Since(time_total).Seconds())
 
 	return
 }
@@ -365,6 +367,7 @@ type rawResult struct {
 	assignment  string
 }
 
+// TODO : set seed
 func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 
 	var solver *exec.Cmd
