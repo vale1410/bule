@@ -377,8 +377,8 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 	switch *glob.Solver_flag {
 	case "minisat":
 		//solver = exec.Command("minisat", "-rnd-seed=123")
-		solver = exec.Command("minisat", "-rnd-seed="+strconv.FormatInt(*glob.Seed_flag, 10))
-		//solver = exec.Command("minisat")
+		//solver = exec.Command("minisat", "-rnd-seed="+strconv.FormatInt(*glob.Seed_flag, 10))
+		solver = exec.Command("minisat")
 	case "glucose":
 		solver = exec.Command("glucose", "-model")
 	case "clasp":
@@ -389,6 +389,8 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 		solver = exec.Command("treengeling")
 	case "plingeling":
 		solver = exec.Command("plingeling")
+	case "dimetheus":
+		solver = exec.Command("dimetheus", "-seed="+strconv.FormatInt(*glob.Seed_flag, 10))
 	case "cmsat":
 		solver = exec.Command("cmsat")
 	case "local":
