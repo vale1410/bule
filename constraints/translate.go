@@ -75,7 +75,8 @@ func (pb *Threshold) CategorizeTranslate1() {
 		//glob.D(pb.Id, "was simplified completely")
 	} else {
 		if b, literals := pb.Cardinality(); b {
-			pb.Print10()
+			//	glob.D("debug")
+			//			pb.Print10()
 
 			if pb.K == int64(len(pb.Entries)-1) {
 				switch pb.Typ {

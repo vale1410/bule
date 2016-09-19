@@ -198,7 +198,7 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, nextOpt int64, lb int64) (resul
 
 					if !opt.Empty() {
 						result.Value = opt.Evaluate(result.Assignment)
-						//g.printAssignment(result.Assignment)
+						g.printAssignment(result.Assignment)
 						glob.D("SAT for value =", result.Value)
 						finished, nextOpt = nextOptValue(lb, &result)
 
@@ -320,7 +320,9 @@ func maxS(v int64) string {
 func (g *Gen) printAssignment(assignment Assignment) {
 
 	count := 2
-	fmt.Print("Vars: ")
+	fmt.Print("Solution: ")
+	//	fmt.Println(assignment)
+	//	fmt.Println(g.PrimaryVars)
 	for idS := range g.PrimaryVars {
 		if value, b := assignment[idS]; value == 1 && b {
 			count++
@@ -378,11 +380,15 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 		solver = exec.Command("minisat", "-rnd-seed="+strconv.FormatInt(*glob.Seed_flag, 10))
 		//solver = exec.Command("minisat")
 	case "glucose":
-		solver = exec.Command("glucose")
+		solver = exec.Command("glucose", "-model")
 	case "clasp":
 		solver = exec.Command("clasp")
 	case "lingeling":
 		solver = exec.Command("lingeling")
+	case "treengeling":
+		solver = exec.Command("treengeling")
+	case "plingeling":
+		solver = exec.Command("plingeling")
 	case "cmsat":
 		solver = exec.Command("cmsat")
 	case "local":

@@ -221,6 +221,7 @@ func (pb *Threshold) Evaluate(a sat.Assignment) (r int64) {
 			r += (1 - int64(v)) * e.Weight
 		}
 	}
+	glob.D("evaluate", r, pb.Offset)
 
 	return r - pb.Offset
 }

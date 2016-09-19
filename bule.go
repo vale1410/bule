@@ -60,7 +60,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		return
 	}
 
-	pbs := problem.Pbs[1:]
+	pbs := problem.Pbs[1:] // opt is just a pointer to first in pbs.
 	opt := problem.Opt
 
 	primaryVars := make(map[string]bool, 0)
@@ -89,7 +89,6 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			for _, pb := range pbs {
 				clauses.AddClauseSet(pb.Clauses)
 			}
-
 		}
 	default:
 		panic("Category not implemented")
@@ -103,6 +102,7 @@ There is NO WARRANTY, to the extent permitted by law.`)
 		g := sat.IdGenerator(clauses.Size()*7 + 1)
 		g.PrimaryVars = primaryVars
 		opt.NormalizePositiveCoefficients()
+		opt.Offset = opt.K
 		glob.A(opt.Positive(), "opt only has positive coefficients")
 		g.Solve(clauses, opt, *glob.Opt_bound_flag, -opt.Offset)
 		//fmt.Println()
