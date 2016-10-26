@@ -14,7 +14,7 @@ import (
 func main() {
 	glob.Init()
 	if *glob.Ver {
-		fmt.Println(`Bule CNF Grounder: Tag 0.95 Pseudo Booleans
+		fmt.Println(`Bule CNF Grounder: Tag 0.97 Pseudo Booleans
 Copyright (C) Data61 and Valentin Mayer-Eichberger
 License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 There is NO WARRANTY, to the extent permitted by law.`)
