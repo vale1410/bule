@@ -1,4 +1,4 @@
-Bule: A simple CNF Generator
+Bule 1.0: A simple CNF Generator (depricated)
 =====================================
 
 Bule is a framework that helps to create good CNF (conjunctive normal form) encodings.
