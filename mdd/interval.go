@@ -73,7 +73,7 @@ func Compare(aa, bb rbtree.Item) int {
 	}
 }
 
-// cleans the bdd from redundant nodes
+// cleans the mdd from redundant nodes
 func (store *IntervalMddStore) RemoveRedundants() (removed int) {
 
 	rep := make(map[int]int, len(store.Nodes))
@@ -105,7 +105,7 @@ func (store *IntervalMddStore) RemoveRedundants() (removed int) {
 	return
 }
 
-//preparation for MDDs, gives out ids of decendancts
+//preparation for MDDs, gives out ids of descendants
 func (b *IntervalMddStore) ClauseIds(n IntervalNode) (v int, level int, des []int) {
 	//children = []int{b.checkId(n.left), b.checkId(n.right)}
 	return n.Id, n.Level, n.Children
