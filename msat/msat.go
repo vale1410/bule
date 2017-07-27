@@ -79,7 +79,8 @@ func main() {
 		//
 	case <-time.After(time.Duration(*Timeout_flag) * time.Second):
 		if err := solver.Process.Kill(); err != nil {
-			log.Fatal("failed to kill: ", err)
+			fmt.Println("failed to kill: ", err)
+			panic("")
 		}
 		fmt.Println("Time limit exceeded!")
 	}
