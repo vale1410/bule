@@ -1,26 +1,35 @@
 package main
 
 import (
+	"bufio"
+	"flag"
+	"fmt"
+	"io"
+	"os"
+	"os/exec"
+	"strconv"
+	"strings"
 	"time"
 )
 
-var Timeout_flag = flags.Int(2, "-t", "Timeout in seconds")
-var Seed_flag = flags.Int(0, "-s", "Random Seed")
+var Timeout_flag = flag.Int("t", 2, "Timeout in seconds")
+var Seed_flag = flag.Int("s", 12, "Random Seed")
 
 func main() {
 
-	flags.Parse()
-	var Solver_flag *int
+	flag.Parse()
 
-	timeout := make(chan bool, 1)
+	finish := make(chan int, 1)
+	//	timeout := make(chan bool, 1)
+
 	time_total := time.Now()
 
-	go func() {
-		time.Sleep(time.Duration(*Timeout_flag) * time.Second)
-		timeout <- true
-	}()
+	//	go func() {
+	//		time.Sleep(time.Duration(*Timeout_flag) * time.Second)
+	//		timeout <- true
+	//	}()
 
-	solver := getSolver
+	solver := getSolver()
 	stdin, err := solver.StdinPipe()
 	if err != nil {
 		panic(err)
@@ -29,83 +38,78 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = solver.Start()
-	if err != nil {
+	if solver.Start() != nil {
 		panic(err)
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(2)
-
 	go func() {
-		time_before := time.Now()
 		defer stdin.Close()
-		defer wg.Done()
 		io.Copy(stdin, os.Stdin)
-		fmt.Printf("Read :\t%.3f s\n", time.Since(time_before).Seconds())
 	}()
 
 	go func() {
-		defer wg.Done()
 		r := bufio.NewReader(stdout)
-		s, err := r.ReadString('\n')
+
 		for {
-			if strings.HasPrefix(s, "v ") {
-				//res.assignment += s[1:]
-			} else if strings.HasPrefix(s, "s ") {
-				if strings.Contains(s, "UNSATISFIABLE") {
-					res.solved = true
-					res.satisfiable = false
-				} else if strings.Contains(s, "SATISFIABLE") {
-					res.solved = true
-					res.satisfiable = true
-				} else {
-					res.solved = false
-					panic("whats up? Result of sat solver does not contain proper answer!")
-				}
-			}
-			s, err = r.ReadString('\n')
+			s, err := r.ReadString('\n')
 			if err == io.EOF {
 				break
 			}
 			if err != nil {
 				panic(err.Error())
 			}
+			if strings.HasPrefix(s, "c ") {
+				continue
+			}
+
+			if strings.Contains(s, "UNSATISFIABLE") {
+				fmt.Println("UNSATISFIABLE")
+				finish <- 0
+			} else if strings.Contains(s, "SATISFIABLE") {
+				fmt.Println("SATISFIABLE")
+				finish <- 1
+			}
 		}
 	}()
 
-	wg.Wait()
-	//	err_tmp := solver.Wait()
-	//
-	//	if err_tmp != nil {
-	//		fmt.Println("return value:", err_tmp())
-	//	}
+	select {
+	case i := <-finish:
+		fmt.Printf("0,0,0,0,0,0,%v,0,%.3f\n", i, time.Since(time_total).Seconds())
+		//	case <-timeout:
+		//
+	case <-time.After(time.Duration(*Timeout_flag) * time.Second):
+		if err := solver.Process.Kill(); err != nil {
+			log.Fatal("failed to kill: ", err)
+		}
+		fmt.Println("Time limit exceeded!")
+	}
+	close(finish)
+	//	close(timeout)
 
 }
 
 func getSolver() (solver *exec.Cmd) {
 
+	var Solver_flag *string
 	if len(os.Args) > 0 {
-		Solver_flag = os.Args[0]
+		Solver_flag = &os.Args[1]
 	}
 
-	seed := strconv.FormatInt(*Seed_flag, 10)
+	seed := strconv.FormatInt(int64(*Seed_flag), 10)
 
-	switch Solver_flag {
+	switch *Solver_flag {
 	case "minisat":
 		//solver = exec.Command("minisat", "-rnd-seed=123")
 		solver = exec.Command("minisat", "-rnd-seed="+seed)
 		//solver = exec.Command("minisat")
 	case "glucose":
-		solver = exec.Command("glucose")
+		solver = exec.Command("glucose", "-rnd-seed="+seed)
 	case "clasp":
-		solver = exec.Command("clasp")
+		solver = exec.Command("clasp", "--seed="+seed)
 	case "lingeling":
 		solver = exec.Command("lingeling")
 	case "cmsat":
-		solver = exec.Command("cmsat")
-	case "clasp":
-		solver = exec.Command("clasp")
+		solver = exec.Command("cmsat", "--verb=0", "--random="+seed)
 		//	case "treengeling":
 		//		solver = exec.Command("treengeling")
 		//	case "plingeling":
