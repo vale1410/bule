@@ -12,22 +12,18 @@ import (
 	"time"
 )
 
-var Timeout_flag = flag.Int("t", 2, "Timeout in seconds")
-var Seed_flag = flag.Int("s", 12, "Random Seed")
+var Timeout_flag = flag.Int("time", 2, "Timeout in seconds")
+var Seed_flag = flag.Int("seed", 12, "Random Seed")
+var Solver_flag = flag.String("solver", "minisat", "Choose solver. Supported is minisat,microsat,cmsat,lingeling,glucose,clasp")
+var Debug_flag = flag.Bool("d", false, "debug.")
 
 func main() {
 
 	flag.Parse()
 
 	finish := make(chan int, 1)
-	//	timeout := make(chan bool, 1)
 
 	time_total := time.Now()
-
-	//	go func() {
-	//		time.Sleep(time.Duration(*Timeout_flag) * time.Second)
-	//		timeout <- true
-	//	}()
 
 	solver := getSolver()
 	stdin, err := solver.StdinPipe()
@@ -58,6 +54,10 @@ func main() {
 			if err != nil {
 				panic(err.Error())
 			}
+			if *Debug_flag {
+				fmt.Println(s)
+			}
+
 			if strings.HasPrefix(s, "c ") {
 				continue
 			}
@@ -75,8 +75,6 @@ func main() {
 	select {
 	case i := <-finish:
 		fmt.Printf("0,0,0,0,0,0,%v,0,%.3f\n", i, time.Since(time_total).Seconds())
-		//	case <-timeout:
-		//
 	case <-time.After(time.Duration(*Timeout_flag) * time.Second):
 		if err := solver.Process.Kill(); err != nil {
 			fmt.Println("failed to kill: ", err)
@@ -85,32 +83,31 @@ func main() {
 		fmt.Println("Time limit exceeded!")
 	}
 	close(finish)
-	//	close(timeout)
 
 }
 
 func getSolver() (solver *exec.Cmd) {
 
-	var Solver_flag *string
-	if len(os.Args) > 0 {
-		Solver_flag = &os.Args[1]
-	}
+	//	var Solver_flag *string
+	//	if len(os.Args) > 0 {
+	//		Solver_flag = &os.Args[1]
+	//	}
 
 	seed := strconv.FormatInt(int64(*Seed_flag), 10)
 
 	switch *Solver_flag {
 	case "minisat":
-		//solver = exec.Command("minisat", "-rnd-seed=123")
-		solver = exec.Command("minisat", "-rnd-seed="+seed)
-		//solver = exec.Command("minisat")
+		solver = exec.Command("minisat", "-rnd-init", "-rnd-seed="+seed)
 	case "glucose":
-		solver = exec.Command("glucose", "-rnd-seed="+seed)
+		solver = exec.Command("glucose", "-rnd-init", "-rnd-seed="+seed)
 	case "clasp":
 		solver = exec.Command("clasp", "--seed="+seed)
 	case "lingeling":
-		solver = exec.Command("lingeling")
+		solver = exec.Command("lingeling", "--seed="+seed)
 	case "cmsat":
 		solver = exec.Command("cmsat", "--verb=0", "--random="+seed)
+		//	case "microsat":
+		//		solver = exec.Command("microsat")
 		//	case "treengeling":
 		//		solver = exec.Command("treengeling")
 		//	case "plingeling":
@@ -119,10 +116,9 @@ func getSolver() (solver *exec.Cmd) {
 		//		solver = exec.Command("dimetheus", "-seed="+seed)
 		//	case "local":
 		//		solver = exec.Command("CCAnr", seed)
-		//	case "microsat":
-		//		solver = exec.Command("microsat")
 	default:
-		fmt.Println(false, "Solver not available", Solver_flag)
+		fmt.Println("Solver not available", *Solver_flag)
+		os.Exit(1)
 	}
 	return
 }
