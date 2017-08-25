@@ -270,7 +270,7 @@ func writeTex(frame Frame) {
 	\begin{document}
 
 	\begin{figure}
-	\includegraphics{plot.tikz}
+%	\includegraphics{plot.tikz}
 	\includegraphics{plot_log.tikz}
 	\centering
 	\include{statistics}%
@@ -305,7 +305,12 @@ func writeTable(frame Frame) {
 	f.WriteString("\\midrule\n")
 
 	for i, id := range frame.insts {
-		f.WriteString(fmt.Sprintf(" %v & \\verb|%v| ", i, id))
+		if len(id) >= 10 {
+			f.WriteString(fmt.Sprintf(" %v & \\verb|%v| ", i, id[:10]))
+		} else {
+			f.WriteString(fmt.Sprintf(" %v & \\verb|%v| ", i, id))
+		}
+
 		//f.WriteString(fmt.Sprintf(" %v ", i))
 		for _, r := range frame.order {
 			f.WriteString(fmt.Sprintf(" & %v ", frame.records[r].values[i].TimeString()))
@@ -409,6 +414,20 @@ func writeComputeStatistics(frame *Frame) {
 	//		frame.stdAll[r] = frame.stdAll[r] / float64(frame.solvedAll[r])
 	//		frame.stdAll[r] = math.Sqrt(frame.stdAll[r])
 	//	}
+	allSAT := true
+	allUNSAT := true
+
+	for _, r := range frame.order {
+		if frame.solved[r] != frame.solvedSAT[r] {
+			allSAT = false
+		}
+	}
+
+	for _, r := range frame.order {
+		if frame.solved[r] != frame.solvedUNSAT[r] {
+			allUNSAT = false
+		}
+	}
 
 	{ // Write to File; Observe that now we use frame.order
 
@@ -424,23 +443,29 @@ func writeComputeStatistics(frame *Frame) {
 		}
 		f.WriteString("\\\\\n \\midrule\n")
 
-		f.WriteString("solved ")
-		for _, r := range frame.order {
-			f.WriteString(fmt.Sprint(" & ", frame.solved[r], " "))
+		if !allUNSAT && !allSAT {
+			f.WriteString("solved ")
+			for _, r := range frame.order {
+				f.WriteString(fmt.Sprint(" & ", frame.solved[r], " "))
+			}
+			f.WriteString("\\\\\n")
 		}
-		f.WriteString("\\\\\n")
 
-		f.WriteString("SAT ")
-		for _, r := range frame.order {
-			f.WriteString(fmt.Sprint(" & ", frame.solvedSAT[r], " "))
+		if !allUNSAT {
+			f.WriteString("SAT ")
+			for _, r := range frame.order {
+				f.WriteString(fmt.Sprint(" & ", frame.solvedSAT[r], " "))
+			}
+			f.WriteString("\\\\\n")
 		}
-		f.WriteString("\\\\\n")
 
-		f.WriteString("UNSAT ")
-		for _, r := range frame.order {
-			f.WriteString(fmt.Sprint(" & ", frame.solvedUNSAT[r], " "))
+		if !allSAT {
+			f.WriteString("UNSAT ")
+			for _, r := range frame.order {
+				f.WriteString(fmt.Sprint(" & ", frame.solvedUNSAT[r], " "))
+			}
+			f.WriteString("\\\\\n")
 		}
-		f.WriteString("\\\\\n")
 
 		f.WriteString("TOs")
 		for _, r := range frame.order {
