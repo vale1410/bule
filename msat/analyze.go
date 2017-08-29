@@ -437,7 +437,7 @@ func writeComputeStatistics(frame *Frame) {
 		}
 		f.WriteString("}\n\\toprule\n")
 
-		f.WriteString("measure ")
+		f.WriteString(" ")
 		for _, r := range frame.order {
 			f.WriteString(fmt.Sprintf(" & %v ", frame.records[r].name))
 		}
