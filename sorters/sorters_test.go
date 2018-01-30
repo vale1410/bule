@@ -1,18 +1,18 @@
 package sorters
 
 import (
-    "fmt"
-    "math/rand"
-    "sort"
-    "testing"
+	"fmt"
+	"math/rand"
+	"sort"
+	"testing"
 )
 
 func TestBubbleSortSize(t *testing.T) {
 
-    sorter := CreateSortingNetwork(5, -1, Bubble)
-    fmt.Println(sorter)
+	sorter := CreateSortingNetwork(16, -1, Pairwise)
+	fmt.Println(sorter)
 
-    PrintSorterTikZ(sorter, "test.tex")
+	PrintSorterTikZ(sorter, "test.tex")
 
 }
 
@@ -147,148 +147,148 @@ func TestBubbleSortSize(t *testing.T) {
 
 func cardinalityAtLeast(size int, k int, t *testing.T, typ SortingNetworkType) {
 
-    array1 := rand.Perm(size)
-    array2 := make([]int, size)
+	array1 := rand.Perm(size)
+	array2 := make([]int, size)
 
-    copy(array2, array1)
-    sort.Ints(array2)
+	copy(array2, array1)
+	sort.Ints(array2)
 
-    mapping := make(map[int]int, size)
+	mapping := make(map[int]int, size)
 
-    sorter := CreateSortingNetwork(size, -1, typ)
+	sorter := CreateSortingNetwork(size, -1, typ)
 
-    for i := 0; i < k; i++ {
-        mapping[sorter.Out[i]] = 1
-        sorter.Out[i] = 1
-        array2[i] = 1
-    }
+	for i := 0; i < k; i++ {
+		mapping[sorter.Out[i]] = 1
+		sorter.Out[i] = 1
+		array2[i] = 1
+	}
 
-    sorter.PropagateBackwards(mapping)
-    sortAndCompareArrays(sorter, array1, array2, t)
+	sorter.PropagateBackwards(mapping)
+	sortAndCompareArrays(sorter, array1, array2, t)
 }
 
 func cardinalityAtMost(size int, k int, t *testing.T, typ SortingNetworkType) {
 
-    array1 := rand.Perm(size)
-    array2 := make([]int, size)
+	array1 := rand.Perm(size)
+	array2 := make([]int, size)
 
-    copy(array2, array1)
-    sort.Ints(array2)
+	copy(array2, array1)
+	sort.Ints(array2)
 
-    mapping := make(map[int]int, size)
+	mapping := make(map[int]int, size)
 
-    sorter := CreateSortingNetwork(size, -1, typ)
+	sorter := CreateSortingNetwork(size, -1, typ)
 
-    for i := size - k; i < size; i++ {
-        mapping[sorter.Out[i]] = 0
-        sorter.Out[i] = 0
-        array2[i] = 0
-    }
-    sorter.PropagateBackwards(mapping)
-    sortAndCompareArrays(sorter, array1, array2, t)
+	for i := size - k; i < size; i++ {
+		mapping[sorter.Out[i]] = 0
+		sorter.Out[i] = 0
+		array2[i] = 0
+	}
+	sorter.PropagateBackwards(mapping)
+	sortAndCompareArrays(sorter, array1, array2, t)
 }
 
 func cutSorting(size int, cut int, t *testing.T, typ SortingNetworkType) {
 
-    array1 := rand.Perm(cut)
-    array2 := rand.Perm(size - cut)
-    sort.Ints(array1)
-    sort.Ints(array2)
-    result := make([]int, size)
+	array1 := rand.Perm(cut)
+	array2 := rand.Perm(size - cut)
+	sort.Ints(array1)
+	sort.Ints(array2)
+	result := make([]int, size)
 
-    array3 := append(array1, array2...)
-    copy(result, array3)
+	array3 := append(array1, array2...)
+	copy(result, array3)
 
-    //fmt.Println("array1",array1)
-    //fmt.Println("array2",array2)
-    //fmt.Println("array3",array3)
-    sort.Ints(result)
-    //fmt.Println("result",result)
+	//fmt.Println("array1",array1)
+	//fmt.Println("array2",array2)
+	//fmt.Println("array3",array3)
+	sort.Ints(result)
+	//fmt.Println("result",result)
 
-    sorter := CreateSortingNetwork(size, cut, typ)
-    //PrintSorterTikZ(sorter,"tmp/cutSorter.tex")
-    sortAndCompareArrays(sorter, array3, result, t)
+	sorter := CreateSortingNetwork(size, cut, typ)
+	//PrintSorterTikZ(sorter,"tmp/cutSorter.tex")
+	sortAndCompareArrays(sorter, array3, result, t)
 }
 
 func normalSorting(size int, t *testing.T, typ SortingNetworkType) {
 
-    array1 := rand.Perm(size)
-    array2 := make([]int, size)
-    copy(array2, array1)
-    sort.Ints(array2)
-    sorter := CreateSortingNetwork(len(array1), -1, typ)
-    sortAndCompareArrays(sorter, array1, array2, t)
+	array1 := rand.Perm(size)
+	array2 := make([]int, size)
+	copy(array2, array1)
+	sort.Ints(array2)
+	sorter := CreateSortingNetwork(len(array1), -1, typ)
+	sortAndCompareArrays(sorter, array1, array2, t)
 }
 
 func sortAndCompareArrays(sorter Sorter, array1, array2 []int, t *testing.T) {
 
-    mapping := make(map[int]int, len(sorter.Comparators))
+	mapping := make(map[int]int, len(sorter.Comparators))
 
-    for i, x := range sorter.In {
-        mapping[x] = array1[i]
-    }
+	for i, x := range sorter.In {
+		mapping[x] = array1[i]
+	}
 
-    for _, comp := range sorter.Comparators {
+	for _, comp := range sorter.Comparators {
 
-        b, bok := mapping[comp.B]
-        a, aok := mapping[comp.A]
+		b, bok := mapping[comp.B]
+		a, aok := mapping[comp.A]
 
-        if !aok {
-            t.Error("not in mapping", comp.A)
-        }
+		if !aok {
+			t.Error("not in mapping", comp.A)
+		}
 
-        if !bok {
-            t.Error("not in mapping", comp.B)
-        }
+		if !bok {
+			t.Error("not in mapping", comp.B)
+		}
 
-        if comp.D > 1 { // 0,1, specific meaning
-            mapping[comp.D] = max(a, b)
-        }
-        if comp.C > 1 { // 0,1, specific meaning
-            mapping[comp.C] = min(a, b)
-        }
+		if comp.D > 1 { // 0,1, specific meaning
+			mapping[comp.D] = max(a, b)
+		}
+		if comp.C > 1 { // 0,1, specific meaning
+			mapping[comp.C] = min(a, b)
+		}
 
-    }
+	}
 
-    output := make([]int, len(array1))
+	output := make([]int, len(array1))
 
-    e := false
+	e := false
 
-    for i, x := range sorter.Out {
-        if x <= 1 {
-            output[i] = x
-        } else {
-            output[i] = mapping[x]
-        }
-        if output[i] != array2[i] {
-            t.Error("Output array does not coincide in position", i)
-            e = true
-        }
-    }
+	for i, x := range sorter.Out {
+		if x <= 1 {
+			output[i] = x
+		} else {
+			output[i] = mapping[x]
+		}
+		if output[i] != array2[i] {
+			t.Error("Output array does not coincide in position", i)
+			e = true
+		}
+	}
 
-    if e {
-        t.Error("ideal", len(array2), array2)
-        t.Error("output", len(output), output)
-        t.Error("sorter", sorter)
-        t.Error("mapping", mapping)
-        if len(sorter.Comparators) < 100 {
-            printSorterDot(sorter, "sorter")
-        }
-    }
+	if e {
+		t.Error("ideal", len(array2), array2)
+		t.Error("output", len(output), output)
+		t.Error("sorter", sorter)
+		t.Error("mapping", mapping)
+		if len(sorter.Comparators) < 100 {
+			printSorterDot(sorter, "sorter")
+		}
+	}
 }
 
 func max(a, b int) int {
-    if a > b {
-        return a
-    } else {
-        return b
-    }
+	if a > b {
+		return a
+	} else {
+		return b
+	}
 }
 
 func min(a, b int) int {
-    if a > b {
-        return b
-    } else {
-        return a
-    }
+	if a > b {
+		return b
+	} else {
+		return a
+	}
 }
