@@ -1,0 +1,24 @@
+% comment 
+c comment 
+
+a(1,2,3). 
+b(3). 
+
+
+{d(X)} <- a(X). % generates d(X), for all a(X). 
+d(X) :- a(X).
+
+
+
+a(X) -> c(X). % should not generate anything
+:- a(X), not c(X). 
+
+
+a(X), b(X).  % is in ASP
+:- not a(X), not b(X). 
+
+
+X != Y -> ~a(X), ~b(Y).  % is in ASP
+:- X != Y, a(X), b(X). 
+
+
