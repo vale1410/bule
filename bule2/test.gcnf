@@ -1,24 +1,33 @@
 % comment 
 c comment 
 
-a(1,2,3). 
+a(1;2;3). 
 b(3). 
 
+d(X)? <- a(X). % generates new variable d(X), for all a(X), plus generates the implication.
 
-{d(X)} <- a(X). % generates d(X), for all a(X). 
-d(X) :- a(X).
+c(X) <- a(X). % only generates if X exists for c and a. 
+a(X) -> c(X). % only generates if X exists for c and a. 
 
+a(X), b(X).  % this is  just a clause, is in ASP :- not a(X), not b(X). 
+a(X) \/ b(X).  % equivalent to above
 
-
-a(X) -> c(X). % should not generate anything
-:- a(X), not c(X). 
-
-
-a(X), b(X).  % is in ASP
-:- not a(X), not b(X). 
+X != Y -> ~a(X), ~b(Y).  % is in ASP :- X != Y, a(X), b(X). 
 
 
-X != Y -> ~a(X), ~b(Y).  % is in ASP
-:- X != Y, a(X), b(X). 
 
 
+%% workflow
+
+a1(.),a2(.)... -> l(x).
+%% let ai be ground. let x be unified with ai(.). 
+%% if l(x) exist ground, check for SAT and remove or give conflict(UNSAT). 
+%% if l(x) doest not exist, generate new fact l(x). 
+
+a1(.),a2(.),... -> l(x)?
+%% let x be unified with ai(.). 
+if l(x) does exist, generate clause with leftover unground predicates. 
+
+if l(x) does not exist, 
+%% 1) system generates new variable l(x). {l(x)}.
+%% 2) generate the respective clause.
