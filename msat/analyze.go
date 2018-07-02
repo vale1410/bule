@@ -555,8 +555,8 @@ func writePlot(frame Frame, log bool) {
 \begin{tikzpicture}
 
 \begin{axis}[
-	%legend pos=outer north east,
-	legend pos=north west,
+	legend pos=outer north east,
+	%legend pos=north west,
 	xlabel=Solved Instances,
 	ylabel=Time in sec,
 `)
