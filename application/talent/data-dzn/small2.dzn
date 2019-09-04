@@ -1,5 +1,0 @@
-numActors = 4 ;
-numScenes = 6 ;
-actorPay = [1,1,1,1];
-sceneDuration = [1,2,3,4,5,6];
-actorInScene = array2d(Actors,Scenes,[1,1,0,0,1,1,1,1,0,1,0,0,0,1,1,1,1,0,0,0,1,1,0,1]);
