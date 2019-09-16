@@ -7,7 +7,7 @@
 c=3.
 r=3.
 q=4.
-K=(c+1)/2.
+%K=(c+1)/2.
 T={1..c*r}.  
 X={1..c}.
 Y={1..r}.
@@ -24,7 +24,7 @@ a abc(3,4).
 %% exist(T), move(c,T). %% existential player chooses last column. 
 
 %%  % time managment
-~step(c,T), step(c,T-1).
+%~step(c,T), step(c,T-1).
 %%  ~step(X-1,T), step(X,T).
 %%  ~step(c,T), ~move(X,T), step(X,T).
 %%  move(X,T), ~step(X,T), step(X-1,T).

@@ -7,18 +7,23 @@ r=3.
 q=4.
 K=(c+1)/2.
 T={1..c*r}.  
+M={1..(c*r)/2}
 X={1..c}.
 Y={1..r}.
-D={0,q-1}.
-P={0,1}.
+D={0..q-1}.
+P={0..1}.
 
 %% WW = {{(X,Y+D):D},{(X+D,Y):D},{(X+D,Y+D):D},{(X-D,Y+D):D}}.
 
-a move(X,T):X.
-e move(X,T):X.
-e step(X,T):X. 
-e first(X,T):X.
-e count(X,Y,T):X:Y.
+e move(X,2*M-1):X.
+e step(X,2*M-1):X. 
+e first(X,2*M-1):X.
+e count(X,Y,2*M-1):X:Y.
+a move(X,2*M):X.
+e step(X,2*M):X. 
+e first(X,2*M):X.
+e count(X,Y,2*M):X:Y.
+
 e board(X,Y,P):X:Y:P.
 
 % time managment
