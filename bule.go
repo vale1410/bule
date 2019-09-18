@@ -263,6 +263,7 @@ func parseProgramExpandGenerators() (p Program) {
 					for _,cons := range constraints {
 						tmp := replaceConstants(cons,assignment)
 						//fmt.Println(cons,tmp,evaluateBoolExpression(tmp))
+						tmp = strings.ReplaceAll(tmp, "#mod", "%")
 						asserts(boolMathExpression(tmp),"Must be bool expression " + tmp)
 						allConstraintsTrue = allConstraintsTrue && evaluateBoolExpression(tmp)
 					}

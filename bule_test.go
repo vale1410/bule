@@ -30,6 +30,7 @@ import (
 //}
 
 
+
 func TestEvaluateExpression(t *testing.T) {
 
 	expr := "X+Y==3"
@@ -74,6 +75,24 @@ func TestInstantiate(t *testing.T) {
 		a := Atom{"move(X,Y+3,4)"}
 		b := a.instantiate("Z", 3)
 		if b.s != "move(X,Y+3,4)" {
+			t.Fail()
+		}
+	}
+}
+
+
+
+
+//board(X+Z*D,Y+(1-Z)*D*V+((-1)**Z)*D*(1-V),P)
+func TestDecompose(t *testing.T) {
+
+	{
+		a := Atom{"board(X+Z*D,Y+(1-Z)*D*V+((-1)**Z)*D*(1-V),P)"}
+		x, y := decomposeAtom(a)
+		if x != "board" {
+			t.Fail()
+		}
+		if len(y) != 3 {
 			t.Fail()
 		}
 	}
