@@ -42,8 +42,8 @@ func TestEvaluateExpression(t *testing.T) {
 		"X":2,
 		"Y":1,
 	}
-	exprFalse := replaceConstants(expr, cc)
-	exprTrue := replaceConstants(expr, cc2)
+	exprFalse := assign(expr, cc)
+	exprTrue := assign(expr, cc2)
 	valF := evaluateBoolExpression(exprFalse)
 	valT := evaluateBoolExpression(exprTrue)
 	if valF ||!valT  {

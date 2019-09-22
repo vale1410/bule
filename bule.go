@@ -21,29 +21,46 @@ func main() {
 
 	flag.Parse()
 
-	p := parseProgramExpandGenerators()
-	p.expandQuantifiers()
-
-	p.Debug()
-
-	for _, q := range p.Quantifiers {
-		if q.Exist {
-			fmt.Print("e ")
-		} else {
-			fmt.Print("a ")
+	p := parseProgram()
+	for _, r := range p.Rules {
+		fmt.Println("rule:",r.debugString)
+		fmt.Println("atoms", r.Atoms)
+		fmt.Println("atomGenerators", r.AtomGenerators)
+		fmt.Println("constraints", r.Constraints)
+		for _,atomG := range r.AtomGenerators {
+			assignments := p.generateAssignments(atomG.variables, atomG.constraints)
+			for _,assignment := range assignments {
+				r.Atoms = append (r.Atoms, atomG.atom.simplifyAtom(assignment))
+			}
 		}
-		for _, atom := range q.Atoms {
-			fmt.Print(atom.s, " ")
-		}
+		fmt.Println("after generation of atoms:")
+		fmt.Println("atoms", r.Atoms)
 		fmt.Println()
 	}
 
-	for _, r := range p.Rules {
-				//fmt.Println(r)
-		for _, s := range ground(r.s, p.Domains, p.Constants) {
-			fmt.Println(s)
-		}
-	}
+
+//	p.expandQuantifiers()
+//
+//	p.Debug()
+//
+//	for _, q := range p.Quantifiers {
+//		if q.Exist {
+//			fmt.Print("e ")
+//		} else {
+//			fmt.Print("a ")
+//		}
+//		for _, atom := range q.Atoms {
+//			fmt.Print(atom, " ")
+//		}
+//		fmt.Println()
+//	}
+
+//	for _, r := range p.Rules {
+//		//fmt.Println(r)
+//		for _, s := range ground(r.debugString, p.Domains, p.Constants) {
+//			fmt.Println(s)
+//		}
+//	}
 }
 
 func (p *Program) containsGlobals(term string) (globals []string) {
@@ -57,99 +74,150 @@ func (p *Program) containsGlobals(term string) (globals []string) {
 	return
 }
 
-func NewAtom(pred string, terms []string) Atom {
-	s := pred+"("
-	for i, x := range terms {
-		s += x
-		if i < len(terms)-1 {
+func (atomG AtomGenerator) String() string {
+	return fmt.Sprintf("%v:constraints%v:vars%v",
+		atomG.atom.String(),
+		atomG.constraints,
+		atomG.variables)
+}
+
+func (atom Atom) String() string {
+	var s string
+	if atom.Neg == false {
+		s = "~"
+	}
+	s = s + atom.Name + "("
+	for i, x := range atom.Terms {
+		s += string(x)
+		if i < len(atom.Terms)-1 {
 			s += ","
 		}
 	}
-	return Atom{s + ")"}
+	return s + ")"
 }
 
-// instantiates atom by replacing variable with values and creates a new copy of atom
-// move(X,Y,4) and Y->3 -> move(X,3,4)
-// move(X,Y+3,4) and Y->3 -> move(X,6,4)
-// Also evaluates math expressions
-// If variable does not exist in move, then just a new copy is created.
-func (a Atom) instantiate(variable string, val int) (newA Atom) {
-	var newTerms []string
-	pred, terms := decomposeAtom(a)
-	for _, term := range terms {
-		tmp := strings.ReplaceAll(term, variable, strconv.Itoa(val))
-		if mathExpression(tmp) {
-			tmp = strconv.Itoa(evaluateExpression(tmp))
-		}
-		newTerms = append(newTerms,tmp)
-	}
-	return NewAtom(pred,newTerms)
+func (atom Atom) Copy() Atom {
+	t := make([]Term, len(atom.Terms))
+	copy(t, atom.Terms)
+	atom.Terms = t
+	return atom
 }
 
-func (p *Program) expandQuantifiers() {
-	//TODO restriction, only ONE free variable allowed
-	freeVar := ""
-	var quantifierWithFree []int
-	var quantifierNoFree []int
-	for i, r := range p.Quantifiers {
-		containsFree := false
-		for _, atom := range r.Atoms {
-			_, expressions := decomposeAtom(atom)
-			for _, expr := range expressions {
-				globals := p.containsGlobals(expr)
-				//fmt.Println(expr, "globals", globals)
-				if len(globals) == 0 {
-					asserts(number(expr), "must be a number.")
-				} else if len(globals) == 1 {
-					// remember the unique free variable
-					if freeVar == "" {
-						freeVar = globals[0]
-					} else if freeVar != globals[0] {
-						fmt.Println("We only allow one free variable in quantifiers. This var: ", expr, " free", freeVar)
-						panic("Too many free Variable")
-					} else {
-						containsFree = true
+func (p *Program) generateAssignments(variables []string, constraints []Constraint) []map[string]int {
+
+	allPossibleAssignments := make([]map[string]int, 1, 32)
+	allPossibleAssignments[0] = make(map[string]int)
+
+	for _, variable := range variables {
+		if dom, ok := p.Domains[variable]; ok {
+			newAssignments := make([]map[string]int, 0, len(allPossibleAssignments)*len(dom))
+			for _, val := range dom {
+				for _, assignment := range allPossibleAssignments {
+					newAssignment := make(map[string]int)
+					for key, value := range assignment {
+						newAssignment[key] = value
 					}
-				} else {
-					fmt.Println("This predicate contains too many free variables", atom.s, "in term",expr)
-					panic("")
+					newAssignment[variable] = val
+					newAssignments = append(newAssignments, newAssignment)
 				}
 			}
-		}
-		if containsFree {
-			quantifierWithFree = append(quantifierWithFree, i)
+			allPossibleAssignments = newAssignments
 		} else {
-			quantifierNoFree = append(quantifierNoFree, i)
+			panic("variable doesnt have domain " + variable)
 		}
 	}
 
-	if freeVar == "" {
-		return
-	}
+	assignments := make([]map[string]int, 0, 32)
 
-	var quantifiers []Quantifier
-	if Dom, ok := p.Domains[freeVar]; ok {
-		for _, Val := range Dom {
-			for _, i := range quantifierWithFree {
-				quantifier := p.Quantifiers[i]
-				quantifier.Atoms = []Atom{}
-				for _, atom := range p.Quantifiers[i].Atoms {
-					quantifier.Atoms = append(quantifier.Atoms, atom.instantiate(freeVar,Val))
-				}
-				quantifiers = append(quantifiers, quantifier)
-			}
+	for _, assignment := range allPossibleAssignments {
+		//fmt.Println(assignment)
+		// check all constraints
+		allConstraintsTrue := true
+		for _, cons := range constraints {
+			tmp := assign(cons.BoolExpr, assignment)
+			//fmt.Println(cons,tmp,evaluateBoolExpression(tmp))
+			tmp = strings.ReplaceAll(tmp, "#mod", "%")
+			asserts(groundBoolLogicalMathExpression(tmp), "Must be bool expression "+tmp)
+			allConstraintsTrue = allConstraintsTrue && evaluateBoolExpression(tmp)
 		}
-	} else { // is some kind of expression
-		asserts(false, "Wrong free variables in quantifier.")
+		if allConstraintsTrue {
+			assignments = append(assignments, assignment)
+//			a := simplifyAtom(atom, assignment)
+//			//fmt.Println(a)
+//			atoms = append(atoms, Atom{a})
+		}
 	}
-	// All the remaining predicates go innermost
-	for _, i := range quantifierNoFree {
-		quantifiers = append(quantifiers, p.Quantifiers[i])
-	}
-	p.Quantifiers = quantifiers
+	return assignments
 }
 
-func parseProgramExpandGenerators() (p Program) {
+//func (p *Program) expandQuantifiers() {
+//	//TODO restriction, only ONE free variable allowed
+//	freeVar := ""
+//	var quantifierWithFree []int
+//	var quantifierNoFree []int
+//	for i, r := range p.Quantifiers {
+//		containsFree := false
+//		for _, atom := range r.Atoms {
+//			_, expressions := decomposeAtom(atom)
+//			for _, expr := range expressions {
+//				globals := p.containsGlobals(expr)
+//				//fmt.Println(expr, "globals", globals)
+//				if len(globals) == 0 {
+//					asserts(number(expr), "must be a number.")
+//				} else if len(globals) == 1 {
+//					// remember the unique free variable
+//					if freeVar == "" {
+//						freeVar = globals[0]
+//					} else if freeVar != globals[0] {
+//						fmt.Println("We only allow one free variable in quantifiers. This var: ", expr, " free", freeVar)
+//						panic("Too many free Variable")
+//					} else {
+//						containsFree = true
+//					}
+//				} else {
+//					fmt.Println("This predicate contains too many free variables", atom.s, "in term", expr)
+//					panic("")
+//				}
+//			}
+//		}
+//		if containsFree {
+//			quantifierWithFree = append(quantifierWithFree, i)
+//		} else {
+//			quantifierNoFree = append(quantifierNoFree, i)
+//		}
+//	}
+//
+//	if freeVar == "" {
+//		return
+//	}
+//
+//	var quantifiers []Quantifier
+//	if Dom, ok := p.Domains[freeVar]; ok {
+//		for _, Val := range Dom {
+//			for _, i := range quantifierWithFree {
+//				quantifier := p.Quantifiers[i]
+//				quantifier.Atoms = []Atom{}
+//				for _, atom := range p.Quantifiers[i].Atoms {
+//					quantifier.Atoms = append(quantifier.Atoms, atom.instantiate(freeVar, Val))
+//				}
+//				quantifiers = append(quantifiers, quantifier)
+//			}
+//		}
+//	} else { // is some kind of expression
+//		asserts(false, "Wrong free variables in quantifier.")
+//	}
+//	// All the remaining predicates go innermost
+//	for _, i := range quantifierNoFree {
+//		quantifiers = append(quantifiers, p.Quantifiers[i])
+//	}
+//	p.Quantifiers = quantifiers
+//}
+
+func parse() (p Program) {
+	return
+}
+
+func parseProgram() (p Program) {
 	// open a file or stream
 	var scanner *bufio.Scanner
 	file, err := os.Open(*progFlag)
@@ -171,6 +239,7 @@ func parseProgramExpandGenerators() (p Program) {
 		//s = strings.Replace(s, " ", "", -1)
 		s = strings.Replace(s, ").", ")", -1)
 		s = strings.Replace(s, "),", ") ", -1)
+		s = strings.Replace(s, ", ", " ", -1)
 
 		if s == "" || strings.HasPrefix(s, "%") {
 			continue
@@ -185,121 +254,73 @@ func parseProgramExpandGenerators() (p Program) {
 				set := strings.Trim(def[1], "{}.")
 				interval := strings.Split(set, "..")
 				i1, _ := strconv.Atoi(interval[0])
-				x := replaceConstants(interval[1], p.Constants)
+				x := assign(interval[1], p.Constants)
 				i2 := evaluateExpression(x)
 				p.Domains[def[0]] = makeSet(i1, i2)
 			} else { // this is a constant
-				term := replaceConstants(def[1],p.Constants)
-			 	if !mathExpression(term) {
-			 		panic("is not ground" + term)
+				term := assign(def[1], p.Constants)
+				if !groundMathExpression(term) {
+					panic("is not ground" + term)
 				}
-				p.Constants[def[0]] =evaluateExpression(term)
+				p.Constants[def[0]] = evaluateExpression(term)
 			}
 			continue
 		}
 
-		{ // A usual clause expression.
-			literals := strings.Fields(s)
-			quant := literals[0]
-			isQuantifier := false
-			if quant == "a" || quant == "e" {
-				literals = literals[1:]
-				isQuantifier = true
-			}
+		{
+			ruleElements := strings.Fields(s)
 
-			var clause []Atom
-			for _, literal := range literals {
+			var atoms []Atom
+			var atomGenerators []AtomGenerator
+			var ruleConstraints []Constraint
 
-				if !strings.Contains(literal, ":") {
-					a := simplifyAtom(Atom{literal}, p.Constants)
-					clause = append(clause,Atom{a})
+			for _, ruleElement := range ruleElements {
+
+				if !strings.Contains(ruleElement, ":") {
+					if constraint, ok := parseConstraint(ruleElement); ok {
+						ruleConstraints = append(ruleConstraints, constraint)
+
+					} else {
+						atom, _ := parseAtom(ruleElement)
+						atoms = append(atoms, atom)
+
+					}
 					continue
 				}
+
+				atomG := AtomGenerator{}
 
 				// This predicate has generators
 				// Move from out to in and replace constants
 				// and evaluates expressions
-				xs := strings.Split(literal, ":")
-				atom := Atom{xs[0]}
+				xs := strings.Split(ruleElement, ":")
 
-				var variables []string
-				var constraints []string
-
-				//fmt.Println("xs",xs)
 				for i := len(xs) - 1; i > 0; i-- {
 					if _, ok := p.Domains[xs[i]]; ok {
-						variables = append(variables, xs[i])
+						atomG.variables = append(atomG.variables, xs[i])
 					} else { // is some kind of expression
-						constraints = append(constraints,xs[i])
+						atomG.constraints = append(atomG.constraints, Constraint{xs[i]})
 					}
 				}
-				//fmt.Println("constraints",constraints)
-				//fmt.Println("variables",variables)
 
-				assignments := make([]map[string]int, 1,32)
-				assignments[0] = make(map[string]int)
-				for _, variable := range variables {
-					if dom, ok := p.Domains[variable]; ok {
-						newAssignments := make([]map[string]int,0,len(assignments) * len(dom))
-						for _, val := range dom {
-							for _,assignment := range assignments {
-								newAssignment := make(map[string]int)
-								for key, value := range assignment {
-									newAssignment[key] = value
-								}
-								newAssignment[variable] = val
-								newAssignments = append(newAssignments, newAssignment)
-							}
-						}
-						assignments = newAssignments
-					} else {
-						panic("variable doesnt have domain " + variable)
-					}
-				}
-				for _, assignment := range assignments {
-					//fmt.Println(assignment)
-					// check all constraints
-					allConstraintsTrue := true
-					for _,cons := range constraints {
-						tmp := replaceConstants(cons,assignment)
-						//fmt.Println(cons,tmp,evaluateBoolExpression(tmp))
-						tmp = strings.ReplaceAll(tmp, "#mod", "%")
-						asserts(boolMathExpression(tmp),"Must be bool expression " + tmp)
-						allConstraintsTrue = allConstraintsTrue && evaluateBoolExpression(tmp)
-					}
-					if allConstraintsTrue {
-						a := simplifyAtom(atom,assignment)
-						//fmt.Println(a)
-						clause = append(clause,Atom{a})
-					}
-				}
+				atomG.atom,_ = parseAtom(xs[0])
+				atomGenerators = append(atomGenerators, atomG)
 			}
-			//fmt.Println("clause finished", clause)
-
-			sClause := ""
-			for _, atom := range clause {
-				sClause += atom.s + " "
-			}
-
-			if isQuantifier {
-				var q Quantifier
-				q.s = quant + " " + sClause
-				q.Exist = quant == "e"
-				q.Atoms = clause
-				p.Quantifiers = append(p.Quantifiers, q)
-			} else {
-				p.Rules = append(p.Rules, Rule{sClause, clause})
-			}
+			p.Rules = append(p.Rules,
+				Rule{s,
+					atoms,
+					atomGenerators,
+					ruleConstraints})
 		}
 	}
 	return
 }
 
 type Program struct {
-	Quantifiers []Quantifier
-	Rules       []Rule
-	Domains     map[string][]int
-	Constants   map[string]int
+	//	Quantifiers []Quantifier
+	Rules     []Rule
+	Domains   map[string][]int
+	Constants map[string]int
 }
 
 func (p *Program) GlobalVariables() []string {
@@ -333,8 +354,18 @@ func (p *Program) Debug() {
 }
 
 type Rule struct {
-	s     string
-	Atoms []Atom
+	debugString    string
+	Atoms          []Atom
+	AtomGenerators []AtomGenerator
+	Constraints    []Constraint
+}
+
+// is a math expression that evaluates to true or false
+// Constraints can contain variables
+// supported are <,>,<=,>=,==
+// z.B.: A*3<=5-2*R/7#mode3.
+type Constraint struct {
+	BoolExpr string
 }
 
 type Quantifier struct {
@@ -343,17 +374,84 @@ type Quantifier struct {
 	Atoms []Atom
 }
 
-type Atom struct {
-	s string
-	//	Name  string
-	//	Neg   bool
-	//	Arity int
-	//	Terms []Term
+type AtomGenerator struct {
+	debugString string
+	variables   []string
+	constraints []Constraint
+	atom        Atom
 }
 
-type Term struct {
-	s   string
-	Val int
+type Atom struct {
+	debugString string
+	Neg         bool
+	Name        string
+	Terms       []Term
+}
+
+type Term string
+
+// assuming it is not a constraint
+func parseAtom(literalString string) (Atom, bool) {
+	name := literalString[:strings.Index(literalString, "(")]
+	literalString = literalString[strings.Index(literalString, "(")+1:]
+	par := literalString[:strings.LastIndex(literalString, ")")]
+	ts := strings.Split(par, ",")
+	terms := make([]Term, len(ts))
+	for i, expr := range ts {
+		terms[i] = Term(expr)
+	}
+	n := true
+	if strings.HasPrefix(name, "~") {
+		name = strings.TrimLeft(name, "~")
+		n = false
+	}
+	return Atom{literalString, n, name, terms}, true
+}
+
+// Makes a deep copy
+func (atom Atom) simplifyAtom(assignment map[string]int) (newAtom Atom) {
+	newAtom = atom.Copy()
+	for i, term := range atom.Terms {
+		expr := assign(string(term), assignment)
+		expr = strings.ReplaceAll(expr, "#mod", "%")
+		if groundMathExpression(expr) {
+			r := evaluateExpression(expr)
+			newAtom.Terms[i] = Term(strconv.Itoa(r))
+		} else {
+			newAtom.Terms[i] = Term(expr)
+		}
+	}
+	return
+}
+
+// instantiates atom by replacing variable with values and creates a new copy of atom
+// move(X,Y,4) and Y->3 -> move(X,3,4)
+// move(X,Y+3,4) and Y->3 -> move(X,6,4)
+// Also evaluates math expressions
+// If variable does not exist in move, then just a new copy is created.
+func (a Atom) instantiate(variable string, val int) Atom {
+	b := a.Copy()
+	for i, term := range a.Terms {
+		tmp := strings.ReplaceAll(string(term), variable, strconv.Itoa(val))
+		if groundMathExpression(tmp) {
+			tmp = strconv.Itoa(evaluateExpression(tmp))
+		}
+		b.Terms[i] = Term(tmp)
+	}
+	return b
+}
+
+func parseConstraint(s string) (Constraint, bool) {
+	if (strings.Contains(s, "==") ||
+		strings.Contains(s, "<=") ||
+		strings.Contains(s, ">=") ||
+		strings.Contains(s, ">") ||
+		strings.Contains(s, ">")) &&
+		!strings.Contains(s, "<=>") &&
+		!strings.Contains(s, "=>") {
+		return Constraint{s}, true
+	}
+	return Constraint{}, false
 }
 
 func number(s string) bool {
@@ -361,19 +459,19 @@ func number(s string) bool {
 	return err == nil
 }
 
-func mathExpression(s string) bool {
+func groundMathExpression(s string) bool {
 	//	r, _ := regexp.MatchString("[0-9+*/%]+", s)
 	return "" == strings.Trim(s, "0123456789+*%-/()")
 }
 
-func boolMathExpression(s string) bool {
+func groundBoolLogicalMathExpression(s string) bool {
 	//	r, _ := regexp.MatchString("[0-9+*/%!=><]+", s)
 	return "" == strings.Trim(s, "0123456789+*%-=><")
 }
 
 //assumption:Space only between literals.
-func replaceConstants(term string, constants map[string]int) string {
-	for Const, Val := range constants {
+func assign(term string, assignment map[string]int) string {
+	for Const, Val := range assignment {
 		term = strings.ReplaceAll(term, Const, strconv.Itoa(Val))
 	}
 	return term
@@ -399,251 +497,43 @@ func evaluateExpression(term string) int {
 	return int(result.(float64))
 }
 
-
 //type Term string
 //type Variable string
 
-
-func ground(s string, domain map[string][]int, constants map[string]int) []string {
-
-	cls := []string{s}
-	for Var := range domain {
-		if strings.Count(s, Var) > 0 {
-			newcls := []string{}
-			for _, cl := range cls {
-				for _, Val := range domain[Var] {
-					cl3 := strings.ReplaceAll(cl, Var, strconv.Itoa(Val))
-					newcls = append(newcls, cl3)
-				}
-			}
-			cls = newcls
-		}
-	}
-
-	rcls := make([]string, len(cls))
-	for i, cl := range cls {
-		literals := strings.Fields(cl)
-		newcl := ""
-		for _, literal := range literals {
-			newcl += simplifyAtom(Atom{literal}, constants)
-		}
-		rcls[i] = newcl
-	}
-
-	return rcls
-}
-
-//  move(X,Y,T+1) ->  move, [X,Y,T+1]
-func decomposeAtom(atom Atom) (name string, terms []string) {
-	literalString := atom.s
-	name = literalString[:strings.Index(literalString, "(")]
-	literalString = literalString[strings.Index(literalString, "(")+1:]
-	par := literalString[:strings.LastIndex(literalString, ")")]
-	terms = strings.Split(par, ",")
-	return
-}
-
-// move(X,5+1,c,k+1) -> move(X,6,10,11). % c=10 and k=11 are constants
-func simplifyAtom(atom Atom, constants map[string]int) (newcl string) {
-	pre, terms := decomposeAtom(atom)
-	newcl = pre + "("
-	for i, expr := range terms {
-		expr = replaceConstants(expr, constants)
-		expr = strings.ReplaceAll(expr, "#mod", "%")
-		if mathExpression(expr) {
-			r := evaluateExpression(expr)
-			newcl += strconv.Itoa(r)
-		} else {
-			newcl += expr
-		}
-		if i == len(terms)-1 {
-			newcl += ") "
-		} else {
-			newcl += ","
-		}
-	}
-	return
-}
-
-func main2() {
-
-	c := flag.Int("c", 3, "columns of board.")
-	r := flag.Int("r", 3, "rows of board.")
-	q := flag.Int("q", 3, "connect-Z.")
-	prog := flag.String("f", "connect.lp", "Encoding.")
-	flag.Parse()
-
-	maxT := *r * *c
-	if maxT%2 == 0 {
-		maxT--
-	}
-
-	//domain := make(map[string][]int)
-	//constants := make(map[string]int)
-
-	// open a file or stream
-	var scanner *bufio.Scanner
-	file, err := os.Open(*prog)
-	if err != nil {
-		scanner = bufio.NewScanner(os.Stdin)
-	} else {
-		defer file.Close()
-		scanner = bufio.NewScanner(file)
-	}
-
-	cls := []string{}
-
-	for scanner.Scan() {
-
-		line := strings.TrimSpace(scanner.Text())
-
-		if line == "" || strings.HasPrefix(line, "%") {
-			continue
-		}
-		fmt.Println(line)
-
-		//	cls = append(cls, fmt.Sprintf("\nc %s\n", line))
-
-		//ground(line, domain, constants, &cls)
-	}
-
-	W := genPositions(*c, *r, *q)
-
-	if false {
-		fmt.Print("e ")
-		for T := 0; T < maxT; T++ {
-
-			if T > 0 {
-				if T%2 == 0 { // white moves, UNIVERSAL
-					fmt.Println("")
-					fmt.Print("a ")
-					for i := 1; i < *c; i++ {
-						fmt.Printf("move(%v,%v) ", i, T)
-					}
-					fmt.Println("")
-					fmt.Print("e ")
-				} else { // back moves
-					for i := 1; i < *c; i++ {
-						fmt.Printf("move(%v,%v) ", i, T)
-					}
-				}
-				fmt.Printf("move(%v,%v) ", *c, T)
-
-				for i := 1; i <= *c; i++ {
-					fmt.Printf("first(%v,%v) ", i, T)
-				}
-			}
-
-			for i := 1; i <= *c; i++ {
-				for j := 0; j <= *r; j++ {
-					fmt.Printf("count(%v,%v,%v) ", i, j, T)
-				}
-			}
-
-			for i := 0; i <= *c; i++ {
-				fmt.Printf("step(%v,%v) ", i, T)
-			}
-
-		}
-
-		fmt.Print("\ne ") // NOT NEEDED BECAUSE ALREADY SPECIFIED.
-		for i := 1; i <= *c; i++ {
-			for j := 1; j <= *r; j++ {
-				fmt.Printf("board(%v,%v,%v) ", i, j, 0)
-				fmt.Printf("board(%v,%v,%v) ", i, j, 1)
-			}
-		}
-		for i := 0; i < len(W); i++ {
-			fmt.Printf("win(%v) ", i)
-		}
-	}
-	fmt.Println()
-
-	if false { // ground all winning positions
-
-		{
-			cls = append(cls, "c ~board(I,J,1):(I,J) in W.")
-			for _, V := range W {
-				s := ""
-				for _, R := range V {
-					s += fmt.Sprintf("~board(%v,%v,0) ", R[0], R[1])
-				}
-				cls = append(cls, s)
-			}
-		}
-
-		{
-			cls = append(cls, "c win(W) : W.")
-			s := ""
-			for i, _ := range W {
-				s += fmt.Sprintf("win(%v) ", i)
-			}
-			cls = append(cls, s)
-		}
-		{
-			cls = append(cls, "c ~win(W), board(I,J,0):(I,J) in W.")
-			for i, V := range W {
-				s := fmt.Sprintf("~win(%v) ", i)
-				for _, R := range V {
-					s += fmt.Sprintf("board(%v,%v,1) ", R[0], R[1])
-				}
-				cls = append(cls, s)
-			}
-		}
-	}
-
-	for _, cl := range cls {
-		fmt.Println(cl)
-	}
-
-}
+//func ground(s string, domain map[string][]int, constants map[string]int) []string {
+//
+//	cls := []string{s}
+//	for Var := range domain {
+//		if strings.Count(s, Var) > 0 {
+//			newcls := []string{}
+//			for _, cl := range cls {
+//				for _, Val := range domain[Var] {
+//					cl3 := strings.ReplaceAll(cl, Var, strconv.Itoa(Val))
+//					newcls = append(newcls, cl3)
+//				}
+//			}
+//			cls = newcls
+//		}
+//	}
+//
+//	rcls := make([]string, len(cls))
+//	for i, cl := range cls {
+//		literals := strings.Fields(cl)
+//		newcl := ""
+//		for _, literal := range literals {
+//			newcl += simplifyAtom(Atom{literal}, constants)
+//		}
+//		rcls[i] = newcl
+//	}
+//
+//	return rcls
+//}
 
 func neg(s string) string {
 	if strings.HasPrefix(s, "~") {
 		return strings.TrimLeft(s, "~")
 	}
 	return "~" + s
-}
-
-func genPositions(c, r, q int) [][][]int {
-	W := make([][][]int, 0, 3*r*c)
-	for i := 1; i <= c; i++ {
-		for j := 1; j <= r-q+1; j++ {
-			row := make([][]int, q)
-			for d := 0; d < q; d++ {
-				row[d] = []int{i, j + d}
-			}
-			W = append(W, row)
-		}
-	}
-	for i := 1; i <= c-q+1; i++ {
-		for j := 1; j <= r; j++ {
-			row := make([][]int, q)
-			for d := 0; d < q; d++ {
-				row[d] = []int{i + d, j}
-			}
-			W = append(W, row)
-		}
-	}
-	for i := 1; i <= c-q+1; i++ {
-		for j := 1; j <= r-q+1; j++ {
-			{
-				row := make([][]int, q)
-				for d := 0; d < q; d++ {
-					row[d] = []int{i + d, j + d}
-				}
-				W = append(W, row)
-			}
-			{
-				row := make([][]int, q)
-				for d := 0; d < q; d++ {
-					row[d] = []int{i + d, j + q - d - 1}
-				}
-				W = append(W, row)
-			}
-		}
-	}
-	return W
 }
 
 func assert(condition bool) {

@@ -13,18 +13,15 @@ Y={1..r}.
 D={0..q-1}.
 P={0..1}.
 
-%% WW = {{(X,Y+D):D},{(X+D,Y):D},{(X+D,Y+D):D},{(X-D,Y+D):D}}.
-
-e move(X,2*M-1):X.
-e step(X,2*M-1):X. 
-e first(X,2*M-1):X.
-e count(X,Y,2*M-1):X:Y.
-a move(X,2*M):X.
-e step(X,2*M):X. 
-e first(X,2*M):X.
-e count(X,Y,2*M):X:Y.
-
-e board(X,Y,P):X:Y:P.
+%% e step(X,2*M-1):X.
+%% e first(X,2*M-1):X.
+%% e count(X,Y,2*M-1):X:Y.
+%% a move(X,2*M):X.
+%% e step(X,2*M):X.
+%% e first(X,2*M):X.
+%% e count(X,Y,2*M):X:Y.
+%%
+%% e board(X,Y,P):X:Y:P.
 
 % time managment
 ~step(c,T), step(c,T-1).
