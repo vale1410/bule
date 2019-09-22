@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"unicode"
 	"errors"
 	"flag"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	//	"regexp"
 	"strconv"
 	"strings"
+	"github.com/scylladb/go-set/strset"
 )
 
 var (
@@ -94,6 +96,30 @@ func (atom Atom) String() string {
 		}
 	}
 	return s + ")"
+}
+
+
+func (term Term) FreeVars() *strset.Set {
+	f := func(c rune) bool {
+		return !unicode.IsLetter(c) && !unicode.IsNumber(c) && c != '_'
+	}
+	return strset.New(strings.FieldsFunc(string(term), f)...)
+}
+
+func (atom Atom) FreeVars() *strset.Set {
+	set := strset.New()
+	for _,t := range atom.Terms {
+		set.Merge(t.FreeVars())
+	}
+	return set
+}
+
+func (rule *Rule) FreeVars() *strset.Set {
+	set := strset.New()
+	for _,a := range rule.Atoms {
+		set.Merge(a.FreeVars())
+	}
+	return set
 }
 
 func (atom Atom) Copy() Atom {
@@ -424,22 +450,22 @@ func (atom Atom) simplifyAtom(assignment map[string]int) (newAtom Atom) {
 	return
 }
 
-// instantiates atom by replacing variable with values and creates a new copy of atom
-// move(X,Y,4) and Y->3 -> move(X,3,4)
-// move(X,Y+3,4) and Y->3 -> move(X,6,4)
-// Also evaluates math expressions
-// If variable does not exist in move, then just a new copy is created.
-func (a Atom) instantiate(variable string, val int) Atom {
-	b := a.Copy()
-	for i, term := range a.Terms {
-		tmp := strings.ReplaceAll(string(term), variable, strconv.Itoa(val))
-		if groundMathExpression(tmp) {
-			tmp = strconv.Itoa(evaluateExpression(tmp))
-		}
-		b.Terms[i] = Term(tmp)
-	}
-	return b
-}
+//   // instantiates atom by replacing variable with values and creates a new copy of atom
+//   // move(X,Y,4) and Y->3 -> move(X,3,4)
+//   // move(X,Y+3,4) and Y->3 -> move(X,6,4)
+//   // Also evaluates math expressions
+//   // If variable does not exist in move, then just a new copy is created.
+//   func (a Atom) instantiate(variable string, val int) Atom {
+//   	b := a.Copy()
+//   	for i, term := range a.Terms {
+//   		tmp := strings.ReplaceAll(string(term), variable, strconv.Itoa(val))
+//   		if groundMathExpression(tmp) {
+//   			tmp = strconv.Itoa(evaluateExpression(tmp))
+//   		}
+//   		b.Terms[i] = Term(tmp)
+//   	}
+//   	return b
+//   }
 
 func parseConstraint(s string) (Constraint, bool) {
 	if (strings.Contains(s, "==") ||
