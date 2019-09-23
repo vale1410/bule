@@ -56,13 +56,35 @@ func TestEvaluateExpression(t *testing.T) {
 
 func TestInstantiate(t *testing.T) {
 
-	//{
-	//	a,_ := parseAtom("move(X,Y,4)")
-	//	b := a.instantiate("Y", 3)
-	//	if b.String() != "move(X,3,4)" {
-	//		t.Fail()
-	//	}
-	//}
+	{
+		a,_ := parseAtom("move(X,Y,4)")
+		assignment := make(map[string]int,0)
+		assignment["Y"] = 3
+		b := a.simplifyAtom(assignment)
+		if b.String() != "move(X,3,4)" {
+			t.Fail()
+		}
+	}
+
+	{
+		a,_ := parseAtom("move(X,Y+3,4)")
+		assignment := make(map[string]int,0)
+		assignment["Y"] = 3
+		b := a.simplifyAtom(assignment)
+		if b.String() != "move(X,6,4)" {
+			t.Fail()
+		}
+	}
+
+	{
+		a,_ := parseAtom("move(X,Y#mod2,4)")
+		assignment := make(map[string]int,0)
+		assignment["Y"] = 3
+		b := a.simplifyAtom(assignment)
+		if b.String() != "move(X,1,4)" {
+			t.Fail()
+		}
+	}
 
 	//{
 	//	a := Atom{"move(X,Y+3,4)"}
@@ -88,7 +110,7 @@ func TestInstantiate(t *testing.T) {
 func TestDecompose(t *testing.T) {
 
 	{
-		a,_ := parseAtom("board(X+Z*D,Y+(1-Z)*D*V+((-1)**Z)*D*(1-V),P)")
+		a,_ := parseAtom("board(X+Z*D,Y+(1-Zas)*D*V+((-1)**Z)*D*(1-V),P)")
 		if a.Name != "board" {
 			t.Fail()
 		}
