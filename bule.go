@@ -19,33 +19,50 @@ var (
 )
 
 func debug(level int, s ...interface{}) {
-	if *debugFlag >= level {
-		fmt.Println(s)
+	if level <= *debugFlag {
+		fmt.Println(s...)
 	}
 }
 
-func main() {
-
-	flag.Parse()
-
-	p := parseProgram()
-	globals := p.GlobalVariables()
-	debug(2, "globals", globals)
-
-	gRules := make([]GroundRule, 0)
-
-	debug(2, "globals", globals)
-
-	existQ := make(map[int][]Atom)
-	forallQ := make(map[int][]Atom)
-	maxIndex := 0
-
+func (p *Program) Debug() {
+	fmt.Println("constants:", p.Constants)
+	fmt.Println("domains:", p.Domains)
+	fmt.Println("globalVars", p.GlobalVariables())
 	for _, r := range p.Rules {
+		fmt.Println("rule:", r.debugString)
+		fmt.Println("head", r.Head)
+		fmt.Println("atoms", r.Atoms)
+		fmt.Println("atomGenerators", r.AtomGenerators)
+		fmt.Println("constraints", r.Constraints)
+		fmt.Println("constraints", r.Constraints)
+		fmt.Println()
+	}
+}
 
-		debug(2, "rule:", r.debugString)
-		debug(2, "atoms", r.Atoms)
-		debug(2, "atomGenerators", r.AtomGenerators)
-		debug(2, "constraints", r.Constraints)
+func (p *Program) RewriteEquivalences() {
+	// Make rules from the head equivalences
+	// Current assumption: head is only one atom, body is a conjunction!
+	newRules := make([]Rule, 0)
+	for _, r := range p.Rules {
+		if r.hasHead() {
+			// Check that freeVars are the same for right and left side (assumption)
+			for i, atom := range r.Atoms {
+				newRule := Rule{}
+				newRule.Atoms = []Atom{r.Head.makeNeg(), atom.Copy()}
+				newRule.Constraints = r.Constraints
+				newRules = append(newRules, newRule)
+				r.Atoms[i] = atom.makeNeg()
+			}
+			r.Atoms = append(r.Atoms, r.Head)
+		}
+		newRules = append(newRules, r)
+	}
+	p.Rules = newRules
+}
+
+func (p *Program) ExpandGenerators() {
+	// Expand the generators
+	for _, r := range p.Rules {
 		for _, atomG := range r.AtomGenerators {
 			assignments := p.generateAssignments(atomG.variables, atomG.constraints)
 			for _, assignment := range assignments {
@@ -56,7 +73,24 @@ func main() {
 			debug(2, "after generation of atoms:")
 			debug(2, "atoms", r.Atoms)
 		}
+	}
+}
+
+func (p *Program) Ground() (gRules []GroundRule,
+	existQ map[int][]Atom,
+	forallQ map[int][]Atom,
+	maxIndex int) {
+
+	gRules = make([]GroundRule, 0)
+	existQ = make(map[int][]Atom)
+	forallQ = make(map[int][]Atom)
+	maxIndex = 0
+	globals := p.GlobalVariables()
+
+	for _, r := range p.Rules {
+
 		debug(2, "freevariables", r.FreeVars())
+
 		asserts(globals.IsSubset(r.FreeVars()), "There are free variables that are not bound by globals.")
 		assignments := p.generateAssignments(r.FreeVars().List(), r.Constraints)
 
@@ -66,7 +100,7 @@ func main() {
 			for _, atom := range r.Atoms {
 				gRule.Atoms = append(gRule.Atoms, atom.simplifyAtom(assignment))
 			}
-			debug(2, "gRule",gRule)
+			debug(2, "gRule", gRule)
 			if len(gRule.Atoms) > 0 {
 				if gRule.Atoms[0].Name == "#forall" {
 					asserts(len(gRule.Atoms[0].Terms) == 1, "Wrong arity for forall")
@@ -91,29 +125,54 @@ func main() {
 		}
 		debug(2)
 	}
+	return
+}
 
-	for i := 0; i <= maxIndex; i++ {
+func main() {
 
-		if atoms, ok := forallQ[i]; ok {
-			fmt.Print("a")
-			for _, a := range atoms {
-				fmt.Print(" ", a)
+	flag.Parse()
+
+	p := parseProgram()
+
+	// forget about Generators now!
+	p.ExpandGenerators()
+
+	// forget about heads now!
+	p.RewriteEquivalences()
+
+	// we only work with Atoms now !
+
+	{
+		gRules, existQ, forallQ, maxIndex := p.Ground()
+
+		// Do Unit Propagation
+
+		// Find variables that need to be put in the quantifier alternation
+
+		for i := 0; i <= maxIndex; i++ {
+
+			if atoms, ok := forallQ[i]; ok {
+				fmt.Print("a")
+				for _, a := range atoms {
+					fmt.Print(" ", a)
+				}
+				fmt.Println()
+			}
+			if atoms, ok := existQ[i]; ok {
+				fmt.Print("e")
+				for _, a := range atoms {
+					fmt.Print(" ", a)
+				}
+				fmt.Println()
+			}
+		}
+
+		for _, r := range gRules {
+			for _, a := range r.Atoms {
+				fmt.Print(a, " ")
 			}
 			fmt.Println()
 		}
-		if atoms, ok := existQ[i]; ok {
-			fmt.Print("e")
-			for _, a := range atoms {
-				fmt.Print(" ", a)
-			}
-			fmt.Println()
-		}
-	}
-	for _, r := range gRules {
-		for _, a := range r.Atoms {
-			fmt.Print(a, " ")
-		}
-		fmt.Println()
 	}
 }
 
@@ -166,6 +225,7 @@ func (rule *Rule) FreeVars() *strset.Set {
 	for _, a := range rule.Atoms {
 		set.Merge(a.FreeVars())
 	}
+	set.Merge(rule.Head.FreeVars())
 	return set
 }
 
@@ -220,10 +280,6 @@ func (p *Program) generateAssignments(variables []string, constraints []Constrai
 	return assignments
 }
 
-func parse() (p Program) {
-	return
-}
-
 func parseProgram() (p Program) {
 	// open a file or stream
 	var scanner *bufio.Scanner
@@ -254,7 +310,10 @@ func parseProgram() (p Program) {
 
 		// parsing a global definition like " X = {4..5}.
 		// or c = 5. or k  = c*2.
-		if strings.Contains(s, "=") && !isConstraint(s) {
+		if strings.Contains(s, "=") &&
+			!isConstraint(s) &&
+			!strings.Contains(s, "<=>") {
+
 			def := strings.Split(s, "=")
 			asserts(len(def) == 2, s)
 			if strings.Contains(def[1], "..") {
@@ -276,6 +335,13 @@ func parseProgram() (p Program) {
 		}
 
 		{
+			var head Atom
+			if strings.Contains(s, "<=>") {
+				ht := strings.Split(s, "<=>")
+				asserts(len(ht) == 2, "Parsing equivalence wrong")
+				s = ht[1]
+				head, _ = parseAtom(ht[0])
+			}
 			ruleElements := strings.Fields(s)
 
 			var atoms []Atom
@@ -315,6 +381,7 @@ func parseProgram() (p Program) {
 			}
 			p.Rules = append(p.Rules,
 				Rule{s,
+					head,
 					atoms,
 					atomGenerators,
 					ruleConstraints})
@@ -347,9 +414,14 @@ type GroundRule struct {
 
 type Rule struct {
 	debugString    string
+	Head           Atom
 	Atoms          []Atom
 	AtomGenerators []AtomGenerator
 	Constraints    []Constraint
+}
+
+func (r *Rule) hasHead() bool {
+	return r.Head.Name != ""
 }
 
 // is a math expression that evaluates to true or false
@@ -358,12 +430,6 @@ type Rule struct {
 // z.B.: A*3<=5-2*R/7#mode3.
 type Constraint struct {
 	BoolExpr string
-}
-
-type Quantifier struct {
-	s     string
-	Exist bool
-	Atoms []Atom
 }
 
 type AtomGenerator struct {
@@ -416,7 +482,7 @@ func (atom Atom) simplifyAtom(assignment map[string]int) (newAtom Atom) {
 	return
 }
 
-func isConstraint(s string)  bool {
+func isConstraint(s string) bool {
 	return (strings.Contains(s, "==") ||
 		strings.Contains(s, "!=") ||
 		strings.Contains(s, "<=") ||
@@ -470,17 +536,15 @@ func evaluateExpression(term string) int {
 	return int(result.(float64))
 }
 
-func neg(s string) string {
-	if strings.HasPrefix(s, "~") {
-		return strings.TrimLeft(s, "~")
+func (atom *Atom) makeNeg() Atom {
+	a := atom.Copy()
+	a.Neg = !a.Neg
+	if strings.HasPrefix(a.debugString, "~") {
+		a.debugString = strings.TrimLeft(a.debugString, "~")
+	} else {
+		a.debugString = "~" + a.debugString
 	}
-	return "~" + s
-}
-
-func assert(condition bool) {
-	if !condition {
-		panic(errors.New(""))
-	}
+	return a
 }
 
 func asserts(condition bool, info string) {
