@@ -28,12 +28,13 @@ func (p *Program) Debug() {
 	fmt.Println("constants:", p.Constants)
 	fmt.Println("domains:", p.Domains)
 	fmt.Println("globalVars", p.GlobalVariables())
-	for _, r := range p.Rules {
-		fmt.Println("rule:", r.debugString)
-		fmt.Println("head", r.Head)
+	for i, r := range p.Rules {
+		fmt.Println("\nrule", i, r.debugString)
+		if r.hasHead() {
+			fmt.Println("head", r.Head)
+		}
 		fmt.Println("atoms", r.Atoms)
 		fmt.Println("atomGenerators", r.AtomGenerators)
-		fmt.Println("constraints", r.Constraints)
 		fmt.Println("constraints", r.Constraints)
 		fmt.Println()
 	}
@@ -62,11 +63,11 @@ func (p *Program) RewriteEquivalences() {
 
 func (p *Program) ExpandGenerators() {
 	// Expand the generators
-	for _, r := range p.Rules {
+	for i, r := range p.Rules {
 		for _, atomG := range r.AtomGenerators {
 			assignments := p.generateAssignments(atomG.variables, atomG.constraints)
 			for _, assignment := range assignments {
-				r.Atoms = append(r.Atoms, atomG.atom.simplifyAtom(assignment))
+				p.Rules[i].Atoms = append(p.Rules[i].Atoms, atomG.atom.simplifyAtom(assignment))
 			}
 		}
 		if len(r.AtomGenerators) > 0 {
@@ -134,15 +135,22 @@ func main() {
 
 	p := parseProgram()
 
-	// forget about Generators now!
+	//p.Debug()
+	debug(2, "\nExpand generators")
 	p.ExpandGenerators()
 
+	//p.Debug()
+
 	// forget about heads now!
+	debug(2, "\nRewrite Equivalences")
 	p.RewriteEquivalences()
+
+	//p.Debug()
 
 	// we only work with Atoms now !
 
 	{
+		debug(2, "Grounding:")
 		gRules, existQ, forallQ, maxIndex := p.Ground()
 
 		// Do Unit Propagation
@@ -298,11 +306,15 @@ func parseProgram() (p Program) {
 	for scanner.Scan() {
 
 		s := strings.TrimSpace(scanner.Text())
+		if pos := strings.Index(s,"%") ; pos >= 0 {
+			s = s[pos:]
+		}
 		s = strings.Trim(s, ".")
-		//s = strings.Replace(s, " ", "", -1)
-		s = strings.Replace(s, ").", ")", -1)
-		s = strings.Replace(s, "),", ") ", -1)
+		s = strings.Replace(s, " ", "", -1)
+		s = strings.Replace(s, "].", "]", -1)
+		s = strings.Replace(s, "],", "] ", -1)
 		s = strings.Replace(s, ", ", " ", -1)
+		debugString := s
 
 		if s == "" || strings.HasPrefix(s, "%") {
 			continue
@@ -380,7 +392,7 @@ func parseProgram() (p Program) {
 				atomGenerators = append(atomGenerators, atomG)
 			}
 			p.Rules = append(p.Rules,
-				Rule{s,
+				Rule{debugString,
 					head,
 					atoms,
 					atomGenerators,
@@ -450,9 +462,9 @@ type Term string
 
 // assuming it is not a constraint
 func parseAtom(literalString string) (Atom, bool) {
-	name := literalString[:strings.Index(literalString, "(")]
-	literalString = literalString[strings.Index(literalString, "(")+1:]
-	par := literalString[:strings.LastIndex(literalString, ")")]
+	name := literalString[:strings.Index(literalString, "[")]
+	literalString = literalString[strings.Index(literalString, "[")+1:]
+	par := literalString[:strings.LastIndex(literalString, "]")]
 	ts := strings.Split(par, ",")
 	terms := make([]Term, len(ts))
 	for i, expr := range ts {
