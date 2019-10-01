@@ -306,7 +306,7 @@ func parseProgram() (p Program) {
 	for scanner.Scan() {
 
 		s := strings.TrimSpace(scanner.Text())
-		if pos := strings.Index(s,"%") ; pos >= 0 {
+		if pos := strings.Index(s, "%"); pos >= 0 {
 			s = s[pos:]
 		}
 		s = strings.Trim(s, ".")
@@ -517,7 +517,7 @@ func groundMathExpression(s string) bool {
 
 func groundBoolLogicalMathExpression(s string) bool {
 	//	r, _ := regexp.MatchString("[0-9+*/%!=><]+", s)
-	return "" == strings.Trim(s, "0123456789+*%-=><()")
+	return "" == strings.Trim(s, "0123456789+*%-=><()!")
 }
 
 //assumption:Space only between literals.
