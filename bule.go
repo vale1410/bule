@@ -62,7 +62,7 @@ func (p *Program) RewriteEquivalences() {
 }
 
 func (p *Program) ExpandGenerators() {
-	// Expand the generators
+
 	for i, r := range p.Rules {
 		for _, atomG := range r.AtomGenerators {
 			assignments := p.generateAssignments(atomG.variables, atomG.constraints)
@@ -78,9 +78,9 @@ func (p *Program) ExpandGenerators() {
 }
 
 func (p *Program) Ground() (gRules []GroundRule,
-	existQ map[int][]Atom,
-	forallQ map[int][]Atom,
-	maxIndex int) {
+				existQ map[int][]Atom,
+				forallQ map[int][]Atom,
+				maxIndex int) {
 
 	gRules = make([]GroundRule, 0)
 	existQ = make(map[int][]Atom)
@@ -147,7 +147,7 @@ func main() {
 
 	//p.Debug()
 
-	// we only work with Atoms now !
+	// There are no equivalences and no generators anymore !
 
 	{
 		debug(2, "Grounding:")
@@ -403,7 +403,6 @@ func parseProgram() (p Program) {
 }
 
 type Program struct {
-	//	Quantifiers []Quantifier
 	Rules     []Rule
 	Domains   map[string][]int
 	Constants map[string]int
@@ -414,7 +413,7 @@ func (p *Program) GlobalVariables() *strset.Set {
 	for k := range p.Domains {
 		set.Add(k)
 	}
-	for k, _ := range p.Constants {
+	for k := range p.Constants {
 		set.Add(k)
 	}
 	return set
@@ -589,3 +588,5 @@ func makeSet(a, b int) (c []int) {
 	}
 	return
 }
+
+
