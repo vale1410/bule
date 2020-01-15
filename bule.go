@@ -196,14 +196,14 @@ func (atom Atom) String() string {
 	if atom.Neg == false {
 		s = "~"
 	}
-	s = s + atom.Name + "("
+	s = s + atom.Name + "["
 	for i, x := range atom.Terms {
 		s += string(x)
 		if i < len(atom.Terms)-1 {
 			s += ","
 		}
 	}
-	return s + ")"
+	return s + "]"
 }
 
 func (term Term) FreeVars() *strset.Set {
@@ -271,14 +271,15 @@ func (p *Program) generateAssignments(variables []string, constraints []Constrai
 	assignments := make([]map[string]int, 0, 32)
 
 	for _, assignment := range allPossibleAssignments {
-		//		fmt.Println(assignment)
+		fmt.Println(assignment)
+		fmt.Println(constraints)
 		// check all constraints
 		allConstraintsTrue := true
 		for _, cons := range constraints {
 			tmp := assign(cons.BoolExpr, assignment)
 			tmp = assign(tmp, p.Constants)
 			tmp = strings.ReplaceAll(tmp, "#mod", "%")
-			asserts(groundBoolLogicalMathExpression(tmp), "Must be bool expression "+tmp+cons.BoolExpr)
+			asserts(groundBoolLogicalMathExpression(tmp), "Must be bool expression",tmp,"from",cons.BoolExpr)
 			allConstraintsTrue = allConstraintsTrue && evaluateBoolExpression(tmp)
 		}
 		if allConstraintsTrue {
@@ -307,18 +308,19 @@ func parseProgram() (p Program) {
 
 		s := strings.TrimSpace(scanner.Text())
 		if pos := strings.Index(s, "%"); pos >= 0 {
-			s = s[pos:]
+			s = s[:pos]
 		}
 		s = strings.Trim(s, ".")
 		s = strings.Replace(s, " ", "", -1)
-		s = strings.Replace(s, "].", "]", -1)
-		s = strings.Replace(s, "],", "] ", -1)
-		s = strings.Replace(s, ", ", " ", -1)
+		//s = strings.Replace(s, "].", "]", -1)
+		//s = strings.Replace(s, "],", "] ", -1)
+		//s = strings.Replace(s, ", ", " ", -1)
 		debugString := s
 
 		if s == "" || strings.HasPrefix(s, "%") {
 			continue
 		}
+
 
 		// parsing a global definition like " X = {4..5}.
 		// or c = 5. or k  = c*2.
@@ -350,11 +352,14 @@ func parseProgram() (p Program) {
 			var head Atom
 			if strings.Contains(s, "<=>") {
 				ht := strings.Split(s, "<=>")
-				asserts(len(ht) == 2, "Parsing equivalence wrong")
-				s = ht[1]
+				asserts(len(ht) == 2, "Parsing equivalence wrong", s)
 				head, _ = parseAtom(ht[0])
+				s = ht[1]
 			}
-			ruleElements := strings.Fields(s)
+
+			ruleElements := generateRuleElements(s)
+
+			fmt.Println("RuleElements", ruleElements)
 
 			var atoms []Atom
 			var atomGenerators []AtomGenerator
@@ -401,6 +406,13 @@ func parseProgram() (p Program) {
 	}
 	return
 }
+
+
+func generateRuleElements(s string) (elements []string) {
+	s = strings.Replace(s, "],", "] ", -1)
+	return strings.Fields(s)
+}
+
 
 type Program struct {
 	Rules     []Rule
@@ -460,7 +472,12 @@ type Atom struct {
 type Term string
 
 // assuming it is not a constraint
-func parseAtom(literalString string) (Atom, bool) {
+// ~a4gDH[123,a*b,432-43#mod2]
+func parseAtom(literalString string) (Atom, error) {
+ 	// Check EBNF of Atom
+ 	// Check for if has [] or not .
+	asserts(strings.Contains(literalString,"["), "doesnt contain [", literalString)
+	asserts(strings.Contains(literalString,"]"), "doesnt contain ]", literalString)
 	name := literalString[:strings.Index(literalString, "[")]
 	literalString = literalString[strings.Index(literalString, "[")+1:]
 	par := literalString[:strings.LastIndex(literalString, "]")]
@@ -475,7 +492,7 @@ func parseAtom(literalString string) (Atom, bool) {
 		name = strings.TrimLeft(name, "~")
 		n = false
 	}
-	return Atom{literalString, n, name, terms}, true
+	return Atom{literalString, n, name, terms}, nil
 }
 
 // Makes a deep copy
@@ -558,10 +575,14 @@ func (atom *Atom) makeNeg() Atom {
 	return a
 }
 
-func asserts(condition bool, info string) {
+func asserts(condition bool, info ...string) {
 	if !condition {
-		fmt.Println(info)
-		panic(errors.New(info))
+		s := ""
+		for _, x := range info {
+			s += x + " "
+		}
+		fmt.Println(s)
+		panic(errors.New(s))
 	}
 }
 
@@ -571,9 +592,12 @@ func asserte(err error) {
 	}
 }
 
-func assertx(err error, info string) {
+func assertx(err error, info ...string) {
 	if err != nil {
-		fmt.Println(info)
+		for _, s := range info {
+			fmt.Print(s, " ")
+		}
+		fmt.Println()
 		panic(err)
 	}
 }
