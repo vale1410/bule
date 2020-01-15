@@ -1,9 +1,8 @@
-
 c=2.
 r=2.
 q=2.
 
-%% board positions (X,Y)
+%% board positions [X,Y]
 X={1..c}.
 Y={1..r}.
 T={0..c*r-((c*r)#mod2)-1}.
@@ -19,7 +18,7 @@ move[6,T] <=> 6 <= c , time[T], ~chose[0,T],  chose[1,T],  chose[2,T].
 move[7,T] <=> 7 <= c , time[T],  chose[0,T],  chose[1,T],  chose[2,T].
 
 
-#exist[T-1), time[T].
+#exist[T-1], time[T].
 #forall[T], chose[B,T], T#mod2=1, 2**B<=c.
 #exist[T], chose[B,T], T#mod2=0, 2**B<=c.
 #exist[T], count[X,Y,T], move[X,T].
