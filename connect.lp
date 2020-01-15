@@ -20,10 +20,11 @@ T={0..c*r-((c*r)#mod2)-1}.
 
 %% All remaining variables are innermost layer (default)
 
-% time management
-% step[c,T] is true if at least one move has been made.
-% This rules enforces that if a move has been made, then also in previous times moves
-% have been made. And once no moves are mode, no moves will be made in the future.
+% time management:
+% step[c,T] is true if at least one move has been made. This rules enforces
+% that if a move has been made, then also in previous times moves have been
+% made. And once no moves are made, this stays in the future and no moves more 
+% moves will be made.
 
 ~step[c,T], step[c,T-1], T>1.
 
@@ -35,8 +36,8 @@ T={0..c*r-((c*r)#mod2)-1}.
  move[X,T], ~step[X,T], step[X-1,T].
 ~step[0,T].
 
-%% symmetry breaking, choose first move in the right side (including center).
-%% q/2 rounds down, i.e. it works for odd and even q
+%% symmetry breaking: choose first move in the right side (including center).
+%% notice that q/2 rounds down, i.e. it works for odd and even q
 % ~step[q/2,0].
 
 %first[X,T] <=> ~step[X-1,T] && step[X,T].

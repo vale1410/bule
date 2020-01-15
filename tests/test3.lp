@@ -1,9 +1,8 @@
-
 c=2.
 r=2.
 q=2.
 
-%% board positions (X,Y)
+%% board positions [X,Y]
 X={1..c}.
 Y={1..r}.
 T={0..c*r-((c*r)#mod2)-1}.
@@ -19,14 +18,10 @@ move[6,T] <=> 6 <= c, time[T], ~chose[0,T],  chose[1,T],  chose[2,T].
 move[7,T] <=> 7 <= c, time[T],  chose[0,T],  chose[1,T],  chose[2,T].
 
 
-#exist[T-1), time[T].
+#exist[T-1], time[T].
 #forall[T], chose[B,T], T#mod2=1, 2**B<=c.
 #exist[T], chose[B,T], T#mod2=0, 2**B<=c.
 #exist[T], count[X,Y,T], move[X,T].
-
-%% IDEA:
-B={0..#log(c)}. % log rounds up, i.e. log(3) = 2.
-move[X,T] <=> X<=c, time[T], chose[B,T]:(X/(2**B))#mod2==0:B, ~chose[B,T]:(X/(2**B))#mod2==1:B.
 
 ~count[X,Y,T-1], count[X,Y,T], T>Y, T+Y<=Tmax.
 count[X,Y-1,T-1], ~count[X,Y,T], Y>0, T+Y<=Tmax.
@@ -37,9 +32,9 @@ count[X,0,-1].
 count[X,Y,-1].
 ~count[X,1,-1].
 
-board[X,Y,T#mod2], count[X,Y,T-1], ~count[X,Y,T], T#mode2=1.
-~stone[X,Y,T], ~count[X,Y,T-1], T#mode2=0.
-~stone[X,Y,T],  count[X,Y,T],   T#mode2=0.
+board[X,Y,T#mod2], count[X,Y,T-1], ~count[X,Y,T], T#mod2=1.
+~stone[X,Y,T], ~count[X,Y,T-1], T#mod2=0.
+~stone[X,Y,T],  count[X,Y,T],   T#mod2=0.
 ~board[X,Y,T#mod2], stone[X,Y,T], T#mod2=0.
 
 %% winning positions:
