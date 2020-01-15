@@ -78,9 +78,9 @@ func (p *Program) ExpandGenerators() {
 }
 
 func (p *Program) Ground() (gRules []GroundRule,
-				existQ map[int][]Atom,
-				forallQ map[int][]Atom,
-				maxIndex int) {
+	existQ map[int][]Atom,
+	forallQ map[int][]Atom,
+	maxIndex int) {
 
 	gRules = make([]GroundRule, 0)
 	existQ = make(map[int][]Atom)
@@ -271,14 +271,14 @@ func (p *Program) generateAssignments(variables []string, constraints []Constrai
 	assignments := make([]map[string]int, 0, 32)
 
 	for _, assignment := range allPossibleAssignments {
-		//fmt.Println(assignment)
+		//		fmt.Println(assignment)
 		// check all constraints
 		allConstraintsTrue := true
 		for _, cons := range constraints {
 			tmp := assign(cons.BoolExpr, assignment)
 			tmp = assign(tmp, p.Constants)
 			tmp = strings.ReplaceAll(tmp, "#mod", "%")
-			asserts(groundBoolLogicalMathExpression(tmp), "Must be bool expression "+tmp)
+			asserts(groundBoolLogicalMathExpression(tmp), "Must be bool expression "+tmp+cons.BoolExpr)
 			allConstraintsTrue = allConstraintsTrue && evaluateBoolExpression(tmp)
 		}
 		if allConstraintsTrue {
@@ -438,7 +438,7 @@ func (r *Rule) hasHead() bool {
 // is a math expression that evaluates to true or false
 // Constraints can contain variables
 // supported are <,>,<=,>=,==
-// z.B.: A*3<=5-2*R/7#mode3.
+// z.B.: A*3<=5-2*R/7#mod3.
 type Constraint struct {
 	BoolExpr string
 }
@@ -588,5 +588,3 @@ func makeSet(a, b int) (c []int) {
 	}
 	return
 }
-
-

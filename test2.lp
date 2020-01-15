@@ -14,18 +14,18 @@ P={0..1}.
 Z={0..1}.
 V={0..1}.
 
-// definition of winning positions
+% definition of winning positions
 win[X,Y,V,Z,P] <=> board[X+Z*D,V*(Y+(1-Z)*D)+(1-V)*(Y+Z*(q-1)+((-1)**Z)*D),P]:D.
 
-// player 1 should not win
+% player 1 should not win
 ~win[X,Y,V,Z,1].
 
-// player 0 needs at least one winning positions
+% player 0 needs at least one winning positions
 win[X,Y,V,Z,0]:X:Y:V:Z.
 
-// Nobody claims positions outside the board
-~board[r+1..r+q,Y+D,P].
-~board[X+D,c+1..c+q,P].
+%%% Nobody claims positions outside the board
+%%~board[r+1..r+q,Y+D,P].
+%%~board[X+D,c+1..c+q,P].
 
 
 

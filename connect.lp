@@ -61,7 +61,6 @@ first[X,T], count[X,Y,T-1], ~count[X,Y,T].
 ~board[X,Y,T#mod2],~count[X,Y,T-1].
 ~board[X,Y,T#mod2], count[X,Y,T].
 
-
 ~board(X,Y,0), ~board(X,Y,1).
 
 %%% Winning positions
@@ -78,4 +77,6 @@ Z={0..1}.
 
 % at least one winning positions for player 1
 winstr(X,Y,Z):X+Z*(q-1)<=c:Y+(1-Z)*(q-1)<=r:X:Y:Z, windia(X,Y,Z):X+q<c:Y+q<r:X:Y:Z.
+
+
 

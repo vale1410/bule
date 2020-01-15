@@ -14,10 +14,10 @@ Y={1..r}.
 D={1..q-1}.
 
 %% WW = {{(X,Y+D):D},{(X+D,Y):D},{(X+D,Y+D):D},{(X-D,Y+D):D}}.
-e count(X,Y,T):X:Y.
-a abc(1,2).
-a move(X,T):X.
-a abc(3,4).
+#exist[T], count[X,Y,T]:X:Y.
+#forall[1], abc[1,2].
+#exist[T], move[X,T]:X.
+#exist[2], abc[3,4].
 
 %% 
 %% exist(T), T #mod 2 = 1, all else
