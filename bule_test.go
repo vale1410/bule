@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"regexp"
 	"testing"
@@ -107,9 +108,32 @@ func TestDecompose(t *testing.T) {
 
 
 
-func TestRuleElement(t *testing.T) {
-
+func TestPeek(t *testing.T) {
+	if peek(",", "a") {
+		t.Fail()
+	}
 }
+
+func TestRuleElement1(t *testing.T) {
+
+
+	s := "1<3,0<2"
+
+	elements := generateRuleElements(s)
+
+	fmt.Println(elements)
+}
+
+func TestRuleElement2(t *testing.T) {
+
+
+	s := "move[3,2],1<3,0<2"
+
+	elements := generateRuleElements(s)
+
+	fmt.Println(elements)
+}
+
 func TestRegexp(t *testing.T) {
 
 //	buleVariable:= `^[A-Z][a-zA-Z0-9_]*`

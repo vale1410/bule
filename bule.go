@@ -8,6 +8,7 @@ import (
 	"github.com/Knetic/govaluate"
 	"github.com/scylladb/go-set/strset"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
@@ -279,7 +280,7 @@ func (p *Program) generateAssignments(variables []string, constraints []Constrai
 			tmp := assign(cons.BoolExpr, assignment)
 			tmp = assign(tmp, p.Constants)
 			tmp = strings.ReplaceAll(tmp, "#mod", "%")
-			asserts(groundBoolLogicalMathExpression(tmp), "Must be bool expression",tmp,"from",cons.BoolExpr)
+			asserts(groundBoolLogicalMathExpression(tmp), "Must be bool expression", tmp, "from", cons.BoolExpr)
 			allConstraintsTrue = allConstraintsTrue && evaluateBoolExpression(tmp)
 		}
 		if allConstraintsTrue {
@@ -320,7 +321,6 @@ func parseProgram() (p Program) {
 		if s == "" || strings.HasPrefix(s, "%") {
 			continue
 		}
-
 
 		// parsing a global definition like " X = {4..5}.
 		// or c = 5. or k  = c*2.
@@ -407,12 +407,66 @@ func parseProgram() (p Program) {
 	return
 }
 
+func generateRuleElements(all string) (elements []string) {
+	//s = strings.Replace(s, "],", "] ", -1)
 
-func generateRuleElements(s string) (elements []string) {
-	s = strings.Replace(s, "],", "] ", -1)
-	return strings.Fields(s)
+	elementSep := ","
+	generatorSep := ":"
+	literal := `~?[a-z][a-zA-Z0-9_]*\[.*\]`
+	constraint := `[a-zA-Z0-9_+*%-=><()!]+`
+
+	element := ""
+	t := ""
+	s := all
+	for s != "" {
+		if peek(elementSep, s) {
+			_, s = nextToken(elementSep, s)
+			if element != "" {
+				elements = append(elements, element)
+			}
+			element = ""
+			continue
+		}
+		if peek(generatorSep, s) {
+			t, s = nextToken(generatorSep, s)
+			element += t
+			continue
+		}
+		if peek(literal, s) {
+			fmt.Println("is literal", s)
+			t, s = nextToken(literal, s)
+			element += t
+			continue
+		}
+		if peek(constraint, s) {
+			fmt.Println("is constraints", s)
+			t, s = nextToken(constraint, s)
+			element += t
+			continue
+		}
+		asserts(false, all,"problem with string",s)
+	}
+
+	if element != "" {
+		elements = append(elements, element)
+	}
+	return
 }
 
+// is true if s starts with regex
+func peek(reg string, s string) bool {
+	re := regexp.MustCompile("^" + reg)
+	loc := re.FindStringIndex(s)
+	return loc != nil
+}
+
+func nextToken(reg string, s string) (token string, rest string) {
+	re := regexp.MustCompile("^" + reg)
+	loc := re.FindStringIndex(s)
+	asserts(loc != nil && loc[0] == 0,
+		"Must be first element. s:", s, " regex:", reg)
+	return s[:loc[1]], s[loc[1]:]
+}
 
 type Program struct {
 	Rules     []Rule
@@ -474,10 +528,10 @@ type Term string
 // assuming it is not a constraint
 // ~a4gDH[123,a*b,432-43#mod2]
 func parseAtom(literalString string) (Atom, error) {
- 	// Check EBNF of Atom
- 	// Check for if has [] or not .
-	asserts(strings.Contains(literalString,"["), "doesnt contain [", literalString)
-	asserts(strings.Contains(literalString,"]"), "doesnt contain ]", literalString)
+	// Check EBNF of Atom
+	// Check for if has [] or not .
+	asserts(strings.Contains(literalString, "["), "doesnt contain [", literalString)
+	asserts(strings.Contains(literalString, "]"), "doesnt contain ]", literalString)
 	name := literalString[:strings.Index(literalString, "[")]
 	literalString = literalString[strings.Index(literalString, "[")+1:]
 	par := literalString[:strings.LastIndex(literalString, "]")]
