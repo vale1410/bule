@@ -118,10 +118,11 @@ func TestRuleElement1(t *testing.T) {
 
 
 	s := "1<3,0<2"
+	constraint := `[a-zA-Z1-9_<!*+-/]+`
 
-	elements := generateRuleElements(s)
+	a,b := nextToken(constraint, s)
 
-	fmt.Println(elements)
+	fmt.Println(a,b,s)
 }
 
 func TestRuleElement2(t *testing.T) {
