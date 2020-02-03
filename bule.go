@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/Knetic/govaluate"
 	"github.com/scylladb/go-set/strset"
+	"github.com/vale1410/bule/parser"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
@@ -43,14 +43,14 @@ func (p *Program) Debug() {
 
 func (p *Program) RewriteEquivalences() {
 	// Make rules from the head equivalences
-	// Current assumption: head is only one atom, body is a conjunction!
+	// Current assumption: head is only one literal, body is a conjunction!
 	newRules := make([]Rule, 0)
 	for _, r := range p.Rules {
 		if r.hasHead() {
 			// Check that freeVars are the same for right and left side (assumption)
 			for i, atom := range r.Atoms {
 				newRule := Rule{}
-				newRule.Atoms = []Atom{r.Head.makeNeg(), atom.Copy()}
+				newRule.Atoms = []Literal{r.Head.makeNeg(), atom.Copy()}
 				newRule.Constraints = r.Constraints
 				newRules = append(newRules, newRule)
 				r.Atoms[i] = atom.makeNeg()
@@ -66,9 +66,12 @@ func (p *Program) ExpandGenerators() {
 
 	for i, r := range p.Rules {
 		for _, atomG := range r.AtomGenerators {
-			assignments := p.generateAssignments(atomG.variables, atomG.constraints)
+			assignments := p.generateAssignments(
+				atomG.variables,
+				atomG.constraints)
 			for _, assignment := range assignments {
-				p.Rules[i].Atoms = append(p.Rules[i].Atoms, atomG.atom.simplifyAtom(assignment))
+				p.Rules[i].Atoms = append(p.Rules[i].Atoms,
+					atomG.literal.simplifyAtom(assignment))
 			}
 		}
 		if len(r.AtomGenerators) > 0 {
@@ -79,13 +82,13 @@ func (p *Program) ExpandGenerators() {
 }
 
 func (p *Program) Ground() (gRules []GroundRule,
-	existQ map[int][]Atom,
-	forallQ map[int][]Atom,
+	existQ map[int][]Literal,
+	forallQ map[int][]Literal,
 	maxIndex int) {
 
 	gRules = make([]GroundRule, 0)
-	existQ = make(map[int][]Atom)
-	forallQ = make(map[int][]Atom)
+	existQ = make(map[int][]Literal)
+	forallQ = make(map[int][]Literal)
 	maxIndex = 0
 	globals := p.GlobalVariables()
 
@@ -100,23 +103,23 @@ func (p *Program) Ground() (gRules []GroundRule,
 		for _, assignment := range assignments {
 			gRule := GroundRule{}
 			for _, atom := range r.Atoms {
-				gRule.Atoms = append(gRule.Atoms, atom.simplifyAtom(assignment))
+				gRule.literals = append(gRule.literals, atom.simplifyAtom(assignment))
 			}
 			debug(2, "gRule", gRule)
-			if len(gRule.Atoms) > 0 {
-				if gRule.Atoms[0].Name == "#forall" {
-					asserts(len(gRule.Atoms[0].Terms) == 1, "Wrong arity for forall")
-					val, err := strconv.Atoi(string(gRule.Atoms[0].Terms[0]))
+			if len(gRule.literals) > 0 {
+				if gRule.literals[0].Name == "#forall" {
+					asserts(len(gRule.literals[0].Terms) == 1, "Wrong arity for forall")
+					val, err := strconv.Atoi(string(gRule.literals[0].Terms[0]))
 					asserte(err)
-					forallQ[val] = append(forallQ[val], gRule.Atoms[1:]...)
+					forallQ[val] = append(forallQ[val], gRule.literals[1:]...)
 					if val > maxIndex {
 						maxIndex = val
 					}
-				} else if gRule.Atoms[0].Name == "#exist" {
-					asserts(len(gRule.Atoms[0].Terms) == 1, "Wrong arity for exist")
-					val, err := strconv.Atoi(string(gRule.Atoms[0].Terms[0]))
+				} else if gRule.literals[0].Name == "#exist" {
+					asserts(len(gRule.literals[0].Terms) == 1, "Wrong arity for exist")
+					val, err := strconv.Atoi(string(gRule.literals[0].Terms[0]))
 					asserte(err)
-					existQ[val] = append(existQ[val], gRule.Atoms[1:]...)
+					existQ[val] = append(existQ[val], gRule.literals[1:]...)
 					if val > maxIndex {
 						maxIndex = val
 					}
@@ -136,17 +139,16 @@ func main() {
 
 	p := parseProgram()
 
-	//p.Debug()
+	if true {
+		return
+	}
+
 	debug(2, "\nExpand generators")
 	p.ExpandGenerators()
-
-	//p.Debug()
 
 	// forget about heads now!
 	debug(2, "\nRewrite Equivalences")
 	p.RewriteEquivalences()
-
-	//p.Debug()
 
 	// There are no equivalences and no generators anymore !
 
@@ -177,7 +179,7 @@ func main() {
 		}
 
 		for _, r := range gRules {
-			for _, a := range r.Atoms {
+			for _, a := range r.literals {
 				fmt.Print(a, " ")
 			}
 			fmt.Println()
@@ -185,29 +187,48 @@ func main() {
 	}
 }
 
+func (name AtomName) String() string {
+	return name.String()
+}
+
 func (atomG AtomGenerator) String() string {
 	return fmt.Sprintf("%v:constraints%v:vars%v",
-		atomG.atom.String(),
+		atomG.literal.String(),
 		atomG.constraints,
 		atomG.variables)
 }
 
-func (atom Atom) String() string {
+func (literal Literal) String() string {
 	var s string
-	if atom.Neg == false {
+	if literal.Neg == false {
 		s = "~"
 	}
-	s = s + atom.Name + "["
-	for i, x := range atom.Terms {
+	s = s + literal.Name.String() + "["
+	for i, x := range literal.Terms {
 		s += string(x)
-		if i < len(atom.Terms)-1 {
+		if i < len(literal.Terms)-1 {
 			s += ","
 		}
 	}
 	return s + "]"
 }
 
-func (term Term) FreeVars() *strset.Set {
+func (literal Literal) FreeVars()  *strset.Set {
+	set := strset.New()
+	for _, t := range literal.Terms {
+		set.Merge(t.FreeVars())
+	}
+	return set
+}
+
+func (literal Literal) Copy() Literal {
+	t := make([]TermExpression, len(literal.Terms))
+	copy(t, literal.Terms)
+	literal.Terms = t
+	return literal
+}
+
+func (term TermExpression) FreeVars() *strset.Set {
 	f := func(c rune) bool {
 		return !unicode.IsLetter(c) && !unicode.IsNumber(c) && c != '_'
 	}
@@ -221,29 +242,15 @@ func (term Term) FreeVars() *strset.Set {
 	return set
 }
 
-func (atom Atom) FreeVars() *strset.Set {
-	set := strset.New()
-	for _, t := range atom.Terms {
-		set.Merge(t.FreeVars())
-	}
-	return set
-}
 
-func (rule *Rule) FreeVars() *strset.Set {
-	set := strset.New()
+func (rule *Rule) FreeVars() *strset.Set  {
+	set := rule.Head.FreeVars()
 	for _, a := range rule.Atoms {
 		set.Merge(a.FreeVars())
 	}
-	set.Merge(rule.Head.FreeVars())
 	return set
 }
 
-func (atom Atom) Copy() Atom {
-	t := make([]Term, len(atom.Terms))
-	copy(t, atom.Terms)
-	atom.Terms = t
-	return atom
-}
 
 func (p *Program) generateAssignments(variables []string, constraints []Constraint) []map[string]int {
 
@@ -279,7 +286,7 @@ func (p *Program) generateAssignments(variables []string, constraints []Constrai
 		for _, cons := range constraints {
 			tmp := assign(cons.BoolExpr, assignment)
 			tmp = assign(tmp, p.Constants)
-			tmp = strings.ReplaceAll(tmp, "#mod", "%")
+			tmp = strings.ReplaceAll(string(tmp), "#mod", "%")
 			asserts(groundBoolLogicalMathExpression(tmp), "Must be bool expression", tmp, "from", cons.BoolExpr)
 			allConstraintsTrue = allConstraintsTrue && evaluateBoolExpression(tmp)
 		}
@@ -311,19 +318,22 @@ func parseProgram() (p Program) {
 		if pos := strings.Index(s, "%"); pos >= 0 {
 			s = s[:pos]
 		}
-		s = strings.Trim(s, ".")
+		//s = strings.Trim(s, ".")
 		s = strings.Replace(s, " ", "", -1)
 		//s = strings.Replace(s, "].", "]", -1)
 		//s = strings.Replace(s, "],", "] ", -1)
 		//s = strings.Replace(s, ", ", " ", -1)
-		debugString := s
+		//		debugString := s
 
 		if s == "" || strings.HasPrefix(s, "%") {
 			continue
 		}
 
-		// parsing a global definition like " X = {4..5}.
-		// or c = 5. or k  = c*2.
+
+		// parsing a global definition like "
+		// X = {4..5}.
+		// or c = 5.
+		// or k  = c*2.
 		if strings.Contains(s, "=") &&
 			!isConstraint(s) &&
 			!strings.Contains(s, "<=>") {
@@ -348,8 +358,9 @@ func parseProgram() (p Program) {
 			continue
 		}
 
+
 		{
-			var head Atom
+			var head Literal
 			if strings.Contains(s, "<=>") {
 				ht := strings.Split(s, "<=>")
 				asserts(len(ht) == 2, "Parsing equivalence wrong", s)
@@ -357,22 +368,23 @@ func parseProgram() (p Program) {
 				s = ht[1]
 			}
 
-			ruleElements := generateRuleElements(s)
+			ruleElements, err := parser.RuleElements(s)
+			asserte(err)
 
 			fmt.Println("RuleElements", ruleElements)
 
-			var atoms []Atom
+			var atoms []Literal
 			var atomGenerators []AtomGenerator
 			var ruleConstraints []Constraint
 
-			for _, ruleElement := range ruleElements {
+			for _, token := range ruleElements {
 
 				if !strings.Contains(ruleElement, ":") {
 					if isConstraint(ruleElement) {
 						ruleConstraints = append(ruleConstraints, Constraint{ruleElement})
 					} else {
-						atom, _ := parseAtom(ruleElement)
-						atoms = append(atoms, atom)
+						literal, _ := parseAtom(ruleElement)
+						atoms = append(atoms, literal)
 
 					}
 					continue
@@ -393,7 +405,7 @@ func parseProgram() (p Program) {
 					}
 				}
 
-				atomG.atom, _ = parseAtom(xs[0])
+				atomG.literal, _ = parseAtom(xs[0])
 				atomGenerators = append(atomGenerators, atomG)
 			}
 			p.Rules = append(p.Rules,
@@ -405,67 +417,6 @@ func parseProgram() (p Program) {
 		}
 	}
 	return
-}
-
-func generateRuleElements(all string) (elements []string) {
-	//s = strings.Replace(s, "],", "] ", -1)
-
-	elementSep := ","
-	generatorSep := ":"
-	literal := `~?[a-z][a-zA-Z0-9_]*\[.*\]`
-	constraint := `[a-zA-Z0-9_+*%-=><()!]+`
-
-	element := ""
-	t := ""
-	s := all
-	for s != "" {
-		if peek(elementSep, s) {
-			_, s = nextToken(elementSep, s)
-			if element != "" {
-				elements = append(elements, element)
-			}
-			element = ""
-			continue
-		}
-		if peek(generatorSep, s) {
-			t, s = nextToken(generatorSep, s)
-			element += t
-			continue
-		}
-		if peek(literal, s) {
-			fmt.Println("is literal", s)
-			t, s = nextToken(literal, s)
-			element += t
-			continue
-		}
-		if peek(constraint, s) {
-			fmt.Println("is constraints", s)
-			t, s = nextToken(constraint, s)
-			element += t
-			continue
-		}
-		asserts(false, all,"problem with string",s)
-	}
-
-	if element != "" {
-		elements = append(elements, element)
-	}
-	return
-}
-
-// is true if s starts with regex
-func peek(reg string, s string) bool {
-	re := regexp.MustCompile("^" + reg)
-	loc := re.FindStringIndex(s)
-	return loc != nil
-}
-
-func nextToken(reg string, s string) (token string, rest string) {
-	re := regexp.MustCompile("^" + reg)
-	loc := re.FindStringIndex(s)
-	asserts(loc != nil && loc[0] == 0,
-		"Must be first element. s:", s, " regex:", reg)
-	return s[:loc[1]], s[loc[1]:]
 }
 
 type Program struct {
@@ -486,13 +437,13 @@ func (p *Program) GlobalVariables() *strset.Set {
 }
 
 type GroundRule struct {
-	Atoms []Atom
+	literals []Literal
 }
 
 type Rule struct {
 	debugString    string
-	Head           Atom
-	Atoms          []Atom
+	Head           Literal
+	Atoms          []Literal
 	AtomGenerators []AtomGenerator
 	Constraints    []Constraint
 }
@@ -510,25 +461,29 @@ type Constraint struct {
 }
 
 type AtomGenerator struct {
-	debugString string
 	variables   []string
 	constraints []Constraint
-	atom        Atom
+	literal     Literal
 }
 
-type Atom struct {
+type Literal struct {
 	debugString string
 	Neg         bool
-	Name        string
-	Terms       []Term
+	Name        AtomName
+	Terms       []TermExpression
 }
 
-type Term string
+type TermExpression string
+type AtomName string
+
+func (t TermExpression) String() string {
+	return string(t)
+}
 
 // assuming it is not a constraint
 // ~a4gDH[123,a*b,432-43#mod2]
-func parseAtom(literalString string) (Atom, error) {
-	// Check EBNF of Atom
+func parseAtom(literalString string) (Literal, error) {
+	// Check EBNF of Literal
 	// Check for if has [] or not .
 	asserts(strings.Contains(literalString, "["), "doesnt contain [", literalString)
 	asserts(strings.Contains(literalString, "]"), "doesnt contain ]", literalString)
@@ -536,29 +491,29 @@ func parseAtom(literalString string) (Atom, error) {
 	literalString = literalString[strings.Index(literalString, "[")+1:]
 	par := literalString[:strings.LastIndex(literalString, "]")]
 	ts := strings.Split(par, ",")
-	terms := make([]Term, len(ts))
+	terms := make([]TermExpression, len(ts))
 	for i, expr := range ts {
 		expr = strings.ReplaceAll(expr, "#mod", "%")
-		terms[i] = Term(expr)
+		terms[i] = TermExpression(expr)
 	}
 	n := true
 	if strings.HasPrefix(name, "~") {
 		name = strings.TrimLeft(name, "~")
 		n = false
 	}
-	return Atom{literalString, n, name, terms}, nil
+	return Literal{literalString, n, AtomName(name), terms}, nil
 }
 
 // Makes a deep copy
-func (atom Atom) simplifyAtom(assignment map[string]int) (newAtom Atom) {
-	newAtom = atom.Copy()
-	for i, term := range atom.Terms {
+func (literal Literal) simplifyAtom(assignment map[string]int) (newAtom Literal) {
+	newAtom = literal.Copy()
+	for i, term := range literal.Terms {
 		expr := assign(string(term), assignment)
 		if groundMathExpression(expr) {
 			r := evaluateExpression(expr)
-			newAtom.Terms[i] = Term(strconv.Itoa(r))
+			newAtom.Terms[i] = TermExpression(strconv.Itoa(r))
 		} else {
-			newAtom.Terms[i] = Term(expr)
+			newAtom.Terms[i] = TermExpression(expr)
 		}
 	}
 	return
@@ -582,20 +537,20 @@ func number(s string) bool {
 
 func groundMathExpression(s string) bool {
 	//	r, _ := regexp.MatchString("[0-9+*/%]+", s)
-	return "" == strings.Trim(s, "0123456789+*%-/()")
+	return "" == strings.Trim(string(s), "0123456789+*%-/()")
 }
 
 func groundBoolLogicalMathExpression(s string) bool {
 	//	r, _ := regexp.MatchString("[0-9+*/%!=><]+", s)
-	return "" == strings.Trim(s, "0123456789+*%-=><()!")
+	return "" == strings.Trim(string(s), "0123456789+*%-=><()!&")
 }
 
 //assumption:Space only between literals.
-func assign(term string, assignment map[string]int) string {
+func assign(termExpression string, assignment map[string]int) string {
 	for Const, Val := range assignment {
-		term = strings.ReplaceAll(term, Const, strconv.Itoa(Val))
+		termExpression = strings.ReplaceAll(termExpression, Const, strconv.Itoa(Val))
 	}
-	return term
+	return termExpression
 }
 
 // Evaluates a ground math expression, needs to path mathExpression
@@ -609,17 +564,17 @@ func evaluateBoolExpression(term string) bool {
 }
 
 // Evaluates a ground math expression, needs to path mathExpression
-func evaluateExpression(term string) int {
-	term = strings.ReplaceAll(term, "#mod", "%")
-	expression, err := govaluate.NewEvaluableExpression(term)
-	assertx(err, term)
+func evaluateExpression(termExpression string) int {
+	termExpression = strings.ReplaceAll(termExpression, "#mod", "%")
+	expression, err := govaluate.NewEvaluableExpression(termExpression)
+	assertx(err, termExpression)
 	result, err := expression.Evaluate(nil)
-	assertx(err, term)
+	assertx(err, termExpression)
 	return int(result.(float64))
 }
 
-func (atom *Atom) makeNeg() Atom {
-	a := atom.Copy()
+func (literal *Literal) makeNeg() Literal {
+	a := literal.Copy()
 	a.Neg = !a.Neg
 	if strings.HasPrefix(a.debugString, "~") {
 		a.debugString = strings.TrimLeft(a.debugString, "~")
