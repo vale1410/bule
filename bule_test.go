@@ -1,22 +1,13 @@
 package bule
 
 import (
-	//"log"
+	"fmt"
 	"testing"
 )
 
 func TestEvaluateExpression(t *testing.T) {
 
-	expr := "X+Y==3."
-	rule, err := parseRule(expr)
-	if err != nil {
-		t.Log(err)
-		t.Fail()
-	}
-
-	rule.Debug()
-
-
+	expr := Term("X+Y==3")
 	cc := map[string]int{
 		"X": 5,
 		"Y": 10,
@@ -25,28 +16,55 @@ func TestEvaluateExpression(t *testing.T) {
 		"X": 2,
 		"Y": 1,
 	}
-	exprFalse := assign(expr, cc)
-	exprTrue := assign(expr, cc2)
-	valF := evaluateBoolExpression(exprFalse)
-	valT := evaluateBoolExpression(exprTrue)
+	exprFalse,_ := assign(expr, cc)
+	exprTrue,_ := assign(expr, cc2)
+	valF := evaluateBoolExpression(exprFalse.String())
+	valT := evaluateBoolExpression(exprTrue.String())
 	if valF || !valT {
 		t.Error("Evaluation is wrong.")
 	}
 }
-//
-//func TestInstantiate1(t *testing.T) {
-//
-//	{
-//		a, _ := parseAtom("move[X,Y,4]")
-//		assignment := make(map[string]int, 0)
-//		assignment["Y"] = 3
-//		b := a.simplifyAtom(assignment)
-//		if b.String() != "move[X,3,4]" {
-//			log.Println(a," ",b)
-//			t.Fail()
-//		}
-//	}
-//}
+
+func TestInstantiate1(t *testing.T) {
+
+	{
+		rule := parseRule("move[X,Y,4].")
+		assignment := make(map[string]int, 0)
+		assignment["Y"] = 3
+		a := rule.Literals[0]
+		b := a.assign(assignment)
+		if b.String() != "move[X,3,4]" {
+			fmt.Println("a:", a, "\nb:", b)
+			t.Fail()
+		}
+	}
+}
+
+func TestBule1(t *testing.T) {
+
+	lines := []string{"#const a=5.","fact[1,2].", "fact[2,a].", "search[A,B]:A+1==B:fact[A,B]."}
+	p := ParseProgramFromStrings(lines)
+	p.ReplaceConstants()
+	p.CollectFacts()
+	p.ExpandGenerators()
+	if p.Rules[0].String() == "search[1,2]" {
+		t.Fail()
+	}
+}
+
+func TestBule2(t *testing.T) {
+
+	lines := []string{"a[1..7,4].","b[2].", "search[A,B,_C] : A==B : a[A,C] : b[B]."}
+	p := ParseProgramFromStrings(lines)
+	p.ReplaceConstants()
+	p.Print()
+	p.ExpandIntervals()
+	p.Print()
+	p.CollectFacts()
+	p.ExpandGenerators()
+	p.Print()
+}
+
 //
 //
 //func TestInstantiate2(t *testing.T) {
@@ -76,4 +94,3 @@ func TestEvaluateExpression(t *testing.T) {
 //		}
 //	}
 //}
-

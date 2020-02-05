@@ -28,46 +28,49 @@ func main() {
 	p := bule.ParseProgram(*progFlag)
 	bule.DebugLevel = *debugFlag
 
-	debug(2, "\nExpand generators")
+	debug(2, "\nReplace Constants")
+    p.ReplaceConstants()
+
+	debug(2, "\nExpand Generators")
 	p.ExpandGenerators()
 
 	// forget about heads now!
 	debug(2, "\nRewrite Equivalences")
-	p.RewriteEquivalences()
+	p.RewriteEquivalencesAndImplications()
 
 	// There are no equivalences and no generators anymore !
 
 	{
 		debug(2, "Grounding:")
-	//	gRules, existQ, forallQ, maxIndex := p.Ground()
-	//
-	//	// Do Unit Propagation
-	//
-	//	// Find variables that need to be put in the quantifier alternation
-	//
-	//	for i := 0; i <= maxIndex; i++ {
-	//
-	//		if atoms, ok := forallQ[i]; ok {
-	//			fmt.Print("a")
-	//			for _, a := range atoms {
-	//				fmt.Print(" ", a)
-	//			}
-	//			fmt.Println()
-	//		}
-	//		if atoms, ok := existQ[i]; ok {
-	//			fmt.Print("e")
-	//			for _, a := range atoms {
-	//				fmt.Print(" ", a)
-	//			}
-	//			fmt.Println()
-	//		}
-	//	}
-	//
-	//	for _, r := range gRules {
-	//		for _, a := range r.literals {
-	//			fmt.Print(a, " ")
-	//		}
-	//		fmt.Println()
-	//	}
+		clauses, existQ, forallQ, maxIndex := p.Ground()
+
+		// Do Unit Propagation
+
+		// Find variables that need to be put in the quantifier alternation
+
+		for i := 0; i <= maxIndex; i++ {
+
+			if atoms, ok := forallQ[i]; ok {
+				fmt.Print("a")
+				for _, a := range atoms {
+					fmt.Print(" ", a)
+				}
+				fmt.Println()
+			}
+			if atoms, ok := existQ[i]; ok {
+				fmt.Print("e")
+				for _, a := range atoms {
+					fmt.Print(" ", a)
+				}
+				fmt.Println()
+			}
+		}
+
+		for _, clause := range clauses {
+			for _, lit := range clause {
+				fmt.Print(lit.String(), " ")
+			}
+			fmt.Println()
+		}
 	}
 }

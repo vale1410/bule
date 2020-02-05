@@ -31,7 +31,7 @@ func TestParser2(t *testing.T) {
 func TestParser3(t *testing.T) {
 
 	in := "~mo[4],X<Y,Y+1>=5,~ab[X,Y+1]."
-	out :=  "NEGATION{~}-ATOM{mo}-AtomBL{[}-TERM{4}-AtomBR{]}-RULECOMMA{,}-TERM{X}-<{<}-TERM{Y}-RULECOMMA{,}-TERM{Y+1}->={>=}-TERM{5}-RULECOMMA{,}-NEGATION{~}-ATOM{ab}-AtomBL{[}-TERM{X}-TERMCOMMA{,}-TERM{Y+1}-AtomBR{]}-DOT{.}-"
+	out :=  "NEGATION{~}-ATOM{mo}-AtomBL{[}-TERM{4}-AtomBR{]}-RULECOMMA{,}-TERM{X}-LT{<}-TERM{Y}-RULECOMMA{,}-TERM{Y+1}-GE{>=}-TERM{5}-RULECOMMA{,}-NEGATION{~}-ATOM{ab}-AtomBL{[}-TERM{X}-TERMCOMMA{,}-TERM{Y+1}-AtomBR{]}-DOT{.}-"
 	checkLexing(in, out, t)
 }
 
@@ -44,7 +44,7 @@ func TestParser4(t *testing.T) {
 
 func TestParser5(t *testing.T) {
 	in := "abc[X]:ab[X]:X<7."
-	out :=  "ATOM{abc}-AtomBL{[}-TERM{X}-AtomBR{]}-COLON{:}-ATOM{ab}-AtomBL{[}-TERM{X}-AtomBR{]}-COLON{:}-TERM{X}-<{<}-TERM{7}-DOT{.}-"
+	out :=  "ATOM{abc}-AtomBL{[}-TERM{X}-AtomBR{]}-COLON{:}-ATOM{ab}-AtomBL{[}-TERM{X}-AtomBR{]}-COLON{:}-TERM{X}-LT{<}-TERM{7}-DOT{.}-"
 	checkLexing(in, out, t)
 }
 
@@ -69,20 +69,20 @@ func TestParser8(t *testing.T) {
 
 func TestParser9(t *testing.T) {
 	in := "X+3>Y+3,(A-1)<=Bds-1."
-	out :=  "TERM{X+3}->{>}-TERM{Y+3}-RULECOMMA{,}-TERM{(A-1)}-<={<=}-TERM{Bds-1}-DOT{.}-"
+	out :=  "TERM{X+3}-GT{>}-TERM{Y+3}-RULECOMMA{,}-TERM{(A-1)}-LE{<=}-TERM{Bds-1}-DOT{.}-"
 	checkLexing(in, out, t)
 }
 
 
 func TestParser10(t *testing.T) {
 	in := "X+3>Y+3,(A-1)<=Bds-1."
-	out :=  "TERM{X+3}->{>}-TERM{Y+3}-RULECOMMA{,}-TERM{(A-1)}-<={<=}-TERM{Bds-1}-DOT{.}-"
+	out :=  "TERM{X+3}-GT{>}-TERM{Y+3}-RULECOMMA{,}-TERM{(A-1)}-LE{<=}-TERM{Bds-1}-DOT{.}-"
 	checkLexing(in, out, t)
 }
 
 func TestParser11(t *testing.T) {
 	in := "move[3,2],1<3,0<2."
-	out :=  "ATOM{move}-AtomBL{[}-TERM{3}-TERMCOMMA{,}-TERM{2}-AtomBR{]}-RULECOMMA{,}-TERM{1}-<{<}-TERM{3}-RULECOMMA{,}-TERM{0}-<{<}-TERM{2}-DOT{.}-"
+	out :=  "ATOM{move}-AtomBL{[}-TERM{3}-TERMCOMMA{,}-TERM{2}-AtomBR{]}-RULECOMMA{,}-TERM{1}-LT{<}-TERM{3}-RULECOMMA{,}-TERM{0}-LT{<}-TERM{2}-DOT{.}-"
 	checkLexing(in, out, t)
 }
 
