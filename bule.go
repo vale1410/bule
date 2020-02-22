@@ -120,7 +120,7 @@ func (r *Rule) String() string {
 }
 
 func (p *Program) RuleExpansion(check func(r Rule) bool, expand func(Rule) []Rule) (changed bool) {
-	newRules := []Rule{}
+	var newRules []Rule
 	for _, rule := range p.Rules {
 		if check(rule) {
 			changed = true
@@ -129,7 +129,6 @@ func (p *Program) RuleExpansion(check func(r Rule) bool, expand func(Rule) []Rul
 			}
 		} else {
 			newRules = append(newRules, rule)
-
 		}
 	}
 	p.Rules = newRules
@@ -138,8 +137,6 @@ func (p *Program) RuleExpansion(check func(r Rule) bool, expand func(Rule) []Rul
 
 func (p *Program) TermExpansionOnlyLiterals(check func(r Term) bool, expand func(Term) []Term) (changed bool) {
 
-	// Make rules from the head equivalences
-	// Current assumption: head is only one literal, body is a conjunction!
 	checkRule := func(r Rule) bool {
 		for _, l := range r.Literals {
 			for _, t := range l.Terms {
@@ -447,7 +444,7 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 	// Assumption:
 	// 1) freevars of literals are all disjunct
 	// 2) literal is GroundFact.
-	// 3) literal is of form <name>[A,B].
+	// 3) literal is of form <name>[A,B..].
 	{
 		set := strset.New()
 		for _, lit := range literals {
@@ -488,7 +485,7 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 	assignments := make([]map[string]int, 0, 32)
 
 	for _, assignment := range allPossibleAssignments {
-		fmt.Println(assignment)
+		//fmt.Println(assignment)
 		// check all constraints
 		allConstraintsTrue := true
 		for _, cons := range constraints {

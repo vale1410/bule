@@ -16,8 +16,8 @@ func TestEvaluateExpression(t *testing.T) {
 		"X": 2,
 		"Y": 1,
 	}
-	exprFalse,_ := assign(expr, cc)
-	exprTrue,_ := assign(expr, cc2)
+	exprFalse, _ := assign(expr, cc)
+	exprTrue, _ := assign(expr, cc2)
 	valF := evaluateBoolExpression(exprFalse.String())
 	valT := evaluateBoolExpression(exprTrue.String())
 	if valF || !valT {
@@ -42,7 +42,7 @@ func TestInstantiate1(t *testing.T) {
 
 func TestBule1(t *testing.T) {
 
-	lines := []string{"#const a=5.","fact[1,2].", "fact[2,a].", "search[A,B]:A+1==B:fact[A,B]."}
+	lines := []string{"#const a=5.", "fact[1,2].", "fact[2,a].", "search[A,B]:A+1==B:fact[A,B]."}
 	p := ParseProgramFromStrings(lines)
 	p.ReplaceConstants()
 	p.CollectFacts()
@@ -54,7 +54,8 @@ func TestBule1(t *testing.T) {
 
 func TestBule2(t *testing.T) {
 
-	lines := []string{"a[1..7,4].","b[2].", "search[A,B,_C] : A==B : a[A,C] : b[B]."}
+	lines := []string{"a[1..7,4].", "b[2].", "search[A,B,_C] : A==B : a[A,C] : b[B]."}
+	fmt.Println(lines)
 	p := ParseProgramFromStrings(lines)
 	p.ReplaceConstants()
 	p.Print()
