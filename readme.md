@@ -6,7 +6,7 @@ Bule is tool to create CNF encodings.
 Let’s start with an example. 
 
 ```
-~step(X,Y) step(X,Y+1).
+~step(X,Y), step(X,Y+1).
 ```
 
 Links
