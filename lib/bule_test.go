@@ -54,7 +54,7 @@ func TestBule1(t *testing.T) {
 
 func TestBule2(t *testing.T) {
 
-	lines := []string{"a[1..7,4].", "b[2].", "search[A,B,_C] : A==B : a[A,C] : b[B]."}
+	lines := []string{"a[1..7,4].", "b[2].", "search[A,B,C] : A==B : a[A,C] : b[B]."}
 	fmt.Println(lines)
 	p := ParseProgramFromStrings(lines)
 	p.ReplaceConstants()
