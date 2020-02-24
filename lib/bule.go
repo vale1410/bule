@@ -1,4 +1,4 @@
-package bule
+package lib
 
 import (
 	"errors"
