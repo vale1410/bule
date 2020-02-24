@@ -6,20 +6,16 @@ import (
 	"github.com/vale1410/bule"
 )
 
-
 var (
 	debugFlag = flag.Int("d", 0, "Debug Level .")
 	progFlag  = flag.String("f", "", "Path to file.")
 )
-
-
 
 func debug(level int, s ...interface{}) {
 	if level <= *debugFlag {
 		fmt.Println(s...)
 	}
 }
-
 
 func main() {
 
@@ -29,7 +25,7 @@ func main() {
 	bule.DebugLevel = *debugFlag
 
 	debug(2, "\nReplace Constants")
-    p.ReplaceConstants()
+	p.ReplaceConstants()
 
 	debug(2, "\nExpand Generators")
 	p.ExpandGenerators()
