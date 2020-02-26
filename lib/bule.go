@@ -220,7 +220,7 @@ func (p *Program) RewriteEquivalencesAndImplications() bool {
 	return p.RuleExpansion(check, transform)
 }
 
-func (p *Program) RewriteFacts() (changed bool) {
+func (p *Program) FindNewFacts() (changed bool) {
 	// All literals are facts but one!
 	// No generators
 	check := func(r Rule) bool {
@@ -252,13 +252,33 @@ func (p *Program) RewriteFacts() (changed bool) {
 			for i,Term := range newLit.Terms{
 				newLit.Terms[i],_ = assign(Term,assignment)
 			}
-			p.PredicatToTuples[newFact.Name] = append(p.PredicatToTuples[newFact.Name], evaluateExpressionTuples(newLit.Terms))
+			//p.PredicatToTuples[newFact.Name] = append(p.PredicatToTuples[newFact.Name], evaluateExpressionTuples(newLit.Terms))
+			p.InsertTuple(newLit)
 		}
 		p.GroundFacts[newFact.Name] = true
 		return // remove rule
 	}
 	return p.RuleExpansion(check, transform)
 }
+
+func (p *Program) InsertTuple(lit Literal) {
+	groundTerms := evaluateExpressionTuples(lit.Terms)
+	tuples := p.PredicatToTuples[lit.Name]
+	for _, tuple := range tuples {
+		isSame := true
+		for i,t := range tuple {
+			if groundTerms[i] != t {
+				isSame = false
+				break
+			}
+		}
+		if isSame {
+			return
+		}
+	}
+	p.PredicatToTuples[lit.Name] = append(p.PredicatToTuples[lit.Name],groundTerms)
+}
+
 
 func (p *Program) CollectFacts() (changed bool) {
 	check := func(r Rule) bool {

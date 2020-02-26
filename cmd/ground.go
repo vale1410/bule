@@ -68,7 +68,7 @@ to quickly create a Cobra application.`,
 		//p.Debug()
 
 		debug(2, "\nRewrite Facts Until none left")
-		for p.RewriteFacts() {}
+		for p.FindNewFacts() {}
 
 		{
 			debug(2, "Output All Facts:")
