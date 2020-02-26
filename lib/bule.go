@@ -22,8 +22,8 @@ func debug(level int, s ...interface{}) {
 
 func (p *Program) Debug() {
 	fmt.Println("constants:", p.Constants)
-	fmt.Println("GroundFacts", p.GroundFacts)
-	fmt.Println("globalVars", p.AtomTuples)
+	fmt.Println("groundFacts", p.GroundFacts)
+	fmt.Println("PredicatsToTuples", p.PredicatToTuples)
 	for i, r := range p.Rules {
 		fmt.Println("\nrule", i)
 		r.Debug()
@@ -36,10 +36,10 @@ func (r *Rule) Debug() {
 		fmt.Println("head", r.Head)
 	}
 	fmt.Println("literals", r.Literals)
-	fmt.Println("generators", r.Generators)
-	fmt.Println("Constraints", r.Constraints)
-	fmt.Println("Logical Connection", r.Typ)
-	fmt.Println("Open Head", r.GeneratingHead)
+	fmt.Println("generator", r.Generators)
+	fmt.Println("constraints", r.Constraints)
+	fmt.Println("logical connection", r.Typ)
+	fmt.Println("open Head", r.GeneratingHead)
 }
 
 func (p *Program) Print() {
@@ -119,6 +119,8 @@ func (r *Rule) String() string {
 	return sb.String()
 }
 
+// goes through all rules and expands expands if check is true.
+// Note that this does not expand the generated rules. (i.e. run until fixpoint)
 func (p *Program) RuleExpansion(check func(r Rule) bool, expand func(Rule) []Rule) (changed bool) {
 	var newRules []Rule
 	for _, rule := range p.Rules {
@@ -175,7 +177,7 @@ func (p *Program) TermTranslation(transform func(Term) (Term, bool)) (changed bo
 	return
 }
 
-func (p *Program) ExpandIntervals() (changed bool) {
+func (p *Program) ExpandRanges() (changed bool) {
 	transform := func(term Term) (newTerms []Term) {
 		interval := strings.Split(string(term), "..")
 		i1 := evaluateExpression(interval[0])
@@ -218,6 +220,46 @@ func (p *Program) RewriteEquivalencesAndImplications() bool {
 	return p.RuleExpansion(check, transform)
 }
 
+func (p *Program) RewriteFacts() (changed bool) {
+	// All literals are facts but one!
+	// No generators
+	check := func(r Rule) bool {
+		if len(r.Generators) != 0 || r.Typ != ruleTypeDisjunction {
+			return false
+		}
+		numberOfNoneFacts := len(r.Literals)
+		for _, lit := range  r.Literals   {
+			if p.GroundFacts[lit.Name] {
+				numberOfNoneFacts--
+			}
+		}
+		return numberOfNoneFacts == 1
+	}
+
+	transform := func(rule Rule) (empty []Rule) {
+		var facts []Literal
+		var newFact Literal
+		for _, lit := range  rule.Literals   {
+			if p.GroundFacts[lit.Name] {
+				facts = append(facts,lit)
+			} else {
+				newFact = lit
+			}
+		}
+		assignments := p.generateAssignments(facts, rule.Constraints)
+		for _, assignment := range assignments {
+			newLit := newFact.Copy()
+			for i,Term := range newLit.Terms{
+				newLit.Terms[i],_ = assign(Term,assignment)
+			}
+			p.PredicatToTuples[newFact.Name] = append(p.PredicatToTuples[newFact.Name], evaluateExpressionTuples(newFact.Terms))
+		}
+		p.GroundFacts[newFact.Name] = true
+		return // remove rule
+	}
+	return p.RuleExpansion(check, transform)
+}
+
 func (p *Program) CollectFacts() (changed bool) {
 	check := func(r Rule) bool {
 		return r.Typ == ruleTypeDisjunction &&
@@ -228,9 +270,9 @@ func (p *Program) CollectFacts() (changed bool) {
 	}
 	transform := func(rule Rule) (empty []Rule) {
 		lit := rule.Literals[0]
-		p.AtomTuples[lit.Name] = append(p.AtomTuples[lit.Name], evaluateExpressionTuples(lit.Terms))
+		p.PredicatToTuples[lit.Name] = append(p.PredicatToTuples[lit.Name], evaluateExpressionTuples(lit.Terms))
 		p.GroundFacts[lit.Name] = true
-		return
+		return // remove rule
 	}
 	return p.RuleExpansion(check, transform)
 }
@@ -265,7 +307,7 @@ func (p *Program) AllTerms() (terms []*Term) {
 		for _, g := range r.Generators {
 			for _, l := range g.Literals {
 				for i := range l.Terms {
-					terms = append(terms, &l.Terms [i])
+					terms = append(terms, &l.Terms[i])
 				}
 			}
 			for _, c := range g.Constraints {
@@ -277,7 +319,7 @@ func (p *Program) AllTerms() (terms []*Term) {
 	return
 }
 
-func (p *Program) ExpandGenerators() {
+func (p *Program) ExpandConditionals() {
 
 	for i, r := range p.Rules {
 		for _, generator := range r.Generators {
@@ -342,7 +384,7 @@ func (p *Program) Ground() (clauses []Clause, existQ map[int][]Literal, forallQ 
 	return
 }
 
-func (name AtomName) String() string {
+func (name Predicate) String() string {
 	return string(name)
 }
 
@@ -460,7 +502,7 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 	allPossibleAssignments[0] = make(map[string]int)
 
 	for _, literal := range literals {
-		if termsDomain, ok := p.AtomTuples[literal.Name]; ok {
+		if termsDomain, ok := p.PredicatToTuples[literal.Name]; ok {
 			newAssignments := make([]map[string]int, 0, len(allPossibleAssignments)*len(termsDomain))
 			for _, tuple := range termsDomain {
 				assert(len(tuple) == len(literal.Terms))
@@ -549,10 +591,11 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 //}
 
 type Program struct {
-	Rules       []Rule
-	Constants   map[string]int
-	AtomTuples  map[AtomName][][]int
-	GroundFacts map[AtomName]bool
+	Rules            []Rule
+	Constants        map[string]int
+	PredicatToTuples map[Predicate][][]int
+	GroundFacts      map[Predicate]bool
+	Search           map[Predicate]bool
 }
 
 type Clause []Literal
@@ -608,13 +651,13 @@ type Generator struct {
 
 type Literal struct {
 	Neg   bool
-	Name  AtomName
+	Name  Predicate
 	Terms []Term
 }
 
 type Term string
 
-type AtomName string
+type Predicate string
 
 // Makes a deep copy and creates a new Literal
 func (literal Literal) assign(assignment map[string]int) (newLiteral Literal) {
@@ -673,7 +716,7 @@ func evaluateExpression(termExpression string) int {
 	return int(result.(float64))
 }
 
-// Evaluates a ground math expression, needs to path mathExpression
+// Evaluates a ground math expression, needs to pass mathExpression
 func evaluateExpressionTuples(terms []Term) (result []int) {
 	for _, t := range terms {
 		result = append(result, evaluateExpression(string(t)))

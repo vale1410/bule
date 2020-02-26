@@ -1,9 +1,10 @@
-NAME=test
+build:
+	go build main.go
 
-all: 
-	go build
+test: build
+	./run.sh	
 
 clean: 
-	rm -fr *.cnf 
-	rm -fr bule
+	rm -fr test-output
+	rm -fr main
 

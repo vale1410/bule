@@ -15,6 +15,7 @@ func ParseProgram(fileName string) (Program) {
 	var scanner *bufio.Scanner
 	file, err := os.Open(fileName)
 	if err != nil {
+		fmt.Println("File not found. waiting for program in Stdin. Finish with ctrl-D")
 		scanner = bufio.NewScanner(os.Stdin)
 	} else {
 		defer file.Close()
@@ -29,8 +30,8 @@ func ParseProgram(fileName string) (Program) {
 
 func ParseProgramFromStrings(lines []string) (p Program) {
 
-	p.AtomTuples = make(map[AtomName][][]int)
-	p.GroundFacts = make(map[AtomName]bool)
+	p.PredicatToTuples = make(map[Predicate][][]int)
+	p.GroundFacts = make(map[Predicate]bool)
 	p.Constants = make(map[string]int)
 
 	for _, s := range lines {
@@ -166,7 +167,7 @@ func parseLiteral(tokens Tokens) (literal Literal) {
 	}
 
 	asserts(tokens[0].kind == tokenAtomName, "Atom Structure", tokens.Debug())
-	literal.Name = AtomName(tokens[0].value)
+	literal.Name = Predicate(tokens[0].value)
 
 	terms := make([]Term, 0, len(tokens))
 	var acc string
