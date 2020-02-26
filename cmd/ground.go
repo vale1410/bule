@@ -35,7 +35,10 @@ var (
 
 func debug(level int, s ...interface{}) {
 	if level <= debugFlag {
-		fmt.Println(s...)
+		fmt.Println()
+		fmt.Print("%d: ")
+		fmt.Print(s...)
+		fmt.Println()
 	}
 }
 
@@ -55,20 +58,24 @@ to quickly create a Cobra application.`,
 		p := bule.ParseProgram(progFlag)
 		bule.DebugLevel = debugFlag
 
-		debug(2, "\nReplace Constants")
+		debug(2, "Replace Constants")
 		p.ReplaceConstants()
-		//p.Debug()
 
-		debug(2, "\n Expand Ranges")
+		debug(2, "Expand Ranges")
 		p.ExpandRanges()
-		//p.Debug()
 
-		debug(2, "\nCollect Facts")
+		debug(2, "Collect Facts")
 		p.CollectFacts()
-		//p.Debug()
 
-		debug(2, "\nRewrite Facts Until none left")
+		debug(2, "Find Facts until fixpoint reached, i.e. all facts have been found!")
 		for p.FindNewFacts() {}
+
+		debug(2, "Now rewrite all rules with facts!")
+		p.InstanciateAndRemoveFacts()
+		//p.Print()
+
+		debug(2, "Now rewrite all rules with facts!")
+		p.CleanRules()
 
 		{
 			debug(2, "Output All Facts:")
@@ -91,15 +98,15 @@ to quickly create a Cobra application.`,
 			}
 		}
 
-		debug(2, "\nExpand Conditionals")
+
+
+		debug(2, "Expand Conditionals")
 		p.ExpandConditionals()
-		//p.Debug()
 
 
 		// forget about heads now!
 		debug(2, "\nRewrite Equivalences")
 		p.RewriteEquivalencesAndImplications()
-		//p.Debug()
 
 
 		// There are no equivalences and no generators anymore !
@@ -131,10 +138,13 @@ to quickly create a Cobra application.`,
 			}
 
 			for _, clause := range clauses {
-				for _, lit := range clause {
-					fmt.Print(lit.String(), " ")
+				for i, lit := range clause {
+					fmt.Print(lit.String())
+					if i < len(clause)  -1 {
+						fmt.Print(", ")
+					}
 				}
-				fmt.Println()
+				fmt.Println(".")
 			}
 		}
 	},

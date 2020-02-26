@@ -44,8 +44,8 @@ func (r *Rule) Debug() {
 
 func (p *Program) Print() {
 	for i, r := range p.Rules {
-		fmt.Print(i, ": ")
-		fmt.Println(r.String())
+		fmt.Print(r.String())
+		fmt.Println(" % rule ", i)
 	}
 }
 
@@ -90,8 +90,8 @@ func (r *Rule) String() string {
 	sb := strings.Builder{}
 
 	for _, c := range r.Constraints {
-		sb.WriteString(c.BoolExpr())
-		sb.WriteString(",")
+		sb.WriteString(c.String())
+		sb.WriteString(", ")
 	}
 
 	for _, g := range r.Generators {
@@ -168,9 +168,9 @@ func (p *Program) TermExpansionOnlyLiterals(check func(r Term) bool, expand func
 	return p.RuleExpansion(checkRule, expandRule)
 }
 
-func (p *Program) TermTranslation(transform func(Term) (Term, bool)) (changed bool) {
+func (r *Rule) TermTranslation(transform func(Term) (Term, bool)) (changed bool) {
 	var ok bool
-	for _, term := range p.AllTerms() {
+	for _, term := range r.AllTerms() {
 		*term, ok = transform(*term)
 		changed = ok || changed
 	}
@@ -180,8 +180,8 @@ func (p *Program) TermTranslation(transform func(Term) (Term, bool)) (changed bo
 func (p *Program) ExpandRanges() (changed bool) {
 	transform := func(term Term) (newTerms []Term) {
 		interval := strings.Split(string(term), "..")
-		i1 := evaluateExpression(interval[0])
-		i2 := evaluateExpression(interval[1])
+		i1 := evaluateTermExpression(interval[0])
+		i2 := evaluateTermExpression(interval[1])
 		for _, newValue := range makeSet(i1, i2) {
 			newTerms = append(newTerms, Term(strconv.Itoa(newValue)))
 		}
@@ -220,6 +220,45 @@ func (p *Program) RewriteEquivalencesAndImplications() bool {
 	return p.RuleExpansion(check, transform)
 }
 
+func (p *Program) InstanciateAndRemoveFacts() (changed bool) {
+	// Find rule with fact
+	check := func(r Rule) bool {
+		for _, lit := range r.Literals {
+			if p.GroundFacts[lit.Name] {
+				return true
+			}
+		}
+		return false
+	}
+
+	transform := func(rule Rule) (generatedRules []Rule) {
+
+		var fact Literal
+		var i int
+		for i, fact = range rule.Literals {
+			if p.GroundFacts[fact.Name] {
+				break
+			}
+		}
+		rule.Literals = append(rule.Literals[:i], rule.Literals[i+1:]...)
+
+		for _, tuple := range p.PredicatToTuples[fact.Name] {
+			newRule := rule.Copy()
+			for j, val := range tuple {
+				newConstraint := Constraint{
+					LeftTerm:   fact.Terms[j],
+					RightTerm:  Term(strconv.Itoa(val)), // TODO Could be simpler ...
+					Comparison: tokenComparisonEQ,
+				}
+				newRule.Constraints = append(newRule.Constraints, newConstraint)
+			}
+			generatedRules = append(generatedRules, newRule)
+		}
+		return
+	}
+	return p.RuleExpansion(check, transform)
+}
+
 func (p *Program) FindNewFacts() (changed bool) {
 	// All literals are facts but one!
 	// No generators
@@ -228,7 +267,7 @@ func (p *Program) FindNewFacts() (changed bool) {
 			return false
 		}
 		numberOfNoneFacts := len(r.Literals)
-		for _, lit := range  r.Literals   {
+		for _, lit := range r.Literals {
 			if p.GroundFacts[lit.Name] {
 				numberOfNoneFacts--
 			}
@@ -239,9 +278,9 @@ func (p *Program) FindNewFacts() (changed bool) {
 	transform := func(rule Rule) (empty []Rule) {
 		var facts []Literal
 		var newFact Literal
-		for _, lit := range  rule.Literals   {
+		for _, lit := range rule.Literals {
 			if p.GroundFacts[lit.Name] {
-				facts = append(facts,lit)
+				facts = append(facts, lit)
 			} else {
 				newFact = lit
 			}
@@ -249,10 +288,9 @@ func (p *Program) FindNewFacts() (changed bool) {
 		assignments := p.generateAssignments(facts, rule.Constraints)
 		for _, assignment := range assignments {
 			newLit := newFact.Copy()
-			for i,Term := range newLit.Terms{
-				newLit.Terms[i],_ = assign(Term,assignment)
+			for i, Term := range newLit.Terms {
+				newLit.Terms[i], _ = assign(Term, assignment)
 			}
-			//p.PredicatToTuples[newFact.Name] = append(p.PredicatToTuples[newFact.Name], evaluateExpressionTuples(newLit.Terms))
 			p.InsertTuple(newLit)
 		}
 		p.GroundFacts[newFact.Name] = true
@@ -266,7 +304,7 @@ func (p *Program) InsertTuple(lit Literal) {
 	tuples := p.PredicatToTuples[lit.Name]
 	for _, tuple := range tuples {
 		isSame := true
-		for i,t := range tuple {
+		for i, t := range tuple {
 			if groundTerms[i] != t {
 				isSame = false
 				break
@@ -276,9 +314,8 @@ func (p *Program) InsertTuple(lit Literal) {
 			return
 		}
 	}
-	p.PredicatToTuples[lit.Name] = append(p.PredicatToTuples[lit.Name],groundTerms)
+	p.PredicatToTuples[lit.Name] = append(p.PredicatToTuples[lit.Name], groundTerms)
 }
-
 
 func (p *Program) CollectFacts() (changed bool) {
 	check := func(r Rule) bool {
@@ -297,43 +334,120 @@ func (p *Program) CollectFacts() (changed bool) {
 	return p.RuleExpansion(check, transform)
 }
 
-func (p *Program) ReplaceConstants() bool {
-	return p.Simplify(p.Constants)
+func (constraint Constraint) IsInstantiation() (is bool, variable string, value int) {
+	freeVars := constraint.FreeVars()
+	if freeVars.Size() == 1 && freeVars.Pop() == constraint.LeftTerm.String() && groundMathExpression(string(constraint.RightTerm)) {
+		return true, constraint.LeftTerm.String(), evaluateTermExpression(string(constraint.RightTerm))
+	} else if freeVars.Size() == 1 && freeVars.Pop() == constraint.RightTerm.String() && groundMathExpression(string(constraint.LeftTerm)) {
+		return true, constraint.RightTerm.String(), evaluateTermExpression(string(constraint.LeftTerm))
+
+	}
+	return false, "", 0
 }
 
-func (p *Program) Simplify(assignment map[string]int) bool {
+// Remove Rules with false constraint
+// Remove true constraints from Rule
+// This is essentially Unit Propagation on Constraint Instantiation
+func (p *Program) CleanRules() bool {
+
+	check := func(r Rule) bool {
+		for _, cons := range r.Constraints {
+			re, _ := cons.GroundBoolExpression()
+			if re {
+				return true
+			}
+		}
+		return false
+	}
+
+	transform := func(rule Rule) (result []Rule) {
+		for i, cons := range rule.Constraints {
+			isGround , boolResult := cons.GroundBoolExpression()
+			if isGround {
+				if boolResult {
+					result = []Rule{}
+				} else {
+					rule.Constraints = append(rule.Constraints[:i], rule.Constraints[i+1:]...)
+					result = []Rule{rule}
+				}
+			}
+		}
+		return
+	}
+	return p.RuleExpansion(check, transform)
+}
+
+// for each Constraint X==<Value>
+// Rewrite all Terms with X <- <Value>
+func (p *Program) TransformConstraintsToInstantiation() bool {
+
+	check := func(r Rule) bool {
+		for _, cons := range r.Constraints {
+			is, _, _ := cons.IsInstantiation()
+			if is {
+				return true
+			}
+		}
+		return false
+	}
+
+	transform := func(rule Rule) (empty []Rule) {
+		var i int
+		var cons Constraint
+		var is bool
+		var variable string
+		var value int
+		for i, cons = range rule.Constraints {
+			is, variable, value = cons.IsInstantiation()
+			if is {
+				break
+			}
+		}
+		assignment := map[string]int{variable: value}
+		rule.Constraints = append(rule.Constraints[:i], rule.Constraints[i+1:]...)
+		rule.Simplify(assignment)
+		return []Rule{rule}
+	}
+	return p.RuleExpansion(check, transform)
+}
+
+func (p *Program) ReplaceConstants() {
+	for i, _ := range p.Rules {
+		p.Rules[i].Simplify(p.Constants)
+	}
+}
+
+func (r *Rule) Simplify(assignment map[string]int) bool {
 
 	transform := func(term Term) (Term, bool) {
 		return assign(term, assignment)
 	}
 
-	return p.TermTranslation(transform)
+	return r.TermTranslation(transform)
 }
 
-func (p *Program) AllTerms() (terms []*Term) {
-	for _, r := range p.Rules {
-		for i := range r.Head.Terms {
-			terms = append(terms, &r.Head.Terms[i])
+func (r *Rule) AllTerms() (terms []*Term) {
+	for i := range r.Head.Terms {
+		terms = append(terms, &r.Head.Terms[i])
+	}
+	for _, l := range r.Literals {
+		for i := range l.Terms {
+			terms = append(terms, &l.Terms[i])
 		}
-		for _, l := range r.Literals {
+	}
+	for _, c := range r.Constraints {
+		terms = append(terms, &c.LeftTerm)
+		terms = append(terms, &c.RightTerm)
+	}
+	for _, g := range r.Generators {
+		for _, l := range g.Literals {
 			for i := range l.Terms {
 				terms = append(terms, &l.Terms[i])
 			}
 		}
-		for _, c := range r.Constraints {
+		for _, c := range g.Constraints {
 			terms = append(terms, &c.LeftTerm)
 			terms = append(terms, &c.RightTerm)
-		}
-		for _, g := range r.Generators {
-			for _, l := range g.Literals {
-				for i := range l.Terms {
-					terms = append(terms, &l.Terms[i])
-				}
-			}
-			for _, c := range g.Constraints {
-				terms = append(terms, &c.LeftTerm)
-				terms = append(terms, &c.RightTerm)
-			}
 		}
 	}
 	return
@@ -417,7 +531,7 @@ func (g Generator) String() string {
 	sb.WriteString(g.Head.String())
 	sb.WriteString(":")
 	for _, c := range g.Constraints {
-		sb.WriteString(c.BoolExpr())
+		sb.WriteString(c.String())
 		sb.WriteString(":")
 	}
 	for _, l := range g.Literals {
@@ -547,17 +661,15 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 	assignments := make([]map[string]int, 0, 32)
 
 	for _, assignment := range allPossibleAssignments {
-		//fmt.Println(assignment)
-		// check all constraints
 		allConstraintsTrue := true
 		for _, cons := range constraints {
-			debug(2,"assignment:", assignment)
-			debug(2,"BoolExpression:", cons.BoolExpr())
+			debug(2, "assignment:", assignment)
+			debug(2, "BoolExpression before assignment:", cons.String())
 			cons.LeftTerm, _ = assign(cons.LeftTerm, assignment)
 			cons.RightTerm, _ = assign(cons.RightTerm, assignment)
-			asserts(groundBoolLogicalMathExpression(cons.BoolExpr()), "Must be bool expression", cons.BoolExpr(), "from", cons.BoolExpr())
-			debug(2,"GroundBoolExpression:", cons.BoolExpr())
-			allConstraintsTrue = allConstraintsTrue && evaluateBoolExpression(cons.BoolExpr())
+			isGround, result := cons.GroundBoolExpression()
+			asserts(isGround, "Must be bool expression ", cons.String())
+			allConstraintsTrue = allConstraintsTrue && result
 		}
 		if allConstraintsTrue {
 			assignments = append(assignments, assignment)
@@ -565,51 +677,6 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 	}
 	return assignments
 }
-
-//func (p *Program) generateAssignments(variables []string, constraints []Constraint) []map[string]int {
-//
-//	allPossibleAssignments := make([]map[string]int, 1, 32)
-//	allPossibleAssignments[0] = make(map[string]int)
-//
-//	for _, variable := range variables {
-//		if dom, ok := p.GlobalDefinitions[variable]; ok {
-//			newAssignments := make([]map[string]int, 0, len(allPossibleAssignments)*len(dom))
-//			for _, val := range dom {
-//				for _, assignment := range allPossibleAssignments {
-//					newAssignment := make(map[string]int)
-//					for key, value := range assignment {
-//						newAssignment[key] = value
-//					}
-//					newAssignment[variable] = val
-//					newAssignments = append(newAssignments, newAssignment)
-//				}
-//			}
-//			allPossibleAssignments = newAssignments
-//		} else {
-//			panic("variable doesnt have domain " + variable)
-//		}
-//	}
-//
-//	assignments := make([]map[string]int, 0, 32)
-//
-//	for _, assignment := range allPossibleAssignments {
-//		fmt.Println(assignment)
-//		fmt.Println(constraints)
-//		// check all constraints
-//		allConstraintsTrue := true
-//		for _, cons := range constraints {
-//			tmp := assign(cons.BoolExpr(), assignment)
-//			//tmp = assign(tmp, p.Constants)
-//			//tmp = strings.ReplaceAll(string(tmp), "#mod", "%")
-//			asserts(groundBoolLogicalMathExpression(tmp), "Must be bool expression", tmp, "from", cons.BoolExpr())
-//			allConstraintsTrue = allConstraintsTrue && evaluateBoolExpression(tmp)
-//		}
-//		if allConstraintsTrue {
-//			assignments = append(assignments, assignment)
-//		}
-//	}
-//	return assignments
-//}
 
 type Program struct {
 	Rules            []Rule
@@ -648,13 +715,22 @@ func (r *Rule) hasHead() bool {
 // supported are <,>,<=,>=,==
 // E.g..: A*3v<=v5-2*R/7#mod3.
 type Constraint struct {
-	LeftTerm    Term
-	Comparision tokenKind
-	RightTerm   Term
+	LeftTerm   Term
+	Comparison tokenKind
+	RightTerm  Term
 }
 
-func (constraint *Constraint) BoolExpr() string {
-	return string(constraint.LeftTerm) + ComparisonString(constraint.Comparision) + string(constraint.RightTerm)
+func (constraint *Constraint) String() string {
+	return string(constraint.LeftTerm) + ComparisonString(constraint.Comparison) + string(constraint.RightTerm)
+}
+
+func (constraint *Constraint) GroundBoolExpression() (isGround bool, result bool) {
+	isGround = groundMathExpression(string(constraint.LeftTerm)) && groundMathExpression(string(constraint.RightTerm))
+	if !isGround {
+		return
+	}
+	result = evaluateBoolExpression(constraint.String())
+	return
 }
 
 func (constraint Constraint) Copy() (cons Constraint) {
@@ -697,7 +773,7 @@ func assign(term Term, assignment map[string]int) (Term, bool) {
 		output = strings.ReplaceAll(output, Const, strconv.Itoa(Val))
 	}
 	if groundMathExpression(output) {
-		output = strconv.Itoa(evaluateExpression(output))
+		output = strconv.Itoa(evaluateTermExpression(output))
 	}
 	return Term(output), input != output
 }
@@ -712,23 +788,18 @@ func groundMathExpression(s string) bool {
 	return "" == strings.Trim(string(s), "0123456789+*%-/()")
 }
 
-func groundBoolLogicalMathExpression(s string) bool {
-	//	r, _ := regexp.MatchString("[0-9+*/%!=><]+", s)
-	return "" == strings.Trim(string(s), "0123456789+*%-=><()!&")
-}
-
 // Evaluates a ground math expression, needs to path mathExpression
-func evaluateBoolExpression(term string) bool {
-	term = strings.ReplaceAll(term, "#mod", "%")
-	expression, err := govaluate.NewEvaluableExpression(term)
-	assertx(err, term)
+func evaluateBoolExpression(termComparison string) bool {
+	termComparison = strings.ReplaceAll(termComparison, "#mod", "%")
+	expression, err := govaluate.NewEvaluableExpression(termComparison)
+	assertx(err, termComparison)
 	result, err := expression.Evaluate(nil)
-	assertx(err, term)
+	assertx(err, termComparison)
 	return result.(bool)
 }
 
 // Evaluates a ground math expression, needs to path mathExpression
-func evaluateExpression(termExpression string) int {
+func evaluateTermExpression(termExpression string) int {
 	termExpression = strings.ReplaceAll(termExpression, "#mod", "%")
 	expression, err := govaluate.NewEvaluableExpression(termExpression)
 	assertx(err, termExpression)
@@ -740,7 +811,7 @@ func evaluateExpression(termExpression string) int {
 // Evaluates a ground math expression, needs to pass mathExpression
 func evaluateExpressionTuples(terms []Term) (result []int) {
 	for _, t := range terms {
-		result = append(result, evaluateExpression(string(t)))
+		result = append(result, evaluateTermExpression(string(t)))
 	}
 	return
 }
@@ -751,23 +822,23 @@ func (literal *Literal) createNegatedLiteral() Literal {
 	return a
 }
 
-func (c *Constraint) createNegatedConstraint() Constraint {
-	constraint := c.Copy()
-	switch constraint.Comparision {
+func (constraint *Constraint) createNegatedConstraint() Constraint {
+	negatedConstraint := constraint.Copy()
+	switch constraint.Comparison {
 	case tokenComparisonLT:
-		constraint.Comparision = tokenComparisonGE
+		constraint.Comparison = tokenComparisonGE
 	case tokenComparisonGT:
-		constraint.Comparision = tokenComparisonLE
+		constraint.Comparison = tokenComparisonLE
 	case tokenComparisonEQ:
-		constraint.Comparision = tokenComparisonNQ
+		constraint.Comparison = tokenComparisonNQ
 	case tokenComparisonGE:
-		constraint.Comparision = tokenComparisonLT
+		constraint.Comparison = tokenComparisonLT
 	case tokenComparisonLE:
-		constraint.Comparision = tokenComparisonGT
+		constraint.Comparison = tokenComparisonGT
 	case tokenComparisonNQ:
-		constraint.Comparision = tokenComparisonEQ
+		constraint.Comparison = tokenComparisonEQ
 	}
-	return constraint
+	return negatedConstraint
 }
 
 func ComparisonString(tokenComparison tokenKind) (s string) {

@@ -52,7 +52,7 @@ func ParseProgramFromStrings(lines []string) (p Program) {
 			asserts(len(def) == 2, s)
 			term,_ := assign(Term(def[1]), p.Constants)
 			asserts(groundMathExpression(term.String()), "is not ground:" + term.String())
-			p.Constants[def[0]] = evaluateExpression(term.String())
+			p.Constants[def[0]] = evaluateTermExpression(term.String())
 			continue
 		}
 
@@ -199,7 +199,7 @@ func parseConstraint(tokens Tokens) (constraint Constraint) {
 	left, sep, right := splitIntoTwo(tokens, tokenComparisonMap())
 	asserts(len(left) > 0, "must contain left and right side")
 	asserts(len(right) > 0, "must contain left and right side")
-	constraint.Comparision = sep
+	constraint.Comparison = sep
 	constraint.LeftTerm = Term(left.String())
 	constraint.RightTerm = Term(right.String())
 	return
