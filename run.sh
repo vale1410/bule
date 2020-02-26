@@ -24,6 +24,10 @@ do
     else 
         echo  ☑ $name 
     fi 
-
 done 
 
+echo TODO: 
+for x in test-input/*.todo
+do 
+    echo $(basename $x)
+done 
