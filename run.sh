@@ -15,7 +15,12 @@ do
     diff -B -b test-expected/$name test-output/$name > /dev/null
     if [ $? -ne 0 ] ; then 
         echo test failed: $name
-        diff -B -b test-expected/$name test-output/$name 
+        echo input: 
+        cat test-input/$name
+        echo output: 
+        cat test-output/$name
+        echo expected: 
+        cat test-expected/$name
     else 
         echo  ☑ $name 
     fi 
