@@ -68,7 +68,11 @@ to quickly create a Cobra application.`,
 		//p.Debug()
 
 		debug(2, "\nRewrite Facts")
-		p.RewriteFacts()
+//		changed := true
+//		for changed {
+//			changed = p.RewriteFacts()
+//		}
+		for p.RewriteFacts() {}
 		//p.Debug()
 
 		{
@@ -83,6 +87,8 @@ to quickly create a Cobra application.`,
 						fmt.Print(t)
 						if i == len(tuple)-1 {
 							fmt.Print("]")
+						} else {
+							fmt.Print(",")
 						}
 					}
 					fmt.Println(".")

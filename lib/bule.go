@@ -252,7 +252,7 @@ func (p *Program) RewriteFacts() (changed bool) {
 			for i,Term := range newLit.Terms{
 				newLit.Terms[i],_ = assign(Term,assignment)
 			}
-			p.PredicatToTuples[newFact.Name] = append(p.PredicatToTuples[newFact.Name], evaluateExpressionTuples(newFact.Terms))
+			p.PredicatToTuples[newFact.Name] = append(p.PredicatToTuples[newFact.Name], evaluateExpressionTuples(newLit.Terms))
 		}
 		p.GroundFacts[newFact.Name] = true
 		return // remove rule
@@ -531,11 +531,12 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 		// check all constraints
 		allConstraintsTrue := true
 		for _, cons := range constraints {
-			fmt.Println(assignment)
-			fmt.Println(cons.BoolExpr())
+			debug(2,"assignment:", assignment)
+			debug(2,"BoolExpression:", cons.BoolExpr())
 			cons.LeftTerm, _ = assign(cons.LeftTerm, assignment)
 			cons.RightTerm, _ = assign(cons.RightTerm, assignment)
 			asserts(groundBoolLogicalMathExpression(cons.BoolExpr()), "Must be bool expression", cons.BoolExpr(), "from", cons.BoolExpr())
+			debug(2,"GroundBoolExpression:", cons.BoolExpr())
 			allConstraintsTrue = allConstraintsTrue && evaluateBoolExpression(cons.BoolExpr())
 		}
 		if allConstraintsTrue {
