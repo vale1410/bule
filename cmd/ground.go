@@ -61,91 +61,91 @@ to quickly create a Cobra application.`,
 		debug(2, "Replace Constants")
 		p.ReplaceConstants()
 
-		debug(2, "Expand Ranges")
+		debug(2, "Expand ground Ranges in literals.")
 		p.ExpandRanges()
 
-		debug(2, "Collect Facts")
-		p.CollectFacts()
+		debug(2, "Collect ground facts.")
+		p.CollectGroundFacts()
 
-		debug(2, "Find Facts until fixpoint reached, i.e. all facts have been found!")
+		debug(2, "Find clauses where all literals but 1 are facts. Resolve, add to tuples of fact and remove.")
 		for p.FindNewFacts() {}
 
-		debug(2, "Now rewrite all rules with facts!")
-		p.InstanciateAndRemoveFacts()
-		//p.Print()
+		// Now there should be no clauses entirely of facts!
 
-		debug(2, "Now rewrite all rules with facts!")
+		p.PrintDebug(2)
+		debug(2, "If a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
+		for p.InstanciateAndRemoveFacts() {}
+		p.PrintDebug(2)
+
+		debug(2, "For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
+		for p.TransformConstraintsToInstantiation() {}
+		p.PrintDebug(2)
+
+		debug(2, "Remove clauses with contradictions (1==2) and remove true constraints (1>2, 1==1).")
 		p.CleanRules()
-
-		{
-			debug(2, "Output All Facts:")
-			for pred,_ := range p.GroundFacts {
-				for _,tuple := range p.PredicatToTuples[pred] {
-					fmt.Print(pred)
-					for i,t := range  tuple {
-						if i == 0 {
-							fmt.Print("[")
-						}
-						fmt.Print(t)
-						if i == len(tuple)-1 {
-							fmt.Print("]")
-						} else {
-							fmt.Print(",")
-						}
-					}
-					fmt.Println(".")
-				}
-			}
-		}
-
-
 
 		debug(2, "Expand Conditionals")
 		p.ExpandConditionals()
 
+		debug(2, "All Rules should be clauses with search predicates. No more ground facts.")
+		p.PrintDebug(2)
 
-		// forget about heads now!
-		debug(2, "\nRewrite Equivalences")
-		p.RewriteEquivalencesAndImplications()
+		debug(2, "Collect all ground literals in all clauses")
+		p.CollectGroundTuples()
+		p.Debug()
+
+		debug(2, "Collect all ground literals in all clauses")
+
+		p.GroundFromTuples() //
+
+		p.Print()
+
+
+
+
+
+		// // forget about heads now!
+		// debug(2, "\nRewrite Equivalences")
+		// p.RewriteEquivalencesAndImplications()
 
 
 		// There are no equivalences and no generators anymore !
 
 		{
-			debug(2, "Grounding:")
-			clauses, existQ, forallQ, maxIndex := p.Ground()
+			// debug(2, "Grounding:")
+			// clauses, existQ, forallQ, maxIndex := p.Ground()
 
 			// Do Unit Propagation
 
 			// Find variables that need to be put in the quantifier alternation
 
-			for i := 0; i <= maxIndex; i++ {
+			// for i := 0; i <= maxIndex; i++ {
 
-				if atoms, ok := forallQ[i]; ok {
-					fmt.Print("a")
-					for _, a := range atoms {
-						fmt.Print(" ", a)
-					}
-					fmt.Println()
-				}
-				if atoms, ok := existQ[i]; ok {
-					fmt.Print("e")
-					for _, a := range atoms {
-						fmt.Print(" ", a)
-					}
-					fmt.Println()
-				}
-			}
-
-			for _, clause := range clauses {
-				for i, lit := range clause {
-					fmt.Print(lit.String())
-					if i < len(clause)  -1 {
-						fmt.Print(", ")
-					}
-				}
-				fmt.Println(".")
-			}
+			// 	if atoms, ok := forallQ[i]; ok {
+			// 		fmt.Print("a")
+			// 		for _, a := range atoms {
+			// 			fmt.Print(" ", a)
+			// 		}
+			// 		fmt.Println()
+			// 	}
+			// 	if atoms, ok := existQ[i]; ok {
+			// 		fmt.Print("e")
+			// 		for _, a := range atoms {
+			// 			fmt.Print(" ", a)
+			// 		}
+			// 		fmt.Println()
+			// 	}
+			// }
+//
+//			for _, clause := range clauses {
+//				for i, lit := range clause {
+//					fmt.Print(lit.String())
+//					if i < len(clause)  -1 {
+//						fmt.Print(", ")
+//					}
+//				}
+//				fmt.Println(".")
+//			}
 		}
 	},
 }

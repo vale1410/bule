@@ -42,10 +42,46 @@ func (r *Rule) Debug() {
 	fmt.Println("open Head", r.GeneratingHead)
 }
 
+func (p *Program) PrintDebug(level int) {
+	if DebugLevel >= level {
+		p.PrintFacts()
+		p.PrintRules()
+	}
+}
+
+
 func (p *Program) Print() {
+	p.PrintFacts()
+	p.PrintRules()
+}
+
+func (p *Program) PrintRules() {
 	for i, r := range p.Rules {
 		fmt.Print(r.String())
-		fmt.Println(" % rule ", i)
+		if DebugLevel > 1 {
+			fmt.Print(" % rule ", i)
+		}
+		fmt.Println()
+	}
+}
+
+func (p *Program) PrintFacts() {
+	for pred,_ := range p.GroundFacts {
+		for _,tuple := range p.PredicatToTuples[pred] {
+			fmt.Print(pred)
+			for i,t := range  tuple {
+				if i == 0 {
+					fmt.Print("[")
+				}
+				fmt.Print(t)
+				if i == len(tuple)-1 {
+					fmt.Print("]")
+				} else {
+					fmt.Print(",")
+				}
+			}
+			fmt.Println(".")
+		}
 	}
 }
 
@@ -254,7 +290,7 @@ func (p *Program) InstanciateAndRemoveFacts() (changed bool) {
 			}
 			generatedRules = append(generatedRules, newRule)
 		}
-		return
+		return generatedRules
 	}
 	return p.RuleExpansion(check, transform)
 }
@@ -267,6 +303,9 @@ func (p *Program) FindNewFacts() (changed bool) {
 			return false
 		}
 		numberOfNoneFacts := len(r.Literals)
+		if numberOfNoneFacts < 2 {
+			return false
+		}
 		for _, lit := range r.Literals {
 			if p.GroundFacts[lit.Name] {
 				numberOfNoneFacts--
@@ -317,7 +356,7 @@ func (p *Program) InsertTuple(lit Literal) {
 	p.PredicatToTuples[lit.Name] = append(p.PredicatToTuples[lit.Name], groundTerms)
 }
 
-func (p *Program) CollectFacts() (changed bool) {
+func (p *Program) CollectGroundFacts() (changed bool) {
 	check := func(r Rule) bool {
 		return r.Typ == ruleTypeDisjunction &&
 			len(r.Literals) == 1 &&
@@ -440,14 +479,17 @@ func (r *Rule) AllTerms() (terms []*Term) {
 		terms = append(terms, &c.RightTerm)
 	}
 	for _, g := range r.Generators {
+		for i := range g.Head.Terms {
+			terms = append(terms, &g.Head.Terms[i])
+		}
 		for _, l := range g.Literals {
 			for i := range l.Terms {
 				terms = append(terms, &l.Terms[i])
 			}
 		}
-		for _, c := range g.Constraints {
-			terms = append(terms, &c.LeftTerm)
-			terms = append(terms, &c.RightTerm)
+		for j := range g.Constraints {
+			terms = append(terms, &g.Constraints[j].LeftTerm)
+			terms = append(terms, &g.Constraints[j].RightTerm)
 		}
 	}
 	return
@@ -467,6 +509,37 @@ func (p *Program) ExpandConditionals() {
 		}
 		p.Rules[i].Generators = []Generator{}
 	}
+}
+
+func (p* Program) CollectGroundTuples() {
+
+	for _, r := range p.Rules {
+		for _, literal := range r.Literals {
+			if literal.FreeVars().IsEmpty() {
+				p.InsertTuple(literal)
+			}
+		}
+	}
+}
+
+func (p* Program) GroundFromTuples() bool {
+	check := func(r Rule) bool {
+		return !r.IsGround()
+	}
+
+	transform := func(rule Rule) (result []Rule) {
+		assignments := p.generateAssignments(rule.Literals, rule.Constraints)
+		for _, assignment := range assignments {
+			newRule := rule.Copy()
+			newRule.Constraints = []Constraint{}
+			for i, lit := range newRule.Literals {
+				newRule.Literals[i] =  lit.assign(assignment)
+			}
+			result = append(result, newRule)
+		}
+		return
+	}
+	return p.RuleExpansion(check, transform)
 }
 
 func (p *Program) Ground() (clauses []Clause, existQ map[int][]Literal, forallQ map[int][]Literal, maxIndex int) {

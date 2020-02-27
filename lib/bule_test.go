@@ -45,7 +45,7 @@ func TestBule1(t *testing.T) {
 	lines := []string{"#const a=5.", "fact[1,2].", "fact[2,a].", "search[A,B]:A+1==B:fact[A,B]."}
 	p := ParseProgramFromStrings(lines)
 	p.ReplaceConstants()
-	p.CollectFacts()
+	p.CollectGroundFacts()
 	p.ExpandConditionals()
 	if p.Rules[0].String() == "search[1,2]" {
 		t.Fail()
@@ -59,7 +59,7 @@ func TestBule2(t *testing.T) {
 	p := ParseProgramFromStrings(lines)
 	p.ReplaceConstants()
 	p.ExpandRanges()
-	p.CollectFacts()
+	p.CollectGroundFacts()
 	p.ExpandConditionals()
 	p.Print()
 }
