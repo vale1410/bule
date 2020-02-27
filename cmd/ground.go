@@ -92,7 +92,7 @@ to quickly create a Cobra application.`,
 
 		debug(2, "Collect all ground literals in all clauses")
 		p.CollectGroundTuples()
-		p.Debug()
+//		p.Debug()
 
 		debug(2, "Collect all ground literals in all clauses")
 

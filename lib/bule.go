@@ -699,8 +699,8 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 		for _, lit := range literals {
 			asserts(strset.Intersection(lit.FreeVars(), set).IsEmpty(),
 				"freevars of literals are all disjunct", set.String(), lit.FreeVars().String())
-			asserts(p.GroundFacts[lit.Name],
-				"Is Ground fact", lit.String())
+//			asserts(p.GroundFacts[lit.Name],
+//				"Is Ground fact", lit.String())
 			set.Merge(lit.FreeVars())
 		}
 	}
