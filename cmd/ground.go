@@ -73,8 +73,10 @@ bule ground <program.bul> [options].
 
 		// Now there should be no clauses entirely of facts!
 
+		p.PrintDebug(2)
 		debug(2, "If a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
 		for p.InstanciateAndRemoveFacts() {}
+		p.PrintDebug(2)
 
 		debug(2, "Fixpoint of TransformConstraintsToInstantiation.")
 		debug(2, "For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")

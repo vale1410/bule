@@ -49,7 +49,6 @@ func (p *Program) PrintDebug(level int) {
 	}
 }
 
-
 func (p *Program) Print() {
 	p.PrintFacts()
 	p.PrintRules()
@@ -66,10 +65,10 @@ func (p *Program) PrintRules() {
 }
 
 func (p *Program) PrintFacts() {
-	for pred,_ := range p.GroundFacts {
-		for _,tuple := range p.PredicatToTuples[pred] {
+	for pred, _ := range p.GroundFacts {
+		for _, tuple := range p.PredicatToTuples[pred] {
 			fmt.Print(pred)
-			for i,t := range  tuple {
+			for i, t := range tuple {
 				if i == 0 {
 					fmt.Print("[")
 				}
@@ -84,7 +83,6 @@ func (p *Program) PrintFacts() {
 		}
 	}
 }
-
 
 func (p *Program) PrintQuantification() {
 
@@ -119,7 +117,6 @@ func (p *Program) PrintQuantification() {
 		}
 	}
 }
-
 
 // Deep Copy
 func (gen Generator) Copy() (newGen Generator) {
@@ -411,6 +408,9 @@ func (p *Program) CollectGroundFacts() (changed bool) {
 
 func (constraint Constraint) IsInstantiation() (is bool, variable string, value int) {
 	freeVars := constraint.FreeVars()
+	if constraint.Comparison != tokenComparisonEQ {
+		return false, "", 0
+	}
 	if freeVars.Size() == 1 && freeVars.Pop() == constraint.LeftTerm.String() && groundMathExpression(string(constraint.RightTerm)) {
 		return true, constraint.LeftTerm.String(), evaluateTermExpression(string(constraint.RightTerm))
 	} else if freeVars.Size() == 1 && freeVars.Pop() == constraint.RightTerm.String() && groundMathExpression(string(constraint.LeftTerm)) {
@@ -439,7 +439,7 @@ func (p *Program) CleanRules() bool {
 		newRule := rule
 		newRule.Constraints = []Constraint{}
 		for _, cons := range rule.Constraints {
-			isGround , boolResult := cons.GroundBoolExpression()
+			isGround, boolResult := cons.GroundBoolExpression()
 			if isGround {
 				if boolResult {
 					result = []Rule{newRule}
@@ -493,7 +493,7 @@ func (p *Program) TransformConstraintsToInstantiation() bool {
 func (p *Program) ReplaceConstantsAndMathFunctions() {
 
 	transform := func(term Term) (Term, bool) {
-		out := strings.ReplaceAll(string(term),"#mod", "%")
+		out := strings.ReplaceAll(string(term), "#mod", "%")
 		return Term(out), out != string(term)
 	}
 
@@ -558,7 +558,7 @@ func (p *Program) ExpandConditionals() {
 	}
 }
 
-func (p* Program) CollectGroundTuples() {
+func (p *Program) CollectGroundTuples() {
 
 	for _, r := range p.Rules {
 		for _, literal := range r.Literals {
@@ -569,7 +569,7 @@ func (p* Program) CollectGroundTuples() {
 	}
 }
 
-func (p* Program) GroundFromTuples() bool {
+func (p *Program) GroundFromTuples() bool {
 	check := func(r Rule) bool {
 		return !r.IsGround()
 	}
@@ -580,7 +580,7 @@ func (p* Program) GroundFromTuples() bool {
 			newRule := rule.Copy()
 			newRule.Constraints = []Constraint{}
 			for i, lit := range newRule.Literals {
-				newRule.Literals[i] =  lit.assign(assignment)
+				newRule.Literals[i] = lit.assign(assignment)
 			}
 			result = append(result, newRule)
 		}
@@ -620,13 +620,10 @@ func (p *Program) ExtractQuantors() {
 		return
 	}
 
-	p.RuleExpansion(checkA,transformA)
-	p.RuleExpansion(checkE,transformE)
+	p.RuleExpansion(checkA, transformA)
+	p.RuleExpansion(checkE, transformE)
 	return
 }
-
-
-
 
 func (name Predicate) String() string {
 	return string(name)
@@ -735,8 +732,8 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 		for _, lit := range literals {
 			asserts(strset.Intersection(lit.FreeVars(), set).IsEmpty(),
 				"freevars of literals are all disjunct", set.String(), lit.FreeVars().String())
-//			asserts(p.GroundFacts[lit.Name],
-//				"Is ExtractQuantors fact", lit.String())
+			//			asserts(p.GroundFacts[lit.Name],
+			//				"Is ExtractQuantors fact", lit.String())
 			set.Merge(lit.FreeVars())
 		}
 	}
@@ -804,8 +801,8 @@ type Program struct {
 	PredicatToTuples map[Predicate][][]int
 	GroundFacts      map[Predicate]bool
 	Search           map[Predicate]bool
-	existQ 			 map[int][]Literal
-	forallQ 		 map[int][]Literal
+	existQ           map[int][]Literal
+	forallQ          map[int][]Literal
 }
 
 type Clause []Literal
@@ -913,7 +910,7 @@ func groundMathExpression(s string) bool {
 
 // Evaluates a ground math expression, needs to path mathExpression
 func evaluateBoolExpression(termComparison string) bool {
-//	termComparison = strings.ReplaceAll(termComparison, "#mod", "%")
+	//	termComparison = strings.ReplaceAll(termComparison, "#mod", "%")
 	expression, err := govaluate.NewEvaluableExpression(termComparison)
 	assertx(err, termComparison)
 	result, err := expression.Evaluate(nil)
@@ -923,7 +920,7 @@ func evaluateBoolExpression(termComparison string) bool {
 
 // Evaluates a ground math expression, needs to path mathExpression
 func evaluateTermExpression(termExpression string) int {
-//	termExpression = strings.ReplaceAll(termExpression, "#mod", "%")
+	//	termExpression = strings.ReplaceAll(termExpression, "#mod", "%")
 	expression, err := govaluate.NewEvaluableExpression(termExpression)
 	assertx(err, termExpression)
 	result, err := expression.Evaluate(nil)
