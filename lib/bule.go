@@ -85,6 +85,42 @@ func (p *Program) PrintFacts() {
 	}
 }
 
+
+func (p *Program) PrintQuantification() {
+
+	maxIndex := 0
+
+	for k := range p.forallQ {
+		if maxIndex < k {
+			maxIndex = k
+		}
+	}
+	for k := range p.existQ {
+		if maxIndex < k {
+			maxIndex = k
+		}
+	}
+
+	for i := 0; i <= maxIndex; i++ {
+
+		if atoms, ok := p.forallQ[i]; ok {
+			fmt.Print("a")
+			for _, a := range atoms {
+				fmt.Print(" ", a)
+			}
+			fmt.Println()
+		}
+		if atoms, ok := p.existQ[i]; ok {
+			fmt.Print("e")
+			for _, a := range atoms {
+				fmt.Print(" ", a)
+			}
+			fmt.Println()
+		}
+	}
+}
+
+
 // Deep Copy
 func (gen Generator) Copy() (newGen Generator) {
 	newGen = gen
@@ -400,15 +436,19 @@ func (p *Program) CleanRules() bool {
 	}
 
 	transform := func(rule Rule) (result []Rule) {
-		for i, cons := range rule.Constraints {
+		newRule := rule
+		newRule.Constraints = []Constraint{}
+		for _, cons := range rule.Constraints {
 			isGround , boolResult := cons.GroundBoolExpression()
 			if isGround {
 				if boolResult {
-					result = []Rule{}
+					result = []Rule{newRule}
 				} else {
-					rule.Constraints = append(rule.Constraints[:i], rule.Constraints[i+1:]...)
-					result = []Rule{rule}
+					result = []Rule{}
+					break
 				}
+			} else {
+				newRule.Constraints = append(rule.Constraints, cons)
 			}
 		}
 		return
@@ -450,8 +490,15 @@ func (p *Program) TransformConstraintsToInstantiation() bool {
 	return p.RuleExpansion(check, transform)
 }
 
-func (p *Program) ReplaceConstants() {
-	for i, _ := range p.Rules {
+func (p *Program) ReplaceConstantsAndMathFunctions() {
+
+	transform := func(term Term) (Term, bool) {
+		out := strings.ReplaceAll(string(term),"#mod", "%")
+		return Term(out), out != string(term)
+	}
+
+	for i := range p.Rules {
+		p.Rules[i].TermTranslation(transform)
 		p.Rules[i].Simplify(p.Constants)
 	}
 }
@@ -474,9 +521,9 @@ func (r *Rule) AllTerms() (terms []*Term) {
 			terms = append(terms, &l.Terms[i])
 		}
 	}
-	for _, c := range r.Constraints {
-		terms = append(terms, &c.LeftTerm)
-		terms = append(terms, &c.RightTerm)
+	for i := range r.Constraints {
+		terms = append(terms, &r.Constraints[i].LeftTerm)
+		terms = append(terms, &r.Constraints[i].RightTerm)
 	}
 	for _, g := range r.Generators {
 		for i := range g.Head.Terms {
@@ -542,54 +589,44 @@ func (p* Program) GroundFromTuples() bool {
 	return p.RuleExpansion(check, transform)
 }
 
-func (p *Program) Ground() (clauses []Clause, existQ map[int][]Literal, forallQ map[int][]Literal, maxIndex int) {
+func (p *Program) ExtractQuantors() {
 
-	clauses = make([]Clause, 0)
-	existQ = make(map[int][]Literal)
-	forallQ = make(map[int][]Literal)
-	maxIndex = 0
+	p.forallQ = make(map[int][]Literal, 0)
+	p.existQ = make(map[int][]Literal, 0)
 
-	for _, r := range p.Rules {
-
-		debug(2, "Free Variables:", r.FreeVars())
-
-		//(globals.IsSubset(r.FreeVars()), "There are free variables that are not bound by globals.")
-		// TODO NEEDS TO BE FIXED> Literals wont work!
-		assignments := p.generateAssignments(r.Literals, r.Constraints)
-
-		debug(2, "Ground Clause:")
-		for _, assignment := range assignments {
-			clause := Clause{}
-			for _, literal := range r.Literals {
-				clause = append(clause, literal.assign(assignment))
-			}
-			debug(2, "clause", clause)
-			if len(clause) > 0 {
-				if clause[0].Name == "#forall" {
-					asserts(len(clause[0].Terms) == 1, "Wrong arity for forall")
-					val, err := strconv.Atoi(string(clause[0].Terms[0].String()))
-					asserte(err)
-					forallQ[val] = append(forallQ[val], clause[1:]...)
-					if val > maxIndex {
-						maxIndex = val
-					}
-				} else if clause[0].Name == "#exist" {
-					asserts(len(clause[0].Terms) == 1, "Wrong arity for exist")
-					val, err := strconv.Atoi(string(clause[0].Terms[0].String()))
-					asserte(err)
-					existQ[val] = append(existQ[val], clause[1:]...)
-					if val > maxIndex {
-						maxIndex = val
-					}
-				} else {
-					clauses = append(clauses, clause)
-				}
-			}
-		}
-		debug(2)
+	checkA := func(r Rule) bool {
+		return r.Literals[0].Name == "#forall"
 	}
+
+	transformA := func(rule Rule) (remove []Rule) {
+		lit := rule.Literals[0]
+		asserts(len(lit.Terms) == 1, "Wrong arity for forall")
+		val, err := strconv.Atoi(string(lit.Terms[0].String()))
+		asserte(err)
+		p.forallQ[val] = append(p.forallQ[val], rule.Literals[1:]...)
+		return
+	}
+
+	checkE := func(r Rule) bool {
+		return r.Literals[0].Name == "#exist"
+	}
+
+	transformE := func(rule Rule) (remove []Rule) {
+		lit := rule.Literals[0]
+		asserts(len(lit.Terms) == 1, "Wrong arity for exist")
+		val, err := strconv.Atoi(string(lit.Terms[0].String()))
+		asserte(err)
+		p.existQ[val] = append(p.existQ[val], rule.Literals[1:]...)
+		return
+	}
+
+	p.RuleExpansion(checkA,transformA)
+	p.RuleExpansion(checkE,transformE)
 	return
 }
+
+
+
 
 func (name Predicate) String() string {
 	return string(name)
@@ -661,8 +698,7 @@ func (constraint Constraint) FreeVars() *strset.Set {
 }
 
 func (term Term) FreeVars() *strset.Set {
-	s := strings.ReplaceAll(term.String(), "#mod", "%")
-	s = strings.ReplaceAll(s, "#log", "%")
+	s := term.String()
 	f := func(c rune) bool {
 		return !unicode.IsLetter(c) && !unicode.IsNumber(c) && c != '_'
 	}
@@ -700,7 +736,7 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 			asserts(strset.Intersection(lit.FreeVars(), set).IsEmpty(),
 				"freevars of literals are all disjunct", set.String(), lit.FreeVars().String())
 //			asserts(p.GroundFacts[lit.Name],
-//				"Is Ground fact", lit.String())
+//				"Is ExtractQuantors fact", lit.String())
 			set.Merge(lit.FreeVars())
 		}
 	}
@@ -751,12 +787,25 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 	return assignments
 }
 
+func (p *Program) PrintTuples() {
+
+	for pred, tuples := range p.PredicatToTuples {
+		fmt.Println(pred.String(), ": ")
+		for _, t := range tuples {
+			fmt.Println("\t", t)
+		}
+	}
+
+}
+
 type Program struct {
 	Rules            []Rule
 	Constants        map[string]int
 	PredicatToTuples map[Predicate][][]int
 	GroundFacts      map[Predicate]bool
 	Search           map[Predicate]bool
+	existQ 			 map[int][]Literal
+	forallQ 		 map[int][]Literal
 }
 
 type Clause []Literal
@@ -840,15 +889,16 @@ func (literal Literal) assign(assignment map[string]int) (newLiteral Literal) {
 
 //returns true if term has been changed
 func assign(term Term, assignment map[string]int) (Term, bool) {
-	input := term.String()
 	output := term.String()
 	for Const, Val := range assignment {
+		// TODO currenlty variables need to be prefix free, i.e. X, Xa, will make problems :\
+		// Use Term parser for getting proper FreeVariables. Or the FreeVariables function
 		output = strings.ReplaceAll(output, Const, strconv.Itoa(Val))
 	}
 	if groundMathExpression(output) {
 		output = strconv.Itoa(evaluateTermExpression(output))
 	}
-	return Term(output), input != output
+	return Term(output), term.String() != output
 }
 
 func number(s string) bool {
@@ -863,7 +913,7 @@ func groundMathExpression(s string) bool {
 
 // Evaluates a ground math expression, needs to path mathExpression
 func evaluateBoolExpression(termComparison string) bool {
-	termComparison = strings.ReplaceAll(termComparison, "#mod", "%")
+//	termComparison = strings.ReplaceAll(termComparison, "#mod", "%")
 	expression, err := govaluate.NewEvaluableExpression(termComparison)
 	assertx(err, termComparison)
 	result, err := expression.Evaluate(nil)
@@ -873,7 +923,7 @@ func evaluateBoolExpression(termComparison string) bool {
 
 // Evaluates a ground math expression, needs to path mathExpression
 func evaluateTermExpression(termExpression string) int {
-	termExpression = strings.ReplaceAll(termExpression, "#mod", "%")
+//	termExpression = strings.ReplaceAll(termExpression, "#mod", "%")
 	expression, err := govaluate.NewEvaluableExpression(termExpression)
 	assertx(err, termExpression)
 	result, err := expression.Evaluate(nil)

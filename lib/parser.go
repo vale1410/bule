@@ -16,12 +16,13 @@ func ParseProgram(fileName string) (Program) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		fmt.Println("File not found. waiting for program in Stdin. Finish with ctrl-D")
-		scanner = bufio.NewScanner(os.Stdin)
+		//scanner = bufio.NewScanner(os.Stdin)
+		return Program{}
 	} else {
 		defer file.Close()
 		scanner = bufio.NewScanner(file)
 	}
-	lines := []string{}
+	var lines []string
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}

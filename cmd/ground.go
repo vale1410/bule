@@ -23,14 +23,12 @@ package cmd
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
 	bule "github.com/vale1410/bule/lib"
 )
 
 var (
 	debugFlag int    //= flag.Int("d", 0, "Debug Level .")
-	progFlag  string //= flag.String("f", "", "Path to file.")
 )
 
 func debug(level int, s ...interface{}) {
@@ -46,23 +44,26 @@ func debug(level int, s ...interface{}) {
 var groundCmd = &cobra.Command{
 	Use:   "ground",
 	Short: "Grounds to CNF from a program written in Bule format",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Bule is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long: `Grounds to CNF from a program written in Bule format
+How to run it: 
+bule ground <program.bul> [options].
+`,
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 
+		if len(args) == 0 {
+			return
+		}
+
 		debug(2, "Bule started")
-		p := bule.ParseProgram(progFlag)
+		p := bule.ParseProgram(args[0])
 		bule.DebugLevel = debugFlag
 
-		debug(2, "Replace Constants")
-		p.ReplaceConstants()
+		debug(2, "Replace Constants (#const a=3. and Function Symbols (#mod)")
+		p.ReplaceConstantsAndMathFunctions()
 
 		debug(2, "Expand ground Ranges in literals.")
-		p.ExpandRanges()
+		for p.ExpandRanges() {}
 
 		debug(2, "Collect ground facts.")
 		p.CollectGroundFacts()
@@ -72,15 +73,14 @@ to quickly create a Cobra application.`,
 
 		// Now there should be no clauses entirely of facts!
 
-		p.PrintDebug(2)
 		debug(2, "If a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
 		for p.InstanciateAndRemoveFacts() {}
-		p.PrintDebug(2)
 
+		debug(2, "Fixpoint of TransformConstraintsToInstantiation.")
 		debug(2, "For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
 		for p.TransformConstraintsToInstantiation() {}
-		p.PrintDebug(2)
 
+		p.PrintDebug(2)
 		debug(2, "Remove clauses with contradictions (1==2) and remove true constraints (1>2, 1==1).")
 		p.CleanRules()
 
@@ -88,78 +88,32 @@ to quickly create a Cobra application.`,
 		p.ExpandConditionals()
 
 		debug(2, "All Rules should be clauses with search predicates. No more ground facts.")
-		p.PrintDebug(2)
 
 		debug(2, "Collect all ground literals in all clauses")
 		p.CollectGroundTuples()
-//		p.Debug()
+		//p.PrintTuples()
 
 		debug(2, "Collect all ground literals in all clauses")
+		p.GroundFromTuples()
 
-		p.GroundFromTuples() //
+		debug(2, "Extract Quantors ")
+
+//		debug(2, "Print Quantification")
+//		p.ExtractQuantors()
+//		p.PrintQuantification()
 
 		p.Print()
 
 
-
-
-
-		// // forget about heads now!
-		// debug(2, "\nRewrite Equivalences")
-		// p.RewriteEquivalencesAndImplications()
-
-
-		// There are no equivalences and no generators anymore !
-
-		{
-			// debug(2, "Grounding:")
-			// clauses, existQ, forallQ, maxIndex := p.Ground()
-
-			// Do Unit Propagation
-
-			// Find variables that need to be put in the quantifier alternation
-
-			// for i := 0; i <= maxIndex; i++ {
-
-			// 	if atoms, ok := forallQ[i]; ok {
-			// 		fmt.Print("a")
-			// 		for _, a := range atoms {
-			// 			fmt.Print(" ", a)
-			// 		}
-			// 		fmt.Println()
-			// 	}
-			// 	if atoms, ok := existQ[i]; ok {
-			// 		fmt.Print("e")
-			// 		for _, a := range atoms {
-			// 			fmt.Print(" ", a)
-			// 		}
-			// 		fmt.Println()
-			// 	}
-			// }
-//
-//			for _, clause := range clauses {
-//				for i, lit := range clause {
-//					fmt.Print(lit.String())
-//					if i < len(clause)  -1 {
-//						fmt.Print(", ")
-//					}
-//				}
-//				fmt.Println(".")
-//			}
-		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(groundCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
 	//debugFlag int    //= flag.Int("d", 0, "Debug Level .")
 	//progFlag  string //= flag.String("f", "", "Path to file.")
-	groundCmd.PersistentFlags().StringVarP(&progFlag, "file", "f", "", "Path to File")
+//	groundCmd.PersistentFlags().StringVarP(&progFlag, "file", "f", "", "Path to File")
 	groundCmd.PersistentFlags().IntVarP(&debugFlag, "debug", "d", 0, "Debug level")
 
 	// Cobra supports local flags which will only run when this command
