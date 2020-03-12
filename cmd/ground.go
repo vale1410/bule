@@ -75,7 +75,7 @@ bule ground <program.bul> [options].
 
 		p.PrintDebug(2)
 		debug(2, "If a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
-		for p.InstanciateAndRemoveFacts() {}
+		for p.InstantiateAndRemoveFacts() {}
 		p.PrintDebug(2)
 
 		debug(2, "Fixpoint of TransformConstraintsToInstantiation.")

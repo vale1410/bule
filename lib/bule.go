@@ -1,250 +1,12 @@
 package lib
 
 import (
-	"errors"
-	"fmt"
 	"github.com/Knetic/govaluate"
 	"github.com/scylladb/go-set/strset"
 	"strconv"
 	"strings"
 	"unicode"
 )
-
-var (
-	DebugLevel int
-)
-
-func debug(level int, s ...interface{}) {
-	if level <= DebugLevel {
-		fmt.Println(s...)
-	}
-}
-
-func (p *Program) Debug() {
-	fmt.Println("constants:", p.Constants)
-	fmt.Println("groundFacts", p.GroundFacts)
-	fmt.Println("PredicatsToTuples", p.PredicatToTuples)
-	for i, r := range p.Rules {
-		fmt.Println("\nrule", i)
-		r.Debug()
-	}
-}
-
-func (r *Rule) Debug() {
-	fmt.Println(r.initialTokens)
-	if r.hasHead() {
-		fmt.Println("head", r.Head)
-	}
-	fmt.Println("literals", r.Literals)
-	fmt.Println("generator", r.Generators)
-	fmt.Println("constraints", r.Constraints)
-	fmt.Println("logical connection", r.Typ)
-	fmt.Println("open Head", r.GeneratingHead)
-}
-
-func (p *Program) PrintDebug(level int) {
-	if DebugLevel >= level {
-		p.PrintFacts()
-		p.PrintRules()
-	}
-}
-
-func (p *Program) Print() {
-	p.PrintFacts()
-	p.PrintRules()
-}
-
-func (p *Program) PrintRules() {
-	for i, r := range p.Rules {
-		fmt.Print(r.String())
-		if DebugLevel > 1 {
-			fmt.Print(" % rule ", i)
-		}
-		fmt.Println()
-	}
-}
-
-func (p *Program) PrintFacts() {
-	for pred, _ := range p.GroundFacts {
-		for _, tuple := range p.PredicatToTuples[pred] {
-			fmt.Print(pred)
-			for i, t := range tuple {
-				if i == 0 {
-					fmt.Print("[")
-				}
-				fmt.Print(t)
-				if i == len(tuple)-1 {
-					fmt.Print("]")
-				} else {
-					fmt.Print(",")
-				}
-			}
-			fmt.Println(".")
-		}
-	}
-}
-
-func (p *Program) PrintQuantification() {
-
-	maxIndex := 0
-
-	for k := range p.forallQ {
-		if maxIndex < k {
-			maxIndex = k
-		}
-	}
-	for k := range p.existQ {
-		if maxIndex < k {
-			maxIndex = k
-		}
-	}
-
-	for i := 0; i <= maxIndex; i++ {
-
-		if atoms, ok := p.forallQ[i]; ok {
-			fmt.Print("a")
-			for _, a := range atoms {
-				fmt.Print(" ", a)
-			}
-			fmt.Println()
-		}
-		if atoms, ok := p.existQ[i]; ok {
-			fmt.Print("e")
-			for _, a := range atoms {
-				fmt.Print(" ", a)
-			}
-			fmt.Println()
-		}
-	}
-}
-
-// Deep Copy
-func (gen Generator) Copy() (newGen Generator) {
-	newGen = gen
-	newGen.Head = gen.Head.Copy()
-	newGen.Constraints = []Constraint{}
-	newGen.Literals = []Literal{}
-	for _, c := range gen.Constraints {
-		newGen.Constraints = append(newGen.Constraints, c.Copy())
-	}
-	for _, l := range gen.Literals {
-		newGen.Literals = append(newGen.Literals, l.Copy())
-	}
-	return
-}
-
-// Deep Copy
-func (rule Rule) Copy() (newRule Rule) {
-	newRule = rule
-	if rule.hasHead() {
-		newRule.Head = rule.Head.Copy()
-	}
-	newRule.Constraints = []Constraint{}
-	newRule.Literals = []Literal{}
-	newRule.Generators = []Generator{}
-	for _, c := range rule.Constraints {
-		newRule.Constraints = append(newRule.Constraints, c.Copy())
-	}
-	for _, l := range rule.Literals {
-		newRule.Literals = append(newRule.Literals, l.Copy())
-	}
-	for _, g := range rule.Generators {
-		newRule.Generators = append(newRule.Generators, g.Copy())
-	}
-	return
-}
-
-func (r *Rule) String() string {
-
-	sb := strings.Builder{}
-
-	for _, c := range r.Constraints {
-		sb.WriteString(c.String())
-		sb.WriteString(", ")
-	}
-
-	for _, g := range r.Generators {
-		sb.WriteString(g.String())
-		sb.WriteString(", ")
-	}
-
-	for _, l := range r.Literals {
-		sb.WriteString(l.String())
-		sb.WriteString(", ")
-	}
-	tmp := strings.TrimSuffix(sb.String(), ", ")
-	sb.Reset()
-	sb.WriteString(tmp)
-
-	if !r.IsDisjunction() {
-		sb.WriteString(RuleTypeString(r.Typ))
-		sb.WriteString(r.Head.String())
-	}
-	if r.GeneratingHead {
-		sb.WriteString("?")
-	} else {
-		sb.WriteString(".")
-	}
-	return sb.String()
-}
-
-// goes through all rules and expands expands if check is true.
-// Note that this does not expand the generated rules. (i.e. run until fixpoint)
-func (p *Program) RuleExpansion(check func(r Rule) bool, expand func(Rule) []Rule) (changed bool) {
-	var newRules []Rule
-	for _, rule := range p.Rules {
-		if check(rule) {
-			changed = true
-			for _, newRule := range expand(rule) {
-				newRules = append(newRules, newRule)
-			}
-		} else {
-			newRules = append(newRules, rule)
-		}
-	}
-	p.Rules = newRules
-	return
-}
-
-func (p *Program) TermExpansionOnlyLiterals(check func(r Term) bool, expand func(Term) []Term) (changed bool) {
-
-	checkRule := func(r Rule) bool {
-		for _, l := range r.Literals {
-			for _, t := range l.Terms {
-				if check(t) {
-					return true
-				}
-			}
-		}
-		return false
-	}
-
-	expandRule := func(r Rule) (newRules []Rule) {
-		for il, literal := range r.Literals {
-			for it, term := range literal.Terms {
-				if check(term) {
-					for _, newTerm := range expand(term) {
-						newRule := r.Copy()
-						newRule.Literals[il].Terms[it] = newTerm
-						newRules = append(newRules, newRule)
-					}
-					return
-				}
-			}
-		}
-		return
-	}
-	return p.RuleExpansion(checkRule, expandRule)
-}
-
-func (r *Rule) TermTranslation(transform func(Term) (Term, bool)) (changed bool) {
-	var ok bool
-	for _, term := range r.AllTerms() {
-		*term, ok = transform(*term)
-		changed = ok || changed
-	}
-	return
-}
 
 func (p *Program) ExpandRanges() (changed bool) {
 	transform := func(term Term) (newTerms []Term) {
@@ -289,7 +51,7 @@ func (p *Program) RewriteEquivalencesAndImplications() bool {
 	return p.RuleExpansion(check, transform)
 }
 
-func (p *Program) InstanciateAndRemoveFacts() (changed bool) {
+func (p *Program) InstantiateAndRemoveFacts() (changed bool) {
 	// Find rule with fact
 	check := func(r Rule) bool {
 		for _, lit := range r.Literals {
@@ -512,36 +274,6 @@ func (r *Rule) Simplify(assignment map[string]int) bool {
 	return r.TermTranslation(transform)
 }
 
-func (r *Rule) AllTerms() (terms []*Term) {
-	for i := range r.Head.Terms {
-		terms = append(terms, &r.Head.Terms[i])
-	}
-	for _, l := range r.Literals {
-		for i := range l.Terms {
-			terms = append(terms, &l.Terms[i])
-		}
-	}
-	for i := range r.Constraints {
-		terms = append(terms, &r.Constraints[i].LeftTerm)
-		terms = append(terms, &r.Constraints[i].RightTerm)
-	}
-	for _, g := range r.Generators {
-		for i := range g.Head.Terms {
-			terms = append(terms, &g.Head.Terms[i])
-		}
-		for _, l := range g.Literals {
-			for i := range l.Terms {
-				terms = append(terms, &l.Terms[i])
-			}
-		}
-		for j := range g.Constraints {
-			terms = append(terms, &g.Constraints[j].LeftTerm)
-			terms = append(terms, &g.Constraints[j].RightTerm)
-		}
-	}
-	return
-}
-
 func (p *Program) ExpandConditionals() {
 
 	for i, r := range p.Rules {
@@ -625,51 +357,6 @@ func (p *Program) ExtractQuantors() {
 	return
 }
 
-func (name Predicate) String() string {
-	return string(name)
-}
-
-func (term Term) String() string {
-	return string(term)
-}
-
-func (g Generator) String() string {
-	sb := strings.Builder{}
-	sb.WriteString(g.Head.String())
-	sb.WriteString(":")
-	for _, c := range g.Constraints {
-		sb.WriteString(c.String())
-		sb.WriteString(":")
-	}
-	for _, l := range g.Literals {
-		sb.WriteString(l.String())
-		sb.WriteString(":")
-	}
-	return strings.TrimSuffix(sb.String(), ":")
-}
-
-func (literal Literal) String() string {
-	var s string
-	if literal.Neg == true {
-		s = "~"
-	}
-	s = s + literal.Name.String() + "["
-	for i, x := range literal.Terms {
-		s += x.String()
-		if i < len(literal.Terms)-1 {
-			s += ","
-		}
-	}
-	return s + "]"
-}
-
-func (literal Literal) Copy() Literal {
-	t := make([]Term, len(literal.Terms))
-	copy(t, literal.Terms)
-	literal.Terms = t
-	return literal
-}
-
 // only works on disjunctions
 func (rule *Rule) FreeVars() *strset.Set {
 	assert(rule.IsDisjunction())
@@ -707,18 +394,6 @@ func (term Term) FreeVars() *strset.Set {
 		}
 	}
 	return set
-}
-
-func (r *Rule) IsDisjunction() bool {
-	return len(r.Generators) == 0 && !r.hasHead() && r.Typ == ruleTypeDisjunction
-}
-
-func (r *Rule) IsGround() bool {
-	return r.FreeVars().IsEmpty()
-}
-
-func (r *Rule) IsFact() bool {
-	return !r.hasHead() && r.Typ == ruleTypeDisjunction && len(r.Literals) == 1
 }
 
 func (p *Program) generateAssignments(literals []Literal, constraints []Constraint) []map[string]int {
@@ -784,65 +459,6 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 	return assignments
 }
 
-func (p *Program) PrintTuples() {
-
-	for pred, tuples := range p.PredicatToTuples {
-		fmt.Println(pred.String(), ": ")
-		for _, t := range tuples {
-			fmt.Println("\t", t)
-		}
-	}
-
-}
-
-type Program struct {
-	Rules            []Rule
-	Constants        map[string]int
-	PredicatToTuples map[Predicate][][]int
-	GroundFacts      map[Predicate]bool
-	Search           map[Predicate]bool
-	existQ           map[int][]Literal
-	forallQ          map[int][]Literal
-}
-
-type Clause []Literal
-
-type ruleType int
-
-const (
-	ruleTypeDisjunction ruleType = iota
-	ruleTypeImplication
-	ruleTypeEquivalence
-)
-
-type Rule struct {
-	initialTokens  []Token
-	Head           Literal
-	Literals       []Literal
-	Generators     []Generator
-	Constraints    []Constraint
-	GeneratingHead bool     // if final token is tokenQuestionMark then it generates, otherwise tokenDot
-	Typ            ruleType // Can be Implication or Equivalence or RuleComma(normal rule)
-}
-
-func (r *Rule) hasHead() bool {
-	return r.Head.Name != ""
-}
-
-// is a math expression that evaluates to true or false
-// Constraints can contain variables
-// supported are <,>,<=,>=,==
-// E.g..: A*3v<=v5-2*R/7#mod3.
-type Constraint struct {
-	LeftTerm   Term
-	Comparison tokenKind
-	RightTerm  Term
-}
-
-func (constraint *Constraint) String() string {
-	return string(constraint.LeftTerm) + ComparisonString(constraint.Comparison) + string(constraint.RightTerm)
-}
-
 func (constraint *Constraint) GroundBoolExpression() (isGround bool, result bool) {
 	isGround = groundMathExpression(string(constraint.LeftTerm)) && groundMathExpression(string(constraint.RightTerm))
 	if !isGround {
@@ -851,29 +467,6 @@ func (constraint *Constraint) GroundBoolExpression() (isGround bool, result bool
 	result = evaluateBoolExpression(constraint.String())
 	return
 }
-
-func (constraint Constraint) Copy() (cons Constraint) {
-	cons = constraint
-	cons.LeftTerm = constraint.LeftTerm
-	cons.RightTerm = constraint.RightTerm
-	return cons
-}
-
-type Generator struct {
-	Constraints []Constraint
-	Literals    []Literal
-	Head        Literal
-}
-
-type Literal struct {
-	Neg   bool
-	Name  Predicate
-	Terms []Term
-}
-
-type Term string
-
-type Predicate string
 
 // Makes a deep copy and creates a new Literal
 func (literal Literal) assign(assignment map[string]int) (newLiteral Literal) {
@@ -986,50 +579,6 @@ func RuleTypeString(typ ruleType) (s string) {
 	case ruleTypeEquivalence:
 		s = " <->"
 	case ruleTypeDisjunction:
-	}
-	return
-}
-
-func assert(condition bool) {
-	if !condition {
-		panic("ASSERT FAILED")
-	}
-}
-
-func asserts(condition bool, info ...string) {
-	if !condition {
-		s := ""
-		for _, x := range info {
-			s += x + " "
-		}
-		fmt.Println(s)
-		panic(errors.New(s))
-	}
-}
-
-func asserte(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-func assertx(err error, info ...string) {
-	if err != nil {
-		for _, s := range info {
-			fmt.Print(s, " ")
-		}
-		fmt.Println()
-		panic(err)
-	}
-}
-
-func makeSet(a, b int) (c []int) {
-	if a >= b {
-		return []int{}
-	}
-	c = make([]int, 0, b-a)
-	for i := a; i <= b; i++ {
-		c = append(c, i)
 	}
 	return
 }

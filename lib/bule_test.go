@@ -63,33 +63,3 @@ func TestBule2(t *testing.T) {
 	p.ExpandConditionals()
 	p.Print()
 }
-
-//
-//
-//func TestInstantiate2(t *testing.T) {
-//
-//	{
-//		a, _ := parseAtom("move[X,Y+3,4]")
-//		assignment := make(map[string]int, 0)
-//		assignment["Y"] = 3
-//		b := a.simplifyAtom(assignment)
-//		if b.String() != "move[X,6,4]" {
-//			log.Println(a," ",b)
-//			t.Fail()
-//		}
-//	}
-//}
-//
-//func TestInstantiate3(t *testing.T) {
-//
-//	{
-//		a, _ := parseAtom("move[X,Y#mod2,4]")
-//		assignment := make(map[string]int, 0)
-//		assignment["Y"] = 3
-//		b := a.simplifyAtom(assignment)
-//		if b.String() != "move[X,1,4]" {
-//			log.Println(a," ",b)
-//			t.Fail()
-//		}
-//	}
-//}
