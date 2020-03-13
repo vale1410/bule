@@ -33,8 +33,7 @@ var (
 
 func debug(level int, s ...interface{}) {
 	if level <= debugFlag {
-		fmt.Println()
-		fmt.Print("%d: ")
+		fmt.Print("% ")
 		fmt.Print(s...)
 		fmt.Println()
 	}
@@ -58,6 +57,10 @@ bule ground <program.bul> [options].
 		debug(2, "Bule started")
 		p := bule.ParseProgram(args[0])
 		bule.DebugLevel = debugFlag
+
+		debug(1, "Input")
+		p.PrintDebug(1)
+		debug(1,"Output")
 
 		debug(2, "Replace Constants (#const a=3. and Function Symbols (#mod)")
 		p.ReplaceConstantsAndMathFunctions()
