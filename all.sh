@@ -27,7 +27,7 @@ do
 done 
 
 echo TODO: 
-for x in test-input/*.todo
+for x in test-todo/*.bul
 do 
     echo $(basename $x)
 done 

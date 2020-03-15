@@ -8,7 +8,11 @@ import (
 	"unicode"
 )
 
-func (p *Program) ExpandRanges() (changed bool) {
+func (p *Program) ExpandGroundRanges() (changed bool) {
+	check := func(term Term) bool {
+		interval := strings.Split(string(term), "..")
+		return len(interval) == 2 && groundMathExpression(interval[0]) && groundMathExpression(interval[1])
+	}
 	transform := func(term Term) (newTerms []Term) {
 		interval := strings.Split(string(term), "..")
 		i1 := evaluateTermExpression(interval[0])
@@ -17,10 +21,6 @@ func (p *Program) ExpandRanges() (changed bool) {
 			newTerms = append(newTerms, Term(strconv.Itoa(newValue)))
 		}
 		return
-	}
-	check := func(term Term) bool {
-		interval := strings.Split(string(term), "..")
-		return len(interval) == 2 && groundMathExpression(interval[0]) && groundMathExpression(interval[1])
 	}
 	return p.TermExpansionOnlyLiterals(check, transform)
 }
@@ -102,7 +102,7 @@ func (p *Program) FindNewFacts() (changed bool) {
 			return false
 		}
 		for _, lit := range r.Literals {
-			if p.GroundFacts[lit.Name] {
+			if p.GroundFacts[lit.Name] && lit.Neg == true {
 				numberOfNoneFacts--
 			}
 		}
@@ -113,12 +113,14 @@ func (p *Program) FindNewFacts() (changed bool) {
 		var facts []Literal
 		var newFact Literal
 		for _, lit := range rule.Literals {
-			if p.GroundFacts[lit.Name] {
+			if p.GroundFacts[lit.Name] && lit.Neg == true {
 				facts = append(facts, lit)
 			} else {
 				newFact = lit
 			}
 		}
+		//fmt.Println(facts)
+		//p.PrintFacts()
 		assignments := p.generateAssignments(facts, rule.Constraints)
 		for _, assignment := range assignments {
 			newLit := newFact.Copy()

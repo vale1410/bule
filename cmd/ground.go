@@ -65,13 +65,13 @@ bule ground <program.bul> [options].
 		debug(2, "Replace Constants (#const a=3. and Function Symbols (#mod)")
 		p.ReplaceConstantsAndMathFunctions()
 
-		debug(2, "Expand ground Ranges in literals.")
-		for p.ExpandRanges() {}
+		debug(2, "ExpandGroundRanges:\n p[1..2]. and also X==1..2, but not Y==A..B.")
+		for p.ExpandGroundRanges() {}
 
-		debug(2, "Collect ground facts.")
+		debug(2, "CollectGroundFacts:\n p[1,2]. r[1]. but not p[1],p[2]. and also not p[X,X].")
 		p.CollectGroundFacts()
 
-		debug(2, "Find clauses where all literals but 1 are facts. Resolve, add to tuples of fact and remove.")
+		debug(2, "FindNewFacts():\nFind clauses where all literals but 1 are facts. Resolve, add to tuples of fact and remove.")
 		for p.FindNewFacts() {}
 
 		// Now there should be no clauses entirely of facts!

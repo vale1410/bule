@@ -192,8 +192,7 @@ func (r *Rule) String() string {
 	tmp := strings.TrimSuffix(sb.String(), ", ")
 	sb.Reset()
 	sb.WriteString(tmp)
-
-	if !r.IsDisjunction() {
+	if r.hasHead() {
 		sb.WriteString(RuleTypeString(r.Typ))
 		sb.WriteString(r.Head.String())
 	}

@@ -58,7 +58,7 @@ func TestBule2(t *testing.T) {
 	fmt.Println(lines)
 	p := ParseProgramFromStrings(lines)
 	p.ReplaceConstantsAndMathFunctions()
-	p.ExpandRanges()
+	p.ExpandGroundRanges()
 	p.CollectGroundFacts()
 	p.ExpandConditionals()
 	p.Print()

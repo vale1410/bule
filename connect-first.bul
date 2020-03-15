@@ -1,0 +1,28 @@
+#const c=3. %% columns c
+#const r=3. %% row r
+#const q=3. %% connect q
+#const d=6. %% depth d.  black(1), white, black ... 
+
+domX[0..c-1].
+domY[0..r-1].
+connect[0..q-1].
+player[0..1].
+t[0..d].
+~t[T], turn[T#mod2,T]. 
+
+#exist[T], ~domX[X], ~domY[Y], ~player[A], ~t[T], Y >= T, board[X,Y,A,T].
+#exist[T], ~domX[X], ~domY[Y], ~t[T], Y >= T, occupied[X,Y,T].
+#forall[T], T#mod2==1, ~domX[X], ~turn[1,T], moveL[X,T]:dom[X]. 
+
+#exist[T], ~dom[T], move[X,T]:dom[X], T#mod2==0.
+
+
+
+
+
+%%st[0..1].
+
+
+
+
+

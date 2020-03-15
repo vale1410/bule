@@ -17,14 +17,10 @@ st[0..1].
 ~posX[X], ~posY[Y], connect[D], board[X+D,Y,0], X+q-1<=c, Y<=r, ~winS[X,Y,1].
 
 ~st[Z], ~posX[X], ~posY[Y], ~board[X+D,Y+Z*(q-1)+((-1)**Z)*D,1]:connect[D], X+q-1<=c, Y+q-1<=r.
-
 ~st[Z], ~posX[X], ~posY[Y], connect[D], ~board[X+D,Y+Z*(q-1)+((-1)**Z)*D,0], X+q-1<=c, Y+q-1<=r, winD[Z,X,Y].
 
 % at least one winning positions for player 1
 winS[X,Y,Z]:X+Z*(q-1)<=c:Y+(1-Z)*(q-1)<=r:posX[X]:posY[Y]:st[Z], winD[X,Y,Z]:X+q<c:Y+q<r:posX[X]:posY[Y]:st[Z].
-
-
-
 
 
 
