@@ -6,13 +6,14 @@ import (
 )
 
 type Program struct {
-	Rules            []Rule
-	Constants        map[string]int
-	PredicatToTuples map[Predicate][][]int
-	GroundFacts      map[Predicate]bool
-	Search           map[Predicate]bool
-	existQ           map[int][]Literal
-	forallQ          map[int][]Literal
+	Rules             []Rule
+	Constants         map[string]int
+	PredicateToTuples map[Predicate][][]int
+	PredicateToArity  map[Predicate]int
+	GroundFacts       map[Predicate]bool
+	Search            map[Predicate]bool
+	existQ            map[int][]Literal
+	forallQ           map[int][]Literal
 }
 
 type Rule struct {
@@ -23,6 +24,7 @@ type Rule struct {
 	Constraints    []Constraint
 	GeneratingHead bool     // if final token is tokenQuestionMark then it generates, otherwise tokenDot
 	Typ            ruleType // Can be Implication or Equivalence or RuleComma(normal rule)
+	NextFreshVar   int
 }
 
 // is a math expression that evaluates to true or false
@@ -207,7 +209,7 @@ func (r *Rule) String() string {
 func (p *Program) Debug() {
 	fmt.Println("constants:", p.Constants)
 	fmt.Println("groundFacts", p.GroundFacts)
-	fmt.Println("PredicatsToTuples", p.PredicatToTuples)
+	fmt.Println("PredicatsToTuples", p.PredicateToTuples)
 	for i, r := range p.Rules {
 		fmt.Println("\nrule", i)
 		r.Debug()
@@ -235,7 +237,7 @@ func (p *Program) PrintDebug(level int) {
 
 func (p *Program) PrintTuples() {
 
-	for pred, tuples := range p.PredicatToTuples {
+	for pred, tuples := range p.PredicateToTuples {
 		fmt.Println(pred.String(), ": ")
 		for _, t := range tuples {
 			fmt.Println("\t", t)
@@ -247,6 +249,38 @@ func (p *Program) PrintTuples() {
 func (p *Program) Print() {
 	p.PrintFacts()
 	p.PrintRules()
+}
+
+type LiteralError struct {
+	L Literal
+	R Rule
+	Message string
+}
+
+func (err LiteralError) Error() string {
+	var sb strings.Builder
+	sb.WriteString(err.Message + ":\n")
+	sb.WriteString("Literal " + err.L.String() + "\n")
+	sb.WriteString("Rule " + err.R.String() + "\n")
+	return sb.String()
+}
+
+func (p *Program) CheckArityOfLiterals() error {
+	p.PredicateToArity = make(map[Predicate]int)
+	for _, r := range p.Rules {
+		for _, l := range r.Literals {
+			if n, ok := p.PredicateToArity[l.Name]; ok {
+				if n != len(l.Terms) {
+					return LiteralError{l,r,
+						fmt.Sprintf("Literal with arity %d already occurs in program with arity %d. \n " +
+							"Bule predicat to arity has to be unique.", len(l.Terms),n)}
+				}
+			} else {
+				p.PredicateToArity[l.Name] = len(l.Terms)
+			}
+		}
+	}
+	return nil
 }
 
 func (p *Program) PrintRules() {
@@ -261,7 +295,7 @@ func (p *Program) PrintRules() {
 
 func (p *Program) PrintFacts() {
 	for pred, _ := range p.GroundFacts {
-		for _, tuple := range p.PredicatToTuples[pred] {
+		for _, tuple := range p.PredicateToTuples[pred] {
 			fmt.Print(pred)
 			for i, t := range tuple {
 				if i == 0 {

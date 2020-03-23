@@ -31,7 +31,7 @@ func ParseProgram(fileName string) (Program) {
 
 func ParseProgramFromStrings(lines []string) (p Program) {
 
-	p.PredicatToTuples = make(map[Predicate][][]int)
+	p.PredicateToTuples = make(map[Predicate][][]int)
 	p.GroundFacts = make(map[Predicate]bool)
 	p.Constants = make(map[string]int)
 

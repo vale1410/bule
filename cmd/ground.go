@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	bule "github.com/vale1410/bule/lib"
+	"os"
 )
 
 var (
@@ -60,7 +61,12 @@ bule ground <program.bul> [options].
 
 		debug(1, "Input")
 		p.PrintDebug(1)
-		debug(1,"Output")
+
+		err := p.CheckArityOfLiterals()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 
 		debug(2, "Replace Constants (#const a=3. and Function Symbols (#mod)")
 		p.ReplaceConstantsAndMathFunctions()
@@ -74,14 +80,15 @@ bule ground <program.bul> [options].
 		debug(2, "FindNewFacts():\nFind clauses where all literals but 1 are facts. Resolve, add to tuples of fact and remove.")
 		for p.FindNewFacts() {}
 
-		// Now there should be no clauses entirely of facts!
+		debug(2, "Now there should be no clauses entirely of facts!")
 
 		p.PrintDebug(2)
-		debug(2, "If a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
+		debug(2, "InstantiateAndRemoveFacts: If a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
 		for p.InstantiateAndRemoveFacts() {}
+		debug(2, "Program is now fact free in all clauses!")
 		p.PrintDebug(2)
 
-		debug(2, "Fixpoint of TransformConstraintsToInstantiation.")
+		debug(2, "Do Fixpoint of TransformConstraintsToInstantiation.")
 		debug(2, "For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
 		for p.TransformConstraintsToInstantiation() {}
 
@@ -107,6 +114,7 @@ bule ground <program.bul> [options].
 //		p.ExtractQuantors()
 //		p.PrintQuantification()
 
+		debug(1,"Output")
 		p.Print()
 
 

@@ -73,7 +73,7 @@ func (p *Program) InstantiateAndRemoveFacts() (changed bool) {
 		}
 		rule.Literals = append(rule.Literals[:i], rule.Literals[i+1:]...)
 
-		for _, tuple := range p.PredicatToTuples[fact.Name] {
+		for _, tuple := range p.PredicateToTuples[fact.Name] {
 			newRule := rule.Copy()
 			for j, val := range tuple {
 				newConstraint := Constraint{
@@ -137,7 +137,7 @@ func (p *Program) FindNewFacts() (changed bool) {
 
 func (p *Program) InsertTuple(lit Literal) {
 	groundTerms := evaluateExpressionTuples(lit.Terms)
-	tuples := p.PredicatToTuples[lit.Name]
+	tuples := p.PredicateToTuples[lit.Name]
 	for _, tuple := range tuples {
 		isSame := true
 		for i, t := range tuple {
@@ -150,7 +150,7 @@ func (p *Program) InsertTuple(lit Literal) {
 			return
 		}
 	}
-	p.PredicatToTuples[lit.Name] = append(p.PredicatToTuples[lit.Name], groundTerms)
+	p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], groundTerms)
 }
 
 func (p *Program) CollectGroundFacts() (changed bool) {
@@ -163,7 +163,7 @@ func (p *Program) CollectGroundFacts() (changed bool) {
 	}
 	transform := func(rule Rule) (empty []Rule) {
 		lit := rule.Literals[0]
-		p.PredicatToTuples[lit.Name] = append(p.PredicatToTuples[lit.Name], evaluateExpressionTuples(lit.Terms))
+		p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], evaluateExpressionTuples(lit.Terms))
 		p.GroundFacts[lit.Name] = true
 		return // remove rule
 	}
@@ -419,7 +419,7 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 	allPossibleAssignments[0] = make(map[string]int)
 
 	for _, literal := range literals {
-		if termsDomain, ok := p.PredicatToTuples[literal.Name]; ok {
+		if termsDomain, ok := p.PredicateToTuples[literal.Name]; ok {
 			newAssignments := make([]map[string]int, 0, len(allPossibleAssignments)*len(termsDomain))
 			for _, tuple := range termsDomain {
 				assert(len(tuple) == len(literal.Terms))
