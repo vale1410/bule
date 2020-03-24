@@ -8,6 +8,16 @@ import (
 	"unicode"
 )
 
+func (p *Program) ConstraintSimplification() {
+
+	debug(2, "Do Fixpoint of TransformConstraintsToInstantiation.")
+	debug(2, "For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
+	for p.TransformConstraintsToInstantiation() {
+	}
+	debug(2, "Remove clauses with contradictions (1==2) and remove true constraints (1>2, 1==1).")
+	p.CleanRulesFromGroundBoolExpression()
+}
+
 func (p *Program) ExpandGroundRanges() (changed bool) {
 	check := func(term Term) bool {
 		interval := strings.Split(string(term), "..")
@@ -51,6 +61,47 @@ func (p *Program) RewriteEquivalencesAndImplications() bool {
 	return p.RuleExpansion(check, transform)
 }
 
+// This resolves facts with clauses.
+func (p *Program) InstantiateNonGroundLiterals() (changed bool) {
+	// Find rule with non-ground literal that is going to be rolled out
+	check := func(r Rule) bool {
+		for _, lit := range r.Literals {
+			if !lit.FreeVars().IsEmpty() {
+				return true
+			}
+		}
+		return false
+	}
+
+	transform := func(rule Rule) (generatedRules []Rule) {
+
+		var litNG Literal // First non-Ground literal
+		var i int
+		for i, litNG = range rule.Literals {
+			if !litNG.FreeVars().IsEmpty() {
+				break
+			}
+		}
+
+		for _, tuple := range p.PredicateToTuples[litNG.Name] {
+			newRule := rule.Copy()
+			for j, val := range tuple {
+				newRule.Literals[i].Terms[j] = Term(strconv.Itoa(val))
+				newConstraint := Constraint{
+					LeftTerm:   litNG.Terms[j],
+					RightTerm:  Term(strconv.Itoa(val)),
+					Comparison: tokenComparisonEQ,
+				}
+				newRule.Constraints = append(newRule.Constraints, newConstraint)
+			}
+			generatedRules = append(generatedRules, newRule)
+		}
+		return generatedRules
+	}
+	return p.RuleExpansion(check, transform)
+}
+
+// This resolves facts with clauses.
 func (p *Program) InstantiateAndRemoveFacts() (changed bool) {
 	// Find rule with fact
 	check := func(r Rule) bool {
@@ -137,20 +188,10 @@ func (p *Program) FindNewFacts() (changed bool) {
 
 func (p *Program) InsertTuple(lit Literal) {
 	groundTerms := evaluateExpressionTuples(lit.Terms)
-	tuples := p.PredicateToTuples[lit.Name]
-	for _, tuple := range tuples {
-		isSame := true
-		for i, t := range tuple {
-			if groundTerms[i] != t {
-				isSame = false
-				break
-			}
-		}
-		if isSame {
-			return
-		}
+	if !p.PredicateGroundTuple[lit.String()] {
+		p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], groundTerms)
 	}
-	p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], groundTerms)
+	p.PredicateGroundTuple[lit.String()] = true
 }
 
 func (p *Program) CollectGroundFacts() (changed bool) {
@@ -187,7 +228,7 @@ func (constraint Constraint) IsInstantiation() (is bool, variable string, value 
 // Remove Rules with false constraint
 // Remove true constraints from Rule
 // This is essentially Unit Propagation on Constraint Instantiation
-func (p *Program) CleanRules() bool {
+func (p *Program) CleanRulesFromGroundBoolExpression() bool {
 
 	check := func(r Rule) bool {
 		for _, cons := range r.Constraints {
@@ -296,32 +337,49 @@ func (p *Program) CollectGroundTuples() {
 
 	for _, r := range p.Rules {
 		for _, literal := range r.Literals {
-			if literal.FreeVars().IsEmpty() {
+			if literal.IsGround() {
 				p.InsertTuple(literal)
+				p.PredicateGroundTuple[literal.String()] = true
+				p.PredicateGroundTuple[literal.createNegatedLiteral().String()] = true
 			}
 		}
 	}
 }
 
-func (p *Program) GroundFromTuples() bool {
-	check := func(r Rule) bool {
-		return !r.IsGround()
+func (p *Program) RemoveClausesWithTuplesThatDontExist() bool {
+	removeIfTrue := func(rule Rule) bool {
+		for _, lit := range rule.Literals {
+			if lit.FreeVars().IsEmpty() {
+				if !p.PredicateGroundTuple[lit.String()] {
+					return true
+				}
+			}
+		}
+		return false
 	}
 
-	transform := func(rule Rule) (result []Rule) {
-		assignments := p.generateAssignments(rule.Literals, rule.Constraints)
-		for _, assignment := range assignments {
-			newRule := rule.Copy()
-			newRule.Constraints = []Constraint{}
-			for i, lit := range newRule.Literals {
-				newRule.Literals[i] = lit.assign(assignment)
-			}
-			result = append(result, newRule)
-		}
-		return
-	}
-	return p.RuleExpansion(check, transform)
+	return p.RemoveRules(removeIfTrue)
 }
+
+//func (p *Program) GroundFromTuples() bool {
+//	check := func(r Rule) bool {
+//		return !r.IsGround()
+//	}
+//
+//	transform := func(rule Rule) (result []Rule) {
+//		assignments := p.generateAssignments(rule.Literals, rule.Constraints)
+//		for _, assignment := range assignments {
+//			newRule := rule.Copy()
+//			newRule.Constraints = []Constraint{}
+//			for i, lit := range newRule.Literals {
+//				newRule.Literals[i] = lit.assign(assignment)
+//			}
+//			result = append(result, newRule)
+//		}
+//		return
+//	}
+//	return p.RuleExpansion(check, transform)
+//}
 
 func (p *Program) ExtractQuantors() {
 

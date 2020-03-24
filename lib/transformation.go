@@ -1,6 +1,19 @@
 package lib
 
 
+// Remove all rules where check is true.
+func (p *Program) RemoveRules(ifTrueRemove func(r Rule) bool) (changed bool) {
+	var newRules []Rule
+	for _, rule := range p.Rules {
+		if !ifTrueRemove(rule) {
+			newRules = append(newRules, rule)
+		}
+	}
+	p.Rules = newRules
+	return
+}
+
+
 // goes through all rules and expands expands if check is true.
 // Note that this does not expand the generated rules. (i.e. run until fixpoint)
 func (p *Program) RuleExpansion(check func(r Rule) bool, expand func(Rule) []Rule) (changed bool) {

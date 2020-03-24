@@ -29,7 +29,7 @@ import (
 )
 
 var (
-	debugFlag int    //= flag.Int("d", 0, "Debug Level .")
+	debugFlag int //= flag.Int("d", 0, "Debug Level .")
 )
 
 func debug(level int, s ...interface{}) {
@@ -72,51 +72,59 @@ bule ground <program.bul> [options].
 		p.ReplaceConstantsAndMathFunctions()
 
 		debug(2, "ExpandGroundRanges:\n p[1..2]. and also X==1..2, but not Y==A..B.")
-		for p.ExpandGroundRanges() {}
+		for p.ExpandGroundRanges() {
+		}
 
-		debug(2, "CollectGroundFacts:\n p[1,2]. r[1]. but not p[1],p[2]. and also not p[X,X].")
+		debug(2, "CollectGroundFacts:\n p[1,2]. r[1]. but not p[1],p[2]. and also not p[X,X], or p[1,X].")
 		p.CollectGroundFacts()
 
 		debug(2, "FindNewFacts():\nFind clauses where all literals but 1 are facts. Resolve, add to tuples of fact and remove.")
-		for p.FindNewFacts() {}
+		for p.FindNewFacts() {
+		}
 
 		debug(2, "Now there should be no clauses entirely of facts!")
 
 		p.PrintDebug(2)
 		debug(2, "InstantiateAndRemoveFacts: If a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
-		for p.InstantiateAndRemoveFacts() {}
+		for p.InstantiateAndRemoveFacts() {
+		}
 		debug(2, "Program is now fact free in all clauses!")
 		p.PrintDebug(2)
 
-		debug(2, "Do Fixpoint of TransformConstraintsToInstantiation.")
-		debug(2, "For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
-		for p.TransformConstraintsToInstantiation() {}
+		p.ConstraintSimplification()
 
 		p.PrintDebug(2)
-		debug(2, "Remove clauses with contradictions (1==2) and remove true constraints (1>2, 1==1).")
-		p.CleanRules()
 
 		debug(2, "Expand Conditionals")
 		p.ExpandConditionals()
+
+		p.PrintDebug(2)
 
 		debug(2, "All Rules should be clauses with search predicates. No more ground facts.")
 
 		debug(2, "Collect all ground literals in all clauses")
 		p.CollectGroundTuples()
-		//p.PrintTuples()
+//		p.PrintTuples()
 
-		debug(2, "Collect all ground literals in all clauses")
-		p.GroundFromTuples()
+		p.PrintDebug(2)
 
-		debug(2, "Extract Quantors ")
+		debug(2, "Ground from all tuples the non-ground literals, until fixpoint.")
+		for p.InstantiateNonGroundLiterals() {
+			p.PrintDebug(2)
+			p.ConstraintSimplification()
+			p.PrintDebug(2)
+			debug(2, "RemoveClausesWithTuplesThatDontExist.")
+			p.RemoveClausesWithTuplesThatDontExist()
+			p.PrintDebug(2)
+		}
 
-//		debug(2, "Print Quantification")
-//		p.ExtractQuantors()
-//		p.PrintQuantification()
+		//		debug(2, "Extract Quantors ")
+		//		p.ExtractQuantors()
+		//		debug(2, "Print Quantification")
+		//		p.PrintQuantification()
 
-		debug(1,"Output")
+		debug(1, "Output")
 		p.Print()
-
 
 	},
 }
@@ -126,7 +134,7 @@ func init() {
 
 	//debugFlag int    //= flag.Int("d", 0, "Debug Level .")
 	//progFlag  string //= flag.String("f", "", "Path to file.")
-//	groundCmd.PersistentFlags().StringVarP(&progFlag, "file", "f", "", "Path to File")
+	//	groundCmd.PersistentFlags().StringVarP(&progFlag, "file", "f", "", "Path to File")
 	groundCmd.PersistentFlags().IntVarP(&debugFlag, "debug", "d", 0, "Debug level")
 
 	// Cobra supports local flags which will only run when this command

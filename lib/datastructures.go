@@ -6,14 +6,15 @@ import (
 )
 
 type Program struct {
-	Rules             []Rule
-	Constants         map[string]int
-	PredicateToTuples map[Predicate][][]int
-	PredicateToArity  map[Predicate]int
-	GroundFacts       map[Predicate]bool
-	Search            map[Predicate]bool
-	existQ            map[int][]Literal
-	forallQ           map[int][]Literal
+	Rules                []Rule
+	Constants            map[string]int
+	PredicateToTuples    map[Predicate][][]int
+	PredicateToArity     map[Predicate]int
+	PredicateGroundTuple map[string]bool
+	GroundFacts          map[Predicate]bool
+	Search               map[Predicate]bool
+	existQ               map[int][]Literal
+	forallQ              map[int][]Literal
 }
 
 type Rule struct {
@@ -59,10 +60,13 @@ type Literal struct {
 	Terms []Term
 }
 
+func (l *Literal) IsGround() bool {
+	return l.FreeVars().IsEmpty()
+}
+
 type Term string
 
 type Predicate string
-
 
 func (r *Rule) hasHead() bool {
 	return r.Head.Name != ""
@@ -79,7 +83,6 @@ func (r *Rule) IsGround() bool {
 func (r *Rule) IsFact() bool {
 	return !r.hasHead() && r.Typ == ruleTypeDisjunction && len(r.Literals) == 1
 }
-
 
 func (constraint Constraint) Copy() (cons Constraint) {
 	cons = constraint
@@ -252,8 +255,8 @@ func (p *Program) Print() {
 }
 
 type LiteralError struct {
-	L Literal
-	R Rule
+	L       Literal
+	R       Rule
 	Message string
 }
 
@@ -271,9 +274,9 @@ func (p *Program) CheckArityOfLiterals() error {
 		for _, l := range r.Literals {
 			if n, ok := p.PredicateToArity[l.Name]; ok {
 				if n != len(l.Terms) {
-					return LiteralError{l,r,
-						fmt.Sprintf("Literal with arity %d already occurs in program with arity %d. \n " +
-							"Bule predicat to arity has to be unique.", len(l.Terms),n)}
+					return LiteralError{l, r,
+						fmt.Sprintf("Literal with arity %d already occurs in program with arity %d. \n "+
+							"Bule predicat to arity has to be unique.", len(l.Terms), n)}
 				}
 			} else {
 				p.PredicateToArity[l.Name] = len(l.Terms)

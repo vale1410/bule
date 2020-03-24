@@ -34,6 +34,7 @@ func ParseProgramFromStrings(lines []string) (p Program) {
 	p.PredicateToTuples = make(map[Predicate][][]int)
 	p.GroundFacts = make(map[Predicate]bool)
 	p.Constants = make(map[string]int)
+	p.PredicateGroundTuple = map[string]bool{}
 
 	for _, s := range lines {
 		s := strings.TrimSpace(s)
