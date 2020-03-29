@@ -1,5 +1,6 @@
 package lib
 
+import "fmt"
 
 // Remove all rules where check is true.
 func (p *Program) RemoveRules(ifTrueRemove func(r Rule) bool) (changed bool) {
@@ -13,17 +14,18 @@ func (p *Program) RemoveRules(ifTrueRemove func(r Rule) bool) (changed bool) {
 	return
 }
 
-
 // goes through all rules and expands expands if check is true.
 // Note that this does not expand the generated rules. (i.e. run until fixpoint)
-func (p *Program) RuleExpansion(check func(r Rule) bool, expand func(Rule) []Rule) (changed bool) {
+func (p *Program) RuleExpansion(check func(r Rule) bool, expand func(Rule) ([]Rule, error)) (changed bool, err error) {
 	var newRules []Rule
-	for _, rule := range p.Rules {
+	for row, rule := range p.Rules {
 		if check(rule) {
 			changed = true
-			for _, newRule := range expand(rule) {
-				newRules = append(newRules, newRule)
+			tmpRules, err := expand(rule)
+			if err != nil {
+				return false, fmt.Errorf("Rele Expansion: %w\n in Rule %v:  %v ", err, row,rule)
 			}
+			newRules = append(newRules, tmpRules...)
 		} else {
 			newRules = append(newRules, rule)
 		}
@@ -32,7 +34,7 @@ func (p *Program) RuleExpansion(check func(r Rule) bool, expand func(Rule) []Rul
 	return
 }
 
-func (p *Program) TermExpansionOnlyLiterals(check func(r Term) bool, expand func(Term) []Term) (changed bool) {
+func (p *Program) TermExpansionOnlyLiterals(check func(r Term) bool, expand func(Term) []Term) (changed bool, err error) {
 
 	checkRule := func(r Rule) bool {
 		for _, l := range r.Literals {
@@ -45,7 +47,7 @@ func (p *Program) TermExpansionOnlyLiterals(check func(r Term) bool, expand func
 		return false
 	}
 
-	expandRule := func(r Rule) (newRules []Rule) {
+	expandRule := func(r Rule) (newRules []Rule, err error) {
 		for il, literal := range r.Literals {
 			for it, term := range literal.Terms {
 				if check(term) {
@@ -71,7 +73,6 @@ func (r *Rule) TermTranslation(transform func(Term) (Term, bool)) (changed bool)
 	}
 	return
 }
-
 
 func (r *Rule) AllTerms() (terms []*Term) {
 	for i := range r.Head.Terms {

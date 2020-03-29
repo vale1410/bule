@@ -29,14 +29,15 @@ func ParseProgram(fileName string) (Program) {
 	return ParseProgramFromStrings(lines)
 }
 
-func ParseProgramFromStrings(lines []string) (p Program) {
+func ParseProgramFromStrings(lines []string) (p Program ) {
 
 	p.PredicateToTuples = make(map[Predicate][][]int)
 	p.GroundFacts = make(map[Predicate]bool)
 	p.Constants = make(map[string]int)
 	p.PredicateGroundTuple = map[string]bool{}
 
-	for _, s := range lines {
+	acc := ""
+	for row, s := range lines {
 		s := strings.TrimSpace(s)
 		if pos := strings.Index(s, "%"); pos >= 0 {
 			s = s[:pos]
@@ -58,9 +59,20 @@ func ParseProgramFromStrings(lines []string) (p Program) {
 			continue
 		}
 
-		p.Rules = append(p.Rules, parseRule(s))
+		acc += s
+		if !strings.HasSuffix(s, ".") {
+			continue
+		}
+
+		rule, err := parseRule(acc)
+		if err != nil {
+			fmt.Printf("Parsing Error in Row %v: %v\n", row, err)
+			os.Exit(1)
+		}
+		p.Rules = append(p.Rules, rule)
+		acc = ""
 	}
-	return
+	return p
 }
 
 func lexRule(text string) (ts Tokens) {
@@ -77,8 +89,9 @@ func lexRule(text string) (ts Tokens) {
 // <ClauseDisjunction>.
 // <ClauseDisjunction>?
 
-func parseRule(text string) (rule Rule) {
+func parseRule(text string) (rule Rule, err error) {
 
+	// TODO: error handling
 	tokens := lexRule(text)
 	if tokens[len(tokens)-1].kind == tokenEOF {
 		tokens = tokens[:len(tokens)-1]
@@ -86,7 +99,7 @@ func parseRule(text string) (rule Rule) {
 	rule.initialTokens = tokens
 	restTokens := rule.parseEquivalenceImplicationHead()
 	rule.parseRestIntoRuleElements(restTokens)
-	return
+	return rule, err
 
 }
 

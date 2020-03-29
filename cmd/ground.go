@@ -72,22 +72,20 @@ bule ground <program.bul> [options].
 		p.ReplaceConstantsAndMathFunctions()
 
 		debug(2, "ExpandGroundRanges:\n p[1..2]. and also X==1..2, but not Y==A..B.")
-		for p.ExpandGroundRanges() {
-		}
+		runFixpoint(p.ExpandGroundRanges)
 
 		debug(2, "CollectGroundFacts:\n p[1,2]. r[1]. but not p[1],p[2]. and also not p[X,X], or p[1,X].")
 		p.CollectGroundFacts()
 
 		debug(2, "FindNewFacts():\nFind clauses where all literals but 1 are facts. Resolve, add to tuples of fact and remove.")
-		for p.FindNewFacts() {
-		}
+		runFixpoint(p.FindNewFacts)
 
 		debug(2, "Now there should be no clauses entirely of facts!")
 
 		p.PrintDebug(2)
 		debug(2, "InstantiateAndRemoveFacts: If a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
-		for p.InstantiateAndRemoveFacts() {
-		}
+		runFixpoint(p.InstantiateAndRemoveFacts)
+
 		debug(2, "Program is now fact free in all clauses!")
 		p.PrintDebug(2)
 
@@ -104,12 +102,20 @@ bule ground <program.bul> [options].
 
 		debug(2, "Collect all ground literals in all clauses")
 		p.CollectGroundTuples()
-//		p.PrintTuples()
+		//		p.PrintTuples()
 
 		p.PrintDebug(2)
 
 		debug(2, "Ground from all tuples the non-ground literals, until fixpoint.")
-		for p.InstantiateNonGroundLiterals() {
+		ok := true
+		i := 0
+		for ok {
+			i++
+			ok, err = p.InstantiateNonGroundLiterals()
+			if err != nil {
+				fmt.Printf("Error occurred in grounding when instantiating non-ground literals. Iteration %v.\n %v\n", i,  err)
+				os.Exit(1)
+			}
 			p.PrintDebug(2)
 			p.ConstraintSimplification()
 			p.PrintDebug(2)
@@ -127,6 +133,18 @@ bule ground <program.bul> [options].
 		p.Print()
 
 	},
+}
+
+func runFixpoint(f func() (bool, error)) {
+	ok := true
+	var err error
+	for ok {
+		ok, err = f()
+		if err != nil {
+			fmt.Println("Error occurred in grounding.\n %w", err)
+			os.Exit(1)
+		}
+	}
 }
 
 func init() {

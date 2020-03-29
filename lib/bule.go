@@ -1,6 +1,8 @@
 package lib
 
 import (
+	"errors"
+	"fmt"
 	"github.com/Knetic/govaluate"
 	"github.com/scylladb/go-set/strset"
 	"strconv"
@@ -8,17 +10,27 @@ import (
 	"unicode"
 )
 
-func (p *Program) ConstraintSimplification() {
+func (p *Program) ConstraintSimplification() error {
 
 	debug(2, "Do Fixpoint of TransformConstraintsToInstantiation.")
 	debug(2, "For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
-	for p.TransformConstraintsToInstantiation() {
+	i := 0
+	for {
+		i++
+		changed, err := p.TransformConstraintsToInstantiation()
+		if err != nil {
+			return fmt.Errorf("Constraint simplification, iteration %v. \n %w", i, err)
+		}
+		if !changed {
+			debug(2, "Remove clauses with contradictions (1==2) and remove true constraints (1>2, 1==1).")
+			p.CleanRulesFromGroundBoolExpression()
+			break
+		}
 	}
-	debug(2, "Remove clauses with contradictions (1==2) and remove true constraints (1>2, 1==1).")
-	p.CleanRulesFromGroundBoolExpression()
+	return nil
 }
 
-func (p *Program) ExpandGroundRanges() (changed bool) {
+func (p *Program) ExpandGroundRanges() (changed bool, err error) {
 	check := func(term Term) bool {
 		interval := strings.Split(string(term), "..")
 		return len(interval) == 2 && groundMathExpression(interval[0]) && groundMathExpression(interval[1])
@@ -35,13 +47,13 @@ func (p *Program) ExpandGroundRanges() (changed bool) {
 	return p.TermExpansionOnlyLiterals(check, transform)
 }
 
-func (p *Program) RewriteEquivalencesAndImplications() bool {
+func (p *Program) RewriteEquivalencesAndImplications() (bool, error) {
 	// Make rules from the head equivalences
 	// Current assumption: head is only one literal, body is a conjunction!
 	check := func(r Rule) bool {
 		return r.hasHead()
 	}
-	transform := func(r Rule) (newRules []Rule) {
+	transform := func(r Rule) (newRules []Rule, err error) {
 		assert(r.Typ == ruleTypeEquivalence || r.Typ == ruleTypeImplication)
 		newRules = make([]Rule, 0)
 		for i, literal := range r.Literals {
@@ -56,13 +68,13 @@ func (p *Program) RewriteEquivalencesAndImplications() bool {
 			r.Typ = ruleTypeDisjunction
 		}
 		r.Literals = append(r.Literals, r.Head)
-		return append(newRules, r)
+		return append(newRules, r), nil
 	}
 	return p.RuleExpansion(check, transform)
 }
 
 // This resolves facts with clauses.
-func (p *Program) InstantiateNonGroundLiterals() (changed bool) {
+func (p *Program) InstantiateNonGroundLiterals() (changed bool, err error) {
 	// Find rule with non-ground literal that is going to be rolled out
 	check := func(r Rule) bool {
 		for _, lit := range r.Literals {
@@ -73,7 +85,7 @@ func (p *Program) InstantiateNonGroundLiterals() (changed bool) {
 		return false
 	}
 
-	transform := func(rule Rule) (generatedRules []Rule) {
+	transform := func(rule Rule) (generatedRules []Rule, err error) {
 
 		var litNG Literal // First non-Ground literal
 		var i int
@@ -96,13 +108,13 @@ func (p *Program) InstantiateNonGroundLiterals() (changed bool) {
 			}
 			generatedRules = append(generatedRules, newRule)
 		}
-		return generatedRules
+		return generatedRules, err
 	}
 	return p.RuleExpansion(check, transform)
 }
 
 // This resolves facts with clauses.
-func (p *Program) InstantiateAndRemoveFacts() (changed bool) {
+func (p *Program) InstantiateAndRemoveFacts() (changed bool, err error) {
 	// Find rule with fact
 	check := func(r Rule) bool {
 		for _, lit := range r.Literals {
@@ -113,7 +125,7 @@ func (p *Program) InstantiateAndRemoveFacts() (changed bool) {
 		return false
 	}
 
-	transform := func(rule Rule) (generatedRules []Rule) {
+	transform := func(rule Rule) (generatedRules []Rule, err error) {
 
 		var fact Literal
 		var i int
@@ -136,12 +148,12 @@ func (p *Program) InstantiateAndRemoveFacts() (changed bool) {
 			}
 			generatedRules = append(generatedRules, newRule)
 		}
-		return generatedRules
+		return
 	}
 	return p.RuleExpansion(check, transform)
 }
 
-func (p *Program) FindNewFacts() (changed bool) {
+func (p *Program) FindNewFacts() (changed bool, err error) {
 	// All literals are facts but one!
 	// No generators
 	check := func(r Rule) bool {
@@ -160,7 +172,7 @@ func (p *Program) FindNewFacts() (changed bool) {
 		return numberOfNoneFacts == 1
 	}
 
-	transform := func(rule Rule) (empty []Rule) {
+	transform := func(rule Rule) (empty []Rule, err error) {
 		var facts []Literal
 		var newFact Literal
 		for _, lit := range rule.Literals {
@@ -172,7 +184,10 @@ func (p *Program) FindNewFacts() (changed bool) {
 		}
 		//fmt.Println(facts)
 		//p.PrintFacts()
-		assignments := p.generateAssignments(facts, rule.Constraints)
+		assignments, err := p.generateAssignments(facts, rule.Constraints)
+		if err != nil {
+			return empty, fmt.Errorf("Find New Facts: %w\n in Rule:  %v ", err, rule.String())
+		}
 		for _, assignment := range assignments {
 			newLit := newFact.Copy()
 			for i, Term := range newLit.Terms {
@@ -194,7 +209,7 @@ func (p *Program) InsertTuple(lit Literal) {
 	p.PredicateGroundTuple[lit.String()] = true
 }
 
-func (p *Program) CollectGroundFacts() (changed bool) {
+func (p *Program) CollectGroundFacts() (changed bool, err error) {
 	check := func(r Rule) bool {
 		return r.Typ == ruleTypeDisjunction &&
 			len(r.Literals) == 1 &&
@@ -202,33 +217,66 @@ func (p *Program) CollectGroundFacts() (changed bool) {
 			len(r.Constraints) == 0 &&
 			r.FreeVars().IsEmpty()
 	}
-	transform := func(rule Rule) (empty []Rule) {
+	transform := func(rule Rule) (empty []Rule, err error) {
 		lit := rule.Literals[0]
 		p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], evaluateExpressionTuples(lit.Terms))
 		p.GroundFacts[lit.Name] = true
-		return // remove rule
+		return
 	}
 	return p.RuleExpansion(check, transform)
 }
 
+// Checks if constraint is of the form X==<math>, or <math>==X
+// It also does very simple equation solving for equations with one variable, like X-3+1==<math> .
 func (constraint Constraint) IsInstantiation() (is bool, variable string, value int) {
-	freeVars := constraint.FreeVars()
 	if constraint.Comparison != tokenComparisonEQ {
 		return false, "", 0
 	}
-	if freeVars.Size() == 1 && freeVars.Pop() == constraint.LeftTerm.String() && groundMathExpression(string(constraint.RightTerm)) {
-		return true, constraint.LeftTerm.String(), evaluateTermExpression(string(constraint.RightTerm))
-	} else if freeVars.Size() == 1 && freeVars.Pop() == constraint.RightTerm.String() && groundMathExpression(string(constraint.LeftTerm)) {
-		return true, constraint.RightTerm.String(), evaluateTermExpression(string(constraint.LeftTerm))
 
+	freeVars := constraint.FreeVars()
+	if freeVars.Size() != 1 {
+		return false, "", 0
 	}
+	freeVar := freeVars.Pop()
+	mathExpression := ""
+	varExpression := ""
+
+	if constraint.LeftTerm.FreeVars().IsEmpty() {
+		mathExpression = constraint.LeftTerm.String()
+		varExpression = constraint.RightTerm.String()
+	} else if constraint.RightTerm.FreeVars().IsEmpty() {
+		asserts(constraint.RightTerm.FreeVars().IsEmpty(), "Must be math expression: "+constraint.String())
+		mathExpression = constraint.RightTerm.String()
+		varExpression = constraint.LeftTerm.String()
+	}
+
+	if !strings.HasPrefix(varExpression, freeVar) {
+		return false, "", 0
+	}
+
+	remainingExpression := strings.TrimPrefix(varExpression, freeVar)
+	asserts(Term(remainingExpression).FreeVars().IsEmpty(), "Must be math expression: "+remainingExpression)
+	if remainingExpression == ""  {
+		return true, freeVar, evaluateTermExpression(mathExpression)
+	}
+
+	if strings.HasPrefix(remainingExpression, "+") {
+		tmp := strings.TrimPrefix(remainingExpression, "+")
+		return true, freeVar, evaluateTermExpression(mathExpression + "-(" + tmp +")")
+	}
+
+	if strings.HasPrefix(remainingExpression, "-") {
+		tmp := strings.TrimPrefix(remainingExpression, "-")
+		return true, freeVar, evaluateTermExpression(mathExpression + "+(" + tmp +")")
+	}
+
 	return false, "", 0
 }
 
 // Remove Rules with false constraint
 // Remove true constraints from Rule
 // This is essentially Unit Propagation on Constraint Instantiation
-func (p *Program) CleanRulesFromGroundBoolExpression() bool {
+func (p *Program) CleanRulesFromGroundBoolExpression() (bool, error) {
 
 	check := func(r Rule) bool {
 		for _, cons := range r.Constraints {
@@ -240,7 +288,7 @@ func (p *Program) CleanRulesFromGroundBoolExpression() bool {
 		return false
 	}
 
-	transform := func(rule Rule) (result []Rule) {
+	transform := func(rule Rule) (result []Rule, err error) {
 		newRule := rule
 		newRule.Constraints = []Constraint{}
 		for _, cons := range rule.Constraints {
@@ -263,7 +311,7 @@ func (p *Program) CleanRulesFromGroundBoolExpression() bool {
 
 // for each Constraint X==<Value>
 // Rewrite all Terms with X <- <Value>
-func (p *Program) TransformConstraintsToInstantiation() bool {
+func (p *Program) TransformConstraintsToInstantiation() (bool, error) {
 
 	check := func(r Rule) bool {
 		for _, cons := range r.Constraints {
@@ -275,7 +323,7 @@ func (p *Program) TransformConstraintsToInstantiation() bool {
 		return false
 	}
 
-	transform := func(rule Rule) (empty []Rule) {
+	transform := func(rule Rule) (empty []Rule, err error) {
 		var i int
 		var cons Constraint
 		var is bool
@@ -290,7 +338,7 @@ func (p *Program) TransformConstraintsToInstantiation() bool {
 		assignment := map[string]int{variable: value}
 		rule.Constraints = append(rule.Constraints[:i], rule.Constraints[i+1:]...)
 		rule.Simplify(assignment)
-		return []Rule{rule}
+		return []Rule{rule}, err
 	}
 	return p.RuleExpansion(check, transform)
 }
@@ -317,13 +365,14 @@ func (r *Rule) Simplify(assignment map[string]int) bool {
 	return r.TermTranslation(transform)
 }
 
-func (p *Program) ExpandConditionals() {
+func (p *Program) ExpandConditionals() error {
 
 	for i, r := range p.Rules {
 		for _, generator := range r.Generators {
-			assignments := p.generateAssignments(
-				generator.Literals,
-				generator.Constraints)
+			assignments, err := p.generateAssignments(generator.Literals, generator.Constraints)
+			if err != nil {
+				fmt.Errorf("Expand Conditionals: %w\n in Rule %v:  %v ", err, i, r)
+			}
 			for _, assignment := range assignments {
 				p.Rules[i].Literals = append(p.Rules[i].Literals,
 					generator.Head.assign(assignment))
@@ -331,6 +380,7 @@ func (p *Program) ExpandConditionals() {
 		}
 		p.Rules[i].Generators = []Generator{}
 	}
+	return nil
 }
 
 func (p *Program) CollectGroundTuples() {
@@ -390,7 +440,7 @@ func (p *Program) ExtractQuantors() {
 		return r.Literals[0].Name == "#forall"
 	}
 
-	transformA := func(rule Rule) (remove []Rule) {
+	transformA := func(rule Rule) (remove []Rule, err error) {
 		lit := rule.Literals[0]
 		asserts(len(lit.Terms) == 1, "Wrong arity for forall")
 		val, err := strconv.Atoi(string(lit.Terms[0].String()))
@@ -403,7 +453,7 @@ func (p *Program) ExtractQuantors() {
 		return r.Literals[0].Name == "#exist"
 	}
 
-	transformE := func(rule Rule) (remove []Rule) {
+	transformE := func(rule Rule) (remove []Rule, err error) {
 		lit := rule.Literals[0]
 		asserts(len(lit.Terms) == 1, "Wrong arity for exist")
 		val, err := strconv.Atoi(string(lit.Terms[0].String()))
@@ -456,7 +506,7 @@ func (term Term) FreeVars() *strset.Set {
 	return set
 }
 
-func (p *Program) generateAssignments(literals []Literal, constraints []Constraint) []map[string]int {
+func (p *Program) generateAssignments(literals []Literal, constraints []Constraint) ([]map[string]int, error) {
 
 	// Assumption:
 	// 1) freevars of literals are all disjunct
@@ -495,7 +545,7 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 			}
 			allPossibleAssignments = newAssignments
 		} else {
-			panic("literal doesnt have domain " + literal.String())
+			return nil, errors.New("Generate assignments. Literal doesnt have domain " + literal.String())
 		}
 	}
 
@@ -516,7 +566,7 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 			assignments = append(assignments, assignment)
 		}
 	}
-	return assignments
+	return assignments, nil
 }
 
 func (constraint *Constraint) GroundBoolExpression() (isGround bool, result bool) {
