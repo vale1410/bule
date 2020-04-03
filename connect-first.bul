@@ -27,7 +27,8 @@ t[1..d].
 #exist[T], ~dom[X,Y], ~t[T], occupied[X,Y,T].
 
 
-
+~board[X,Y,_,T], occupied[X,Y,T]. 
+~occupied[X,Y,T], board[X,Y,A,T]:player[A]. 
 
 %% Winning Positions
 % at least one winning position for black
@@ -38,8 +39,8 @@ winS[X,Y,1]:X+(q-1)<=c:Y<=r:dom[X,Y],
 % horizontal (Z==0) and vertical(Z==1) winning positions (winS)
 ~st[Z], ~white[A], ~board[X+Z*D,Y+(1-Z)*D,A,d]:connect[D].
 ~st[Z], ~black[A], ~connect[D], board[X+Z*D,Y+(1-Z)*D,A,d], ~winS[X,Y,Z].
-
-% diagonal rising (Z==0) and falling (Z==1) winning positions (winD)
+%%
+%%% diagonal rising (Z==0) and falling (Z==1) winning positions (winD)
 ~st[Z], ~white[A], ~board[X+D,Y+Z*(q-1)+((-1)**Z)*D,A,d]:connect[D].
 ~st[Z], ~black[A], connect[D], ~board[X+D,Y+Z*(q-1)+((-1)**Z)*D,A,d], winD[X,Y,Z]. 
 
