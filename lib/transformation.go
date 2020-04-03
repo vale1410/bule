@@ -2,6 +2,32 @@ package lib
 
 import "fmt"
 
+// Check that there are no unbound variables
+// All variables that only occur in exactly one term are not bound by others and
+// must  be marked as free and unbound (i.e. starting with underscore _)
+func (p *Program) CheckUnboundVariables() error {
+	for _, rule := range p.Rules {
+		countVars := make(map[string]int, 0)
+		for _, term := range rule.AllTerms() {
+			for _, v := range term.FreeVars().List() {
+				if !IsMarkedAsFree(v) {
+					if c, ok := countVars[v]; ok {
+						countVars[v] = c + 1
+					} else {
+						countVars[v] = 1
+					}
+				}
+			}
+		}
+		for v, c := range countVars {
+			if c < 2 {
+				return fmt.Errorf("In the following rule the variables %s is not marked as free and unbound (starting with underscore _).\n %s",v, rule.String())
+			}
+		}
+	}
+	return nil
+}
+
 // Remove all rules where check is true.
 func (p *Program) RemoveRules(ifTrueRemove func(r Rule) bool) (changed bool) {
 	var newRules []Rule
@@ -15,7 +41,7 @@ func (p *Program) RemoveRules(ifTrueRemove func(r Rule) bool) (changed bool) {
 }
 
 // goes through all rules and expands expands if check is true.
-// Note that this does not expand the generated rules. (i.e. run until fixpoint)
+// Note that this does not expand the generated rules. (i.e. it does not run until fixpoint)
 func (p *Program) RuleExpansion(check func(r Rule) bool, expand func(Rule) ([]Rule, error)) (changed bool, err error) {
 	var newRules []Rule
 	for row, rule := range p.Rules {
@@ -23,7 +49,7 @@ func (p *Program) RuleExpansion(check func(r Rule) bool, expand func(Rule) ([]Ru
 			changed = true
 			tmpRules, err := expand(rule)
 			if err != nil {
-				return false, fmt.Errorf("Rele Expansion: %w\n in Rule %v:  %v ", err, row,rule)
+				return false, fmt.Errorf("Rele Expansion: %w\n in Rule %v:  %v ", err, row, rule)
 			}
 			newRules = append(newRules, tmpRules...)
 		} else {
@@ -34,6 +60,7 @@ func (p *Program) RuleExpansion(check func(r Rule) bool, expand func(Rule) ([]Ru
 	return
 }
 
+// Check terms in literals and expands the rules according to the *first* term found according to it's expansion.
 func (p *Program) TermExpansionOnlyLiterals(check func(r Term) bool, expand func(Term) []Term) (changed bool, err error) {
 
 	checkRule := func(r Rule) bool {

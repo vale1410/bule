@@ -22,7 +22,7 @@ func (p *Program) ConstraintSimplification() error {
 			return fmt.Errorf("Constraint simplification, iteration %v. \n %w", i, err)
 		}
 		if !changed {
-			debug(2, "Remove clauses with contradictions (1==2) and remove true constraints (1>2, 1==1).")
+			debug(2, "Remove clauses with contradictions, e.g.  (1==2) or (1!=1),  and remove true constraints, e.g.  (1>2, 1==1).")
 			p.CleanRulesFromGroundBoolExpression()
 			break
 		}
@@ -256,18 +256,18 @@ func (constraint Constraint) IsInstantiation() (is bool, variable string, value 
 
 	remainingExpression := strings.TrimPrefix(varExpression, freeVar)
 	asserts(Term(remainingExpression).FreeVars().IsEmpty(), "Must be math expression: "+remainingExpression)
-	if remainingExpression == ""  {
+	if remainingExpression == "" {
 		return true, freeVar, evaluateTermExpression(mathExpression)
 	}
 
 	if strings.HasPrefix(remainingExpression, "+") {
 		tmp := strings.TrimPrefix(remainingExpression, "+")
-		return true, freeVar, evaluateTermExpression(mathExpression + "-(" + tmp +")")
+		return true, freeVar, evaluateTermExpression(mathExpression + "-(" + tmp + ")")
 	}
 
 	if strings.HasPrefix(remainingExpression, "-") {
 		tmp := strings.TrimPrefix(remainingExpression, "-")
-		return true, freeVar, evaluateTermExpression(mathExpression + "+(" + tmp +")")
+		return true, freeVar, evaluateTermExpression(mathExpression + "+(" + tmp + ")")
 	}
 
 	return false, "", 0
@@ -335,9 +335,11 @@ func (p *Program) TransformConstraintsToInstantiation() (bool, error) {
 				break
 			}
 		}
-		assignment := map[string]int{variable: value}
 		rule.Constraints = append(rule.Constraints[:i], rule.Constraints[i+1:]...)
-		rule.Simplify(assignment)
+		if !IsMarkedAsFree(variable) {
+			assignment := map[string]int{variable: value}
+			rule.Simplify(assignment)
+		}
 		return []Rule{rule}, err
 	}
 	return p.RuleExpansion(check, transform)

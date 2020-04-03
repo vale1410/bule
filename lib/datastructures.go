@@ -84,6 +84,10 @@ func (r *Rule) IsFact() bool {
 	return !r.hasHead() && r.Typ == ruleTypeDisjunction && len(r.Literals) == 1
 }
 
+func IsMarkedAsFree(v string) bool {
+	return strings.HasPrefix(v,"_")
+}
+
 func (constraint Constraint) Copy() (cons Constraint) {
 	cons = constraint
 	cons.LeftTerm = constraint.LeftTerm

@@ -10,8 +10,8 @@
 %% #const q=4. %% connect q
 %% #const d=6. %% depth d.  black(1), white, black ... 
 
-domX[1..c].
-domY[1..r].
+ domX[1..c].
+ domY[1..r].
 ~domX[X], ~domY[Y], dom[X,Y]. 
 connect[0..q-1].
 black[1].
@@ -23,31 +23,28 @@ t[1..d].
 
 #forall[T], ~domX[X], ~white[A],  ~turn[T,A], moveL[X,T]. 
 #exist[T], ~domX[X], ~t[T], move[X,T].
-#exist[d], ~dom[X,Y], ~player[A], board[X,Y,A].
-#exist[d], ~dom[X,Y], occupied[X,Y].
+#exist[T], ~dom[X,Y], ~t[T], ~player[A], board[X,Y,A,T].
+#exist[T], ~dom[X,Y], ~t[T], occupied[X,Y,T].
 
-%% Winning Positions: 
 
+
+
+%% Winning Positions
 % at least one winning position for black
 winS[X,Y,1]:X+(q-1)<=c:Y<=r:dom[X,Y], 
     winS[X,Y,0]:X<=c:Y+(q-1)<=r:dom[X,Y], 
     winD[X,Y,Z]:X+q-1<=c:Y+q-1<=r:dom[X,Y]:st[Z].
 
 % horizontal (Z==0) and vertical(Z==1) winning positions (winS)
-~st[Z], ~white[A], ~board[X+Z*D,Y+(1-Z)*D,A]:connect[D].
-~st[Z], ~black[A], ~connect[D], board[X+Z*D,Y+(1-Z)*D,A], ~winS[X,Y,Z].
+~st[Z], ~white[A], ~board[X+Z*D,Y+(1-Z)*D,A,d]:connect[D].
+~st[Z], ~black[A], ~connect[D], board[X+Z*D,Y+(1-Z)*D,A,d], ~winS[X,Y,Z].
 
 % diagonal rising (Z==0) and falling (Z==1) winning positions (winD)
-~st[Z], ~white[A], ~board[X+D,Y+Z*(q-1)+((-1)**Z)*D,A]:connect[D].
-~st[Z], ~black[A], connect[D], ~board[X+D,Y+Z*(q-1)+((-1)**Z)*D,A], winD[X,Y,Z]. 
+~st[Z], ~white[A], ~board[X+D,Y+Z*(q-1)+((-1)**Z)*D,A,d]:connect[D].
+~st[Z], ~black[A], connect[D], ~board[X+D,Y+Z*(q-1)+((-1)**Z)*D,A,d], winD[X,Y,Z]. 
 
 
 
 
-%#exist[d], ~dom[X,Y], X<=c, Y+q-1<=r, ~winS[X,Y,0].
-%#exist[d], ~dom[X,Y], X+q-1<=c, Y<=r, ~winS[X,Y,1].
-%#exist[d], ~dom[X,Y], X+q-1<=c, Y+q-1<=r, ~st[Z], winD[X,Y,Z].
-%#exist[d], ~winS[X,Y,0].
-%#exist[d], ~winS[X,Y,1].
-%#exist[d], winD[X,Y,Z].
+
 

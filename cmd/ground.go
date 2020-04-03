@@ -62,14 +62,25 @@ bule ground <program.bul> [options].
 		debug(1, "Input")
 		p.PrintDebug(1)
 
-		err := p.CheckArityOfLiterals()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		{
+			err := p.CheckArityOfLiterals()
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 
 		debug(2, "Replace Constants (#const a=3. and Function Symbols (#mod)")
 		p.ReplaceConstantsAndMathFunctions()
+
+		{
+			debug(2, "Check for unbound variables that are not marked as such.")
+			err := p.CheckUnboundVariables()
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
 
 		debug(2, "ExpandGroundRanges:\n p[1..2]. and also X==1..2, but not Y==A..B.")
 		runFixpoint(p.ExpandGroundRanges)
@@ -111,9 +122,10 @@ bule ground <program.bul> [options].
 		i := 0
 		for ok {
 			i++
+			var err error
 			ok, err = p.InstantiateNonGroundLiterals()
 			if err != nil {
-				fmt.Printf("Error occurred in grounding when instantiating non-ground literals. Iteration %v.\n %v\n", i,  err)
+				fmt.Printf("Error occurred in grounding when instantiating non-ground literals. Iteration %v.\n %v\n", i, err)
 				os.Exit(1)
 			}
 			p.PrintDebug(2)
