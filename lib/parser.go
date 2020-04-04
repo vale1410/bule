@@ -10,7 +10,7 @@ import (
 	"unicode/utf8"
 )
 
-func ParseProgram(fileName string) (Program) {
+func ParseProgram(fileName string) Program {
 	// open a file or stream
 	var scanner *bufio.Scanner
 	file, err := os.Open(fileName)
@@ -222,7 +222,7 @@ func parseConstraint(tokens Tokens) (constraint Constraint) {
 
 type Tokens []Token
 
-func (ts Tokens) Debug() (string) {
+func (ts Tokens) Debug() string {
 
 	sb := strings.Builder{}
 	for _, token := range ts {

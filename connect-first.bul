@@ -44,8 +44,3 @@ winS[X,Y,1]:X+(q-1)<=c:Y<=r:dom[X,Y],
 ~st[Z], ~white[A], ~board[X+D,Y+Z*(q-1)+((-1)**Z)*D,A,d]:connect[D].
 ~st[Z], ~black[A], connect[D], ~board[X+D,Y+Z*(q-1)+((-1)**Z)*D,A,d], winD[X,Y,Z]. 
 
-
-
-
-
-

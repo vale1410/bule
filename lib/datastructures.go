@@ -301,7 +301,7 @@ func (p *Program) PrintRules() {
 }
 
 func (p *Program) PrintFacts() {
-	for pred, _ := range p.GroundFacts {
+	for pred := range p.GroundFacts {
 		for _, tuple := range p.PredicateToTuples[pred] {
 			fmt.Print(pred)
 			for i, t := range tuple {
