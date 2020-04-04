@@ -1,12 +1,12 @@
 Bule 2.0: A simple CNF Generator
 ================================
 
-Bule is tool to create CNF encodings.
+Bule is a tool to help in the process to create beautiful CNF encodings.
 
 Let’s start with an example. 
 
 ```
-~step(X,Y), step(X,Y+1).
+~step[X,Y], step[X,Y+1].
 ```
 
 Links
