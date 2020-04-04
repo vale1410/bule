@@ -17,3 +17,13 @@ Links
 * http://potassco.sourceforge.net/
 * http://bach.istc.kobe-u.ac.jp/sugar/
 
+Documentation
+-------------
+
+I am currenlty working on a paper for ICLP'2020 which will then be used in the readme and referenced: 
+
+* https://iclp2020.unical.it/
+* Abstract registration (regular papers): May 8, 2020
+* Paper submission (regular paper): May 15, 2020
+
+
