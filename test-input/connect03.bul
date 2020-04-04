@@ -1,0 +1,4 @@
+dom[0..3]. 
+
+#exist[T], ~dom[T], move[X,T]:dom[X], T#mod2==0.
+#forall[T], ~dom[T], move[X,T]:dom[X], T#mod2==1.

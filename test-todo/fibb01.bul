@@ -1,0 +1,3 @@
+fibb[0,1].
+fibb[1,1].
+~fibb[I,X], ~fibb[I+1,Y], fibb[I+2,X+Y]. 

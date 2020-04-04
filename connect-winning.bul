@@ -1,0 +1,32 @@
+
+
+#const c=3. %% columns c
+#const r=3. %% row r
+#const q=3. %% connect q
+
+%%% Winning positions
+posX[1..c].
+posY[1..r].
+connect[0..q-1].
+st[0..1].
+
+% horizontal and vertical winning positions (winS)
+~posX[X], ~posY[Y], ~board[X,Y+D,1]:connect[D], X<=c, Y+q-1<=r.
+~posX[X], ~posY[Y], ~board[X+D,Y,1]:connect[D], X+q-1<=c, Y<=r.
+~posX[X], ~posY[Y], ~connect[D], board[X,Y+D,0], X<=c, Y+q-1<=r, ~winS[X,Y,0].
+~posX[X], ~posY[Y], ~connect[D], board[X+D,Y,0], X+q-1<=c, Y<=r, ~winS[X,Y,1].
+
+~st[Z], ~posX[X], ~posY[Y], ~board[X+D,Y+Z*(q-1)+((-1)**Z)*D,1]:connect[D], X+q-1<=c, Y+q-1<=r.
+~st[Z], ~posX[X], ~posY[Y], connect[D], ~board[X+D,Y+Z*(q-1)+((-1)**Z)*D,0], X+q-1<=c, Y+q-1<=r, winD[Z,X,Y].
+
+% at least one winning positions for player 1
+winS[X,Y,Z]:X+Z*(q-1)<=c:Y+(1-Z)*(q-1)<=r:posX[X]:posY[Y]:st[Z], winD[X,Y,Z]:X+q<c:Y+q<r:posX[X]:posY[Y]:st[Z].
+
+
+
+%%% board(X+D,Y+Z*(q-1)+((-1)**Z)*D,0),   X+q<c, Y+q<r, ~windia(X,Y,Z).
+%%~st[Z], ~board(X+Z*D,Y+(1-Z)*D,0):connect[D], X+Z*(q-1)<=c, Y+(1-Z)*(q-1)<=r.
+%%  board(X+Z*D,Y+(1-Z)*D,1),   X+Z*(q-1)<=c, Y+(1-Z)*(q-1)<=r, ~winstr(X,Y,Z).
+%%  % diagonal winning positions (windia)
+%%  ~board(X+D,Y+Z*(q-1)+((-1)**Z)*D,0):D, X+q<c, Y+q<r.
+%%   board(X+D,Y+Z*(q-1)+((-1)**Z)*D,1),   X+q<c, Y+q<r, ~windia(X,Y,Z).
