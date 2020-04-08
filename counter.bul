@@ -1,0 +1,17 @@
+#const n=10.
+#const k=5.
+
+dom[1..n]. 
+cnt[1..k]. 
+element[X]:dom[X].
+
+#exist[0], count[I,J],I>=J,dom[I],cnt[J]. 
+
+~count[I,J], count[I+1,J].
+
+~count[I,J], count[I-1,J-1].
+
+~element[I], ~count[I-1,J-1], count[I,J].
+~element[I], count[I,1].
+
+element[I], ~count[I,J], count[I-1,J].
