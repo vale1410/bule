@@ -124,7 +124,7 @@ func (rule *Rule) parseEquivalenceImplicationHead() (rest Tokens) {
 
 func (rule *Rule) parseRestIntoRuleElements(tokens Tokens) {
 
-	splitRuleElementsSeparators := map[tokenKind]bool{tokenDot: true, tokenQuestionsmark: true, tokenRuleComma: true}
+	splitRuleElementsSeparators := map[tokenKind]bool{tokenDot: true, tokenQuestionsmark: true, token2RuleComma: true}
 	rest := splitTokens(tokens, splitRuleElementsSeparators)
 	for _, sep := range rest {
 		assert(len(sep.tokens) > 0)
@@ -165,7 +165,7 @@ func parseGenerators(generators []SepToken) (generator Generator) {
 
 func checkIfLiteral(tokens Tokens) bool {
 	asserts(len(tokens) > 0, "Tokens must have elements: ", tokens.String())
-	return tokens[0].kind == tokenAtomName || tokens[0].kind == tokenNegation
+	return tokens[0].kind == token2AtomName || tokens[0].kind == tokenNegation
 }
 
 // assuming it is not a constraint
@@ -181,7 +181,7 @@ func parseLiteral(tokens Tokens) (literal Literal) {
 		tokens = tokens[1:]
 	}
 
-	asserts(tokens[0].kind == tokenAtomName, "Atom Structure", tokens.Debug())
+	asserts(tokens[0].kind == token2AtomName, "Atom Structure", tokens.Debug())
 	literal.Name = Predicate(tokens[0].value)
 
 	terms := make([]Term, 0, len(tokens))
@@ -192,14 +192,21 @@ func parseLiteral(tokens Tokens) (literal Literal) {
 		//	continue
 		//}
 		switch tok.kind {
-		case tokenTermExpression,tokenDoubleDot:
+		case token2TermExpression,tokenDoubleDot:
 			acc += tok.value
-		case tokenTermComma:
+		case token2TermComma:
 			terms = append(terms, Term(acc))
 			acc = ""
+		case tokenAtomParanthesisRight:
+			asserts(literal.Search,"Should not be a fact atom")
+			terms = append(terms, Term(acc))
 		case tokenAtomBracketRight:
+			asserts(!literal.Search,"Should not be a search atom")
 			terms = append(terms, Term(acc))
 		case tokenAtomBracketLeft:
+			literal.Search = false
+		case tokenAtomParanthesisLeft:
+			literal.Search = true
 		default:
 			asserts(false, "Atom Structure:", tok.value, " ", tokens.Debug())
 		}
@@ -253,17 +260,17 @@ func replaceBrackets(tokens []Token) (res []Token, err error) {
 		switch token.kind {
 		case tokenAtomBracketLeft:
 			//if openBrackets > 0 {
-			//	token.kind = tokenTermBracketLeft
+			//	token.kind = token2TermBracketLeft
 			//}
 			openBrackets++
 		case tokenAtomBracketRight:
 			openBrackets--
 			//if openBrackets > 1 {
-			//	token.kind = tokenTermBracketRight
+			//	token.kind = token2TermBracketRight
 			//}
-		case tokenRuleComma:
+		case token2RuleComma:
 			//if openBrackets > 1 {
-			//	token.kind = tokenTermBracketRight
+			//	token.kind = token2TermBracketRight
 			//}
 		}
 
@@ -323,35 +330,23 @@ const (
 	tokenEmpty tokenKind = iota
 	tokenEOF
 	tokenError
-	tokenAtomName          // [a-z][a-zA-Z0-9_]*
-	tokenAtomBracketLeft   // [
-	tokenAtomBracketRight  // ]
-	tokenNegation          // ~
-	tokenTermComma         // ,
-	tokenRuleComma         // ,
-	tokenColon             // :
-	tokenEquivalence       // <->
-	tokenImplication       // ->
-	tokenDot               // .
-	tokenQuestionsmark     // ?
-	tokenDoubleDot         // ..
+	token2AtomName        // [a-z][a-zA-Z0-9_]*
+	tokenAtomParanthesisLeft  // (
+	tokenAtomParanthesisRight // )
+	tokenAtomBracketLeft  // [
+	tokenAtomBracketRight // ]
+	tokenNegation         // ~
+	token2TermComma       // ,
+	token2RuleComma       // ,
+	tokenColon            // :
+	tokenEquivalence      // <->
+	tokenImplication      // ->
+	tokenDot              // .
+	tokenQuestionsmark    // ?
+	tokenDoubleDot        // ..
 
-	tokenTermExpression
-	//tokenTermModulo     // #mod
-	//tokenTermLogarithm  // #log
-	//tokenTermBracketLeft     // (
-	//tokenTermBracketRight    // )
-	//tokenTermVariable        // [A-Z][a-zA-Z0-9_]*
-	//tokenTermConstant        // [a-z][a-zA-Z0-9_]*
-	//tokenTermMultiplication  // *
-	//tokenTermAddition        // +
-	//tokenTermSubtraction     // -
-	//tokenTermExponent        // **
-	//tokenTermExponent        // ^
-	//tokenTermDivide          // /
-	//tokenTermNumber          // 0-9
+	token2TermExpression
 
-	//tokenConstraint
 	tokenComparisonLT  // >
 	tokenComparisonGT  // <
 	tokenComparisonLE  // <=
@@ -359,19 +354,35 @@ const (
 	tokenComparisonEQ  // ==
 	tokenComparisonNQ  // !=
 
-	//tokenBracketLeft   // (
-	//tokenBracketRight  // )
-	//tokenComma   // ,
-	//tokenCurlyBracketLeft // {
-	//tokenCurlyBracketRight // }
+	///  // This technical set is important for phase one parsing!
+	///  tokenIdentifier// ,
+	///  tokenBracketLeft   // (
+	///  tokenBracketRight  // )
+	///  tokenComma   // ,
+	///  //tokenCurlyBracketLeft // {
+	///  //tokenCurlyBracketRight // }
+
+	///  tokenTermBracketLeft   // (
+	///  tokenTermBracketRight  // )
+	///  tokenTermVariable      // [A-Z][a-zA-Z0-9_]*
+	///  tokenTermConstant      // [a-z][a-zA-Z0-9_]*
+	///  tokenTermMultiplication // *
+	///  tokenTermAddition       // +
+	///  tokenTermSubtraction    // -
+	///  tokenTermExponent       // ** or  ^
+	///  tokenTermDivide         // /
+	///  tokenTermNumber         // 0-9
+
+	///  tokenTermModulo         // #mod
+	///  tokenTermLogarithm      // #log
 )
 
 //func tokenTermMap() map[tokenKind]bool {
 //	return map[tokenKind]bool{
-//		tokenTermBracketLeft: true,
-//		tokenTermBracketRight: true,
-//		tokenTermVariable: true,
-//		tokenTermConstant: true,
+//		token2TermBracketLeft: true,
+//		token2TermBracketRight: true,
+//		token2TermVariable: true,
+//		token2TermConstant: true,
 //		tokenTermMultiplication: true,
 //		tokenTermAddition: true,
 //		tokenTermSubtraction: true,
@@ -396,7 +407,7 @@ func tokenComparisonMap() map[tokenKind]bool {
 
 func printToken(kind tokenKind) (s string) {
 	switch kind {
-	case tokenAtomName:
+	case token2AtomName:
 		s = "ATOM"
 	case tokenAtomBracketLeft:
 		s = "AtomBL"
@@ -404,13 +415,13 @@ func printToken(kind tokenKind) (s string) {
 		s = "AtomBR"
 	case tokenNegation:
 		s = "NEGATION"
-	case tokenTermComma:
+	case token2TermComma:
 		s = "TERMCOMMA"
-	case tokenRuleComma:
+	case token2RuleComma:
 		s = "RULECOMMA"
 	case tokenColon:
 		s = "COLON"
-	case tokenTermExpression:
+	case token2TermExpression:
 		s = "TERM"
 	//case tokenConstraint:
 	//	s = "CONSTRAINT"
@@ -434,6 +445,10 @@ func printToken(kind tokenKind) (s string) {
 		s = "EQ"
 	case tokenComparisonNQ:
 		s = "QN"
+	case tokenAtomParanthesisLeft:
+		s = "ATOMPL"
+	case tokenAtomParanthesisRight:
+		s = "ATOMPR"
 	default:
 		asserts(false, "not implemented tokentype:", fmt.Sprintf("%+v", kind))
 	}
@@ -475,6 +490,8 @@ type lexer struct {
 	start    int        // the position we started scanning
 	position int        // the current position of our scan
 	width    int        // we'll be using runes which can be double byte
+	paranthesisStack int  //  number of open paranthesis  ( ( are closed by ) )
+	//bracketStack int  // number of open brackets [ [  are closed via ] ] ]
 	state    stateFn    // the current state function
 	tokens   chan Token // the channel we'll use to communicate between the lexer and the parser
 }
@@ -583,7 +600,7 @@ func lexRuleElement(l *lexer) (fn stateFn) {
 			return l.errorf("%s", "This should be an equivalence!")
 		}
 	case r == ',':
-		l.emit(tokenRuleComma)
+		l.emit(token2RuleComma)
 		fn = lexRuleElement
 	case r == ':':
 		l.emit(tokenColon)
@@ -613,19 +630,26 @@ func lexAtom(l *lexer) stateFn {
 		r := l.next()
 		switch {
 		case r == eof:
-			return l.lexEOF(tokenAtomName)
+			return l.lexEOF(token2AtomName)
 		case r == ',':
 			l.backup()
-			l.emit(tokenAtomName)
+			l.emit(token2AtomName)
 			l.next()
-			l.emit(tokenRuleComma)
+			l.emit(token2RuleComma)
 			return lexRuleElement
+		case r == '(':
+			l.backup()
+			l.emit(token2AtomName)
+			l.next()
+			l.emit(tokenAtomParanthesisLeft)
+			//l.next()
+			return lexTermInAtom
 		case r == '[':
 			l.backup()
-			l.emit(tokenAtomName)
+			l.emit(token2AtomName)
 			l.next()
 			l.emit(tokenAtomBracketLeft)
-			l.next()
+			//l.next()
 			return lexTermInAtom
 		case unicode.IsDigit(r) || unicode.IsLetter(r) || r == '_':
 			continue
@@ -644,11 +668,11 @@ func lexConstraintLeft(l *lexer) stateFn {
 			return l.errorf("%s", "Constraint lexing should not end here.?")
 		//case r == ':', r == '.': // Global Variable!
 		//	l.backup()
-		//	l.emit(tokenTermExpression)
+		//	l.emit(token2TermExpression)
 		//	return lexRuleElement(l)
 		case r == '!':
 			l.backup()
-			l.emit(tokenTermExpression)
+			l.emit(token2TermExpression)
 			l.next()
 			rr := l.next()
 			if rr == '=' {
@@ -659,7 +683,7 @@ func lexConstraintLeft(l *lexer) stateFn {
 			}
 		case r == '<':
 			l.backup()
-			l.emit(tokenTermExpression)
+			l.emit(token2TermExpression)
 			l.next()
 			rr := l.next()
 			if rr == '=' {
@@ -672,7 +696,7 @@ func lexConstraintLeft(l *lexer) stateFn {
 			}
 		case r == '>':
 			l.backup()
-			l.emit(tokenTermExpression)
+			l.emit(token2TermExpression)
 			l.next()
 			rr := l.next()
 			if rr == '=' {
@@ -685,7 +709,7 @@ func lexConstraintLeft(l *lexer) stateFn {
 			}
 		case r == '=':
 			l.backup()
-			l.emit(tokenTermExpression)
+			l.emit(token2TermExpression)
 			l.next()
 			rr := l.next()
 			if rr == '=' {
@@ -704,7 +728,7 @@ func lexConstraintLeft(l *lexer) stateFn {
 	}
 }
 
-// TODO SPECIAL
+//// TODO SPECIAL
 //func lexSpecialFn(l *lexer, fn stateFn) stateFn {
 //	r1 := l.next()
 //	r2 := l.next()
@@ -728,11 +752,11 @@ func lexConstraintRight(l *lexer) stateFn {
 			return l.errorf("%s", "Constraint lexing should not end here.?")
 		case isTermExpressionFinish(r):
 			l.backup()
-			l.emit(tokenTermExpression)
+			l.emit(token2TermExpression)
 			return lexRuleElement
-		//case r == '#': TODO SPECIAL
+		//case r == '#':// TODO SPECIAL
 		//	l.backup()
-		//	l.emit(tokenTermExpression)
+		//	l.emit(token2TermExpression)
 		//	l.next()
 		//	return lexSpecialFn(l, lexConstraintRight)
 		case isTermExpressionRune(r):
@@ -759,25 +783,38 @@ func lexTermInAtom(l *lexer) stateFn {
 			return l.errorf("%s", "Term lexing should not end here!")
 		case r == '.':
 			l.backup()
-			l.emit(tokenTermExpression)
+			l.emit(token2TermExpression)
 			l.next()
 			rr := l.next()
 			if rr != '.' {
-				return l.errorf("Double dot in Term expression missing!")
+				return l.errorf("The second of the double dot in Term expression is missing!")
 			}
 			l.emit(tokenDoubleDot)
 			return lexTermInAtom
 		case r == ',':
 			l.backup()
-			l.emit(tokenTermExpression)
+			l.emit(token2TermExpression)
 			l.next()
-			l.emit(tokenTermComma)
+			l.emit(token2TermComma)
 			return lexTermInAtom
 		case r == ']':
 			l.backup()
-			l.emit(tokenTermExpression)
+			l.emit(token2TermExpression)
 			l.next()
 			l.emit(tokenAtomBracketRight)
+			return lexRuleElement
+		//case r == ')' && l.paranthesisStack == 0 : ERROR
+		case r == '(' :
+			l.paranthesisStack++
+			continue
+		case r == ')' && l.paranthesisStack >= 1 :
+			l.paranthesisStack--
+			continue
+		case r == ')' && l.paranthesisStack == 0 :
+			l.backup()
+			l.emit(token2TermExpression)
+			l.next()
+			l.emit(tokenAtomParanthesisRight)
 			return lexRuleElement
 		case isTermExpressionRune(r):
 			continue

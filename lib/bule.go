@@ -213,6 +213,7 @@ func (p *Program) CollectGroundFacts() (changed bool, err error) {
 	check := func(r Rule) bool {
 		return r.Typ == ruleTypeDisjunction &&
 			len(r.Literals) == 1 &&
+			!r.Literals[0].Search &&
 			len(r.Generators) == 0 &&
 			len(r.Constraints) == 0 &&
 			r.FreeVars().IsEmpty()

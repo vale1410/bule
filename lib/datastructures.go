@@ -56,11 +56,16 @@ type Generator struct {
 
 type Literal struct {
 	Neg   bool
+	Search bool // decides between () and []
 	Name  Predicate
 	Terms []Term
 }
 
 func (l *Literal) IsGround() bool {
+	return l.FreeVars().IsEmpty()
+}
+
+func (l *Literal) IsSearch() bool {
 	return l.FreeVars().IsEmpty()
 }
 
@@ -167,17 +172,27 @@ func (g Generator) String() string {
 
 func (literal Literal) String() string {
 	var s string
+	var opening string
+	var closing string
+	if literal.Search {
+		opening = "("
+		closing = ")"
+	} else {
+		opening = "["
+		closing = "]"
+	}
+
 	if literal.Neg == true {
 		s = "~"
 	}
-	s = s + literal.Name.String() + "["
+	s = s + literal.Name.String() + opening
 	for i, x := range literal.Terms {
 		s += x.String()
 		if i < len(literal.Terms)-1 {
 			s += ","
 		}
 	}
-	return s + "]"
+	return s + closing
 }
 
 func (r *Rule) String() string {
