@@ -269,7 +269,7 @@ func (p *Program) PrintTuples() {
 }
 
 func (p *Program) Print() {
-	p.PrintFacts()
+	//p.PrintFacts()
 	p.PrintRules()
 }
 
