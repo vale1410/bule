@@ -1,5 +1,5 @@
-#const n=10.
-#const k=5.
+#const n=4.
+#const k=2.
 
 dom[1..n]. 
 cnt[1..k]. 

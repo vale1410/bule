@@ -269,9 +269,6 @@ func run(filename string, units map[string]bool) {
 
 		if conflict {
 			fmt.Println("p cnf 1 1 \n 0\n")
-			//fmt.Println("p cnf 1 2\n e 1 0\n -1 0 \n 1 0\n")
-			//fmt.Println("p cnf 2 4\n e 1 2 0 \n -1 -2 0 \n -1 2 0\n 1 -2 0\n 1 2 0\n")
-			//fmt.Println("p cnf 2 4\n -1 -2 0 \n -1 2 0\n 1 -2 0\n 1 2 0\n")
 			return
 		}
 

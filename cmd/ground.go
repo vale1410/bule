@@ -29,17 +29,8 @@ import (
 )
 
 var (
-	debugFlag          int
 	quantificationFlag bool
 )
-
-func debug(level int, s ...interface{}) {
-	if level <= debugFlag {
-		fmt.Print("% ")
-		fmt.Print(s...)
-		fmt.Println()
-	}
-}
 
 // groundCmd represents the ground command
 var groundCmd = &cobra.Command{
@@ -167,10 +158,6 @@ func init() {
 	//debugFlag int    //= flag.Int("d", 0, "Debug Level .")
 	//progFlag  string //= flag.String("f", "", "Path to file.")
 	//	groundCmd.PersistentFlags().StringVarP(&progFlag, "file", "f", "", "Path to File")
-	groundCmd.PersistentFlags().IntVarP(&debugFlag, "debug", "d", 0, "Debug level")
 	groundCmd.PersistentFlags().BoolVarP(&quantificationFlag, "quant", "q", false, "Print Quantification")
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// groundCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

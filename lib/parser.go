@@ -347,7 +347,7 @@ const (
 	//tokenTermAddition        // +
 	//tokenTermSubtraction     // -
 	//tokenTermExponent        // **
-
+	//tokenTermExponent        // ^
 	//tokenTermDivide          // /
 	//tokenTermNumber          // 0-9
 
