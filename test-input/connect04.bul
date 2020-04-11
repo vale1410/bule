@@ -3,4 +3,4 @@
 
 dom[0..n].
 
-~dom[V], ~dom[I], 2**I < n, bit[V,I,(V/(2**I))#mod2]. 
+#exist(V), ~dom[V], ~dom[I], 2**I < n, bit(V,I,(V/(2**I))#mod2). 

@@ -1,5 +1,5 @@
-#forall[0], move[0,0], move[1,0], move[2,0].
-#forall[2], move[0,2], move[1,2], move[2,2].
+#forall(0), move(0,0), move(1,0), move(2,0).
+#forall(2), move(0,2), move(1,2), move(2,2).
 dom[0].
 dom[1].
 dom[2].

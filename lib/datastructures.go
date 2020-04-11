@@ -55,10 +55,10 @@ type Generator struct {
 }
 
 type Literal struct {
-	Neg   bool
+	Neg    bool
 	Search bool // decides between () and []
-	Name  Predicate
-	Terms []Term
+	Name   Predicate
+	Terms  []Term
 }
 
 func (l *Literal) IsGround() bool {
@@ -90,7 +90,7 @@ func (r *Rule) IsFact() bool {
 }
 
 func IsMarkedAsFree(v string) bool {
-	return strings.HasPrefix(v,"_")
+	return strings.HasPrefix(v, "_")
 }
 
 func (constraint Constraint) Copy() (cons Constraint) {
@@ -269,7 +269,7 @@ func (p *Program) PrintTuples() {
 }
 
 func (p *Program) Print() {
-	//p.PrintFacts()
+	p.PrintFacts()
 	p.PrintRules()
 }
 
@@ -287,7 +287,58 @@ func (err LiteralError) Error() string {
 	return sb.String()
 }
 
+func (p *Program) CheckNoRemainingFacts() error {
+	for _, r := range p.Rules {
+		for _, l := range r.Literals {
+			if !l.Search {
+				return LiteralError{
+					l,
+					r,
+					fmt.Sprintf("Literals that are used in search should have paranthesis () and not brackets []. \n" +
+						"They need to be marked as such!"),
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (p *Program) CheckFactsInGenerators() error {
+	for _, r := range p.Rules {
+		for _, g := range r.Generators {
+			for _, l := range g.Literals {
+				if l.Search {
+					return LiteralError{
+						l,
+						r,
+						fmt.Sprintf("In generator there is a search literal used as a generator but has to be fact!\n"),
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (p *Program) CheckArityOfLiterals() error {
+	p.PredicateToArity = make(map[Predicate]int)
+	for _, r := range p.Rules {
+		for _, l := range r.Literals {
+			if n, ok := p.PredicateToArity[l.Name]; ok {
+				if n != len(l.Terms) {
+					return LiteralError{l, r,
+						fmt.Sprintf("Literal with arity %d already occurs in program with arity %d. \n "+
+							"Bule predicat to arity has to be unique.", len(l.Terms), n)}
+				}
+			} else {
+				p.PredicateToArity[l.Name] = len(l.Terms)
+			}
+		}
+	}
+	return nil
+}
+
+func (p *Program) CheckSearch() error {
 	p.PredicateToArity = make(map[Predicate]int)
 	for _, r := range p.Rules {
 		for _, l := range r.Literals {

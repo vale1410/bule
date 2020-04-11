@@ -62,8 +62,18 @@ bule ground <program.bul> [options].
 			}
 		}
 
+		{
+			err := p.CheckFactsInGenerators()
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+
 		debug(2, "Replace Constants (#const a=3. and Function Symbols (#mod)")
 		p.ReplaceConstantsAndMathFunctions()
+
+		p.ConstraintSimplification()
 
 		debug(2, "ExpandGroundRanges:\n p[1..2]. and also X==1..2, but not Y==A..B.")
 		runFixpoint(p.ExpandGroundRanges)
@@ -101,6 +111,14 @@ bule ground <program.bul> [options].
 		p.PrintDebug(2)
 
 		debug(2, "All Rules should be clauses with search predicates. No more ground facts.")
+
+		{
+			err := p.CheckNoRemainingFacts()
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
 
 		debug(2, "Collect all ground literals in all clauses")
 		p.CollectGroundTuples()
