@@ -1,0 +1,35 @@
+#const g=3.
+#const p=3.
+#const w=4.
+
+
+week[1..w]. 
+group[1..g]. 
+player[1..g*p].
+size[0..p].
+
+% all player play in one week 
+~week[W], ~player[P], table(W,G,P) : group[G]. 
+
+% players dont play in different groups in a week. 
+~table(W,G1,P), ~table(W,G2,P), G1 < G2. 
+
+% Socialising constraint; players only meet once 
+~week[W], ~player[P1], ~player[P2],  pair(W,P1,P2), ~table(W,G,P1), ~table(W,G,P2), P1 < P2. 
+~pair(W1,P1,P2), ~pair(W2,P1,P2), W1 < W2. 
+
+size[1..p+1].
+~week[W], ~group[G], count(W,G,P,J):P>=J:P+J<=p*g:playX[P]:size[J]. 
+
+count(_,_,0,0).
+~count(_,_,0,1).
+
+count(_,_,g*p,p).
+~count(_,_,g*p,p+1).
+
+~count(W,G,P,J), count(W,G,P+1,J).
+~count(W,G,P,J), count(W,G,P-1,J-1).
+~table(W,G,P), ~count(W,G,P-1,J-1), count(W,G,P,J).
+table(W,G,P), ~count(W,G,P,J), count(W,G,P-1,J).
+
+
