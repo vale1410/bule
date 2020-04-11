@@ -1,0 +1,3 @@
+% check that Xa and X are different variables
+p[1..2].
+~p[X], ~p[Xa], q[X], q[Xa], X!=Xa.

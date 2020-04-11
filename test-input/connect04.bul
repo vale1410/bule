@@ -1,0 +1,6 @@
+
+#const n=5.
+
+dom[0..n].
+
+#exist(V), ~dom[V], ~dom[I], 2**I < n, bit(V,I,(V/(2**I))#mod2). 
