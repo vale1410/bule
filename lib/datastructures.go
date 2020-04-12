@@ -61,12 +61,12 @@ type Literal struct {
 	Terms  []Term
 }
 
-func (l *Literal) IsGround() bool {
-	return l.FreeVars().IsEmpty()
+func (literal *Literal) IsGround() bool {
+	return literal.FreeVars().IsEmpty()
 }
 
-func (l *Literal) IsSearch() bool {
-	return l.FreeVars().IsEmpty()
+func (literal *Literal) IsSearch() bool {
+	return literal.FreeVars().IsEmpty()
 }
 
 type Term string

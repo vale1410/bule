@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"errors"
 	"fmt"
 	"github.com/Knetic/govaluate"
 	"github.com/scylladb/go-set/strset"
@@ -95,7 +94,7 @@ func (p *Program) InstantiateNonGroundLiterals() (changed bool, err error) {
 			}
 		}
 
-		for _, tuple := range p.PredicateToTuples[litNG.Name] {
+		for _, tuple := range p.findFilteredTuples(litNG) { //p.PredicateToTuples[litNG.Name] {
 			newRule := rule.Copy()
 			for j, val := range tuple {
 				newRule.Literals[i].Terms[j] = Term(strconv.Itoa(val))
@@ -111,6 +110,24 @@ func (p *Program) InstantiateNonGroundLiterals() (changed bool, err error) {
 		return generatedRules, err
 	}
 	return p.RuleExpansion(check, transform)
+}
+
+func (p *Program) findFilteredTuples(literal Literal) [][]int {
+	positions, values := literal.findGroundTerms()
+	filteredTuples := make([][]int, 0, len(p.PredicateToTuples[literal.Name]))
+	for _, tuple := range p.PredicateToTuples[literal.Name] {
+		good := true
+		for i, p := range positions {
+			if tuple[p] != values[i] {
+				good = false
+				break
+			}
+		}
+		if good {
+			filteredTuples = append(filteredTuples, tuple)
+		}
+	}
+	return filteredTuples
 }
 
 // This resolves facts with clauses.
@@ -136,7 +153,7 @@ func (p *Program) InstantiateAndRemoveFacts() (changed bool, err error) {
 		}
 		rule.Literals = append(rule.Literals[:i], rule.Literals[i+1:]...)
 
-		for _, tuple := range p.PredicateToTuples[fact.Name] {
+		for _, tuple := range p.findFilteredTuples(fact) { //p.PredicateToTuples[fact.Name] {
 			newRule := rule.Copy()
 			for j, val := range tuple {
 				newConstraint := Constraint{
@@ -414,26 +431,6 @@ func (p *Program) RemoveClausesWithTuplesThatDontExist() bool {
 	return p.RemoveRules(removeIfTrue)
 }
 
-//func (p *Program) GroundFromTuples() bool {
-//	check := func(r Rule) bool {
-//		return !r.IsGround()
-//	}
-//
-//	transform := func(rule Rule) (result []Rule) {
-//		assignments := p.generateAssignments(rule.Literals, rule.Constraints)
-//		for _, assignment := range assignments {
-//			newRule := rule.Copy()
-//			newRule.Constraints = []Constraint{}
-//			for i, lit := range newRule.Literals {
-//				newRule.Literals[i] = lit.assign(assignment)
-//			}
-//			result = append(result, newRule)
-//		}
-//		return
-//	}
-//	return p.RuleExpansion(check, transform)
-//}
-
 func (p *Program) ExtractQuantors() {
 
 	p.forallQ = make(map[int][]Literal, 0)
@@ -520,8 +517,6 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 		for _, lit := range literals {
 			asserts(strset.Intersection(lit.FreeVars(), set).IsEmpty(),
 				"freevars of literals are all disjunct", set.String(), lit.FreeVars().String())
-			//			asserts(p.GroundFacts[lit.Name],
-			//				"Is ExtractQuantors fact", lit.String())
 			set.Merge(lit.FreeVars())
 		}
 	}
@@ -530,28 +525,24 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 	allPossibleAssignments[0] = make(map[string]int)
 
 	for _, literal := range literals {
-		if termsDomain, ok := p.PredicateToTuples[literal.Name]; ok {
-			newAssignments := make([]map[string]int, 0, len(allPossibleAssignments)*len(termsDomain))
-			for _, tuple := range termsDomain {
-				assert(len(tuple) == len(literal.Terms))
-				for _, assignment := range allPossibleAssignments {
-					newAssignment := make(map[string]int)
-					for key, value := range assignment {
-						newAssignment[key] = value
-					}
-					for i, value := range tuple {
-						newAssignment[string(literal.Terms[i])] = value
-					}
-					newAssignments = append(newAssignments, newAssignment)
-
+		newAssignments := make([]map[string]int, 0, len(allPossibleAssignments))
+		termsDomain := p.findFilteredTuples(literal)
+		for _, tuple := range termsDomain {
+			assert(len(tuple) == len(literal.Terms))
+			for _, assignment := range allPossibleAssignments {
+				newAssignment := make(map[string]int)
+				for key, value := range assignment {
+					newAssignment[key] = value
 				}
-			}
-			allPossibleAssignments = newAssignments
-		} else {
-			return nil, errors.New("Generate assignments. Literal doesnt have domain " + literal.String())
-		}
-	}
+				for i, value := range tuple {
+					newAssignment[string(literal.Terms[i])] = value
+				}
+				newAssignments = append(newAssignments, newAssignment)
 
+			}
+		}
+		allPossibleAssignments = newAssignments
+	}
 	assignments := make([]map[string]int, 0, 32)
 
 	for _, assignment := range allPossibleAssignments {
@@ -638,6 +629,16 @@ func evaluateTermExpression(termExpression string) int {
 func evaluateExpressionTuples(terms []Term) (result []int) {
 	for _, t := range terms {
 		result = append(result, evaluateTermExpression(string(t)))
+	}
+	return
+}
+
+func (literal *Literal) findGroundTerms() (positions []int, values []int) {
+	for i, t := range literal.Terms {
+		if v, ok := strconv.Atoi(t.String()); ok == nil {
+			positions = append(positions, i)
+			values = append(values, v)
+		}
 	}
 	return
 }

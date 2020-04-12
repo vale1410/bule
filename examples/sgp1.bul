@@ -1,6 +1,6 @@
-#const g=3.
-#const p=3.
-#const w=4.
+#const g=8.
+#const p=4.
+#const w=10.
 
 
 week[1..w]. 
@@ -18,7 +18,9 @@ size[0..p].
 ~week[W], ~player[P1], ~player[P2],  pair(W,P1,P2), ~table(W,G,P1), ~table(W,G,P2), P1 < P2. 
 ~pair(W1,P1,P2), ~pair(W2,P1,P2), W1 < W2. 
 
-size[1..p+1].
+size[0..p+1].
+playX[0..p*g].
+
 ~week[W], ~group[G], count(W,G,P,J):P>=J:P+J<=p*g:playX[P]:size[J]. 
 
 count(_,_,0,0).
