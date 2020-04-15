@@ -1,6 +1,10 @@
-#const g=8.
-#const p=4.
-#const w=10.
+%%#const g=8.
+%%#const p=4.
+%%#const w=10.
+%%
+#const g=5.
+#const p=3.
+#const w=7.
 
 
 week[1..w]. 
