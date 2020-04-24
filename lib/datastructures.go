@@ -268,8 +268,10 @@ func (p *Program) PrintTuples() {
 
 }
 
-func (p *Program) Print() {
-	p.PrintFacts()
+func (p *Program) Print(withFacts bool) {
+	if withFacts {
+		p.PrintFacts()
+	}
 	p.PrintRules()
 }
 

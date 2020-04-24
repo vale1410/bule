@@ -14,8 +14,9 @@ show: compile
 	evince $(OUTPUT) 2>/dev/null &
 
 clean: 
-	rm -fr *.blg
-	rm -fr *.bbl
-	rm -fr *.out
-	rm -fr *.aux
-	rm -fr *.log
+	rm -fr $(NAME).pdf
+	rm -fr $(NAME).blg
+	rm -fr $(NAME).bbl
+	rm -fr $(NAME).out
+	rm -fr $(NAME).aux
+	rm -fr $(NAME).log

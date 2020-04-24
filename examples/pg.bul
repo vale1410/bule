@@ -1,0 +1,21 @@
+%% easy
+#const depth=6. %% depth d.
+t[1..depth].
+
+black[1].
+white[0].
+player[0..1].
+
+%input edge[A,I,V]. Agent A\in{0,1} has winning edge I with vertex V
+~edge[_,_,V], vertex[V]. 
+~edge[A,I,_], edgeId[A,I]. 
+~t[T], turn[T, T#mod2].
+
+#forall(T), ~vertex[V], ~white[A],  ~turn[T,A], moveL(V,T). 
+#exist(T), ~vertex[V], ~t[T], ~turn[T,A], move(A,V,T).
+#exist(T), ~vertex[V], ~t[T], ~player[A], board(A,V,T).
+#exist(T), ~vertex[V], ~t[T], occupied(V,T).
+#exist(depth), ~vertex[X,Y], ~t[T], occupied(X,Y,T).
+
+~board(X,Y,_,T), occupied(X,Y,T). 
+~occupied(X,Y,T), board(X,Y,A,T):player[A]. 

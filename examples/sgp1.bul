@@ -38,4 +38,3 @@ count(_,_,g*p,p).
 ~table(W,G,P), ~count(W,G,P-1,J-1), count(W,G,P,J).
 table(W,G,P), ~count(W,G,P,J), count(W,G,P-1,J).
 
-

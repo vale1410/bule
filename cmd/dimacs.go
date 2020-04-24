@@ -19,11 +19,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+
 package cmd
 
 import (
-	"fmt"
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 
@@ -105,27 +106,34 @@ func run(filename string, units map[string]bool) {
 	buf := make([]byte, maxCapacity)
 	scanner.Buffer(buf, maxCapacity)
 
+	acc := ""
+
 	for scanner.Scan() {
 
 		s := scanner.Text()
 
-		if !strings.HasPrefix(s, "e ")  && !strings.HasPrefix(s, "a ")  {
-			s = strings.ReplaceAll(s, " ", "")
-			s = strings.ReplaceAll(s, "],", "] ")
-			s = strings.ReplaceAll(s, "].", "]")
+		if !strings.HasPrefix(s, "e ") && !strings.HasPrefix(s, "a ") {
+			s = strings.ReplaceAll(s, " ", ",")
+//			s = strings.ReplaceAll(s, "],", "] ")
+//			s = strings.ReplaceAll(s, "].", "]")
 		}
 
-		fields := strings.Fields(s)
-
-		if len(fields) == 0 || strings.HasPrefix(fields[0], "%") {
+		s = strings.ReplaceAll(s, " ", "")
+		if s == "" || strings.HasPrefix(s, "%") || strings.HasPrefix(s, "c") {
 			continue
 		}
 
+		if !strings.HasSuffix(s,".") {
+			acc += s
+			continue
+		} else {
+			s = s[:len(s)-1]
+			s = acc
+			acc = ""
+		}
+
+		fields := strings.Split(s,",")
 		first := fields[0]
-
-		if first == "c" {
-			continue
-		}
 
 		// merge consecutive e's and a's
 		if first == "e" || first == "a" {

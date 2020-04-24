@@ -5,12 +5,17 @@ dom[0..n].
 cnt[0..k+1]. 
 element(X):X>0:dom[X].
 
-#exist(0), count(I,J),I>=J,dom[I],cnt[J]. 
+#exist(0), count(I,J), 
+J <= I, I-J <= k, 
+~dom[I], ~cnt[J]. 
 
 
-count(0,0).
-~count(0,1).
-~count(I,J), count(I+1,J).
-~count(I,J), count(I-1,J-1).
+~count(I,J),  count(I+1,J).
+~count(I,J),  count(I-1,J-1).
 ~element(I), ~count(I-1,J-1), count(I,J).
-element(I), ~count(I,J), count(I-1,J).
+ element(I), ~count(I,J),     count(I-1,J).
+
+ count(0,0).
+~count(0,1).
+ count(n,k).
+~count(n,k+1).

@@ -30,6 +30,7 @@ import (
 
 var (
 	quantificationFlag bool
+	withFactsFlag  bool
 )
 
 // groundCmd represents the ground command
@@ -153,8 +154,7 @@ bule ground <program.bul> [options].
 		}
 
 		debug(1, "Output")
-		p.Print()
-
+		p.Print(withFactsFlag)
 	},
 }
 
@@ -177,5 +177,6 @@ func init() {
 	//progFlag  string //= flag.String("f", "", "Path to file.")
 	//	groundCmd.PersistentFlags().StringVarP(&progFlag, "file", "f", "", "Path to File")
 	groundCmd.PersistentFlags().BoolVarP(&quantificationFlag, "quant", "q", false, "Print Quantification")
+	groundCmd.PersistentFlags().BoolVarP(&withFactsFlag, "facts", "f", false, "Output all facts.")
 
 }

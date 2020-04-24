@@ -1,4 +1,6 @@
 \documentclass{ecai}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=0.85]{beramono}
 \usepackage{times}
 \usepackage{graphicx}
 \usepackage{latexsym}
@@ -10,6 +12,13 @@
 \usepackage{verbatim}
 \usepackage{graphics}
 \usepackage{hyperref}
+\usepackage{listings}
+\lstset{
+basicstyle=\ttfamily,
+literate={~}{{\fontfamily{ptm}\selectfont \textasciitilde}}1
+}
+
+
 \newcommand{\citet}{\cite}
 
 \newcommand{\TODO}[1]{\textcolor[rgb]{1.00,0.00,0.00}{todo: #1} }
@@ -66,9 +75,24 @@ In this paper we propose the grounding language \emph{Bule} that is easy to
 
 \section{Introduction}
 \section{Definition}
+\subsection{Counter Encoding}
+
+
+\begin{lstlisting}
+~count(I,J),  count(I+1,J).
+~count(I,J),  count(I-1,J-1).
+~element(I), ~count(I-1,J-1), count(I,J).
+ element(I), ~count(I,J),     count(I-1,J).
+
+ count(0,0).
+~count(0,1).
+ count(n,k).
+~count(n,k+1).
+\end{lstlisting}
+
 \section{Conclusion}
 
-This is the counter encoding found in \cite{Sinz2005}.
+This is the counter encoding found in \cite{sinz2005}.
 
 We thank Cameron Browne, Ryan Hayward, and Bjarne Toft for providing us with
 the hand-crafted Hex puzzles. We also thank Mikoláš Janota for his feedback on
