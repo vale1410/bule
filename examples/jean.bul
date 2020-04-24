@@ -1,0 +1,15 @@
+#const n=4.
+#const k=2.
+
+dom[0..n]. 
+cnt[0..k+1]. 
+
+~dom[X], ~dom[Y], jean[X,X*Y, X**Y #mod 17]. 
+
+J<=I, I-J<=k, ~dom[I], ~cnt[J],  tableDom[I,J]. 
+
+~dom[I], table(I,J) : tableDom[I,J].
+
+#exist(I),I#mod 2 == 1,  table(I,J), J<=I, I-J<=k, ~dom[I], ~cnt[J]. 
+#forall(I),I#mod 2 == 0,  table(I,J), J<=I, I-J<=k, ~dom[I], ~cnt[J]. 
+

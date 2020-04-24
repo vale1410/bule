@@ -1,0 +1,14 @@
+
+
+
+
+%input_clause[X,Y,Z].
+
+input_clause[4,-5,(-1)*2].
+input_clause[3,(-1)*12,4].
+
+~input_clause[X,Y,Z], output_negation[(-1)*X,(-1)*Y,(-1)*Z]. 
+~input_clause[X,Y,Z], output_move_by_one[X+1#mod3,Y+1#mod3,Z+1#mod3]. 
+~input_clause[X,Y,Z], output_rotate[Z,X,Y]. 
+
+

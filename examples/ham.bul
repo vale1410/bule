@@ -1,0 +1,26 @@
+
+
+
+many[X,Y,D] => many[X,Y,f(D)].
+edge[1..3, 1..3].
+
+exception[3]. 
+
+
+edge[X], X<k => edge[X+1]. 
+edge[1..k].
+
+edge[X,_] => node[X].  
+~edge[Y,X], exception[Y], node[X].  
+edge[X,Y] => reached(Y), ~connect(X,Y), ~reached(X). 
+edge[X,Y] => ~connect(X,Y), proj(X).
+edge[X,Y], edge[Y,Z], X<Y => ~connect(X,Y), proj(X).
+
+
+\bigvee_{j,k, j<k, j\in C }, x_{i,j,k} \wedge x_{i+1,j,k}. 
+
+reached(1). 
+~reached(X), connect(Y,X) : node[Y]. 
+
+Y1 < Y2 => ~connect(X,Y1), ~connect(X,Y2). 
+Y1 < Y2 => ~connect(Y1,X), ~connect(Y2,X). 

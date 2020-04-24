@@ -1,6 +1,6 @@
 %% easy
-#const c=3. %% columns c
-#const r=3. %% row r
+#const c=4. %% columns c
+#const r=4. %% row r
 #const q=3. %% connect q
 #const d=6. %% depth d.  black(1), white, black ... 
 
@@ -25,7 +25,6 @@ t[1..d].
 #exist(T), ~domX[X], ~t[T], move(X,T).
 #exist(T), ~dom[X,Y], ~t[T], ~player[A], board(X,Y,A,T).
 #exist(T), ~dom[X,Y], ~t[T], occupied(X,Y,T).
-
 
 ~board(X,Y,_,T), occupied(X,Y,T). 
 ~occupied(X,Y,T), board(X,Y,A,T):player[A]. 

@@ -3,12 +3,9 @@
 
 dom[0..n]. 
 cnt[0..k+1]. 
-element(X):X>0:dom[X].
 
-#exist(0), count(I,J), 
-J <= I, I-J <= k, 
-~dom[I], ~cnt[J]. 
-
+J<=I, I-J<=k, dom[I], cnt[J] => #exist(0), count(I,J). 
+element(X) : X>0 : dom[X].
 
 ~count(I,J),  count(I+1,J).
 ~count(I,J),  count(I-1,J-1).
