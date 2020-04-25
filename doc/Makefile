@@ -1,5 +1,5 @@
 
-NAME=main
+NAME=bule
 OUTPUT=$(NAME).pdf
 
 all: compile
