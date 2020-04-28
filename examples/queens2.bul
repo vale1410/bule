@@ -1,0 +1,21 @@
+#const n = 9.
+
+dom[1..n]. 
+
+~dom[X], ~dom[Y], iter[1,Y,X,Y,X+1,Y]. % rows
+~dom[X], ~dom[Y], iter[2,X,X,Y,X,Y+1]. % columns
+~dom[X], ~dom[Y], iter[3,X+Y-1,X,Y,X+1,Y+1]. % positive diagonals 
+~dom[X], ~dom[Y], iter[4,X-Y+n,X,Y,X+1,Y-1]. % negative diagonals 
+ex1[0..1]
+
+~iter[Type,Id,X1,Y1,X2,Y2], first[Type,Id,X1,Y1]. 
+~iter[Type,Id,X1,Y1,X2,Y2], last[Type,Id,X2,Y2]. 
+
+~first[T,I,X,Y], last[T,I,X,Y], ~q(T,I,X,Y). 
+~ex1[T], ~last[T,I,X,Y], first[T,I,X,Y], q(T,I,X,Y). 
+
+~iter[T,Id,X1,Y1,X2,Y2], ~q(X1,Y1), ladder(T,Id,X2,Y2).
+~q(X1,Y1), ~ladder(T,Id,X1,Y1).
+
+~iter[T,Id,X1,Y1,X2,Y2], q(X2,Y2), ladder(T,Id,X1,Y1), ~ladder(T,Id,X2,Y2).
+~ladder(T,Id,X1,Y1), ladder(T,Id,X2,Y2).
