@@ -50,7 +50,7 @@ time(T), ~move(_,T). %11
 ~occupied(V,T-1), ~move(V,T).  %12
 turn[T,A] => board(A,V,T), ~move(V,T). %13 
 
-vertex[V] => ~moveL(I,T):choose[V,T,1], moveL(I,T):choose[V,T,0], 
+vertex[V] => ~moveL(I,T):choose[V,I,1], moveL(I,T):choose[V,I,0], 
     ~time(T), occupied(V,T-1), move(V,T). %14
 
 move(V,T), board(A,V,T-1), ~board(A,V,T). %15
@@ -59,7 +59,7 @@ player[A], t[T], ~turn[A,T] => board(A,V,T-1), ~board(A,V,T). %16
 black[A] => win(E):edgeId[A,E]. %17
 black[A], edge[A,E,V] => ~win(E), board(A,V,final). %18
 white[A] => ~board(A,V,final):edge[A,E,V]. %19
-black[A], edgeId[A,E] => ~win(E), board(A,V,final):edge[A,E,V]. %20
+black[A], edgeId[A,E] => win(E), ~board(A,V,final):edge[A,E,V]. %20
 
 ~ladder(V,T), ladder(V+1,T). %22
 ~move(V+1,T),~ladder(V,T). %22

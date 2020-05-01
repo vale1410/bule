@@ -8,4 +8,6 @@ require (
 	github.com/scylladb/go-set v1.0.2
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/viper v1.6.2
+	github.com/yasushi-saito/rbtree v0.0.0-20180524175743-33ff713a769b
+	golang.org/x/tools v0.0.0-20190328211700-ab21143f2384
 )
