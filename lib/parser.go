@@ -29,7 +29,7 @@ func ParseProgram(fileName string) Program {
 	return ParseProgramFromStrings(lines)
 }
 
-func ParseProgramFromStrings(lines []string) (p Program ) {
+func ParseProgramFromStrings(lines []string) (p Program) {
 
 	p.PredicateToTuples = make(map[Predicate][][]int)
 	p.GroundFacts = make(map[Predicate]bool)
@@ -53,8 +53,8 @@ func ParseProgramFromStrings(lines []string) (p Program ) {
 			s = strings.TrimSuffix(s, ".")
 			def := strings.Split(s, "=")
 			asserts(len(def) == 2, s)
-			term,_ := assign(Term(def[1]), p.Constants)
-			asserts(groundMathExpression(term.String()), "is not ground:" + term.String())
+			term, _ := assign(Term(def[1]), p.Constants)
+			asserts(groundMathExpression(term.String()), "is not ground:"+term.String())
 			p.Constants[def[0]] = evaluateTermExpression(term.String())
 			continue
 		}
@@ -97,38 +97,50 @@ func parseRule(text string) (rule Rule, err error) {
 		tokens = tokens[:len(tokens)-1]
 	}
 	rule.initialTokens = tokens
-	restTokens := rule.parseEquivalenceImplicationHead()
-	rule.parseRestIntoRuleElements(restTokens)
+
+	splitEquivalences := map[tokenKind]bool{tokenImplication: true}
+	left, sep, right := splitIntoTwo(rule.initialTokens, splitEquivalences)
+	switch sep {
+	case tokenEmpty:
+		rule.parseClausesOrHead(left)
+		rule.Typ = ruleTypeDisjunction
+	case tokenImplication:
+		rule.parseGuardsIntoRuleElements(left)
+		rule.parseClausesOrHead(right)
+		rule.Typ = ruleTypeDisjunction
+	}
 	return rule, err
 
 }
 
-func (rule *Rule) parseEquivalenceImplicationHead() (rest Tokens) {
+func (rule *Rule) parseGuardsIntoRuleElements(tokens Tokens) {
 
-	splitEquivalences := map[tokenKind]bool{tokenEquivalence: true, tokenImplication: true}
-	rest, sep, head := splitIntoTwo(rule.initialTokens, splitEquivalences)
-	//fmt.Println("rest:", rest.String(), "head:", head.String())
-	switch sep {
-	case tokenEmpty:
-		rule.Typ = ruleTypeDisjunction
-		return
-	case tokenEquivalence:
-		rule.Head = parseLiteral(head)
-		rule.Typ = ruleTypeEquivalence
-	case tokenImplication:
-		rule.Head = parseLiteral(head)
-		rule.Typ = ruleTypeImplication
+	splitRuleElementsSeparators := map[tokenKind]bool{token2RuleComma: true}
+	rest := splitTokens(tokens, splitRuleElementsSeparators)
+	for _, sep := range rest {
+		assert(len(sep.tokens) > 0)
+		//asserts(sep.separator.kind != tokenEmpty, "sep:", sep.tokens.String(), " - all tokens: ", tokens.String())
+
+		//parse for Generators
+		splitGenerator := map[tokenKind]bool{tokenColon: true}
+		generator := splitTokens(sep.tokens, splitGenerator)
+		asserts(len(generator) == 1, "no generators allowed in guards yet!"+tokens.String())
+		if checkIfLiteral(generator[0].tokens) {
+			lit := parseLiteral(generator[0].tokens)
+			rule.Literals = append(rule.Literals, lit.createNegatedLiteral())
+		} else {
+			rule.Constraints = append(rule.Constraints, parseConstraint(generator[0].tokens))
+		}
 	}
-	return rest
 }
 
-func (rule *Rule) parseRestIntoRuleElements(tokens Tokens) {
+func (rule *Rule) parseClausesOrHead(tokens Tokens) {
 
 	splitRuleElementsSeparators := map[tokenKind]bool{tokenDot: true, tokenQuestionsmark: true, token2RuleComma: true}
 	rest := splitTokens(tokens, splitRuleElementsSeparators)
 	for _, sep := range rest {
 		assert(len(sep.tokens) > 0)
-		asserts(sep.separator.kind != tokenEmpty, sep.tokens.String(), tokens.String())
+		asserts(sep.separator.kind != tokenEmpty, "sep:", sep.tokens.String(), " - all tokens: ", tokens.String())
 
 		//parse for Generators
 		splitGenerator := map[tokenKind]bool{tokenColon: true}
@@ -192,16 +204,16 @@ func parseLiteral(tokens Tokens) (literal Literal) {
 		//	continue
 		//}
 		switch tok.kind {
-		case token2TermExpression,tokenDoubleDot:
+		case token2TermExpression, tokenDoubleDot:
 			acc += tok.value
 		case token2TermComma:
 			terms = append(terms, Term(acc))
 			acc = ""
 		case tokenAtomParanthesisRight:
-			asserts(literal.Search,"Should not be a fact atom")
+			asserts(literal.Search, "Should not be a fact atom")
 			terms = append(terms, Term(acc))
 		case tokenAtomBracketRight:
-			asserts(!literal.Search,"Should not be a search atom")
+			asserts(!literal.Search, "Should not be a search atom")
 			terms = append(terms, Term(acc))
 		case tokenAtomBracketLeft:
 			literal.Search = false
@@ -330,29 +342,29 @@ const (
 	tokenEmpty tokenKind = iota
 	tokenEOF
 	tokenError
-	token2AtomName        // [a-z][a-zA-Z0-9_]*
+	token2AtomName            // [a-z][a-zA-Z0-9_]*
 	tokenAtomParanthesisLeft  // (
 	tokenAtomParanthesisRight // )
-	tokenAtomBracketLeft  // [
-	tokenAtomBracketRight // ]
-	tokenNegation         // ~
-	token2TermComma       // ,
-	token2RuleComma       // ,
-	tokenColon            // :
-	tokenEquivalence      // <->
-	tokenImplication      // ->
-	tokenDot              // .
-	tokenQuestionsmark    // ?
-	tokenDoubleDot        // ..
+	tokenAtomBracketLeft      // [
+	tokenAtomBracketRight     // ]
+	tokenNegation             // ~
+	token2TermComma           // ,
+	token2RuleComma           // ,
+	tokenColon                // :
+	tokenEquivalence          // <->
+	tokenImplication          // -> or =>
+	tokenDot                  // .
+	tokenQuestionsmark        // ?
+	tokenDoubleDot            // ..
 
 	token2TermExpression
 
-	tokenComparisonLT  // >
-	tokenComparisonGT  // <
-	tokenComparisonLE  // <=
-	tokenComparisonGE  // >=
-	tokenComparisonEQ  // ==
-	tokenComparisonNQ  // !=
+	tokenComparisonLT // >
+	tokenComparisonGT // <
+	tokenComparisonLE // <=
+	tokenComparisonGE // >=
+	tokenComparisonEQ // ==
+	tokenComparisonNQ // !=
 
 	///  // This technical set is important for phase one parsing!
 	///  tokenIdentifier// ,
@@ -486,14 +498,14 @@ func lex(input string) *lexer {
 
 // lexer is created to manage an individual scanning/parsing operation.
 type lexer struct {
-	input    string     // we'll store the string being parsed
-	start    int        // the position we started scanning
-	position int        // the current position of our scan
-	width    int        // we'll be using runes which can be double byte
-	paranthesisStack int  //  number of open paranthesis  ( ( are closed by ) )
+	input            string // we'll store the string being parsed
+	start            int    // the position we started scanning
+	position         int    // the current position of our scan
+	width            int    // we'll be using runes which can be double byte
+	paranthesisStack int    //  number of open paranthesis  ( ( are closed by ) )
 	//bracketStack int  // number of open brackets [ [  are closed via ] ] ]
-	state    stateFn    // the current state function
-	tokens   chan Token // the channel we'll use to communicate between the lexer and the parser
+	state  stateFn    // the current state function
+	tokens chan Token // the channel we'll use to communicate between the lexer and the parser
 }
 
 // emit sends a Token over the channel so the parser can collect and manage
@@ -583,6 +595,14 @@ func lexRuleElement(l *lexer) (fn stateFn) {
 	case r == '.':
 		l.emit(tokenDot)
 		fn = lexRuleElement
+	case r == '=':
+		if l.next() == '>' {
+			l.emit(tokenImplication)
+			return lexRuleElement
+		} else {
+			l.emit(tokenError)
+			return l.errorf("%s", "This should be an implication")
+		}
 	case r == '-':
 		if l.next() == '>' {
 			l.emit(tokenImplication)
@@ -768,7 +788,7 @@ func lexConstraintRight(l *lexer) stateFn {
 }
 
 func isTermExpressionFinish(r rune) bool {
-	return strings.ContainsRune(",:.", r)
+	return strings.ContainsRune(",:.=", r)
 }
 
 func isTermExpressionRune(r rune) bool {
@@ -804,13 +824,13 @@ func lexTermInAtom(l *lexer) stateFn {
 			l.emit(tokenAtomBracketRight)
 			return lexRuleElement
 		//case r == ')' && l.paranthesisStack == 0 : ERROR
-		case r == '(' :
+		case r == '(':
 			l.paranthesisStack++
 			continue
-		case r == ')' && l.paranthesisStack >= 1 :
+		case r == ')' && l.paranthesisStack >= 1:
 			l.paranthesisStack--
 			continue
-		case r == ')' && l.paranthesisStack == 0 :
+		case r == ')' && l.paranthesisStack == 0:
 			l.backup()
 			l.emit(token2TermExpression)
 			l.next()

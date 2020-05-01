@@ -1,21 +1,27 @@
 #const n = 9.
 
-dom[1..n]. 
+%% Domains and Facts 
 
-~dom[X], ~dom[Y], iter[1,Y,X,Y,X+1,Y]. % rows
-~dom[X], ~dom[Y], iter[2,X,X,Y,X,Y+1]. % columns
-~dom[X], ~dom[Y], iter[3,X+Y-1,X,Y,X+1,Y+1]. % positive diagonals 
-~dom[X], ~dom[Y], iter[4,X-Y+n,X,Y,X+1,Y-1]. % negative diagonals 
-ex1[0..1]
+dom[1..n,1..n]. 
+%% iter[Type,Id,X1,Y1,X2,Y2]
+dom[X,Y] => iter[1, Y,     X,Y, X+1,Y]. % rows
+dom[X,Y] => iter[2, X,     X,Y, X,Y+1]. % columns
+dom[X,Y] => iter[3, X-Y, X,Y, X+1,Y+1]. % positive diagonals 
+dom[X,Y] => iter[4, X+Y, X,Y, X+1,Y-1]. % negative diagonals 
+iter[Type,Id,X1,Y1,_,_] => first[Type,Id,X1,Y1]. 
+iter[Type,Id,_,_,X2,Y2] => last[Type,Id,X2,Y2]. 
 
-~iter[Type,Id,X1,Y1,X2,Y2], first[Type,Id,X1,Y1]. 
-~iter[Type,Id,X1,Y1,X2,Y2], last[Type,Id,X2,Y2]. 
+%% Search Variables 
+dom[X,Y] => #exist(0), q(X,Y). 
+first[T,I,X,Y], ~last[T,I,X,Y] => #exist(0), ladder(T,I,X,Y). 
+~first[T,I,X,Y], last[T,I,X,Y] => #exist(0), ladder(T,I,X,Y). 
 
-~first[T,I,X,Y], last[T,I,X,Y], ~q(T,I,X,Y). 
-~ex1[T], ~last[T,I,X,Y], first[T,I,X,Y], q(T,I,X,Y). 
-
-~iter[T,Id,X1,Y1,X2,Y2], ~q(X1,Y1), ladder(T,Id,X2,Y2).
-~q(X1,Y1), ~ladder(T,Id,X1,Y1).
-
-~iter[T,Id,X1,Y1,X2,Y2], q(X2,Y2), ladder(T,Id,X1,Y1), ~ladder(T,Id,X2,Y2).
+%% Clauses 
+first[T,I,X,Y], ~last[T,I,X,Y] => ~ladder(T,I,X,Y). 
+iter[T,Id,X1,Y1,X2,Y2] => ~q(X1,Y1), ladder(T,Id,X2,Y2).
+iter[T,Id,X1,Y1,X2,Y2] => q(X2,Y2), ladder(T,Id,X1,Y1), ~ladder(T,Id,X2,Y2).
+~q(X1,Y1), ~ladder(_T,_Id,X1,Y1).
 ~ladder(T,Id,X1,Y1), ladder(T,Id,X2,Y2).
+
+% Exactly one constraint on type 1 and 2. 
+T==1..2, last[T,I,X,Y], ~first[T,I,X,Y] => ladder(T,I,X,Y). 

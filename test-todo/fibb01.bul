@@ -1,3 +1,9 @@
+
 fibb[0,1].
 fibb[1,1].
-~fibb[I,X], ~fibb[I+1,Y], fibb[I+2,X+Y]. 
+fibb[I,X], fibb[I+1,Y], I < 100 => fibb[I+2,X+Y]. 
+
+fibb[I,X] => search(I,X).
+
+
+~search(I,X), ~search(I+1,X+100). 
