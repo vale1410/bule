@@ -13,6 +13,7 @@ type Program struct {
 	PredicateGroundTuple map[string]bool
 	GroundFacts          map[Predicate]bool
 	Search               map[Predicate]bool
+	Alternation          [][]Literal
 	existQ               map[int][]Literal
 	forallQ              map[int][]Literal
 }
@@ -56,7 +57,7 @@ type Generator struct {
 
 type Literal struct {
 	Neg    bool
-	Search bool // decides between () and []
+	Search bool // if true then search variable with parenthesis () otherwise a fact with brackets []
 	Name   Predicate
 	Terms  []Term
 }
@@ -269,6 +270,7 @@ func (p *Program) PrintTuples() {
 }
 
 func (p *Program) Print(withFacts bool) {
+	p.PrintQuantification()
 	if withFacts {
 		p.PrintFacts()
 	}
@@ -389,6 +391,21 @@ func (p *Program) PrintFacts() {
 }
 
 func (p *Program) PrintQuantification() {
+	for i, quantifier := range p.Alternation {
+		if i%2 == 0 {
+			fmt.Print("e ")
+		} else {
+			fmt.Print("a ")
+		}
+		for _, v := range quantifier {
+			fmt.Print(v, " ")
+		}
+		fmt.Println()
+	}
+}
+
+// Translates forallQ and existQ into quantification
+func (p *Program) MergeConsecutiveQuantificationLevels() {
 
 	maxIndex := -1
 
@@ -403,21 +420,31 @@ func (p *Program) PrintQuantification() {
 		}
 	}
 
+	last := "e"
+	var acc []Literal
+
 	for i := -1; i <= maxIndex; i++ {
 
 		if atoms, ok := p.forallQ[i]; ok {
-			fmt.Print("a")
-			for _, a := range atoms {
-				fmt.Print(" ", a)
+			if last == "a" {
+				acc = append(acc, atoms...)
+			} else {
+				p.Alternation = append(p.Alternation, acc)
+				last = "a"
+				acc = atoms
 			}
-			fmt.Println()
 		}
 		if atoms, ok := p.existQ[i]; ok {
-			fmt.Print("e")
-			for _, a := range atoms {
-				fmt.Print(" ", a)
+			if last == "e" {
+				acc = append(acc, atoms...)
+			} else {
+				p.Alternation = append(p.Alternation, acc)
+				last = "e"
+				acc = atoms
 			}
-			fmt.Println()
 		}
+	}
+	if len(acc)>0 {
+		p.Alternation = append(p.Alternation, acc)
 	}
 }

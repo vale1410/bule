@@ -31,6 +31,7 @@ import (
 var (
 	quantificationFlag bool
 	withFactsFlag  bool
+	dimacsFlag    bool
 )
 
 // groundCmd represents the ground command
@@ -149,12 +150,18 @@ bule ground <program.bul> [options].
 		if quantificationFlag {
 			debug(2, "Extract Quantors ")
 			p.ExtractQuantors()
-			debug(2, "Print Quantification")
-			p.PrintQuantification()
+			debug(2, "Merge Quantification Levels")
+			p.MergeConsecutiveQuantificationLevels()
 		}
 
 		debug(1, "Output")
-		p.Print(withFactsFlag)
+
+		if dimacsFlag {
+			clauseProgram := translateFromRuleProgram(p)
+			clauseProgram.Print()
+		} else {
+			p.Print(withFactsFlag)
+		}
 	},
 }
 
@@ -173,10 +180,10 @@ func runFixpoint(f func() (bool, error)) {
 func init() {
 	rootCmd.AddCommand(groundCmd)
 
-	//debugFlag int    //= flag.Int("d", 0, "Debug Level .")
-	//progFlag  string //= flag.String("f", "", "Path to file.")
 	//	groundCmd.PersistentFlags().StringVarP(&progFlag, "file", "f", "", "Path to File")
-	groundCmd.PersistentFlags().BoolVarP(&quantificationFlag, "quant", "q", false, "Print Quantification")
+	groundCmd.PersistentFlags().BoolVarP(&quantificationFlag, "quant", "q", true, "Print Quantification")
 	groundCmd.PersistentFlags().BoolVarP(&withFactsFlag, "facts", "f", false, "Output all facts.")
-
+	groundCmd.PersistentFlags().BoolVarP(&dimacsFlag, "dimacs", "D", true, "false: print bule format. true: print dimacs format")
+	groundCmd.PersistentFlags().BoolVarP(&printInfoFlag, "info", "i", true, "Print all units as well.")
+	groundCmd.PersistentFlags().BoolVarP(&unitPropagationFlag, "up", "u", true, "Perform Unitpropagation.")
 }
