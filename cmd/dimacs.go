@@ -34,10 +34,9 @@ import (
 
 type ClauseProgram struct {
 	clauses        [][]string
-	alternation    [][]string
+	alternation    [][]string// level 0 is exist, then alternating!
 	units          map[string]bool
 	conflict       bool
-	quantification [][]string // level 0 is exist, then alternating!
 	idMap          map[string]int
 }
 
@@ -98,6 +97,7 @@ func init() {
 	dimacsCmd.PersistentFlags().BoolVarP(&printInfoFlag, "info", "i", true, "Print information about units as well.")
 }
 
+// This translate from a grounded Bule program to clause representation
 // Assuming the program is ground!!!
 func translateFromRuleProgram(program lib.Program)  (p ClauseProgram) {
 	p.units = map[string]bool{}
@@ -121,7 +121,6 @@ func translateFromRuleProgram(program lib.Program)  (p ClauseProgram) {
 		}
 		p.alternation = append(p.alternation, q)
 	}
-	fmt.Println(p.alternation)
 
 	return
 }
@@ -210,7 +209,7 @@ func (p *ClauseProgram) generateIds() {
 	count := 1
 	vars := make(map[string]int, 0)
 	// generate id's for variables
-	for _, quantifier := range p.quantification {
+	for _, quantifier := range p.alternation {
 		for _, v := range quantifier {
 			if _, b := vars[v]; !b {
 				vars[v] = count
@@ -238,10 +237,12 @@ func (p *ClauseProgram) generateIds() {
 	p.idMap = vars
 }
 
+// Finds all variables that are not bound and adds them to the
+// innermost level
 func (p *ClauseProgram) createInnermostExistFromFreeVars() {
 
 	qvars := make(map[string]bool, 0) // vars in quantifier alternation
-	for _, quantifier := range p.quantification {
+	for _, quantifier := range p.alternation{
 		for _, v := range quantifier {
 			qvars[v] = true
 		}
@@ -253,8 +254,6 @@ func (p *ClauseProgram) createInnermostExistFromFreeVars() {
 			aux = append(aux, v)
 		}
 	}
-
-	fmt.Println(aux)
 
 	if len(aux) > 0 {
 		if len(p.alternation)%2 == 1 {
@@ -391,7 +390,6 @@ func (p ClauseProgram) run(additionalUnits map[string]bool) {
 	for unit := range additionalUnits {
 		p.units[unit] = true
 	}
-
 
 	if unitPropagationFlag {
 		p.unitPropagation()

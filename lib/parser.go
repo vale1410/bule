@@ -10,21 +10,20 @@ import (
 	"unicode/utf8"
 )
 
-func ParseProgram(fileName string) Program {
-	// open a file or stream
-	var scanner *bufio.Scanner
-	file, err := os.Open(fileName)
-	if err != nil {
-		fmt.Println("File not found. waiting for program in Stdin. Finish with ctrl-D")
-		//scanner = bufio.NewScanner(os.Stdin)
-		return Program{}
-	} else {
-		defer file.Close()
-		scanner = bufio.NewScanner(file)
-	}
+func ParseProgram(fileNames []string) Program {
+	debug(2, "opening files:", fileNames)
 	var lines []string
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
+	for _, fileName := range fileNames {
+		var scanner *bufio.Scanner
+		file, err := os.Open(fileName)
+		if err != nil {
+			return Program{}
+		}
+		scanner = bufio.NewScanner(file)
+		for scanner.Scan() {
+			lines = append(lines, scanner.Text())
+		}
+		file.Close()
 	}
 	return ParseProgramFromStrings(lines)
 }

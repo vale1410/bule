@@ -1,4 +1,4 @@
-#const n = 3.
+#const n = 4.
 
 dom[1..n]. 
 dom[X], dom[Y] => #exist(0), q(X,Y).

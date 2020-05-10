@@ -30,8 +30,8 @@ import (
 
 var (
 	quantificationFlag bool
-	withFactsFlag  bool
-	dimacsFlag    bool
+	withFactsFlag      bool
+	dimacsFlag         bool
 )
 
 // groundCmd represents the ground command
@@ -49,9 +49,9 @@ bule ground <program.bul> [options].
 			return
 		}
 
-		debug(2, "Bule started")
-		p := bule.ParseProgram(args[0])
 		bule.DebugLevel = debugFlag
+
+		p := bule.ParseProgram(args)
 
 		debug(1, "Input")
 		p.PrintDebug(1)
@@ -152,6 +152,7 @@ bule ground <program.bul> [options].
 			p.ExtractQuantors()
 			debug(2, "Merge Quantification Levels")
 			p.MergeConsecutiveQuantificationLevels()
+			debug(2, "Merged alternations:", p.Alternation)
 		}
 
 		debug(1, "Output")
