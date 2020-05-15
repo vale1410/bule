@@ -1,15 +1,18 @@
-#const n = 4.
+%% #const n = 4. given external 
 
 dom[1..n]. 
 dom[X], dom[Y] => #exist(0), q(X,Y).
 
+
 dom[Y] => q(X,Y) : dom[X].
 dom[X] => q(X,Y) : dom[Y]. 
 
-% row and column 
+% Max one per row and column  
 X1 < X2 => ~q(X1,Y), ~q(X2,Y). 
 Y1 < Y2 => ~q(X,Y1), ~q(X,Y2). 
 
 % diagonals
 X1 < X2, Y1 >= Y2, X1 + Y1 == X2 + Y2 => ~q(X1,Y1), ~q(X2,Y2). 
 X1 < X2, Y1 <= Y2, X1 + Y2 == X2 + Y1 => ~q(X1,Y1), ~q(X2,Y2). 
+
+

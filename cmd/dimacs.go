@@ -368,7 +368,7 @@ func (p *ClauseProgram) unitPropagation() {
 			if len(clause2) == 1 {
 				p.units[clause2[0]] = true
 			} else if len(clause2) == 0 {
-				//fmt.Println("c conflict:", clause)
+				debug(2,"c conflict:", clause)
 				p.conflict = true
 			}
 
