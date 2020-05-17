@@ -1,26 +1,6 @@
 \NeedsTeXFormat{LaTeX2e}
-
 \documentclass{new_tlp}
-
-%\documentclass{article}
-\usepackage{misc}
-\usepackage{xspace}
-\usepackage{color}
-\usepackage{amssymb}
-\usepackage{amsmath}
-\usepackage{listings}
-\lstset{
-basicstyle=\ttfamily,
-literate={~}{{$\neg$}}1
-%literate={~}{{\fontfamily{ptm}\selectfont \textasciitilde}}1
-}
-
-\newcommand{\TODO}[1]{\textcolor[rgb]{1.00,0.00,0.00}{todo: #1} }
-\newcommand{\vale}[1]{\textcolor[rgb]{0.00,0.00,0.54296875}{vale: #1} }
-
-\newcommand\bigforall{\mbox{\Large $\mathsurround0pt\forall$}}
-\newcommand\bigexists{\mbox{\Large $\mathsurround0pt\exists$}}
-
+\input{header.tex}
 
 \title{ SAT Programming With \emph{BULE}}
 \author{
@@ -155,12 +135,12 @@ We say that $\Kmc$ is \emph{satisfiable} if the set of clauses $\mn{cl}(\Kmc)$ i
 
 \section{Examples}
 
-\subsection{Counter Encoding}
+\subsection{The Counter Encoding for Cardinality Constraints}
 
-The counter encoding introduced in \cite{Sinz05} written in Bule. 
 
-Given the predicate $element(1\ldots n)$, 
-the counter encodings counts the number of true elements.
+Given the search atoms $element(1\ldots n)$, the counter encodings encodes the
+number of true elements (CNF encoding of Cardinality as defined in \cite{Sinz05})
+under the current assignment:
 
 \begin{lstlisting}
 ~count(I,J),  count(I+1,J).
