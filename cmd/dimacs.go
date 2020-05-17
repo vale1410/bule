@@ -33,15 +33,15 @@ import (
 )
 
 type ClauseProgram struct {
-	clauses        [][]string
-	alternation    [][]string// level 0 is exist, then alternating!
-	units          map[string]bool
-	conflict       bool
-	idMap          map[string]int
+	clauses     [][]string
+	alternation [][]string // level 0 is exist, then alternating!
+	units       map[string]bool
+	conflict    bool
+	idMap       map[string]int
 }
 
 var (
-	printInfoFlag bool
+	printInfoFlag       bool
 	unitPropagationFlag bool
 )
 
@@ -99,14 +99,14 @@ func init() {
 
 // This translate from a grounded Bule program to clause representation
 // Assuming the program is ground!!!
-func translateFromRuleProgram(program lib.Program)  (p ClauseProgram) {
+func translateFromRuleProgram(program lib.Program) (p ClauseProgram) {
 	p.units = map[string]bool{}
-	for _,r := range program.Rules {
+	for _, r := range program.Rules {
 		if len(r.Literals) == 1 {
 			p.units[r.Literals[0].String()] = true
 			continue
 		}
-		clause := make([]string,0,len(r.Literals))
+		clause := make([]string, 0, len(r.Literals))
 		for _, l := range r.Literals {
 			clause = append(clause, l.String())
 		}
@@ -114,8 +114,8 @@ func translateFromRuleProgram(program lib.Program)  (p ClauseProgram) {
 	}
 
 	// Assuming quantification levels have been merged
-	for _,level := range program.Alternation {
-		q := make([]string,len(level))
+	for _, level := range program.Alternation {
+		q := make([]string, len(level))
 		for i, literal := range level {
 			q[i] = literal.String()
 		}
@@ -125,7 +125,7 @@ func translateFromRuleProgram(program lib.Program)  (p ClauseProgram) {
 	return
 }
 
-func parseFromFile(filename string)  (p ClauseProgram) {
+func parseFromFile(filename string) (p ClauseProgram) {
 	// open a file or stream
 	var scanner *bufio.Scanner
 	file, err := os.Open(filename)
@@ -181,11 +181,11 @@ func parseFromFile(filename string)  (p ClauseProgram) {
 			if last == first {
 				alternation[len(alternation)-1] = append(alternation[len(alternation)-1], fields[1:]...)
 			} else {
-				if alternationDepth == 0  && first == "a" {
+				if alternationDepth == 0 && first == "a" {
 					alternation = append(alternation, fields)
 				}
 				alternation = append(alternation, fields)
-				alternationDepth ++
+				alternationDepth++
 			}
 			last = first
 			continue
@@ -242,7 +242,7 @@ func (p *ClauseProgram) generateIds() {
 func (p *ClauseProgram) createInnermostExistFromFreeVars() {
 
 	qvars := make(map[string]bool, 0) // vars in quantifier alternation
-	for _, quantifier := range p.alternation{
+	for _, quantifier := range p.alternation {
 		for _, v := range quantifier {
 			qvars[v] = true
 		}
@@ -269,7 +269,6 @@ func (p ClauseProgram) PrintDimacs() {
 	conflict := p.conflict
 	cls := p.clauses
 	units := p.units
-
 
 	if printInfoFlag {
 		varids := make([]string, len(vars)+1)
@@ -333,6 +332,16 @@ func (p ClauseProgram) PrintDimacs() {
 		}
 		fmt.Println("0")
 	}
+	// printout textual representation!!
+	//	for _, clause := range cls {
+	//		for i, lit := range clause {
+	//			if i != 0 {
+	//				fmt.Print(", ")
+	//			}
+	//			fmt.Print(lit)
+	//		}
+	//		fmt.Println(".")
+	//	}
 }
 
 // This is a very slow implementation of unit propagation
@@ -368,7 +377,7 @@ func (p *ClauseProgram) unitPropagation() {
 			if len(clause2) == 1 {
 				p.units[clause2[0]] = true
 			} else if len(clause2) == 0 {
-				debug(2,"c conflict:", clause)
+				debug(2, "c conflict:", clause)
 				p.conflict = true
 			}
 

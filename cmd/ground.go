@@ -75,6 +75,16 @@ bule ground <program.bul> [options].
 		debug(2, "Replace Constants (#const a=3. and Function Symbols (#mod)")
 		p.ReplaceConstantsAndMathFunctions()
 
+
+		{
+			debug(2, "Check for unbound variables that are not marked as such.")
+			err := p.CheckUnboundVariables()
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+
 		p.ConstraintSimplification()
 
 		debug(2, "ExpandGroundRanges:\n p[1..2]. and also X==1..2, but not Y==A..B.")
@@ -102,14 +112,6 @@ bule ground <program.bul> [options].
 		debug(2, "Expand Conditionals")
 		p.ExpandConditionals()
 
-		{
-			debug(2, "Check for unbound variables that are not marked as such.")
-			err := p.CheckUnboundVariables()
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		}
 		p.PrintDebug(2)
 
 		debug(2, "All Rules should be clauses with search predicates. No more ground facts.")
