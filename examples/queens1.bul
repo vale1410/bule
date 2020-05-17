@@ -3,7 +3,6 @@
 dom[1..n]. 
 dom[X], dom[Y] => #exist(0), q(X,Y).
 
-
 dom[Y] => q(X,Y) : dom[X].
 dom[X] => q(X,Y) : dom[Y]. 
 

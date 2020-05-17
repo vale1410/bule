@@ -59,19 +59,32 @@ literate={~}{{$\neg$}}1
 
 \end{abstract}
 
+\section{Related Works and Citations and Ideas}
+
+
+Comparing Answer set programming and satisfiability solving. Key difference
+according to \cite{Lierler17} is that ASP has a modelling language and a
+grounder attached to it, whereas SAT is focused on problems stemming from
+already ground problems. We will try to change that !
+
+
 \begin{itemize}
-    \item Datalog Disjunctive, DLV 
-    \item Answer Set Programming Lparse/Gringo
-    \item FO(ID), Lazy Clause Generation
+    \item Disjunctive Datalog, DLV \cite{Eiter97} or even just Datalog \cite{Gottlob89}
+    \item Assat, translating ASP programs to SAT \cite{Lin04}
+    \item \cite{Janhunen11}. Compact Translations of Non-disjunctive Answer Set
+        Programs to Propositional Clauses
+    \item FO(ID). First order logic with bounds (guards) \cite{Wittocx10}
+    \item Predicate Logic as a modeling language. IDP System. \cite{Cat18}
+    \item Answer Set Programming Lparse/Gringo \cite{Gebser15}, \cite{Ferraris05}
+%    \item QBF Solvers \cite{Lonsing17,Tentrup15}
+    \item Lazy Clause Generation Interleaving Grounding and Search \cite{Cat15}
 \end{itemize}
 
-\begin{itemize}
-    \item Datalog Disjunctive, DLV 
-    \item Answer Set Programming Lparse/Gringo
-    \item FO(ID), Lazy Clause Generation
-\end{itemize}
+How do we avoid the challenges in stable models, minimal models, well-founded
+semantics etc. ?  Isn't this just Tight, stratified, normal logic program?
 
 
+A ground Bule program is a set of clauses with literals. 
 
 \section{Bule Syntax and Semantics}
 
@@ -144,14 +157,14 @@ We say that $\Kmc$ is \emph{satisfiable} if the set of clauses $\mn{cl}(\Kmc)$ i
 
 \subsection{Counter Encoding}
 
-The counter encoding introduced in \cite{sinz2005} written in Bule. 
+The counter encoding introduced in \cite{Sinz05} written in Bule. 
 
 Given the predicate $element(1\ldots n)$, 
 the counter encodings counts the number of true elements.
 
 \begin{lstlisting}
 ~count(I,J),  count(I+1,J).
-~count(I,J),  count(I-1,J-1).
+ count(I-1,J-1), ~count(I,J).
 ~element(I), ~count(I-1,J-1), count(I,J).
  element(I), ~count(I,J),     count(I-1,J).
 
