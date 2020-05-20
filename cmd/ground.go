@@ -116,6 +116,8 @@ bule ground <program.bul> [options].
 
 		debug(2, "All Rules should be clauses with search predicates. No more ground facts.")
 
+		p.RemoveClausesWithFacts()
+
 		{
 			err := p.CheckNoRemainingFacts()
 			if err != nil {

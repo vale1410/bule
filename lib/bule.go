@@ -416,6 +416,20 @@ func (p *Program) CollectGroundTuples() {
 	}
 }
 
+// At this point no clauses should exist that contains a fact
+// So we remove all of them that do contain one.
+func (p *Program) RemoveClausesWithFacts() bool {
+	removeIfTrue := func(rule Rule) bool {
+		for _, lit := range rule.Literals {
+			if !lit.Search && !lit.IsGround() {
+				return true
+			}
+		}
+		return false
+	}
+	return p.RemoveRules(removeIfTrue)
+}
+
 func (p *Program) RemoveClausesWithTuplesThatDontExist() bool {
 	removeIfTrue := func(rule Rule) bool {
 		for _, lit := range rule.Literals {
@@ -427,7 +441,6 @@ func (p *Program) RemoveClausesWithTuplesThatDontExist() bool {
 		}
 		return false
 	}
-
 	return p.RemoveRules(removeIfTrue)
 }
 
@@ -437,7 +450,8 @@ func (p *Program) ExtractQuantors() {
 	p.existQ = make(map[int][]Literal, 0)
 
 	checkA := func(r Rule) bool {
-		return r.Literals[0].Name == "#forall"
+
+		return len(r.Literals) > 0 && r.Literals[0].Name == "#forall"
 	}
 
 	transformA := func(rule Rule) (remove []Rule, err error) {
@@ -450,7 +464,7 @@ func (p *Program) ExtractQuantors() {
 	}
 
 	checkE := func(r Rule) bool {
-		return r.Literals[0].Name == "#exist"
+		return len(r.Literals) > 0 && r.Literals[0].Name == "#exist"
 	}
 
 	transformE := func(rule Rule) (remove []Rule, err error) {

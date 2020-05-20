@@ -66,10 +66,6 @@ func (literal *Literal) IsGround() bool {
 	return literal.FreeVars().IsEmpty()
 }
 
-func (literal *Literal) IsSearch() bool {
-	return literal.FreeVars().IsEmpty()
-}
-
 type Term string
 
 type Predicate string
