@@ -1,0 +1,72 @@
+%% easy
+#const c=4. %% columns c
+#const r=4. %% row r
+#const q=3. %% connect q
+#const d=6. %% depth d.  black(1), white, black ... 
+
+domX[1..c].
+domY[1..r].
+domX[X], domY[Y] => dom[X,Y]. 
+dom[X,Y] => vertex[X,Y,Y*(r-1)+X].
+
+black[1].
+white[0].
+player[0..1].
+
+t[0..d].
+t[T],T > 0 => turn[T,T#mod2]. 
+
+first[1]. %vertices going from 1..r*c
+domX[X], domX[I], 2**I <= r*c => choose[X,I,(V/(2**I))#mod2]. 
+choose[_,I,_] => bit[I]. 
+
+t[T], T>0,                       => #exist(T) , time(T).  %1
+white[A], turn1[T,A], bit[I]     => #forall(T), moveL(I,T). 
+domX[X], t[T], T>0               => #exist(T) , move(V,T).    
+dom[X,Y], t[T], player[A]        => #exist(T) , board(A,X,Y,T).
+dom[X,Y], t[T]                   => #exist(T) , occupied(X,Y,T).
+vertex[_,_,V], t[T], T>0         => #exist(T) , ladder(V,T).
+st[Z], black[A], dom[X,Y]        => #exist(d), win(Z,X,Y).  %2 
+
+~time(T+1), time(T).
+~board(_,_,_,0). // INITIAL ? 
+vertex[V], t[T] => ~board(A,V,T):player[A]. %5
+~board(A,X,Y,T), board(A,X,Y,T+1). 
+time(T), board(A,X,Y,T-1), ~board(A,X,Y,T). %7
+
+~board(_,X,Y,T), occupied(X,Y,T). %9  (8 follows from 4 & 10)
+~occupied(X,Y,T), board(A,X,Y,T) : player[A]. %10 
+
+time(T), ~move(_,T). %11
+~occupied(X,_,T-1), ~move(V,T).  %12
+turn1[T,A] => board(A,V,T), ~move(V,T). %13 
+
+vertex[V] => ~moveL(I,T):choose[V,I,1], moveL(I,T):choose[V,I,0], 
+    ~time(T), occupied(V,T-1), move(V,T). %14
+
+turn1[T,A] => move(V,T), board(A,V,T-1), ~board(A,V,T). %15
+turn1[T,A] => board(1-A,V,T-1), ~board(1-A,V,T). %16
+
+
+~ladder(V,T), ladder(V+1,T). %22
+~move(V+1,T),~ladder(V,T). %22
+~move(V,T),   ladder(V,T). %23
+move(I+1,T),  ladder(I,T), ~ladder(I+1,T). %25
+first[V] => move(V,T), ~ladder(V,T). %24
+~time(T), ladder(vertexLast,T). %26
+
+%% Winning Positions
+st[0..1].
+% at least one winning position for black
+winS(X,Y,1):X+(q-1)<=c:Y<=r:dom[X,Y], 
+    winS(X,Y,0):X<=c:Y+(q-1)<=r:dom[X,Y], 
+    winD(X,Y,Z):X+q-1<=c:Y+q-1<=r:dom[X,Y]:st[Z].
+
+% horizontal (Z==0) and vertical(Z==1) winning positions (winS)
+st[Z], white[A] => ~board(X+Z*D,Y+(1-Z)*D,A,d):connect[D].
+st[Z], black[A] => ~connect[D], board(X+Z*D,Y+(1-Z)*D,A,d), ~winS(X,Y,Z).
+%%
+%%% diagonal rising (Z==0) and falling (Z==1) winning positions (winD)
+st[Z], white[A] => ~board(X+D,Y+Z*(q-1)+((-1)**Z)*D,A,d):connect[D].
+st[Z], black[A] =>  connect[D], ~board(X+D,Y+Z*(q-1)+((-1)**Z)*D,A,d), winD(X,Y,Z). 
+

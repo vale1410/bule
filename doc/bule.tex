@@ -18,13 +18,16 @@
 
 
 \begin{abstract}
-    In this paper we introduce Bule, a Logic Programming paradigm based on clauses in its purest form. 
-    A ground program in Bule consist simply of set propositional of propositional clauses. 
-    None-ground clauses ground to clauses in conjunctive normal form by iterating over the domain of their term variables and leading. 
-    The semantics of Bule corresponds to Boolean satisfiability and is simpler than that of other related paradigm such as Answer Set Programming and First Order Logic with bounds.  
-    The goal of the language is a declarative and concise definition language of CNF encodings. 
-    Bule offers techniques related to SAT Solving such as Approximate Model Counting and Quantified Boolean Formulae. 
-    This paper formally defines the language Bule, presents the implementation through key examples and compares to alternative approaches. 
+    SAT Programming extends SAT Solving by a declarative modelling language. 
+    We propose Bule, a Logic Programming language, based on classical logic that introduces SAT Programming. 
+    A ground program in Bule consist of a set of propositional clauses with meaningful literals. 
+    The process of translating a non-ground program to propositional clauses is called grounding and is done by iterating over the domain of their variables. 
+    The semantics of Bule is simpler than Answer Set Programming or First Order Logic with bounds.  
+    Bule also offers techniques based on SAT Solving such as Approximate Model Counting and Quantified Boolean Formulae 
+    and enriches such SAT related technologies by a uniform modelling language. 
+
+    %This paper formally defines the language Bule, presents the implementation
+    %through key examples and compares to alternative approaches. 
 
 
     % With rising usage of SAT solvers the challenge to translate problems to CNF is everywhere. 
