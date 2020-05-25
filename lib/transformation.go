@@ -1,6 +1,9 @@
 package lib
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/scylladb/go-set/strset"
+)
 
 // Check that there are no unbound variables
 // All variables that only occur in exactly one term are not bound by others and
@@ -19,9 +22,20 @@ func (p *Program) CheckUnboundVariables() error {
 				}
 			}
 		}
+
+		// collect free vars in head of generators,
+		// they can occur alone but due to unrolling the generator
+		// they do occur multiple times. Example. q(X,D):d[D]. % X occurs alone but is rolled out
+		inHead := strset.New()
+		for _, g := range rule.Generators {
+			for i := range g.Head.Terms {
+				inHead = strset.Union(inHead, g.Head.Terms[i].FreeVars())
+			}
+		}
+
 		for v, c := range countVars {
-			if c < 2 {
-				return fmt.Errorf("In the following rule the variables %s is not marked as free and unbound (starting with underscore _).\n %s",v, rule.String())
+			if !inHead.Has(v) && c < 2 {
+				return fmt.Errorf("In the following rule the variables %s is not marked as free and unbound (starting with underscore _).\n %s", v, rule.String())
 			}
 		}
 	}
