@@ -161,7 +161,7 @@ bule ground <program.bul> [options].
 
 		debug(1, "Output")
 
-		if dimacsFlag {
+		if unitPropagationFlag || dimacsFlag {
 			clauseProgram := translateFromRuleProgram(p)
 			clauseProgram.Print()
 		} else {

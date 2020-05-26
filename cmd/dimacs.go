@@ -323,25 +323,28 @@ func (p ClauseProgram) PrintDimacs() {
 		}
 	}
 
-	for _, clause := range cls {
-		for _, lit := range clause {
-			if strings.HasPrefix(lit, "~") {
-				fmt.Print("-")
+	if dimacsFlag {
+		for _, clause := range cls {
+			for _, lit := range clause {
+				if strings.HasPrefix(lit, "~") {
+					fmt.Print("-")
+				}
+				fmt.Print(vars[pos(lit)], " ")
 			}
-			fmt.Print(vars[pos(lit)], " ")
+			fmt.Println("0")
 		}
-		fmt.Println("0")
+	} else {
+		// printout textual representation!!
+		for _, clause := range cls {
+			for i, lit := range clause {
+				if i != 0 {
+					fmt.Print(", ")
+				}
+				fmt.Print(lit)
+			}
+			fmt.Println(".")
+		}
 	}
-	// printout textual representation!!
-	//	for _, clause := range cls {
-	//		for i, lit := range clause {
-	//			if i != 0 {
-	//				fmt.Print(", ")
-	//			}
-	//			fmt.Print(lit)
-	//		}
-	//		fmt.Println(".")
-	//	}
 }
 
 // This is a very slow implementation of unit propagation

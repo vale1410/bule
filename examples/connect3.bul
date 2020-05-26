@@ -17,11 +17,11 @@
 %%  q=4, c=7. r=6. d=c*r. %%  > original! black win!
 
 %% %% easy
-#const q=3. 
-#const c=1. 
-#const r=3. 
-#const d=1. 
-%#const d=2*((c*r)/2)-1. 
+#const q=2. 
+#const c=2. 
+#const r=2. 
+%#const d=3. 
+#const d=2*((c*r)/2)-1. 
 
 connect[0..q-1].
 
@@ -47,7 +47,8 @@ domT[T]                              => #exist(T-1) , time(T).
 white[A], bitC[I], turn[T,A]         => #forall(T), moveL(I,T). 
 black[A], bitC[I], turn[T,A]         => #exist(T), moveL(I,T). 
 turn[T,A], domC[C]                   => #exist(T) , move(A,C,T).    
-domC[C], domR0[R], domT0[T], R <= T  => #exist(T) , occupied(C,R,T). 
+%domC[C], domR0[R], domT0[T], R <= T  => #exist(T) , occupied(C,R,T). 
+domC[C], domR0[R], domT0[T]          => #exist(T) , occupied(C,R,T). 
 dom[C,R]                             => #exist(d) , board(C,R).
 dom[C,R], C+(q-1)<=c, R<=r           => #exist(d) , winO(C,R,1).  
 dom[C,R], C<=c , R+(q-1)<=r          => #exist(d) , winO(C,R,0).  
@@ -71,16 +72,17 @@ white[A], domC[C] => ~time(T), occupied(C,r,T),
 ~occupied(_C,1,0).
 ~occupied(C,R,T),    occupied(C,R-1,T).  %% gravity!!
 ~occupied(C,R,T-1),  occupied(C,R,T). 
- occupied(C,R,T-1), ~occupied(C,R,T), move(A,C,T).
+ occupied(C,R,T-1), ~occupied(C,R,T), move(_,C,T).
 
 black[A]            =>  move(A,C,T) : turn[T,A], ~occupied(C,R,d), ~board(C,R). 
 black[A], turn[T,A] => occupied(C,R-1,T-1), ~move(A,C,T), ~board(C,R). 
-%black[A], turn[T,A] => ~ occupied(C,R,T-1), ~move(A,C,T), ~board(C,R). 
+black[A], turn[T,A] => ~occupied(C,R,T-1),  ~move(A,C,T), ~board(C,R). 
 white[A], turn[T,A] => ~occupied(C,R-1,T-1), occupied(C,R,T-1), ~move(A,C,T), ~board(C,R). 
 
 ~occupied(C,R-1,T-1), occupied(C,R,T-1), ~move(_A,C,T), occupied(C,R,T). 
 
-turn[T,A] => move(A,C,T):domC[C]. 
+turn[T,A] => ~time(T), move(A,C,T):domC[C]. 
+              time(T), occupied(C,R,T-1), ~occupied(C,R,T). 
 
 %% Winning Positions
 
