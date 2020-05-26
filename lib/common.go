@@ -49,10 +49,10 @@ func assertx(err error, info ...string) {
 }
 
 func makeSet(a, b int) (c []int) {
-	if a >= b {
+	if a > b {
 		return []int{}
 	}
-	c = make([]int, 0, b-a)
+	c = make([]int, 0, b-a+1)
 	for i := a; i <= b; i++ {
 		c = append(c, i)
 	}

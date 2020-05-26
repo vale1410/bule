@@ -6,7 +6,6 @@
 %%  q=2, c=3. r=2. d=c*r. %%  > black win!
 %%  q=2, c=3. r=3. d=c*r. %%  > black win!
 
-
 %%  q=3, c=3. r=3. d=c*r. %%  > draw !
 %%  q=3, c=4. r=3. d=c*r. %%  > black win!
 %%  q=3, c=4. r=4. d=c*r. %%  > black win!
@@ -17,17 +16,12 @@
 %%  q=4, c=6. r=7. d=c*r. %%  > black win!
 %%  q=4, c=7. r=6. d=c*r. %%  > original! black win!
 
-%% %% %% easy
-%% #const q=3. 
-%% #const c=3. 
-%% #const r=3. 
-%% #const d=3. 
-
 %% %% easy
-#const q=1. 
+#const q=3. 
 #const c=1. 
-#const r=1. 
-#const d=c*r. 
+#const r=3. 
+#const d=1. 
+%#const d=2*((c*r)/2)-1. 
 
 connect[0..q-1].
 
@@ -46,7 +40,7 @@ domT0[0..d].
 domT[1..d].
 domT[T] => turn[T,T#mod2]. 
 
-domC[C], domC[I], 2**I <= c => chooseC[C,I,(C/(2**I))#mod2]. 
+domC[C], domC[I], 2**(I-1) <= c => chooseC[C,I-1,(C/(2**(I-1)))#mod2]. 
 chooseC[_,I,_] => bitC[I]. 
 
 domT[T]                              => #exist(T-1) , time(T).
@@ -68,17 +62,22 @@ white[A], turn[T,A] => ~time(T), time(T+1).
 black[A], chooseC[C,I,0] => ~move(A,C,T), ~moveL(I,T).
 black[A], chooseC[C,I,1] => ~move(A,C,T), moveL(I,T).
 
-white[A] => ~time(T), occupied(C,r,T), 
+white[A], domC[C] => ~time(T), occupied(C,r,T), 
      moveL(I,T) : chooseC[C,I,0], 
     ~moveL(I,T) : chooseC[C,I,1], 
     move(A,C,T).
 
  occupied(_C,0,0).
 ~occupied(_C,1,0).
-~occupied(C,R,T), occupied(C,R-1,T).  %% gravity!!
-~occupied(C,R,T), occupied(C,R,T+1). 
-black[A] => ~occupied(C,R-1,T), occupied(C,R,T-1), ~move(A,C,T),  board(C,R). 
-white[A] => ~occupied(C,R-1,T), occupied(C,R,T-1), ~move(A,C,T), ~board(C,R). 
+~occupied(C,R,T),    occupied(C,R-1,T).  %% gravity!!
+~occupied(C,R,T-1),  occupied(C,R,T). 
+ occupied(C,R,T-1), ~occupied(C,R,T), move(A,C,T).
+
+black[A]            =>  move(A,C,T) : turn[T,A], ~occupied(C,R,d), ~board(C,R). 
+black[A], turn[T,A] => occupied(C,R-1,T-1), ~move(A,C,T), ~board(C,R). 
+%black[A], turn[T,A] => ~ occupied(C,R,T-1), ~move(A,C,T), ~board(C,R). 
+white[A], turn[T,A] => ~occupied(C,R-1,T-1), occupied(C,R,T-1), ~move(A,C,T), ~board(C,R). 
+
 ~occupied(C,R-1,T-1), occupied(C,R,T-1), ~move(_A,C,T), occupied(C,R,T). 
 
 turn[T,A] => move(A,C,T):domC[C]. 
@@ -92,11 +91,11 @@ turn[T,A] => move(A,C,T):domC[C].
     winD(C,R,Z) : C+q-1<=c   : R+q-1<=r   : dom[C,R] : dir[Z].
 
 % orthogonal: horizontal (Z==0) and vertical(Z==1) winning positions (winO)
-dir[Z]             => board(C+Z*D,R+(1-Z)*D) : connect[D].
-dir[Z], connect[D] => board(C+Z*D,R+(1-Z)*D),    ~winO(C,R,Z).
+dir[Z]             =>    board(C+Z*D,R+(1-Z)*D)  : connect[D].
+dir[Z], connect[D] =>    board(C+Z*D,R+(1-Z)*D)  , ~winO(C,R,Z).
 dir[Z], connect[D] => occupied(C+Z*D,R+(1-Z)*D,d), ~winO(C,R,Z).
 %%
 %%% diagonal rising (Z==0) and falling (Z==1) winning positions (winD)
-dir[Z]             => board(C+D,R+Z*(q-1)+((-1)**Z)*D) : connect[D].
-dir[Z], connect[D] => board(C+D,R+Z*(q-1)+((-1)**Z)*D),    ~winD(C,R,Z). 
+dir[Z]             =>    board(C+D,R+Z*(q-1)+((-1)**Z)*D)  : connect[D].
+dir[Z], connect[D] =>    board(C+D,R+Z*(q-1)+((-1)**Z)*D)  , ~winD(C,R,Z). 
 dir[Z], connect[D] => occupied(C+D,R+Z*(q-1)+((-1)**Z)*D,d), ~winD(C,R,Z). 
