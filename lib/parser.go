@@ -141,7 +141,7 @@ func (rule *Rule) parseClausesOrHead(tokens Tokens) {
 	splitRuleElementsSeparators := map[tokenKind]bool{tokenDot: true, tokenQuestionsmark: true, token2RuleComma: true}
 	rest := splitTokens(tokens, splitRuleElementsSeparators)
 	for _, sep := range rest {
-		assert(len(sep.tokens) > 0)
+		asserts(len(sep.tokens) > 0, "problem:", rule.String())
 		asserts(sep.separator.kind != tokenEmpty, "sep:", sep.tokens.String(), " - all tokens: ", tokens.String())
 
 		//parse for Generators

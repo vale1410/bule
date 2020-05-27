@@ -32,6 +32,7 @@ var (
 	quantificationFlag bool
 	withFactsFlag      bool
 	textualFlag        bool
+	constStringMap     map[string]int
 )
 
 // groundCmd represents the ground command
@@ -55,6 +56,10 @@ bule ground <program.bul> [options].
 
 		p := bule.ParseProgram(args)
 
+		for key, val := range constStringMap {
+			p.Constants[key] = val
+		}
+
 		debug(1, "Input")
 		p.PrintDebug(1)
 
@@ -76,7 +81,6 @@ bule ground <program.bul> [options].
 
 		debug(2, "Replace Constants (#const a=3. and Function Symbols (#mod)")
 		p.ReplaceConstantsAndMathFunctions()
-
 
 		{
 			debug(2, "Check for unbound variables that are not marked as such.")
@@ -169,7 +173,7 @@ bule ground <program.bul> [options].
 
 		if unitPropagationFlag || !textualFlag {
 			units := convertArgsToUnits(unitSlice)
-			clauseProgram := translateFromRuleProgram(p,units)
+			clauseProgram := translateFromRuleProgram(p, units)
 			clauseProgram.Print()
 		} else {
 			p.Print()
@@ -194,7 +198,8 @@ func init() {
 	//	groundCmd.PersistentFlags().StringVarP(&progFlag, "file", "f", "", "Path to File")
 	groundCmd.PersistentFlags().BoolVarP(&quantificationFlag, "quant", "q", true, "Print Quantification")
 	groundCmd.PersistentFlags().BoolVarP(&withFactsFlag, "facts", "f", false, "Output all facts.")
-	groundCmd.PersistentFlags().BoolVarP(&textualFlag, "text", "t", true, "true: print grounded textual bule format. false: print dimacs format for QBF and SAT solvers.")
+	groundCmd.PersistentFlags().BoolVarP(&textualFlag, "text", "t", false, "true: print grounded textual bule format. false: print dimacs format for QBF and SAT solvers.")
 	groundCmd.PersistentFlags().BoolVarP(&printInfoFlag, "info", "i", true, "Print all units as well.")
 	groundCmd.PersistentFlags().BoolVarP(&unitPropagationFlag, "up", "u", true, "Perform Unitpropagation.")
+	groundCmd.PersistentFlags().StringToIntVarP(&constStringMap, "const", "c", map[string]int{}, "Comma separated list of constant instantiations: c=d.")
 }
