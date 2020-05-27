@@ -62,22 +62,23 @@ var dimacsCmd = &cobra.Command{
 			fmt.Println("usage: bule dimacs <filename> [units]")
 			os.Exit(1)
 		}
-
-		units := make(map[string]bool, 0)
-
-		for i, s := range args {
-			if i < 2 {
-				continue
-			}
-			if strings.HasPrefix(s, "-") {
-				s = "~" + strings.TrimLeft(s, "-")
-			}
-			units[s] = true
-		}
+		units := convertArgsToUnits(args[1:])
 		fmt.Println("run with args")
 		p := parseFromFile(args[0])
 		p.run(units)
 	},
+}
+
+func convertArgsToUnits(args []string) map[string]bool {
+	units := make(map[string]bool, 0)
+
+	for _, s := range args {
+		if strings.HasPrefix(s, "-") {
+			s = "~" + strings.TrimLeft(s, "-")
+		}
+		units[s] = true
+	}
+	return units
 }
 
 func init() {
@@ -99,8 +100,8 @@ func init() {
 
 // This translate from a grounded Bule program to clause representation
 // Assuming the program is ground!!!
-func translateFromRuleProgram(program lib.Program) (p ClauseProgram) {
-	p.units = map[string]bool{}
+func translateFromRuleProgram(program lib.Program, units map[string]bool) (p ClauseProgram) {
+	p.units = units
 	for _, r := range program.Rules {
 		if len(r.Literals) == 1 {
 			p.units[r.Literals[0].String()] = true
@@ -323,7 +324,7 @@ func (p ClauseProgram) PrintDimacs() {
 		}
 	}
 
-	if dimacsFlag {
+	if !textualFlag {
 		for _, clause := range cls {
 			for _, lit := range clause {
 				if strings.HasPrefix(lit, "~") {

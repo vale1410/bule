@@ -265,11 +265,8 @@ func (p *Program) PrintTuples() {
 
 }
 
-func (p *Program) Print(withFacts bool) {
+func (p *Program) Print() {
 	p.PrintQuantification()
-	if withFacts {
-		p.PrintFacts()
-	}
 	p.PrintRules()
 }
 

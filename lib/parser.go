@@ -50,11 +50,14 @@ func ParseProgramFromStrings(lines []string) (p Program) {
 		if strings.HasPrefix(s, "#const") {
 			s = strings.TrimPrefix(s, "#const")
 			s = strings.TrimSuffix(s, ".")
-			def := strings.Split(s, "=")
-			asserts(len(def) == 2, s)
-			term, _ := assign(Term(def[1]), p.Constants)
-			asserts(groundMathExpression(term.String()), "is not ground:"+term.String())
-			p.Constants[def[0]] = evaluateTermExpression(term.String())
+			defs := strings.Split(s, ",")
+			for _, def := range defs {
+				def := strings.Split(def, "=")
+				asserts(len(def) == 2, s)
+				term, _ := assign(Term(def[1]), p.Constants)
+				asserts(groundMathExpression(term.String()), "is not ground:"+term.String())
+				p.Constants[def[0]] = evaluateTermExpression(term.String())
+			}
 			continue
 		}
 

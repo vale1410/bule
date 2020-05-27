@@ -6,7 +6,7 @@
 %%  q=2, c=3. r=2. d=c*r. %%  > black win!
 %%  q=2, c=3. r=3. d=c*r. %%  > black win!
 
-%%  q=3, c=3. r=3. d=c*r. %%  > draw !
+%%  q=3, c=3. r=3. d=c*r. %%  > UNSAT draw !
 %%  q=3, c=4. r=3. d=c*r. %%  > black win!
 %%  q=3, c=4. r=4. d=c*r. %%  > black win!
 %%  q=3, c=5. r=5. d=c*r. %%  > black win!
@@ -17,9 +17,9 @@
 %%  q=4, c=7. r=6. d=c*r. %%  > original! black win!
 
 %% %% easy
-#const q=2. 
-#const c=2. 
-#const r=2. 
+#const q=3. 
+#const c=3. 
+#const r=1. 
 %#const d=3. 
 #const d=2*((c*r)/2)-1. 
 
@@ -55,34 +55,38 @@ dom[C,R], C<=c , R+(q-1)<=r          => #exist(d) , winO(C,R,0).
 dom[C,R], dir[Z], C+q-1<=c,R+q-1<=r  => #exist(d) , winD(C,R,Z).  
 
 ~time(T+1), time(T).
-white[A], turn[T,A] => ~time(T), time(T+1).
+white[A], turn[T,A] => ~time(T), time(T+1). %% Dont stop game at whites turn 
 
-~move(_,_,T), time(T). 
-~move(_,C,T), ~occupied(C,r,T-1). 
+~move(_,_,T), time(T).   %% When game is over, no more moves allowed
+turn[T,A] => ~time(T), move(A,C,T):domC[C].  %% game is running, then make one move
+~move(_,C,T), ~occupied(C,r,T-1). %% No moves in full rows 
+time(T), occupied(C,R,T-1), ~occupied(C,R,T).  %% games over, then no more moves are conquered
+%%move(_,C,T), occupied(C,R,T-1), ~occupied(C,R,T). %% implied by previous 63 and 60!
 
 black[A], chooseC[C,I,0] => ~move(A,C,T), ~moveL(I,T).
 black[A], chooseC[C,I,1] => ~move(A,C,T), moveL(I,T).
 
-white[A], domC[C] => ~time(T), occupied(C,r,T), 
+white[A], domC[C] => 
+    ~time(T),           %% Game is still running 
+    occupied(C,r,T),    %% Column is not completely full 
      moveL(I,T) : chooseC[C,I,0], 
     ~moveL(I,T) : chooseC[C,I,1], 
-    move(A,C,T).
+    move(A,C,T).        %% White makes a move in column C!
 
  occupied(_C,0,0).
 ~occupied(_C,1,0).
-~occupied(C,R,T),    occupied(C,R-1,T).  %% gravity!!
-~occupied(C,R,T-1),  occupied(C,R,T). 
- occupied(C,R,T-1), ~occupied(C,R,T), move(_,C,T).
-
-black[A]            =>  move(A,C,T) : turn[T,A], ~occupied(C,R,d), ~board(C,R). 
-black[A], turn[T,A] => occupied(C,R-1,T-1), ~move(A,C,T), ~board(C,R). 
-black[A], turn[T,A] => ~occupied(C,R,T-1),  ~move(A,C,T), ~board(C,R). 
-white[A], turn[T,A] => ~occupied(C,R-1,T-1), occupied(C,R,T-1), ~move(A,C,T), ~board(C,R). 
-
+~occupied(C,R,T),     occupied(C,R-1,T).  %% gravity!!
+~occupied(C,R,T-1),   occupied(C,R,T).  %% board moves forward 
+occupied(C,R,T),   ~occupied(C,R+1,T+1).  %% no jumps 
 ~occupied(C,R-1,T-1), occupied(C,R,T-1), ~move(_A,C,T), occupied(C,R,T). 
 
-turn[T,A] => ~time(T), move(A,C,T):domC[C]. 
-              time(T), occupied(C,R,T-1), ~occupied(C,R,T). 
+occupied(C,R,d), ~board(C,R). 
+white[A], turn[T,A] => ~occupied(C,R,T-1), occupied(C,R,T), ~board(C,R). 
+
+
+%%~board(C,R), occupied(C,R,d). 
+%%occupied(C,R,T). 
+%%board(C,R,T). 
 
 %% Winning Positions
 
@@ -93,11 +97,14 @@ turn[T,A] => ~time(T), move(A,C,T):domC[C].
     winD(C,R,Z) : C+q-1<=c   : R+q-1<=r   : dom[C,R] : dir[Z].
 
 % orthogonal: horizontal (Z==0) and vertical(Z==1) winning positions (winO)
-dir[Z]             =>    board(C+Z*D,R+(1-Z)*D)  : connect[D].
-dir[Z], connect[D] =>    board(C+Z*D,R+(1-Z)*D)  , ~winO(C,R,Z).
-dir[Z], connect[D] => occupied(C+Z*D,R+(1-Z)*D,d), ~winO(C,R,Z).
+dir[Z]             => board(C+Z*D,R+(1-Z)*D)       : connect[D],
+                      ~occupied(C+Z*D,R+(1-Z)*D,d) : connect[D].
+dir[Z], connect[D] => board(C+Z*D,R+(1-Z)*D)  , ~winO(C,R,Z).
+%%dir[Z], connect[D] => occupied(C+Z*D,R+(1-Z)*D,d), ~winO(C,R,Z).
+
 %%
 %%% diagonal rising (Z==0) and falling (Z==1) winning positions (winD)
-dir[Z]             =>    board(C+D,R+Z*(q-1)+((-1)**Z)*D)  : connect[D].
-dir[Z], connect[D] =>    board(C+D,R+Z*(q-1)+((-1)**Z)*D)  , ~winD(C,R,Z). 
-dir[Z], connect[D] => occupied(C+D,R+Z*(q-1)+((-1)**Z)*D,d), ~winD(C,R,Z). 
+dir[Z]             => board(C+D,R+Z*(q-1)+((-1)**Z)*D)  : connect[D],
+                      occupied(C+D,R+Z*(q-1)+((-1)**Z)*D,d) : connect[D]. 
+dir[Z], connect[D] => board(C+D,R+Z*(q-1)+((-1)**Z)*D)  , ~winD(C,R,Z). 
+%%dir[Z], connect[D] => occupied(C+D,R+Z*(q-1)+((-1)**Z)*D,d), ~winD(C,R,Z). 

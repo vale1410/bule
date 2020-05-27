@@ -31,7 +31,7 @@ import (
 var (
 	quantificationFlag bool
 	withFactsFlag      bool
-	dimacsFlag         bool
+	textualFlag        bool
 )
 
 // groundCmd represents the ground command
@@ -48,6 +48,8 @@ bule ground <program.bul> [options].
 		if len(args) == 0 {
 			return
 		}
+
+		unitSlice := args[1:]
 
 		bule.DebugLevel = debugFlag
 
@@ -161,11 +163,16 @@ bule ground <program.bul> [options].
 
 		debug(1, "Output")
 
-		if unitPropagationFlag || dimacsFlag {
-			clauseProgram := translateFromRuleProgram(p)
+		if textualFlag && withFactsFlag {
+			p.PrintFacts()
+		}
+
+		if unitPropagationFlag || !textualFlag {
+			units := convertArgsToUnits(unitSlice)
+			clauseProgram := translateFromRuleProgram(p,units)
 			clauseProgram.Print()
 		} else {
-			p.Print(withFactsFlag)
+			p.Print()
 		}
 	},
 }
@@ -184,11 +191,10 @@ func runFixpoint(f func() (bool, error)) {
 
 func init() {
 	rootCmd.AddCommand(groundCmd)
-
 	//	groundCmd.PersistentFlags().StringVarP(&progFlag, "file", "f", "", "Path to File")
 	groundCmd.PersistentFlags().BoolVarP(&quantificationFlag, "quant", "q", true, "Print Quantification")
 	groundCmd.PersistentFlags().BoolVarP(&withFactsFlag, "facts", "f", false, "Output all facts.")
-	groundCmd.PersistentFlags().BoolVarP(&dimacsFlag, "dimacs", "D", true, "false: print bule format. true: print dimacs format")
+	groundCmd.PersistentFlags().BoolVarP(&textualFlag, "text", "t", true, "true: print grounded textual bule format. false: print dimacs format for QBF and SAT solvers.")
 	groundCmd.PersistentFlags().BoolVarP(&printInfoFlag, "info", "i", true, "Print all units as well.")
 	groundCmd.PersistentFlags().BoolVarP(&unitPropagationFlag, "up", "u", true, "Perform Unitpropagation.")
 }
