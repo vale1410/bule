@@ -6,7 +6,7 @@
 %%  q=2, c=3. r=2. d=c*r. %%  > black win!
 %%  q=2, c=3. r=3. d=c*r. %%  > black win!
 
-%%  q=3, c=3. r=3. d=c*r. %%  > UNSAT draw !
+%%  q=3, c=3. r=3. d=c*r. %%  > black win!
 %%  q=3, c=4. r=3. d=c*r. %%  > black win!
 %%  q=3, c=4. r=4. d=c*r. %%  > black win!
 %%  q=3, c=5. r=5. d=c*r. %%  > black win!
@@ -17,10 +17,10 @@
 %%  q=4, c=7. r=6. d=c*r. %%  > original! black win!
 
 %% %% easy
-#const q=3.
-#const c=4. 
-#const r=4. 
-#const d=c*r.
+%#const q=3.
+%#const c=4. 
+%#const r=4. 
+%#const d=c*r.
 %#const d=3. 
 %#const d=2*((c*r+1)/2)-1. 
 
@@ -41,7 +41,7 @@ domT0[0..d].
 domT[1..d].
 domT[T] => turn[T,T#mod2]. 
 
-domC[C], domC[I], 2**I <= c => chooseC[C,I-1,(C/(2**(I-1)))#mod2]. 
+domC[C], domC[I], 2**(I-1) <= c => chooseC[C,I-1,((C-1)/(2**(I-1)))#mod2]. 
 chooseC[_,I,_] => bitC[I]. 
 
 domT[T]                              => #exist(T-1) , time(T).
