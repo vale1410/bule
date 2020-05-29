@@ -2,7 +2,6 @@ package lib
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 )
 
@@ -12,7 +11,7 @@ type Program struct {
 	PredicateToTuples map[Predicate][][]int
 	PredicateToArity  map[Predicate]int
 	PredicateFact     map[string]bool
-	GroundFacts       map[Predicate]bool
+	CollectedFacts    map[Predicate]bool
 	Search            map[Predicate]bool
 	Alternation       [][]Literal
 	existQ            map[int][]Literal
@@ -23,7 +22,7 @@ type Rule struct {
 	initialTokens  []Token
 	LineNumber     int
 	Parent         *Rule
-	Generator      []Literal
+	Generators     []Literal
 	Constraints    []Constraint
 	Literals       []Literal
 	Iterators      []Iterator
@@ -63,12 +62,12 @@ type Term string
 
 type Predicate string
 
-func (r *Rule) IsGround() bool {
-	return r.FreeVars().IsEmpty()
+func (rule *Rule) IsGround() bool {
+	return rule.FreeVars().IsEmpty()
 }
 
-func (r *Rule) IsFact() bool {
-	return len(r.Literals) == 1 && r.Literals[0].Fact
+func (rule *Rule) IsFact() bool {
+	return len(rule.Literals) == 1 && rule.Literals[0].Fact
 }
 
 func IsMarkedAsFree(v string) bool {
@@ -174,20 +173,29 @@ func (literal Literal) String() string {
 	return s + closing
 }
 
-func (r *Rule) Debug() string {
-	return r.String() + "  %% #" + strconv.Itoa(r.LineNumber)
+func (rule *Rule) Debug() string {
+	sb := strings.Builder{}
+	sb.WriteString(rule.Debug())
+	p := rule.Parent
+	s := "  "
+	for p != nil {
+		sb.WriteString(" " + p.String())
+		s += "  "
+		p = p.Parent
+	}
+	return sb.String()
 }
 
-func (r *Rule) String() string {
+func (rule *Rule) String() string {
 
 	sb := strings.Builder{}
 
-	for _, l := range r.Generator {
+	for _, l := range rule.Generators {
 		sb.WriteString(l.String())
 		sb.WriteString(", ")
 	}
 
-	for _, c := range r.Constraints {
+	for _, c := range rule.Constraints {
 		sb.WriteString(c.String())
 		sb.WriteString(", ")
 	}
@@ -197,19 +205,19 @@ func (r *Rule) String() string {
 
 	sb.WriteString(" => ")
 
-	for _, g := range r.Iterators {
+	for _, g := range rule.Iterators {
 		sb.WriteString(g.String())
 		sb.WriteString(", ")
 	}
 
-	for _, l := range r.Literals {
+	for _, l := range rule.Literals {
 		sb.WriteString(l.String())
 		sb.WriteString(", ")
 	}
 	tmp = strings.TrimSuffix(sb.String(), ", ")
 	sb.Reset()
 	sb.WriteString(tmp)
-	if r.IsQuestionMark {
+	if rule.IsQuestionMark {
 		sb.WriteString("?")
 	} else {
 		sb.WriteString(".")
@@ -218,8 +226,8 @@ func (r *Rule) String() string {
 }
 
 func (p *Program) Debug() {
-	fmt.Println("constants:", p.Constants)
-	fmt.Println("groundFacts", p.GroundFacts)
+	fmt.Println("Constants:", p.Constants)
+	fmt.Println("Collected Facts", p.CollectedFacts)
 	fmt.Println("PredicatFact", p.PredicateFact)
 	fmt.Println("PredicatsToTuples", p.PredicateToTuples)
 	for _, r := range p.Rules {
@@ -250,6 +258,20 @@ func (p *Program) Print() {
 	p.PrintRules()
 }
 
+type RuleError struct {
+	R       Rule
+	Message string
+	Err     error
+}
+
+func (err RuleError) Error() string {
+	var sb strings.Builder
+	sb.WriteString(err.Message + ":\n")
+	sb.WriteString(err.Err.Error() + ":\n")
+	sb.WriteString("Rule " + err.R.Debug() + "\n")
+	return sb.String()
+}
+
 type LiteralError struct {
 	L       Literal
 	R       Rule
@@ -260,7 +282,7 @@ func (err LiteralError) Error() string {
 	var sb strings.Builder
 	sb.WriteString(err.Message + ":\n")
 	sb.WriteString("Literal " + err.L.String() + "\n")
-	sb.WriteString("Rule " + err.R.String() + "\n")
+	sb.WriteString("Rule " + err.R.Debug() + "\n")
 	return sb.String()
 }
 
@@ -284,7 +306,7 @@ func (p *Program) CheckFactsInIterators() error {
 	for _, r := range p.Rules {
 		for _, g := range r.Iterators {
 			for _, l := range g.Literals {
-				if l.Fact {
+				if !l.Fact {
 					return LiteralError{
 						l,
 						r,
@@ -300,16 +322,17 @@ func (p *Program) CheckFactsInIterators() error {
 func (p *Program) CheckArityOfLiterals() error {
 	p.PredicateToArity = make(map[Predicate]int)
 	for _, r := range p.Rules {
-		for _, l := range r.Literals {
+		for _, l := range r.AllLiterals() {
 			if n, ok := p.PredicateToArity[l.Name]; ok {
 				if n != len(l.Terms) {
-					return LiteralError{l, r,
+					return LiteralError{*l, r,
 						fmt.Sprintf("Literal with arity %d already occurs in program with arity %d. \n "+
 							"Bule predicat to arity has to be unique.", len(l.Terms), n)}
 				}
 			} else {
 				p.PredicateToArity[l.Name] = len(l.Terms)
 			}
+
 		}
 	}
 	return nil
@@ -344,7 +367,7 @@ func (p *Program) PrintRules() {
 }
 
 func (p *Program) PrintFacts() {
-	for pred := range p.GroundFacts {
+	for pred := range p.CollectedFacts {
 		for _, tuple := range p.PredicateToTuples[pred] {
 			fmt.Print(pred)
 			for i, t := range tuple {

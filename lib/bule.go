@@ -32,16 +32,22 @@ func (p *Program) ExpandGroundRanges() (changed bool, err error) {
 		interval := strings.Split(string(term), "..")
 		return len(interval) == 2 && groundMathExpression(interval[0]) && groundMathExpression(interval[1])
 	}
-	transform := func(term Term) (newTerms []Term) {
+	transform := func(term Term) (newTerms []Term, err error) {
 		interval := strings.Split(string(term), "..")
-		i1 := evaluateTermExpression(interval[0])
-		i2 := evaluateTermExpression(interval[1])
+		i1, err := evaluateTermExpression(interval[0])
+		if err != nil {
+			return newTerms, err
+		}
+		i2, err := evaluateTermExpression(interval[1])
+		if err != nil {
+			return newTerms, err
+		}
 		for _, newValue := range makeSet(i1, i2) {
 			newTerms = append(newTerms, Term(strconv.Itoa(newValue)))
 		}
 		return
 	}
-	return p.TermExpansionOnlyLiterals(check, transform)
+	return p.TermExpansion(check, transform)
 }
 
 // This resolves facts with clauses.
@@ -84,7 +90,6 @@ func (p *Program) InstantiateNonGroundLiterals() (changed bool, err error) {
 	return p.RuleExpansion(check, transform)
 }
 
-
 // given a literal p(X,4,2,Y), a simple and quick way to find all tuples that fulfil this!
 func (p *Program) findFilteredTuples(literal Literal) [][]int {
 	positions, values := literal.findGroundTerms()
@@ -105,11 +110,59 @@ func (p *Program) findFilteredTuples(literal Literal) [][]int {
 }
 
 // This resolves facts with clauses.
+func (p *Program) InstantiateAndRemoveFactFromIterator() (changed bool, err error) {
+	// Find iterator with fact that we can replace!
+	check := func(r Rule) bool {
+		for _, iter := range r.Iterators {
+			for _, lit := range iter.Literals {
+				if p.CollectedFacts[lit.Name] && lit.Neg == false {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	transform := func(rule Rule) (generatedRules []Rule, err error) {
+
+		var fact Literal
+		var iter Iterator
+		var i int
+		var j int
+		for i, iter = range rule.Iterators {
+			for j, fact = range iter.Literals {
+				if p.CollectedFacts[fact.Name] && fact.Neg == false {
+					break
+				}
+			}
+		}
+		rule.Literals = append(rule.Iterators[i].Literals[:j],
+			rule.Iterators[i].Literals[j+1:]...)
+
+		for _, tuple := range p.findFilteredTuples(fact) {
+			newRule := rule.Copy()
+			newRule.Parent = &rule
+			for k, val := range tuple {
+				newConstraint := Constraint{
+					LeftTerm:   fact.Terms[k],
+					RightTerm:  Term(strconv.Itoa(val)), // TODO Could be simpler ...
+					Comparison: tokenComparisonEQ,
+				}
+				newRule.Constraints = append(newRule.Constraints, newConstraint)
+			}
+			generatedRules = append(generatedRules, newRule)
+		}
+		return
+	}
+	return p.RuleExpansion(check, transform)
+}
+
+// This resolves facts with clauses.
 func (p *Program) InstantiateAndRemoveFactFromGenerator() (changed bool, err error) {
 	// Find rule with fact
 	check := func(r Rule) bool {
-		for _, lit := range r.Generator {
-			if p.GroundFacts[lit.Name] && lit.Neg == false {
+		for _, lit := range r.Generators {
+			if p.CollectedFacts[lit.Name] && lit.Neg == false {
 				return true
 			}
 		}
@@ -121,11 +174,11 @@ func (p *Program) InstantiateAndRemoveFactFromGenerator() (changed bool, err err
 		var fact Literal
 		var i int
 		for i, fact = range rule.Literals {
-			if p.GroundFacts[fact.Name] && fact.Neg == false {
+			if p.CollectedFacts[fact.Name] && fact.Neg == false {
 				break
 			}
 		}
-		rule.Literals = append(rule.Generator[:i], rule.Generator[i+1:]...)
+		rule.Generators= append(rule.Generators[:i], rule.Generators[i+1:]...)
 
 		for _, tuple := range p.findFilteredTuples(fact) {
 			newRule := rule.Copy()
@@ -145,71 +198,45 @@ func (p *Program) InstantiateAndRemoveFactFromGenerator() (changed bool, err err
 	return p.RuleExpansion(check, transform)
 }
 
-func (p *Program) FindNewFacts() (changed bool, err error) {
-	// All literals are facts
-	// No generators
-	check := func(r Rule) bool {
-		if len(r.Iterators) != 0 {
-			return false
-		}
-		if len(r.Literals) != 1 || !r.Literals[0].Fact {
-			return false
-		}
-		for _, lit := range r.Generator {
-			if !p.GroundFacts[lit.Name] {
-				return false
-			}
-		}
-		return true
-	}
+func (p *Program) FindNewFacts2() (changed bool, err error) {
+	p.CollectGroundFacts()
 
-	transform := func(rule Rule) (empty []Rule, err error) {
-		var facts []Literal
-		var newFact Literal
-		for _, lit := range rule.Generator {
-			if p.GroundFacts[lit.Name] && lit.Neg == false {
-				facts = append(facts, lit)
-			} else {
-				newFact = lit
-			}
-		}
-		assignments, err := p.generateAssignments(facts, rule.Constraints)
-		if err != nil {
-			return empty, fmt.Errorf("Find New Facts: %w\n in Rule:  %v ", err, rule.Debug())
-		}
-		for _, assignment := range assignments {
-			newLit := newFact.Copy()
-			for i, Term := range newLit.Terms {
-				newLit.Terms[i], _ = assign(Term, assignment)
-			}
-			p.InsertTuple(newLit)
-		}
-		p.GroundFacts[newFact.Name] = true
-		return // remove rule
-	}
-	return p.RuleExpansion(check, transform)
+	return
 }
 
-func (p *Program) InsertTuple(lit Literal) {
-	groundTerms := evaluateExpressionTuples(lit.Terms)
+func (p *Program) InsertTuple(lit Literal) error {
+	groundTerms, err := evaluateExpressionTuples(lit.Terms)
+	if err != nil {
+		return err
+	}
 	if !p.PredicateFact[lit.String()] {
 		p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], groundTerms)
 	}
 	p.PredicateFact[lit.String()] = true
+	return nil
 }
 
 func (p *Program) CollectGroundFacts() (changed bool, err error) {
 	check := func(r Rule) bool {
 		return len(r.Literals) == 1 &&
-			!r.Literals[0].Fact &&
+			r.Literals[0].Fact &&
 			len(r.Iterators) == 0 &&
 			len(r.Constraints) == 0 &&
+			len(r.Generators) == 0 &&
 			r.FreeVars().IsEmpty()
 	}
 	transform := func(rule Rule) (empty []Rule, err error) {
 		lit := rule.Literals[0]
-		p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], evaluateExpressionTuples(lit.Terms))
-		p.GroundFacts[lit.Name] = true
+		res, err := evaluateExpressionTuples(lit.Terms)
+		if err != nil {
+			return empty, RuleError{
+				rule,
+				"Collect Ground Facts Problem",
+				err,
+			}
+		}
+		p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], res)
+		p.CollectedFacts[lit.Name] = true
 		return
 	}
 	return p.RuleExpansion(check, transform)
@@ -217,14 +244,14 @@ func (p *Program) CollectGroundFacts() (changed bool, err error) {
 
 // Checks if constraint is of the form X==<math>, or <math>==X
 // It also does very simple equation solving for equations with one variable, like X-3+1==<math> .
-func (constraint Constraint) IsInstantiation() (is bool, variable string, value int) {
+func (constraint Constraint) IsInstantiation() (is bool, variable string, value int, err error) {
 	if constraint.Comparison != tokenComparisonEQ {
-		return false, "", 0
+		return false, "", 0, nil
 	}
 
 	freeVars := constraint.FreeVars()
 	if freeVars.Size() != 1 {
-		return false, "", 0
+		return false, "", 0, nil
 	}
 	freeVar := freeVars.Pop()
 	mathExpression := ""
@@ -240,26 +267,29 @@ func (constraint Constraint) IsInstantiation() (is bool, variable string, value 
 	}
 
 	if !strings.HasPrefix(varExpression, freeVar) {
-		return false, "", 0
+		return false, "", 0, nil
 	}
 
 	remainingExpression := strings.TrimPrefix(varExpression, freeVar)
 	asserts(Term(remainingExpression).FreeVars().IsEmpty(), "Must be math expression: "+remainingExpression)
 	if remainingExpression == "" {
-		return true, freeVar, evaluateTermExpression(mathExpression)
+		val, err := evaluateTermExpression(mathExpression)
+		return true, freeVar, val, err
 	}
 
 	if strings.HasPrefix(remainingExpression, "+") {
 		tmp := strings.TrimPrefix(remainingExpression, "+")
-		return true, freeVar, evaluateTermExpression(mathExpression + "-(" + tmp + ")")
+		val, err := evaluateTermExpression(mathExpression + "-(" + tmp + ")")
+		return true, freeVar, val, err
 	}
 
 	if strings.HasPrefix(remainingExpression, "-") {
 		tmp := strings.TrimPrefix(remainingExpression, "-")
-		return true, freeVar, evaluateTermExpression(mathExpression + "+(" + tmp + ")")
+		val, err := evaluateTermExpression(mathExpression + "+(" + tmp + ")")
+		return true, freeVar, val, err
 	}
 
-	return false, "", 0
+	return false, "", 0, nil
 }
 
 // Remove Rules with false constraint
@@ -304,7 +334,7 @@ func (p *Program) TransformConstraintsToInstantiation() (bool, error) {
 
 	check := func(r Rule) bool {
 		for _, cons := range r.Constraints {
-			is, _, _ := cons.IsInstantiation()
+			is, _, _, _ := cons.IsInstantiation()
 			if is {
 				return true
 			}
@@ -312,14 +342,18 @@ func (p *Program) TransformConstraintsToInstantiation() (bool, error) {
 		return false
 	}
 
-	transform := func(rule Rule) (empty []Rule, err error) {
+	transform := func(rule Rule) (Rule, error) {
 		var i int
 		var cons Constraint
 		var is bool
 		var variable string
 		var value int
+		var err error
 		for i, cons = range rule.Constraints {
-			is, variable, value = cons.IsInstantiation()
+			is, variable, value, err = cons.IsInstantiation()
+			if err != nil {
+				return rule, RuleError{rule, "Transform Constraint Problem", err}
+			}
 			if is {
 				break
 			}
@@ -329,16 +363,16 @@ func (p *Program) TransformConstraintsToInstantiation() (bool, error) {
 			assignment := map[string]int{variable: value}
 			rule.Simplify(assignment)
 		}
-		return []Rule{rule}, err
+		return rule, err
 	}
-	return p.RuleExpansion(check, transform)
+	return p.RuleTransformation(check, transform)
 }
 
 func (p *Program) ReplaceConstantsAndMathFunctions() {
 
-	transform := func(term Term) (Term, bool) {
+	transform := func(term Term) (Term, bool, error) {
 		out := strings.ReplaceAll(string(term), "#mod", "%")
-		return Term(out), out != string(term)
+		return Term(out), out != string(term), nil
 	}
 
 	for i := range p.Rules {
@@ -347,44 +381,34 @@ func (p *Program) ReplaceConstantsAndMathFunctions() {
 	}
 }
 
-func (r *Rule) Simplify(assignment map[string]int) bool {
+func (rule *Rule) Simplify(assignment map[string]int) (bool,error) {
 
-	transform := func(term Term) (Term, bool) {
+	transform := func(term Term) (Term, bool, error) {
 		return assign(term, assignment)
 	}
 
-	return r.TermTranslation(transform)
+	return rule.TermTranslation(transform)
 }
 
-func (p *Program) ExpandConditionals() error {
-
-	for i, r := range p.Rules {
-		for _, iterator := range r.Iterators {
-			assignments, err := p.generateAssignments(iterator.Literals, iterator.Constraints)
-			if err != nil {
-				fmt.Errorf("Expand Conditionals: %w\n in Rule %v:  %v ", err, i, r)
-			}
-			for _, assignment := range assignments {
-				p.Rules[i].Literals = append(p.Rules[i].Literals,
-					iterator.Head.assign(assignment))
-			}
-		}
-		p.Rules[i].Iterators = []Iterator{}
-	}
-	return nil
-}
-
-func (p *Program) CollectGroundTuples() {
+func (p *Program) CollectGroundTuples() error {
 
 	for _, r := range p.Rules {
 		for _, literal := range r.Literals {
 			if literal.IsGround() {
-				p.InsertTuple(literal)
+				err := p.InsertTuple(literal)
+				if err != nil {
+					return LiteralError{
+						L:       literal,
+						R:       r,
+						Message: fmt.Sprintf("%v", err),
+					}
+				}
 				p.PredicateFact[literal.String()] = true
 				p.PredicateFact[literal.createNegatedLiteral().String()] = true
 			}
 		}
 	}
+	return nil
 }
 
 // At this point no clauses should exist that contains a fact
@@ -490,71 +514,6 @@ func (term Term) FreeVars() *strset.Set {
 	return set
 }
 
-func (p *Program) generateAssignments(literals []Literal, constraints []Constraint) ([]map[string]int, error) {
-
-	// Assumption:
-	// 1) freevars of literals are all disjunct
-	// 2) literal is GroundFact.
-	// 3) literal is of form <name>[A,B..].
-	{
-		set := strset.New()
-		for _, lit := range literals {
-			if !strset.Intersection(lit.FreeVars(), set).IsEmpty() {
-				fmt.Println("freevars of literals are all disjunct", set.String(), lit.FreeVars().String())
-				for _,lit := range literals {
-					fmt.Println(lit.String())
-				}
-				for _,cons := range constraints{
-					fmt.Println(cons.String())
-				}
-				panic("stuff")
-			}
-			set.Merge(lit.FreeVars())
-		}
-	}
-
-	allPossibleAssignments := make([]map[string]int, 1, 32)
-	allPossibleAssignments[0] = make(map[string]int)
-
-	for _, literal := range literals {
-		newAssignments := make([]map[string]int, 0, len(allPossibleAssignments))
-		termsDomain := p.findFilteredTuples(literal)
-		for _, tuple := range termsDomain {
-			assert(len(tuple) == len(literal.Terms))
-			for _, assignment := range allPossibleAssignments {
-				newAssignment := make(map[string]int)
-				for key, value := range assignment {
-					newAssignment[key] = value
-				}
-				for i, value := range tuple {
-					newAssignment[string(literal.Terms[i])] = value
-				}
-				newAssignments = append(newAssignments, newAssignment)
-
-			}
-		}
-		allPossibleAssignments = newAssignments
-	}
-	assignments := make([]map[string]int, 0, 32)
-
-	for _, assignment := range allPossibleAssignments {
-		allConstraintsTrue := true
-		for _, cons := range constraints {
-			Debug(2, "assignment:", assignment)
-			Debug(2, "BoolExpression before assignment:", cons.String())
-			cons.LeftTerm, _ = assign(cons.LeftTerm, assignment)
-			cons.RightTerm, _ = assign(cons.RightTerm, assignment)
-			isGround, result := cons.GroundBoolExpression()
-			asserts(isGround, "Must be bool expression ", cons.String())
-			allConstraintsTrue = allConstraintsTrue && result
-		}
-		if allConstraintsTrue {
-			assignments = append(assignments, assignment)
-		}
-	}
-	return assignments, nil
-}
-
 func (constraint *Constraint) GroundBoolExpression() (isGround bool, result bool) {
 	isGround = groundMathExpression(string(constraint.LeftTerm)) && groundMathExpression(string(constraint.RightTerm))
 	if !isGround {
@@ -565,16 +524,16 @@ func (constraint *Constraint) GroundBoolExpression() (isGround bool, result bool
 }
 
 // Makes a deep copy and creates a new Literal
-func (literal Literal) assign(assignment map[string]int) (newLiteral Literal) {
+func (literal Literal) assign(assignment map[string]int) (newLiteral Literal, err error) {
 	newLiteral = literal.Copy()
 	for i, term := range literal.Terms {
-		newLiteral.Terms[i], _ = assign(term, assignment)
+		newLiteral.Terms[i], _, err = assign(term, assignment)
 	}
-	return newLiteral
+	return newLiteral, nil
 }
 
 //returns true if term has been changed
-func assign(term Term, assignment map[string]int) (Term, bool) {
+func assign(term Term, assignment map[string]int) (Term, bool, error) {
 	output := term.String()
 	for Const, Val := range assignment {
 		// TODO currenlty variables need to be prefix free, i.e. X, Xa, will make problems :\
@@ -582,9 +541,13 @@ func assign(term Term, assignment map[string]int) (Term, bool) {
 		output = strings.ReplaceAll(output, Const, strconv.Itoa(Val))
 	}
 	if groundMathExpression(output) {
-		output = strconv.Itoa(evaluateTermExpression(output))
+		val, err := evaluateTermExpression(output)
+		if err != nil {
+			return Term(output), false, err
+		}
+		output = strconv.Itoa(val)
 	}
-	return Term(output), term.String() != output
+	return Term(output), term.String() != output, nil
 }
 
 func number(s string) bool {
@@ -608,19 +571,27 @@ func evaluateBoolExpression(termComparison string) bool {
 }
 
 // Evaluates a ground math expression, needs to path mathExpression
-func evaluateTermExpression(termExpression string) int {
+func evaluateTermExpression(termExpression string) (int, error) {
 	//	termExpression = strings.ReplaceAll(termExpression, "#mod", "%")
 	expression, err := govaluate.NewEvaluableExpression(termExpression)
-	assertx(err, termExpression)
+	if err != nil {
+		return 0, fmt.Errorf("problem in term expression %v: %w", termExpression, err)
+	}
 	result, err := expression.Evaluate(nil)
-	assertx(err, termExpression)
-	return int(result.(float64))
+	if err != nil {
+		return 0, fmt.Errorf("problem in term expression %v: %w", termExpression, err)
+	}
+	return int(result.(float64)), nil
 }
 
 // Evaluates a ground math expression, needs to pass mathExpression
-func evaluateExpressionTuples(terms []Term) (result []int) {
+func evaluateExpressionTuples(terms []Term) (result []int, err error) {
 	for _, t := range terms {
-		result = append(result, evaluateTermExpression(string(t)))
+		val, err := evaluateTermExpression(string(t))
+		if err != nil {
+			return result, err
+		}
+		result = append(result, val)
 	}
 	return
 }

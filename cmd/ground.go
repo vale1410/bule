@@ -91,37 +91,39 @@ bule ground <program.bul> [options].
 			}
 		}
 
-		stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", "" +
-			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
-		p.ConstraintSimplification()
+		{
+			stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", ""+
+				"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
+			p.ConstraintSimplification()
 
-		stageInfo(&p,"ExpandGroundRanges","p[1..2]. and also X==1..2, but not Y==A..B.")
-		runFixpoint(p.ExpandGroundRanges)
+			stageInfo(&p, "ExpandGroundRanges", "p[1..2]. and also X==1..2, but not Y==A..B.")
+			p.ExpandGroundRanges()
 
-		stageInfo(&p, "CollectGroundFacts", "p[1,2]. r[1]. but not p[1],p[2]. and also not p[X,X], or p[1,X].")
-		p.CollectGroundFacts()
+			stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", "")
+			p.ConstraintSimplification()
 
-		stageInfo(&p, "FindNewFacts()","Find clauses where all literals but 1 are facts. Resolve, add to tuples of fact and remove.")
-		runFixpoint(p.FindNewFacts)
+			stageInfo(&p, "CollectGroundFacts", "p[1,2]. r[1]. but not p[1],p[2]. and also not p[X,X], or p[1,X].")
+			p.CollectGroundFacts()
 
-		debug(2, "Now there should be no clauses entirely of facts!")
+			//		stageInfo(&p, "FindNewFacts()","Find clauses where all literals but 1 are facts. Resolve, add to tuples of fact and remove.")
+			//		p.FindNewFacts()
 
-		p.PrintDebug(2)
-		stageInfo(&p, "InstantiateAndRemoveFactFromGenerator"," If a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
-		runFixpoint(p.InstantiateAndRemoveFactFromGenerator)
+			debug(2, "Now there should be no clauses entirely of facts!")
 
-		debug(2, "Program is now fact free in all clauses!")
+			stageInfo(&p, "InstantiateAndRemoveFactFromGenerator", " If a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
+			p.InstantiateAndRemoveFactFromGenerator()
 
-		stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", "" +
-			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
-		p.ConstraintSimplification()
+			debug(2, "Program is now fact free in all clauses!")
 
+			stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", "")
+			p.ConstraintSimplification()
 
-		stageInfo(&p, "ExpandConditionals","")
-		p.ExpandConditionals()
+			stageInfo(&p, "ExpandIterators", "")
+			p.InstantiateAndRemoveFactFromIterator()
 
-		stageInfo(&p, "RemoveClausesWithFacts","")
-		p.RemoveClausesWithFacts()
+			stageInfo(&p, "RemoveClausesWithFacts", "")
+			p.RemoveClausesWithFacts()
+		}
 
 		{
 			err := p.CheckNoRemainingFacts()
@@ -132,25 +134,31 @@ bule ground <program.bul> [options].
 		}
 
 		stageInfo(&p,"CollectGroundTuples","")
-		p.CollectGroundTuples()
+		err := p.CollectGroundTuples()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 
-		stageInfo(&p,"Ground non-Ground Lits","Ground from all tuples the non-ground literals, until fixpoint.")
-		ok := true
-		i := 0
-		for ok {
-			i++
-			var err error
-			ok, err = p.InstantiateNonGroundLiterals()
-			if err != nil {
-				fmt.Printf("Error occurred in grounding when instantiating non-ground literals. Iteration %v.\n %v\n", i, err)
-				os.Exit(1)
+		{
+			stageInfo(&p, "Ground non-Ground Lits", "Ground from all tuples the non-ground literals, until fixpoint.")
+			ok := true
+			i := 0
+			for ok {
+				i++
+				var err error
+				ok, err = p.InstantiateNonGroundLiterals()
+				if err != nil {
+					fmt.Printf("Error occurred in grounding when instantiating non-ground literals. Iteration %v.\n %v\n", i, err)
+					os.Exit(1)
+				}
+				stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", ""+
+					"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
+				p.ConstraintSimplification()
+
+				stageInfo(&p, "RemoveClausesWithTuplesThatDontExist.", "")
+				p.RemoveClausesWithTuplesThatDontExist()
 			}
-			stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", "" +
-				"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
-			p.ConstraintSimplification()
-
-			stageInfo(&p,"RemoveClausesWithTuplesThatDontExist.","")
-			p.RemoveClausesWithTuplesThatDontExist()
 		}
 
 		if quantificationFlag {

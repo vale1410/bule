@@ -10,14 +10,14 @@ import (
 	"unicode/utf8"
 )
 
-func ParseProgram(fileNames []string) Program {
+func ParseProgram(fileNames []string) (Program, error) {
 	Debug(2, "opening files:", fileNames)
 	var lines []string
 	for _, fileName := range fileNames {
 		var scanner *bufio.Scanner
 		file, err := os.Open(fileName)
 		if err != nil {
-			return Program{}
+			return Program{}, err
 		}
 		scanner = bufio.NewScanner(file)
 		for scanner.Scan() {
@@ -28,10 +28,10 @@ func ParseProgram(fileNames []string) Program {
 	return ParseProgramFromStrings(lines)
 }
 
-func ParseProgramFromStrings(lines []string) (p Program) {
+func ParseProgramFromStrings(lines []string) (p Program, err error) {
 
 	p.PredicateToTuples = make(map[Predicate][][]int)
-	p.GroundFacts = make(map[Predicate]bool)
+	p.CollectedFacts = make(map[Predicate]bool)
 	p.Constants = make(map[string]int)
 	p.PredicateFact = map[string]bool{}
 
@@ -54,9 +54,16 @@ func ParseProgramFromStrings(lines []string) (p Program) {
 			for _, def := range defs {
 				def := strings.Split(def, "=")
 				asserts(len(def) == 2, s)
-				term, _ := assign(Term(def[1]), p.Constants)
+				term, _, err := assign(Term(def[1]), p.Constants)
+				if err != nil {
+					return p, err
+				}
 				asserts(groundMathExpression(term.String()), "is not ground:"+term.String())
-				p.Constants[def[0]] = evaluateTermExpression(term.String())
+				val, err := evaluateTermExpression(term.String())
+				if err != nil {
+					return p, err
+				}
+				p.Constants[def[0]] = val
 			}
 			continue
 		}
@@ -68,14 +75,13 @@ func ParseProgramFromStrings(lines []string) (p Program) {
 
 		rule, err := parseRule(acc)
 		if err != nil {
-			fmt.Printf("Parsing Error in Row %v: %v\n", row, err)
-			os.Exit(1)
+			return p, fmt.Errorf("Parsing Error in Row %v: %w\n", row, err)
 		}
 		rule.LineNumber = row
 		p.Rules = append(p.Rules, rule)
 		acc = ""
 	}
-	return p
+	return p, nil
 }
 
 func lexRule(text string) (ts Tokens) {
@@ -129,7 +135,7 @@ func (rule *Rule) parseGeneratorAndConstraints(tokens Tokens) {
 		if checkIfLiteral(iterator[0].tokens) {
 			lit := parseLiteral(iterator[0].tokens)
 			//rule.Literals = append(rule.Literals, lit.createNegatedLiteral())
-			rule.Generator = append(rule.Generator, lit)
+			rule.Generators = append(rule.Generators, lit)
 		} else {
 			rule.Constraints = append(rule.Constraints, parseConstraint(iterator[0].tokens))
 		}
