@@ -54,7 +54,11 @@ bule ground <program.bul> [options].
 
 		bule.DebugLevel = debugFlag
 
-		p := bule.ParseProgram(args)
+		p, err := bule.ParseProgram(args)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 
 		for key, val := range constStringMap {
 			p.Constants[key] = val

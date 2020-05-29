@@ -178,7 +178,7 @@ func (p *Program) InstantiateAndRemoveFactFromGenerator() (changed bool, err err
 				break
 			}
 		}
-		rule.Generators= append(rule.Generators[:i], rule.Generators[i+1:]...)
+		rule.Generators = append(rule.Generators[:i], rule.Generators[i+1:]...)
 
 		for _, tuple := range p.findFilteredTuples(fact) {
 			newRule := rule.Copy()
@@ -381,7 +381,7 @@ func (p *Program) ReplaceConstantsAndMathFunctions() {
 	}
 }
 
-func (rule *Rule) Simplify(assignment map[string]int) (bool,error) {
+func (rule *Rule) Simplify(assignment map[string]int) (bool, error) {
 
 	transform := func(term Term) (Term, bool, error) {
 		return assign(term, assignment)
