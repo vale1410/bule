@@ -23,11 +23,11 @@ func (p *Program) CheckUnboundVariables() error {
 			}
 		}
 
-		// collect free vars in head of generators,
+		// collect free vars in head of iterators,
 		// they can occur alone but due to unrolling the generator
 		// they do occur multiple times. Example. q(X,D):d[D]. % X occurs alone but is rolled out
 		inHead := strset.New()
-		for _, g := range rule.Generators {
+		for _, g := range rule.Iterators {
 			for i := range g.Head.Terms {
 				inHead = strset.Union(inHead, g.Head.Terms[i].FreeVars())
 			}
@@ -116,9 +116,6 @@ func (r *Rule) TermTranslation(transform func(Term) (Term, bool)) (changed bool)
 }
 
 func (r *Rule) AllTerms() (terms []*Term) {
-	for i := range r.Head.Terms {
-		terms = append(terms, &r.Head.Terms[i])
-	}
 	for _, l := range r.Literals {
 		for i := range l.Terms {
 			terms = append(terms, &l.Terms[i])
@@ -128,7 +125,7 @@ func (r *Rule) AllTerms() (terms []*Term) {
 		terms = append(terms, &r.Constraints[i].LeftTerm)
 		terms = append(terms, &r.Constraints[i].RightTerm)
 	}
-	for _, g := range r.Generators {
+	for _, g := range r.Iterators {
 		for i := range g.Head.Terms {
 			terms = append(terms, &g.Head.Terms[i])
 		}

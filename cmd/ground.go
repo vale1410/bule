@@ -60,7 +60,7 @@ bule ground <program.bul> [options].
 			p.Constants[key] = val
 		}
 
-		debug(1, "Input")
+		debug(1, "Input:")
 		p.PrintDebug(1)
 
 		{
@@ -72,18 +72,18 @@ bule ground <program.bul> [options].
 		}
 
 		{
-			err := p.CheckFactsInGenerators()
+			err := p.CheckFactsInIterators()
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
 		}
 
-		debug(2, "Replace Constants (#const a=3. and Function Symbols (#mod)")
+		stageInfo(&p, "Replace Constants and Math","(#const a=3. and Function Symbols (#mod)")
 		p.ReplaceConstantsAndMathFunctions()
 
 		{
-			debug(2, "Check for unbound variables that are not marked as such.")
+			stageInfo(&p, "CheckUnboundVariables","Check for unbound variables that are not marked as such.")
 			err := p.CheckUnboundVariables()
 			if err != nil {
 				fmt.Println(err)
@@ -91,37 +91,36 @@ bule ground <program.bul> [options].
 			}
 		}
 
+		stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", "" +
+			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
 		p.ConstraintSimplification()
 
-		debug(2, "ExpandGroundRanges:\n p[1..2]. and also X==1..2, but not Y==A..B.")
+		stageInfo(&p,"ExpandGroundRanges","p[1..2]. and also X==1..2, but not Y==A..B.")
 		runFixpoint(p.ExpandGroundRanges)
 
-		debug(2, "CollectGroundFacts:\n p[1,2]. r[1]. but not p[1],p[2]. and also not p[X,X], or p[1,X].")
+		stageInfo(&p, "CollectGroundFacts", "p[1,2]. r[1]. but not p[1],p[2]. and also not p[X,X], or p[1,X].")
 		p.CollectGroundFacts()
 
-		debug(2, "FindNewFacts():\nFind clauses where all literals but 1 are facts. Resolve, add to tuples of fact and remove.")
+		stageInfo(&p, "FindNewFacts()","Find clauses where all literals but 1 are facts. Resolve, add to tuples of fact and remove.")
 		runFixpoint(p.FindNewFacts)
 
 		debug(2, "Now there should be no clauses entirely of facts!")
 
 		p.PrintDebug(2)
-		debug(2, "InstantiateAndRemoveFacts: If a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
-		runFixpoint(p.InstantiateAndRemoveFacts)
+		stageInfo(&p, "InstantiateAndRemoveFactFromGenerator"," If a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
+		runFixpoint(p.InstantiateAndRemoveFactFromGenerator)
 
 		debug(2, "Program is now fact free in all clauses!")
-		p.PrintDebug(2)
 
+		stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", "" +
+			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
 		p.ConstraintSimplification()
 
-		p.PrintDebug(2)
 
-		debug(2, "Expand Conditionals")
+		stageInfo(&p, "ExpandConditionals","")
 		p.ExpandConditionals()
 
-		p.PrintDebug(2)
-
-		debug(2, "All Rules should be clauses with search predicates. No more ground facts.")
-
+		stageInfo(&p, "RemoveClausesWithFacts","")
 		p.RemoveClausesWithFacts()
 
 		{
@@ -132,13 +131,10 @@ bule ground <program.bul> [options].
 			}
 		}
 
-		debug(2, "Collect all ground literals in all clauses")
+		stageInfo(&p,"CollectGroundTuples","")
 		p.CollectGroundTuples()
-		//		p.PrintTuples()
 
-		p.PrintDebug(2)
-
-		debug(2, "Ground from all tuples the non-ground literals, until fixpoint.")
+		stageInfo(&p,"Ground non-Ground Lits","Ground from all tuples the non-ground literals, until fixpoint.")
 		ok := true
 		i := 0
 		for ok {
@@ -149,18 +145,18 @@ bule ground <program.bul> [options].
 				fmt.Printf("Error occurred in grounding when instantiating non-ground literals. Iteration %v.\n %v\n", i, err)
 				os.Exit(1)
 			}
-			p.PrintDebug(2)
+			stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", "" +
+				"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
 			p.ConstraintSimplification()
-			p.PrintDebug(2)
-			debug(2, "RemoveClausesWithTuplesThatDontExist.")
+
+			stageInfo(&p,"RemoveClausesWithTuplesThatDontExist.","")
 			p.RemoveClausesWithTuplesThatDontExist()
-			p.PrintDebug(2)
 		}
 
 		if quantificationFlag {
-			debug(2, "Extract Quantors ")
+			stageInfo(&p,"Extract Quantors","")
 			p.ExtractQuantors()
-			debug(2, "Merge Quantification Levels")
+			stageInfo(&p,"Merge Quantification Levels","")
 			p.MergeConsecutiveQuantificationLevels()
 			debug(2, "Merged alternations:", p.Alternation)
 		}
@@ -193,9 +189,17 @@ func runFixpoint(f func() (bool, error)) {
 	}
 }
 
+func stageInfo(p *bule.Program, stage string, info string) {
+	p.PrintDebug(2)
+	debug(2, "===================================================")
+	debug(2, stage)
+	debug(2, "===================================================")
+	debug(3, info)
+	debug(3, "---------------------------------------------------\n\n")
+}
+
 func init() {
 	rootCmd.AddCommand(groundCmd)
-	//	groundCmd.PersistentFlags().StringVarP(&progFlag, "file", "f", "", "Path to File")
 	groundCmd.PersistentFlags().BoolVarP(&quantificationFlag, "quant", "q", true, "Print Quantification")
 	groundCmd.PersistentFlags().BoolVarP(&withFactsFlag, "facts", "f", false, "Output all facts.")
 	groundCmd.PersistentFlags().BoolVarP(&textualFlag, "text", "t", false, "true: print grounded textual bule format. false: print dimacs format for QBF and SAT solvers.")

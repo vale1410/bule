@@ -2,31 +2,32 @@ package lib
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
 type Program struct {
-	Rules                []Rule
-	Constants            map[string]int
-	PredicateToTuples    map[Predicate][][]int
-	PredicateToArity     map[Predicate]int
-	PredicateGroundTuple map[string]bool
-	GroundFacts          map[Predicate]bool
-	Search               map[Predicate]bool
-	Alternation          [][]Literal
-	existQ               map[int][]Literal
-	forallQ              map[int][]Literal
+	Rules             []Rule
+	Constants         map[string]int
+	PredicateToTuples map[Predicate][][]int
+	PredicateToArity  map[Predicate]int
+	PredicateFact     map[string]bool
+	GroundFacts       map[Predicate]bool
+	Search            map[Predicate]bool
+	Alternation       [][]Literal
+	existQ            map[int][]Literal
+	forallQ           map[int][]Literal
 }
 
 type Rule struct {
 	initialTokens  []Token
-	Head           Literal
-	Literals       []Literal
-	Generators     []Generator
+	LineNumber     int
+	Parent         *Rule
+	Generator      []Literal
 	Constraints    []Constraint
-	GeneratingHead bool     // if final token is tokenQuestionMark then it generates, otherwise tokenDot
-	Typ            ruleType // Can be Implication or Equivalence or RuleComma(normal rule)
-	NextFreshVar   int
+	Literals       []Literal
+	Iterators      []Iterator
+	IsQuestionMark bool // if final token is tokenQuestionMark then it generates, otherwise tokenDot
 }
 
 // is a math expression that evaluates to true or false
@@ -41,25 +42,17 @@ type Constraint struct {
 
 type Clause []Literal
 
-type ruleType int
-
-const (
-	ruleTypeDisjunction ruleType = iota
-	ruleTypeImplication
-	ruleTypeEquivalence
-)
-
-type Generator struct {
+type Iterator struct {
 	Constraints []Constraint
 	Literals    []Literal
 	Head        Literal
 }
 
 type Literal struct {
-	Neg    bool
-	Search bool // if true then search variable with parenthesis () otherwise a fact with brackets []
-	Name   Predicate
-	Terms  []Term
+	Neg   bool
+	Fact  bool // if true then search variable with parenthesis () otherwise a fact with brackets []
+	Name  Predicate
+	Terms []Term
 }
 
 func (literal *Literal) IsGround() bool {
@@ -70,20 +63,12 @@ type Term string
 
 type Predicate string
 
-func (r *Rule) hasHead() bool {
-	return r.Head.Name != ""
-}
-
-func (r *Rule) IsDisjunction() bool {
-	return len(r.Generators) == 0 && !r.hasHead() && r.Typ == ruleTypeDisjunction
-}
-
 func (r *Rule) IsGround() bool {
 	return r.FreeVars().IsEmpty()
 }
 
 func (r *Rule) IsFact() bool {
-	return !r.hasHead() && r.Typ == ruleTypeDisjunction && len(r.Literals) == 1
+	return len(r.Literals) == 1 && r.Literals[0].Fact
 }
 
 func IsMarkedAsFree(v string) bool {
@@ -105,7 +90,7 @@ func (literal Literal) Copy() Literal {
 }
 
 // Deep Copy
-func (gen Generator) Copy() (newGen Generator) {
+func (gen Iterator) Copy() (newGen Iterator) {
 	newGen = gen
 	newGen.Head = gen.Head.Copy()
 	newGen.Constraints = []Constraint{}
@@ -122,20 +107,17 @@ func (gen Generator) Copy() (newGen Generator) {
 // Deep Copy
 func (rule Rule) Copy() (newRule Rule) {
 	newRule = rule
-	if rule.hasHead() {
-		newRule.Head = rule.Head.Copy()
-	}
 	newRule.Constraints = []Constraint{}
 	newRule.Literals = []Literal{}
-	newRule.Generators = []Generator{}
+	newRule.Iterators = []Iterator{}
 	for _, c := range rule.Constraints {
 		newRule.Constraints = append(newRule.Constraints, c.Copy())
 	}
 	for _, l := range rule.Literals {
 		newRule.Literals = append(newRule.Literals, l.Copy())
 	}
-	for _, g := range rule.Generators {
-		newRule.Generators = append(newRule.Generators, g.Copy())
+	for _, g := range rule.Iterators {
+		newRule.Iterators = append(newRule.Iterators, g.Copy())
 	}
 	return
 }
@@ -152,7 +134,7 @@ func (term Term) String() string {
 	return string(term)
 }
 
-func (g Generator) String() string {
+func (g Iterator) String() string {
 	sb := strings.Builder{}
 	sb.WriteString(g.Head.String())
 	sb.WriteString(":")
@@ -171,7 +153,7 @@ func (literal Literal) String() string {
 	var s string
 	var opening string
 	var closing string
-	if literal.Search {
+	if literal.Fact {
 		opening = "("
 		closing = ")"
 	} else {
@@ -192,16 +174,30 @@ func (literal Literal) String() string {
 	return s + closing
 }
 
+func (r *Rule) Debug() string {
+	return r.String() + "  %% #" + strconv.Itoa(r.LineNumber)
+}
+
 func (r *Rule) String() string {
 
 	sb := strings.Builder{}
+
+	for _, l := range r.Generator {
+		sb.WriteString(l.String())
+		sb.WriteString(", ")
+	}
 
 	for _, c := range r.Constraints {
 		sb.WriteString(c.String())
 		sb.WriteString(", ")
 	}
+	tmp := strings.TrimSuffix(sb.String(), ", ")
+	sb.Reset()
+	sb.WriteString(tmp)
 
-	for _, g := range r.Generators {
+	sb.WriteString(" => ")
+
+	for _, g := range r.Iterators {
 		sb.WriteString(g.String())
 		sb.WriteString(", ")
 	}
@@ -210,14 +206,10 @@ func (r *Rule) String() string {
 		sb.WriteString(l.String())
 		sb.WriteString(", ")
 	}
-	tmp := strings.TrimSuffix(sb.String(), ", ")
+	tmp = strings.TrimSuffix(sb.String(), ", ")
 	sb.Reset()
 	sb.WriteString(tmp)
-	if r.hasHead() {
-		sb.WriteString(RuleTypeString(r.Typ))
-		sb.WriteString(r.Head.String())
-	}
-	if r.GeneratingHead {
+	if r.IsQuestionMark {
 		sb.WriteString("?")
 	} else {
 		sb.WriteString(".")
@@ -228,23 +220,11 @@ func (r *Rule) String() string {
 func (p *Program) Debug() {
 	fmt.Println("constants:", p.Constants)
 	fmt.Println("groundFacts", p.GroundFacts)
+	fmt.Println("PredicatFact", p.PredicateFact)
 	fmt.Println("PredicatsToTuples", p.PredicateToTuples)
-	for i, r := range p.Rules {
-		fmt.Println("\nrule", i)
-		r.Debug()
+	for _, r := range p.Rules {
+		fmt.Println(r.Debug())
 	}
-}
-
-func (r *Rule) Debug() {
-	fmt.Println(r.initialTokens)
-	if r.hasHead() {
-		fmt.Println("head", r.Head)
-	}
-	fmt.Println("literals", r.Literals)
-	fmt.Println("generator", r.Generators)
-	fmt.Println("constraints", r.Constraints)
-	fmt.Println("logical connection", r.Typ)
-	fmt.Println("open Head", r.GeneratingHead)
 }
 
 func (p *Program) PrintDebug(level int) {
@@ -287,7 +267,7 @@ func (err LiteralError) Error() string {
 func (p *Program) CheckNoRemainingFacts() error {
 	for _, r := range p.Rules {
 		for _, l := range r.Literals {
-			if !l.Search {
+			if !l.Fact {
 				return LiteralError{
 					l,
 					r,
@@ -300,15 +280,15 @@ func (p *Program) CheckNoRemainingFacts() error {
 	return nil
 }
 
-func (p *Program) CheckFactsInGenerators() error {
+func (p *Program) CheckFactsInIterators() error {
 	for _, r := range p.Rules {
-		for _, g := range r.Generators {
+		for _, g := range r.Iterators {
 			for _, l := range g.Literals {
-				if l.Search {
+				if l.Fact {
 					return LiteralError{
 						l,
 						r,
-						fmt.Sprintf("In generator there is a search literal used as a generator but has to be fact!\n"),
+						fmt.Sprintf("In iterator there is a search literal used as a iterator but has to be fact!\n"),
 					}
 				}
 			}
@@ -354,10 +334,10 @@ func (p *Program) CheckSearch() error {
 }
 
 func (p *Program) PrintRules() {
-	for i, r := range p.Rules {
+	for _, r := range p.Rules {
 		fmt.Print(r.String())
 		if DebugLevel > 0 {
-			fmt.Print(" % rule ", i)
+			fmt.Print(" % line: ", r.LineNumber)
 		}
 		fmt.Println()
 	}
@@ -437,7 +417,7 @@ func (p *Program) MergeConsecutiveQuantificationLevels() {
 			}
 		}
 	}
-	if len(acc)>0 {
+	if len(acc) > 0 {
 		p.Alternation = append(p.Alternation, acc)
 	}
 }

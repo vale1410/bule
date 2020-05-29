@@ -11,8 +11,6 @@ import (
 
 func (p *Program) ConstraintSimplification() error {
 
-	debug(2, "Do Fixpoint of TransformConstraintsToInstantiation.")
-	debug(2, "For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
 	i := 0
 	for {
 		i++
@@ -21,7 +19,7 @@ func (p *Program) ConstraintSimplification() error {
 			return fmt.Errorf("Constraint simplification, iteration %v. \n %w", i, err)
 		}
 		if !changed {
-			debug(2, "Remove clauses with contradictions, e.g.  (1==2) or (1!=1),  and remove true constraints, e.g.  (1>2, 1==1).")
+			//Debug(2, "Remove clauses with contradictions, e.g.  (1==2) or (1!=1),  and remove true constraints, e.g.  (1>2, 1==1).")
 			p.CleanRulesFromGroundBoolExpression()
 			break
 		}
@@ -46,32 +44,6 @@ func (p *Program) ExpandGroundRanges() (changed bool, err error) {
 	return p.TermExpansionOnlyLiterals(check, transform)
 }
 
-func (p *Program) RewriteEquivalencesAndImplications() (bool, error) {
-	// Make rules from the head equivalences
-	// Current assumption: head is only one literal, body is a conjunction!
-	check := func(r Rule) bool {
-		return r.hasHead()
-	}
-	transform := func(r Rule) (newRules []Rule, err error) {
-		assert(r.Typ == ruleTypeEquivalence || r.Typ == ruleTypeImplication)
-		newRules = make([]Rule, 0)
-		for i, literal := range r.Literals {
-			if r.Typ == ruleTypeEquivalence {
-				newRule := Rule{}
-				newRule.Typ = ruleTypeDisjunction
-				newRule.Literals = []Literal{literal.Copy(), r.Head.createNegatedLiteral()}
-				newRule.Constraints = r.Constraints
-				newRules = append(newRules, newRule)
-			}
-			r.Literals[i] = literal.createNegatedLiteral()
-			r.Typ = ruleTypeDisjunction
-		}
-		r.Literals = append(r.Literals, r.Head)
-		return append(newRules, r), nil
-	}
-	return p.RuleExpansion(check, transform)
-}
-
 // This resolves facts with clauses.
 func (p *Program) InstantiateNonGroundLiterals() (changed bool, err error) {
 	// Find rule with non-ground literal that is going to be rolled out
@@ -94,7 +66,7 @@ func (p *Program) InstantiateNonGroundLiterals() (changed bool, err error) {
 			}
 		}
 
-		for _, tuple := range p.findFilteredTuples(litNG) { //p.PredicateToTuples[litNG.Name] {
+		for _, tuple := range p.findFilteredTuples(litNG) {
 			newRule := rule.Copy()
 			for j, val := range tuple {
 				newRule.Literals[i].Terms[j] = Term(strconv.Itoa(val))
@@ -112,6 +84,8 @@ func (p *Program) InstantiateNonGroundLiterals() (changed bool, err error) {
 	return p.RuleExpansion(check, transform)
 }
 
+
+// given a literal p(X,4,2,Y), a simple and quick way to find all tuples that fulfil this!
 func (p *Program) findFilteredTuples(literal Literal) [][]int {
 	positions, values := literal.findGroundTerms()
 	filteredTuples := make([][]int, 0, len(p.PredicateToTuples[literal.Name]))
@@ -131,11 +105,11 @@ func (p *Program) findFilteredTuples(literal Literal) [][]int {
 }
 
 // This resolves facts with clauses.
-func (p *Program) InstantiateAndRemoveFacts() (changed bool, err error) {
+func (p *Program) InstantiateAndRemoveFactFromGenerator() (changed bool, err error) {
 	// Find rule with fact
 	check := func(r Rule) bool {
-		for _, lit := range r.Literals {
-			if p.GroundFacts[lit.Name] {
+		for _, lit := range r.Generator {
+			if p.GroundFacts[lit.Name] && lit.Neg == false {
 				return true
 			}
 		}
@@ -147,14 +121,15 @@ func (p *Program) InstantiateAndRemoveFacts() (changed bool, err error) {
 		var fact Literal
 		var i int
 		for i, fact = range rule.Literals {
-			if p.GroundFacts[fact.Name] {
+			if p.GroundFacts[fact.Name] && fact.Neg == false {
 				break
 			}
 		}
-		rule.Literals = append(rule.Literals[:i], rule.Literals[i+1:]...)
+		rule.Literals = append(rule.Generator[:i], rule.Generator[i+1:]...)
 
-		for _, tuple := range p.findFilteredTuples(fact) { //p.PredicateToTuples[fact.Name] {
+		for _, tuple := range p.findFilteredTuples(fact) {
 			newRule := rule.Copy()
+			newRule.Parent = &rule
 			for j, val := range tuple {
 				newConstraint := Constraint{
 					LeftTerm:   fact.Terms[j],
@@ -171,39 +146,36 @@ func (p *Program) InstantiateAndRemoveFacts() (changed bool, err error) {
 }
 
 func (p *Program) FindNewFacts() (changed bool, err error) {
-	// All literals are facts but one!
+	// All literals are facts
 	// No generators
 	check := func(r Rule) bool {
-		if len(r.Generators) != 0 || r.Typ != ruleTypeDisjunction {
+		if len(r.Iterators) != 0 {
 			return false
 		}
-		numberOfNoneFacts := len(r.Literals)
-		if numberOfNoneFacts < 2 {
+		if len(r.Literals) != 1 || !r.Literals[0].Fact {
 			return false
 		}
-		for _, lit := range r.Literals {
-			if p.GroundFacts[lit.Name] && lit.Neg == true {
-				numberOfNoneFacts--
+		for _, lit := range r.Generator {
+			if !p.GroundFacts[lit.Name] {
+				return false
 			}
 		}
-		return numberOfNoneFacts == 1
+		return true
 	}
 
 	transform := func(rule Rule) (empty []Rule, err error) {
 		var facts []Literal
 		var newFact Literal
-		for _, lit := range rule.Literals {
-			if p.GroundFacts[lit.Name] && lit.Neg == true {
+		for _, lit := range rule.Generator {
+			if p.GroundFacts[lit.Name] && lit.Neg == false {
 				facts = append(facts, lit)
 			} else {
 				newFact = lit
 			}
 		}
-		//fmt.Println(facts)
-		//p.PrintFacts()
 		assignments, err := p.generateAssignments(facts, rule.Constraints)
 		if err != nil {
-			return empty, fmt.Errorf("Find New Facts: %w\n in Rule:  %v ", err, rule.String())
+			return empty, fmt.Errorf("Find New Facts: %w\n in Rule:  %v ", err, rule.Debug())
 		}
 		for _, assignment := range assignments {
 			newLit := newFact.Copy()
@@ -220,18 +192,17 @@ func (p *Program) FindNewFacts() (changed bool, err error) {
 
 func (p *Program) InsertTuple(lit Literal) {
 	groundTerms := evaluateExpressionTuples(lit.Terms)
-	if !p.PredicateGroundTuple[lit.String()] {
+	if !p.PredicateFact[lit.String()] {
 		p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], groundTerms)
 	}
-	p.PredicateGroundTuple[lit.String()] = true
+	p.PredicateFact[lit.String()] = true
 }
 
 func (p *Program) CollectGroundFacts() (changed bool, err error) {
 	check := func(r Rule) bool {
-		return r.Typ == ruleTypeDisjunction &&
-			len(r.Literals) == 1 &&
-			!r.Literals[0].Search &&
-			len(r.Generators) == 0 &&
+		return len(r.Literals) == 1 &&
+			!r.Literals[0].Fact &&
+			len(r.Iterators) == 0 &&
 			len(r.Constraints) == 0 &&
 			r.FreeVars().IsEmpty()
 	}
@@ -388,17 +359,17 @@ func (r *Rule) Simplify(assignment map[string]int) bool {
 func (p *Program) ExpandConditionals() error {
 
 	for i, r := range p.Rules {
-		for _, generator := range r.Generators {
-			assignments, err := p.generateAssignments(generator.Literals, generator.Constraints)
+		for _, iterator := range r.Iterators {
+			assignments, err := p.generateAssignments(iterator.Literals, iterator.Constraints)
 			if err != nil {
 				fmt.Errorf("Expand Conditionals: %w\n in Rule %v:  %v ", err, i, r)
 			}
 			for _, assignment := range assignments {
 				p.Rules[i].Literals = append(p.Rules[i].Literals,
-					generator.Head.assign(assignment))
+					iterator.Head.assign(assignment))
 			}
 		}
-		p.Rules[i].Generators = []Generator{}
+		p.Rules[i].Iterators = []Iterator{}
 	}
 	return nil
 }
@@ -409,8 +380,8 @@ func (p *Program) CollectGroundTuples() {
 		for _, literal := range r.Literals {
 			if literal.IsGround() {
 				p.InsertTuple(literal)
-				p.PredicateGroundTuple[literal.String()] = true
-				p.PredicateGroundTuple[literal.createNegatedLiteral().String()] = true
+				p.PredicateFact[literal.String()] = true
+				p.PredicateFact[literal.createNegatedLiteral().String()] = true
 			}
 		}
 	}
@@ -421,7 +392,7 @@ func (p *Program) CollectGroundTuples() {
 func (p *Program) RemoveClausesWithFacts() bool {
 	removeIfTrue := func(rule Rule) bool {
 		for _, lit := range rule.Literals {
-			if !lit.Search && !lit.IsGround() {
+			if !lit.Fact && !lit.IsGround() {
 				return true
 			}
 		}
@@ -434,7 +405,7 @@ func (p *Program) RemoveClausesWithTuplesThatDontExist() bool {
 	removeIfTrue := func(rule Rule) bool {
 		for _, lit := range rule.Literals {
 			if lit.FreeVars().IsEmpty() {
-				if !p.PredicateGroundTuple[lit.String()] {
+				if !p.PredicateFact[lit.String()] {
 					return true
 				}
 			}
@@ -483,7 +454,6 @@ func (p *Program) ExtractQuantors() {
 
 // only works on disjunctions
 func (rule *Rule) FreeVars() *strset.Set {
-	assert(rule.IsDisjunction())
 	set := strset.New()
 	for _, a := range rule.Literals {
 		set.Merge(a.FreeVars())
@@ -529,8 +499,16 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 	{
 		set := strset.New()
 		for _, lit := range literals {
-			asserts(strset.Intersection(lit.FreeVars(), set).IsEmpty(),
-				"freevars of literals are all disjunct", set.String(), lit.FreeVars().String())
+			if !strset.Intersection(lit.FreeVars(), set).IsEmpty() {
+				fmt.Println("freevars of literals are all disjunct", set.String(), lit.FreeVars().String())
+				for _,lit := range literals {
+					fmt.Println(lit.String())
+				}
+				for _,cons := range constraints{
+					fmt.Println(cons.String())
+				}
+				panic("stuff")
+			}
 			set.Merge(lit.FreeVars())
 		}
 	}
@@ -562,8 +540,8 @@ func (p *Program) generateAssignments(literals []Literal, constraints []Constrai
 	for _, assignment := range allPossibleAssignments {
 		allConstraintsTrue := true
 		for _, cons := range constraints {
-			debug(2, "assignment:", assignment)
-			debug(2, "BoolExpression before assignment:", cons.String())
+			Debug(2, "assignment:", assignment)
+			Debug(2, "BoolExpression before assignment:", cons.String())
 			cons.LeftTerm, _ = assign(cons.LeftTerm, assignment)
 			cons.RightTerm, _ = assign(cons.RightTerm, assignment)
 			isGround, result := cons.GroundBoolExpression()
@@ -696,17 +674,6 @@ func ComparisonString(tokenComparison tokenKind) (s string) {
 		s = "<="
 	case tokenComparisonNQ:
 		s = "!="
-	}
-	return
-}
-
-func RuleTypeString(typ ruleType) (s string) {
-	switch typ {
-	case ruleTypeImplication:
-		s = " -> "
-	case ruleTypeEquivalence:
-		s = " <->"
-	case ruleTypeDisjunction:
 	}
 	return
 }

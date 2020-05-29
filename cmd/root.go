@@ -24,6 +24,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/vale1410/bule/lib"
 	"os"
 
 	"github.com/mitchellh/go-homedir"
@@ -102,9 +103,5 @@ func initConfig() {
 }
 
 func debug(level int, s ...interface{}) {
-	if level <= debugFlag {
-		fmt.Print("% ")
-		fmt.Print(s...)
-		fmt.Println()
-	}
+	lib.Debug(level,s...)
 }

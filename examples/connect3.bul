@@ -61,6 +61,12 @@ dom[C,R], dir[Z], C+q-1<=c,R+q-1<=r  => #exist(d) , winD(C,R,Z).
 ~move(_,_,T), time(T).   %% When game is over, no more moves allowed
 ~time(T), move(_,C,T):domC[C].  %% game is running, make at last one move
 
+black[A],  init[A,C,R] => board[C,R].
+white[A],  init[A,C,R] => ~board[C,R].
+dom[C,R], ~init[_,C,R] => ~occupied(C,1,0).
+           init[_,C,R] => occupied[C,R,d].
+ occupied(_C,0,0).
+
 
 black[A], chooseC[C,I,0] => ~move(A,C,T), ~moveL(I,T).
 black[A], chooseC[C,I,1] => ~move(A,C,T), moveL(I,T).
@@ -72,8 +78,6 @@ white[A], domC[C] =>
     ~moveL(I,T) : chooseC[C,I,1], 
     move(A,C,T).        %% White makes a move in column C!
 
- occupied(_C,0,0).
-~occupied(_C,1,0).
 ~occupied(C,R,T-1),   occupied(C,R,T).  %% board positions dont change
 ~occupied(C,R+1,T+1), occupied(C,R,T).  %% no jumps  (implies gravity)
 ~move(_A,C,T), ~occupied(C,R-1,T-1), occupied(C,R,T). 

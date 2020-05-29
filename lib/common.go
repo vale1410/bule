@@ -9,9 +9,12 @@ var (
 	DebugLevel int
 )
 
-func debug(level int, s ...interface{}) {
+
+func Debug(level int, s ...interface{}) {
 	if level <= DebugLevel {
-		fmt.Println(s...)
+		fmt.Print("% ")
+		fmt.Print(s...)
+		fmt.Println()
 	}
 }
 
