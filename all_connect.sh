@@ -23,7 +23,6 @@ output[5]=UNSAT
 
 for i in $(seq 1 5)
 do 
-#    echo case $1 $input[1] should be $output[$i]
     r=$(bule ground examples/connect3.bul --const=$input[$i] | depqbf)
 
     if [[ $r == $output[$i] ]]
@@ -33,8 +32,3 @@ do
         echo $input[$i] ☐  output $r expected $output[$i]
     fi
 done
-
-# for m in $(seq $min_depth[$i] 2 $max_depth[$i])
-# do 
-#     r=$(bule ground examples/connect3.bul --const='q=2,c=2,r=2,d=4' | depqbf)
-# done
