@@ -39,15 +39,14 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "bule",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "Bule provides SAT Programming at its best!",
+	Long: `
+Bule 2.0: A simple CNF Generator
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
+Bule is a tool to create beautiful CNF encodings. Bule is part of the
+SAT Programming paradigm and provides easy access and handling of SAT
+technologies such at SAT Solving, QBF, MaxSAT or Approx. Model Counting.
+`,
 	//	Run: func(cmd *cobra.Command, args []string) { },
 }
 
@@ -72,7 +71,7 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	//	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 }
 
@@ -103,5 +102,5 @@ func initConfig() {
 }
 
 func debug(level int, s ...interface{}) {
-	lib.Debug(level,s...)
+	lib.Debug(level, s...)
 }

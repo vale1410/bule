@@ -186,7 +186,7 @@ func (p *Program) InstantiateAndRemoveFactFromGenerator() (changed bool, err err
 			for j, val := range tuple {
 				newConstraint := Constraint{
 					LeftTerm:   fact.Terms[j],
-					RightTerm:  Term(strconv.Itoa(val)), // TODO Could be simpler ...
+					RightTerm:  Term(strconv.Itoa(val)),
 					Comparison: tokenComparisonEQ,
 				}
 				newRule.Constraints = append(newRule.Constraints, newConstraint)

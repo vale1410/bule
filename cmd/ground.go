@@ -50,7 +50,6 @@ bule ground <program.bul> [options].
 			return
 		}
 
-		unitSlice := args[1:]
 
 		bule.DebugLevel = debugFlag
 
@@ -95,13 +94,20 @@ bule ground <program.bul> [options].
 			}
 		}
 
-		{
+		for changed := true; changed; {
+			var chng bool
+
 			stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", ""+
 				"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
-			p.ConstraintSimplification()
+			err = p.ConstraintSimplification()
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 
 			stageInfo(&p, "ExpandGroundRanges", "p[1..2]. and also X==1..2, but not Y==A..B.")
-			p.ExpandGroundRanges()
+			chng, err = p.ExpandGroundRanges()
+			changed = chng && changed
 
 			stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", "")
 			p.ConstraintSimplification()
@@ -138,7 +144,7 @@ bule ground <program.bul> [options].
 		}
 
 		stageInfo(&p,"CollectGroundTuples","")
-		err := p.CollectGroundTuples()
+		err = p.CollectGroundTuples()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -179,6 +185,7 @@ bule ground <program.bul> [options].
 			p.PrintFacts()
 		}
 
+		unitSlice := args[1:]
 		if unitPropagationFlag || !textualFlag {
 			units := convertArgsToUnits(unitSlice)
 			clauseProgram := translateFromRuleProgram(p, units)

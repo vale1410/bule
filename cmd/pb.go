@@ -30,7 +30,7 @@ import (
 // pbCmd represents the pb command
 var pbCmd = &cobra.Command{
 	Use:   "pb",
-	Short: "A description of your command",
+	Short: "A CNF Eager Pseudo Boolean Constraint Solver",
 	Long: `This is essentially the Pseudo Boolean Solver Bule 1.0.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
