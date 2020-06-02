@@ -50,7 +50,6 @@ bule ground <program.bul> [options].
 			return
 		}
 
-
 		bule.DebugLevel = debugFlag
 
 		p, err := bule.ParseProgram(args)
@@ -63,8 +62,8 @@ bule ground <program.bul> [options].
 			p.Constants[key] = val
 		}
 
-		debug(1, "Input:")
-		p.PrintDebug(1)
+		//		debug(1, "Input:")
+		//		p.PrintDebug(1)
 
 		{
 			err := p.CheckArityOfLiterals()
@@ -82,11 +81,11 @@ bule ground <program.bul> [options].
 			}
 		}
 
-		stageInfo(&p, "Replace Constants and Math","(#const a=3. and Function Symbols (#mod)")
+		stageInfo(&p, "Replace Constants and Math", "(#const a=3. and Function Symbols (#mod)")
 		p.ReplaceConstantsAndMathFunctions()
 
 		{
-			stageInfo(&p, "CheckUnboundVariables","Check for unbound variables that are not marked as such.")
+			stageInfo(&p, "CheckUnboundVariables", "Check for unbound variables that are not marked as such.")
 			err := p.CheckUnboundVariables()
 			if err != nil {
 				fmt.Println(err)
@@ -94,46 +93,56 @@ bule ground <program.bul> [options].
 			}
 		}
 
-		for changed := true; changed; {
-			var chng bool
+		round := 0
 
-			stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", ""+
+		changed := true
+		for changed {
+
+			debug(2, "This is round: ", round)
+			round++
+			changed = false
+
+			stage(&p, &changed,
+				p.ConstraintSimplification,
+				"Do Fixpoint of TransformConstraintsToInstantiation.",
 				"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
-			err = p.ConstraintSimplification()
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
 
-			stageInfo(&p, "ExpandGroundRanges", "p[1..2]. and also X==1..2, but not Y==A..B.")
-			chng, err = p.ExpandGroundRanges()
-			changed = chng && changed
+			stage(&p, &changed,
+				p.ExpandGroundRanges,
+				"ExpandGroundRanges",
+				"p[1..2]. and also X==1..2, but not Y==A..B.")
 
-			stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", "")
-			p.ConstraintSimplification()
+			stage(&p, &changed,
+				p.ConstraintSimplification,
+				"Do Fixpoint of TransformConstraintsToInstantiation.",
+				"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
 
-			stageInfo(&p, "CollectGroundFacts", "p[1,2]. r[1]. but not p[1],p[2]. and also not p[X,X], or p[1,X].")
-			p.CollectGroundFacts()
+			stage(&p, &changed,
+				p.CollectGroundFacts,
+				"CollectGroundFacts",
+				"Example: p[1,2]. r[1]. but not p[1],p[2]. and also not p[X,X], or p[1,X].")
 
-			//		stageInfo(&p, "FindNewFacts()","Find clauses where all literals but 1 are facts. Resolve, add to tuples of fact and remove.")
-			//		p.FindNewFacts()
+			stage(&p, &changed,
+				p.InstantiateAndRemoveFactFromGenerator,
+				"InstantiateAndRemoveFactFromGenerator",
+				"Example: a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
 
-			debug(2, "Now there should be no clauses entirely of facts!")
+			stage(&p, &changed,
+				p.ConstraintSimplification,
+				"Do Fixpoint of TransformConstraintsToInstantiation.",
+				"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.", )
 
-			stageInfo(&p, "InstantiateAndRemoveFactFromGenerator", " If a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
-			p.InstantiateAndRemoveFactFromGenerator()
-
-			debug(2, "Program is now fact free in all clauses!")
-
-			stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", "")
-			p.ConstraintSimplification()
-
-			stageInfo(&p, "ExpandIterators", "")
-			p.InstantiateAndRemoveFactFromIterator()
-
-			stageInfo(&p, "RemoveClausesWithFacts", "")
-			p.RemoveClausesWithFacts()
+			stage(&p, &changed,
+				p.InstantiateAndRemoveFactFromIterator,
+				"ExpandIterators", "")
 		}
+
+		//			{
+		//
+		//				stageInfo(&p, "RemoveClausesWithFacts", "")
+		//				tmp := p.RemoveClausesWithFacts()
+		//				changed = tmp || changed
+		//			}
 
 		{
 			err := p.CheckNoRemainingFacts()
@@ -143,7 +152,7 @@ bule ground <program.bul> [options].
 			}
 		}
 
-		stageInfo(&p,"CollectGroundTuples","")
+		stageInfo(&p, "CollectGroundTuples", "")
 		err = p.CollectGroundTuples()
 		if err != nil {
 			fmt.Println(err)
@@ -172,9 +181,9 @@ bule ground <program.bul> [options].
 		}
 
 		if quantificationFlag {
-			stageInfo(&p,"Extract Quantors","")
+			stageInfo(&p, "Extract Quantors", "")
 			p.ExtractQuantors()
-			stageInfo(&p,"Merge Quantification Levels","")
+			stageInfo(&p, "Merge Quantification Levels", "")
 			p.MergeConsecutiveQuantificationLevels()
 			debug(2, "Merged alternations:", p.Alternation)
 		}
@@ -193,7 +202,20 @@ bule ground <program.bul> [options].
 		} else {
 			p.Print()
 		}
+
 	},
+}
+
+func stage(p *bule.Program, change *bool, f func() (bool, error), stage string, info string) {
+	tmp, err := f()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	if tmp {
+		stageInfo(p, stage, info)
+	}
+	*change = *change || tmp
 }
 
 func runFixpoint(f func() (bool, error)) {

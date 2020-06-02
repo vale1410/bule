@@ -220,15 +220,15 @@ func parseLiteral(tokens Tokens) (literal Literal) {
 			terms = append(terms, Term(acc))
 			acc = ""
 		case tokenAtomParanthesisRight:
-			asserts(literal.Fact, "Should not be a fact atom")
+			asserts(!literal.Fact, "Should not be a fact atom")
 			terms = append(terms, Term(acc))
 		case tokenAtomBracketRight:
-			asserts(!literal.Fact, "Should not be a search atom")
+			asserts(literal.Fact, "Should not be a search atom")
 			terms = append(terms, Term(acc))
 		case tokenAtomBracketLeft:
-			literal.Fact = false
-		case tokenAtomParanthesisLeft:
 			literal.Fact = true
+		case tokenAtomParanthesisLeft:
+			literal.Fact = false
 		default:
 			asserts(false, "Atom Structure:", tok.value, " ", tokens.Debug())
 		}

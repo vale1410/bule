@@ -9,22 +9,27 @@ import (
 	"unicode"
 )
 
-func (p *Program) ConstraintSimplification() error {
+func (p *Program) ConstraintSimplification() (bool, error) {
+
+	finalChanged := true
 
 	i := 0
 	for {
 		i++
 		changed, err := p.TransformConstraintsToInstantiation()
 		if err != nil {
-			return fmt.Errorf("Constraint simplification, iteration %v. \n %w", i, err)
+			return true, fmt.Errorf("Constraint simplification, iteration %v. \n %w", i, err)
 		}
 		if !changed {
 			//Debug(2, "Remove clauses with contradictions, e.g.  (1==2) or (1!=1),  and remove true constraints, e.g.  (1>2, 1==1).")
-			p.CleanRulesFromGroundBoolExpression()
+			finalChanged, err = p.CleanRulesFromGroundBoolExpression()
+			if err != nil {
+				return true, fmt.Errorf("Remove of clauses failed %v. \n %w", i, err)
+			}
 			break
 		}
 	}
-	return nil
+	return finalChanged || i > 1, nil
 }
 
 func (p *Program) ExpandGroundRanges() (changed bool, err error) {
@@ -173,7 +178,7 @@ func (p *Program) InstantiateAndRemoveFactFromGenerator() (changed bool, err err
 
 		var fact Literal
 		var i int
-		for i, fact = range rule.Literals {
+		for i, fact = range rule.Generators {
 			if p.CollectedFacts[fact.Name] && fact.Neg == false {
 				break
 			}
@@ -361,7 +366,10 @@ func (p *Program) TransformConstraintsToInstantiation() (bool, error) {
 		rule.Constraints = append(rule.Constraints[:i], rule.Constraints[i+1:]...)
 		if !IsMarkedAsFree(variable) {
 			assignment := map[string]int{variable: value}
-			rule.Simplify(assignment)
+			_, err := rule.Simplify(assignment)
+			if err != nil {
+				return rule,err
+			}
 		}
 		return rule, err
 	}
@@ -411,19 +419,20 @@ func (p *Program) CollectGroundTuples() error {
 	return nil
 }
 
-// At this point no clauses should exist that contains a fact
-// So we remove all of them that do contain one.
-func (p *Program) RemoveClausesWithFacts() bool {
-	removeIfTrue := func(rule Rule) bool {
-		for _, lit := range rule.Literals {
-			if !lit.Fact && !lit.IsGround() {
-				return true
-			}
-		}
-		return false
-	}
-	return p.RemoveRules(removeIfTrue)
-}
+// Probably deprecated
+//  // // At this point no clauses should exist that contains a fact
+//  // // So we remove all of them that do contain one.
+//  // func (p *Program) RemoveClausesWithFacts() bool {
+//  // 	removeIfTrue := func(rule Rule) bool {
+//  // 		for _, lit := range rule.Literals {
+//  // 			if !lit.Fact && !lit.IsGround() {
+//  // 				return true
+//  // 			}
+//  // 		}
+//  // 		return false
+//  // 	}
+//  // 	return p.RemoveRules(removeIfTrue)
+//  // }
 
 func (p *Program) RemoveClausesWithTuplesThatDontExist() bool {
 	removeIfTrue := func(rule Rule) bool {

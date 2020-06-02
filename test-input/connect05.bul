@@ -1,3 +1,4 @@
 dom[0..3].
-#exist(T), ~dom[T], plays(T#mod2,T). 
+
+dom[T] => #exist(T), plays(T#mod2,T). 
 

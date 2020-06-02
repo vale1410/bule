@@ -153,11 +153,11 @@ func (literal Literal) String() string {
 	var opening string
 	var closing string
 	if literal.Fact {
-		opening = "("
-		closing = ")"
-	} else {
 		opening = "["
 		closing = "]"
+	} else {
+		opening = "("
+		closing = ")"
 	}
 
 	if literal.Neg == true {
@@ -190,20 +190,23 @@ func (rule *Rule) String() string {
 
 	sb := strings.Builder{}
 
-	for _, l := range rule.Generators {
-		sb.WriteString(l.String())
-		sb.WriteString(", ")
-	}
+	if len(rule.Generators)>0 || len(rule.Constraints) > 0 {
 
-	for _, c := range rule.Constraints {
-		sb.WriteString(c.String())
-		sb.WriteString(", ")
-	}
-	tmp := strings.TrimSuffix(sb.String(), ", ")
-	sb.Reset()
-	sb.WriteString(tmp)
+		for _, l := range rule.Generators {
+			sb.WriteString(l.String())
+			sb.WriteString(", ")
+		}
 
-	sb.WriteString(" => ")
+		for _, c := range rule.Constraints {
+			sb.WriteString(c.String())
+			sb.WriteString(", ")
+		}
+		tmp := strings.TrimSuffix(sb.String(), ", ")
+		sb.Reset()
+		sb.WriteString(tmp)
+
+		sb.WriteString(" => ")
+	}
 
 	for _, g := range rule.Iterators {
 		sb.WriteString(g.String())
@@ -214,7 +217,7 @@ func (rule *Rule) String() string {
 		sb.WriteString(l.String())
 		sb.WriteString(", ")
 	}
-	tmp = strings.TrimSuffix(sb.String(), ", ")
+	tmp := strings.TrimSuffix(sb.String(), ", ")
 	sb.Reset()
 	sb.WriteString(tmp)
 	if rule.IsQuestionMark {
@@ -357,6 +360,10 @@ func (p *Program) CheckSearch() error {
 }
 
 func (p *Program) PrintRules() {
+	if len(p.Rules) == 0 {
+		return
+	}
+	fmt.Println("%% Rules:")
 	for _, r := range p.Rules {
 		fmt.Print(r.String())
 		if DebugLevel > 0 {
@@ -367,6 +374,10 @@ func (p *Program) PrintRules() {
 }
 
 func (p *Program) PrintFacts() {
+	if len(p.CollectedFacts) == 0 {
+		return
+	}
+	fmt.Println("%% Collected Facts:")
 	for pred := range p.CollectedFacts {
 		for _, tuple := range p.PredicateToTuples[pred] {
 			fmt.Print(pred)
