@@ -1,3 +1,4 @@
 dom[0..2]. 
 
 dom[T], T#mod2==0 => #forall(T), move(X,T):dom[X].
+%dom[T], T#mod2==0 => move(X,T):dom[X].

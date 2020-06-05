@@ -33,7 +33,7 @@ func ParseProgramFromStrings(lines []string) (p Program, err error) {
 	p.PredicateToTuples = make(map[Predicate][][]int)
 	p.CollectedFacts = make(map[Predicate]bool)
 	p.Constants = make(map[string]int)
-	p.PredicateFact = map[string]bool{}
+	p.PredicateTupleMap = map[string]bool{}
 
 	acc := ""
 	for row, s := range lines {
@@ -77,7 +77,7 @@ func ParseProgramFromStrings(lines []string) (p Program, err error) {
 		if err != nil {
 			return p, fmt.Errorf("Parsing Error in Row %v: %w\n", row, err)
 		}
-		rule.LineNumber = row
+		rule.LineNumber = row + 1
 		p.Rules = append(p.Rules, rule)
 		acc = ""
 	}
@@ -92,17 +92,18 @@ func lexRule(text string) (ts Tokens) {
 	return ts
 }
 
-// <Constraint>, <Literals> <-> head(1,2,3).
-// <Constraint>, <Literals> -> head(1,2,3).
-// <Constraint>, <Literals> -> head(1,2,3)?
-// <ClauseDisjunction>.
-// <ClauseDisjunction>?
+// <Constraint>, <Guard> => <Fact>.
+// <Constraint>, <Guard> => <Conditionals>?
+// <Constraint>, <Guard> => <Conditionals>.
 
 func parseRule(text string) (rule Rule, err error) {
 
-	// TODO: error handling
 	tokens := lexRule(text)
-	if tokens[len(tokens)-1].kind == tokenEOF {
+	last := tokens[len(tokens)-1]
+	if last.kind == tokenError {
+		return rule, fmt.Errorf("Lexing Error in %v \n in rule %v", last.value, text)
+	}
+	if last.kind == tokenEOF {
 		tokens = tokens[:len(tokens)-1]
 	}
 	rule.initialTokens = tokens
@@ -134,7 +135,7 @@ func (rule *Rule) parseGeneratorAndConstraints(tokens Tokens) {
 		asserts(len(iterator) == 1, "no iterator allowed in guards yet!"+tokens.String())
 		if checkIfLiteral(iterator[0].tokens) {
 			lit := parseLiteral(iterator[0].tokens)
-			//rule.Literals = append(rule.Literals, lit.createNegatedLiteral())
+			//rule.Conditionals = append(rule.Conditionals, lit.createNegatedLiteral())
 			rule.Generators = append(rule.Generators, lit)
 		} else {
 			rule.Constraints = append(rule.Constraints, parseConstraint(iterator[0].tokens))
@@ -176,7 +177,7 @@ func parseIterator(iteratorDef []SepToken) (iterator Iterator) {
 			iterator.Head = parseLiteral(genElement.tokens)
 		} else {
 			if checkIfLiteral(genElement.tokens) {
-				iterator.Literals = append(iterator.Literals, parseLiteral(genElement.tokens))
+				iterator.Conditionals = append(iterator.Conditionals, parseLiteral(genElement.tokens))
 			} else {
 				iterator.Constraints = append(iterator.Constraints, parseConstraint(genElement.tokens))
 			}
@@ -661,6 +662,16 @@ func lexAtom(l *lexer) stateFn {
 		switch {
 		case r == eof:
 			return l.lexEOF(token2AtomName)
+		case r == '=':
+			l.backup()
+			l.emit(token2AtomName)
+			return lexRuleElement
+		case r == '.':
+			l.backup()
+			l.emit(token2AtomName)
+			l.next()
+			l.emit(token2RuleComma)
+			return lexRuleElement
 		case r == ',':
 			l.backup()
 			l.emit(token2AtomName)

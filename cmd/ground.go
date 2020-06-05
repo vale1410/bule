@@ -58,175 +58,235 @@ bule ground <program.bul> [options].
 			os.Exit(1)
 		}
 
-		for key, val := range constStringMap {
-			p.Constants[key] = val
-		}
-
-		//		debug(1, "Input:")
-		//		p.PrintDebug(1)
-
-		{
-			err := p.CheckArityOfLiterals()
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		}
-
-		{
-			err := p.CheckFactsInIterators()
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		}
-
-		stageInfo(&p, "Replace Constants and Math", "(#const a=3. and Function Symbols (#mod)")
-		p.ReplaceConstantsAndMathFunctions()
-
-		{
-			stageInfo(&p, "CheckUnboundVariables", "Check for unbound variables that are not marked as such.")
-			err := p.CheckUnboundVariables()
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		}
-
-		round := 0
-
-		changed := true
-		for changed {
-
-			debug(2, "This is round: ", round)
-			round++
-			changed = false
-
-			stage(&p, &changed,
-				p.ConstraintSimplification,
-				"Do Fixpoint of TransformConstraintsToInstantiation.",
-				"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
-
-			stage(&p, &changed,
-				p.ExpandGroundRanges,
-				"ExpandGroundRanges",
-				"p[1..2]. and also X==1..2, but not Y==A..B.")
-
-			stage(&p, &changed,
-				p.ConstraintSimplification,
-				"Do Fixpoint of TransformConstraintsToInstantiation.",
-				"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
-
-			stage(&p, &changed,
-				p.CollectGroundFacts,
-				"CollectGroundFacts",
-				"Example: p[1,2]. r[1]. but not p[1],p[2]. and also not p[X,X], or p[1,X].")
-
-			stage(&p, &changed,
-				p.InstantiateAndRemoveFactFromGenerator,
-				"InstantiateAndRemoveFactFromGenerator",
-				"Example: a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
-
-			stage(&p, &changed,
-				p.ConstraintSimplification,
-				"Do Fixpoint of TransformConstraintsToInstantiation.",
-				"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.", )
-
-			stage(&p, &changed,
-				p.InstantiateAndRemoveFactFromIterator,
-				"ExpandIterators", "")
-		}
-
-		//			{
-		//
-		//				stageInfo(&p, "RemoveClausesWithFacts", "")
-		//				tmp := p.RemoveClausesWithFacts()
-		//				changed = tmp || changed
-		//			}
-
-		{
-			err := p.CheckNoRemainingFacts()
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		}
-
-		stageInfo(&p, "CollectGroundTuples", "")
-		err = p.CollectGroundTuples()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		{
-			stageInfo(&p, "Ground non-Ground Lits", "Ground from all tuples the non-ground literals, until fixpoint.")
-			ok := true
-			i := 0
-			for ok {
-				i++
-				var err error
-				ok, err = p.InstantiateNonGroundLiterals()
-				if err != nil {
-					fmt.Printf("Error occurred in grounding when instantiating non-ground literals. Iteration %v.\n %v\n", i, err)
-					os.Exit(1)
-				}
-				stageInfo(&p, "Do Fixpoint of TransformConstraintsToInstantiation.", ""+
-					"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
-				p.ConstraintSimplification()
-
-				stageInfo(&p, "RemoveClausesWithTuplesThatDontExist.", "")
-				p.RemoveClausesWithTuplesThatDontExist()
-			}
-		}
-
-		if quantificationFlag {
-			stageInfo(&p, "Extract Quantors", "")
-			p.ExtractQuantors()
-			stageInfo(&p, "Merge Quantification Levels", "")
-			p.MergeConsecutiveQuantificationLevels()
-			debug(2, "Merged alternations:", p.Alternation)
-		}
-
-		debug(1, "Output")
-
-		if textualFlag && withFactsFlag {
-			p.PrintFacts()
-		}
-
-		unitSlice := args[1:]
-		if unitPropagationFlag || !textualFlag {
-			units := convertArgsToUnits(unitSlice)
-			clauseProgram := translateFromRuleProgram(p, units)
-			clauseProgram.Print()
-		} else {
-			p.Print()
-		}
+		stage0Prerequisites(&p)
+		stage1GeneratorsAndFacts(&p)
+		stage2Iterators(&p)
+		stage3Clauses(&p)
+		stage4Printing(&p, args)
 
 	},
 }
 
+func stage0Prerequisites(p *bule.Program) {
+	for key, val := range constStringMap {
+		p.Constants[key] = val
+	}
+
+	//		debug(1, "Input:")
+	//		p.PrintDebug(1)
+
+	{
+		// This inserts arity 1 with term 0 in all zero arity literals!
+		err := p.CheckArityOfLiterals()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+
+	{
+		err := p.CheckFactsInIterators()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+
+	stageInfo(p, "Replace Constants and Math", "(#const a=3. and Function Symbols (#mod)")
+	p.ReplaceConstantsAndMathFunctions()
+
+	{
+		stageInfo(p, "CheckUnboundVariables", "Check for unbound variables that are not marked as such.")
+		err := p.CheckUnboundVariables()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+}
+
+func stage1GeneratorsAndFacts(p *bule.Program) {
+	round := 0
+	changed := true
+	for changed {
+
+		debug(2, "This is round: ", round)
+		round++
+		changed = false
+
+		stage(p, &changed,
+			p.ConstraintSimplification,
+			"Do Fixpoint of TransformConstraintsToInstantiation.",
+			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
+
+		stage(p, &changed,
+			runFixpoint(p.ExpandGroundRanges),
+			"ExpandGroundRanges",
+			"p[1..2]. and also X==1..2, but not Y==A..B.")
+		stage(p, &changed,
+			p.ConstraintSimplification,
+			"Do Fixpoint of TransformConstraintsToInstantiation.",
+			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
+
+		stage(p, &changed,
+			p.CollectGroundFacts,
+			"CollectGroundFacts",
+			"Example: p[1,2]. r[1]. but not p[1],p[2]. and also not p[X,X], or p[1,X].")
+
+		stage(p, &changed,
+			p.InstantiateAndRemoveFactFromGenerator,
+			"InstantiateAndRemoveFactFromGenerator",
+			"Example: a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
+
+		stage(p, &changed,
+			p.ConstraintSimplification,
+			"Do Fixpoint of TransformConstraintsToInstantiation.",
+			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.", )
+
+		stage(p, &changed,
+			p.RemoveRulesWithNegatedGroundGenerator,
+			"RemoveRulesWithNegatedGroundGenerator.",
+			"~p[1,2]=> q(1,2) and p[1,2] is not a fact then remove rule!", )
+
+		stage(p, &changed,
+			p.RemoveNegatedGroundGenerator,
+			"RemoveNegatedGroundGenerator",
+			"~p[1,2]=> q(1,2) and p[1,2] is a fact, then remove from generators!", )
+	}
+}
+
+func stage2Iterators(p *bule.Program) {
+	round := 0
+	changed := true
+	for changed {
+
+		debug(2, "This is round: ", round)
+		round++
+		changed = false
+
+		stage(p, &changed,
+			runFixpoint(p.TransformConstraintsToInstantiationIterator),
+			"Fixpoint of TransformConstraintsToInstantiationIterator.",
+			"If we have p(X,Y):q[X,Y]:X==3+1, then simplify this to: p(4,Y):q[4,Y].")
+
+		stage(p, &changed,
+			p.InstantiateAndRemoveFactFromIterator,
+			"InstantiateAndRemoveFactFromIterator", "")
+
+		stage(p, &changed,
+			p.ConstraintSimplification,
+			"ConstraintSimplification.",
+			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.", )
+
+		stage(p, &changed,
+			p.CleanIteratorFromGroundBoolExpressions,
+			"CleanIteratorFromGroundBoolExpressions.",
+			"p(X,Y):q[X,Y]:#true -> p(X,Y):q[X,Y]", )
+
+		stage(p, &changed,
+			p.ConvertHeadOnlyIteratorsToLiterals,
+			"ConvertHeadOnlyIteratorsToLiterals.",
+			"p(1,2) -> p(1,2) %% but now as literal!", )
+	}
+}
+
+func stage3Clauses(p *bule.Program) {
+
+	var err error
+	{
+		err = p.CheckNoGeneratorsOrIterators()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+
+	stageInfo(p, "CollectGroundTuples", "")
+	err = p.CollectGroundTuples()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	{
+		stageInfo(p, "Ground non-Ground Lits", "Ground from all tuples the non-ground literals, until fixpoint.")
+		ok := true
+		i := 0
+		for ok {
+			i++
+			var err error
+			ok, err = p.InstantiateNonGroundLiterals()
+			if err != nil {
+				fmt.Printf("Error occurred in grounding when instantiating non-ground literals. Iteration %v.\n %v\n", i, err)
+				os.Exit(1)
+			}
+			stageInfo(p, "Do Fixpoint of TransformConstraintsToInstantiation.", ""+
+				"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
+			p.ConstraintSimplification()
+
+			stageInfo(p, "RemoveClausesWithTuplesThatDontExist.", "")
+			p.RemoveClausesWithTuplesThatDontExist()
+		}
+	}
+}
+
+func stage4Printing(p *bule.Program, args []string) {
+
+	//			{
+	//
+	//				stageInfo(p, "RemoveClausesWithFacts", "")
+	//				tmp := p.RemoveClausesWithFacts()
+	//				changed = tmp || changed
+	//			}
+
+	if quantificationFlag {
+		stageInfo(p, "Extract Quantors", "")
+		p.ExtractQuantors()
+		stageInfo(p, "Merge Quantification Levels", "")
+		p.MergeConsecutiveQuantificationLevels()
+		debug(2, "Merged alternations:", p.Alternation)
+	}
+
+	debug(1, "Output")
+
+	if textualFlag && withFactsFlag {
+		p.PrintFacts()
+	}
+
+	unitSlice := args[1:]
+	if unitPropagationFlag || !textualFlag {
+		units := convertArgsToUnits(unitSlice)
+		clauseProgram := translateFromRuleProgram(*p, units)
+		clauseProgram.Print()
+	} else {
+		p.Print()
+	}
+}
+
 func stage(p *bule.Program, change *bool, f func() (bool, error), stage string, info string) {
+	stageInfo(p, stage, info)
 	tmp, err := f()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	if tmp {
-		stageInfo(p, stage, info)
+		debug(2,"Stage changed Program!")
 	}
 	*change = *change || tmp
 }
 
-func runFixpoint(f func() (bool, error)) {
-	ok := true
-	var err error
-	for ok {
-		ok, err = f()
-		if err != nil {
-			fmt.Println("Error occurred in grounding.\n %w", err)
-			os.Exit(1)
+func runFixpoint(f func() (bool, error)) func() (bool, error) {
+	return func() (changed bool, err error){
+		ok := true
+		for ok {
+			ok, err = f()
+			changed = changed || ok
+			if err != nil {
+				return changed, fmt.Errorf("Error occurred in grounding.\n %w", err)
+			}
 		}
+		return
 	}
 }
 

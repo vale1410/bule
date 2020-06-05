@@ -47,7 +47,7 @@ func (p *Program) CheckUnboundVariables() error {
 }
 
 // Remove all rules where check is true.
-func (p *Program) RemoveRules(ifTrueRemove func(r Rule) bool) (changed bool) {
+func (p *Program) RemoveRules(ifTrueRemove func(r Rule) bool) (changed bool, err error ) {
 	var newRules []Rule
 	for _, rule := range p.Rules {
 		if !ifTrueRemove(rule) {
@@ -89,18 +89,6 @@ func (p *Program) RuleTransformation(check func(r Rule) bool,
 		rn, err := transformation(r)
 		return []Rule{rn}, err
 	})
-	//for row, rule := range p.Rules {
-	//	if check(rule) {
-	//		changed = true
-	//		p.Rules[row], err = transformation(rule)
-	//		if err != nil {
-	//			return changed, RuleError{
-	//				R:       rule,
-	//				Message: fmt.Sprintf("Rule Transformation %v",err),
-	//			}
-	//		}
-	//	}
-	//}
 	return
 }
 
@@ -131,16 +119,20 @@ func (p *Program) TermExpansion(check func(r Term) bool, expand func(Term) ([]Te
 					newRule := workingRule.Copy()
 					newRules = append(newRules, newRule)
 				}
+				break
 			}
 		}
 		return
 	}
 	return p.RuleExpansion(checkRule, expandRule)
 }
+type TermIterator interface {
+	AllTerms()	[]*Term
+}
 
-func (rule *Rule) TermTranslation(transform func(Term) (Term, bool, error)) (changed bool, err error) {
+func TermTranslation(termIterator TermIterator, transform func(Term) (Term, bool, error)) (changed bool, err error) {
 	var ok bool
-	for _, term := range rule.AllTerms() {
+	for _, term := range termIterator.AllTerms() {
 		*term, ok, err = transform(*term)
 		changed = ok || changed
 		if err != nil {
@@ -150,7 +142,51 @@ func (rule *Rule) TermTranslation(transform func(Term) (Term, bool, error)) (cha
 	return
 }
 
-func (rule *Rule) AllTerms() (terms []*Term) {
+
+//func (iterator *Iterator) TermTranslation(transform func(Term) (Term, bool, error)) (changed bool, err error) {
+//	var ok bool
+//	for _, term := range iterator.AllTerms() {
+//		*term, ok, err = transform(*term)
+//		changed = ok || changed
+//		if err != nil {
+//			return changed, err
+//		}
+//	}
+//	return
+//}
+//
+//func (rule *Rule) TermTranslation(transform func(Term) (Term, bool, error)) (changed bool, err error) {
+//	var ok bool
+//	for _, term := range rule.AllTerms() {
+//		*term, ok, err = transform(*term)
+//		changed = ok || changed
+//		if err != nil {
+//			return changed, err
+//		}
+//	}
+//	return
+//}
+
+func (iterator Iterator) AllTerms() (terms []*Term) {
+
+	for i := range iterator.Head.Terms {
+		terms = append(terms, &iterator.Head.Terms[i])
+	}
+
+	for i := range iterator.Conditionals {
+		for j := range iterator.Conditionals[i].Terms {
+			terms = append(terms, &iterator.Conditionals[i].Terms[j])
+		}
+	}
+
+	for j := range iterator.Constraints {
+		terms = append(terms, &iterator.Constraints[j].LeftTerm)
+		terms = append(terms, &iterator.Constraints[j].RightTerm)
+	}
+	return
+}
+
+func (rule Rule) AllTerms() (terms []*Term) {
 	for _, l := range rule.AllLiterals() {
 		for i := range l.Terms {
 			terms = append(terms, &l.Terms[i])
@@ -169,21 +205,44 @@ func (rule *Rule) AllTerms() (terms []*Term) {
 	return
 }
 
-func (rule *Rule) AllLiterals() (lits []*Literal) {
+func (rule Rule) AllLiterals() (literals []*Literal) {
 
 	for i := range rule.Generators {
-		lits = append(lits, &rule.Generators[i])
+		literals = append(literals, &rule.Generators[i])
 	}
 
 	for i := range rule.Literals {
-		lits = append(lits, &rule.Literals[i])
+		literals = append(literals, &rule.Literals[i])
 	}
 
 	for i := range rule.Iterators {
-		lits = append(lits, &rule.Iterators[i].Head)
-		for j := range rule.Iterators[i].Literals {
-			lits = append(lits, &rule.Iterators[i].Literals[j])
+		literals = append(literals, &rule.Iterators[i].Head)
+		for j := range rule.Iterators[i].Conditionals {
+			literals = append(literals, &rule.Iterators[i].Conditionals[j])
 		}
 	}
 	return
 }
+
+
+/// IDEA to unify treatment of Iterator and Rule
+type Groundable interface {
+	Terms() []*Term
+	Literals() *[]Literal
+	Constraints() *[]Constraint
+	Generators() *[]Literal
+	Copy() Groundable
+}
+
+func Expansion(func(Groundable) (changed bool, result []Groundable, err error)) (bool, error) {
+	return false, nil
+}
+
+///func Simplify(g *Groundable) error  {
+///	return nil
+///}
+///
+///func Instantiate(g *Groundable) error  {
+///	return nil
+///}
+

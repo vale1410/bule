@@ -119,7 +119,7 @@ func (p *Program) InstantiateAndRemoveFactFromIterator() (changed bool, err erro
 	// Find iterator with fact that we can replace!
 	check := func(r Rule) bool {
 		for _, iter := range r.Iterators {
-			for _, lit := range iter.Literals {
+			for _, lit := range iter.Conditionals {
 				if p.CollectedFacts[lit.Name] && lit.Neg == false {
 					return true
 				}
@@ -128,38 +128,49 @@ func (p *Program) InstantiateAndRemoveFactFromIterator() (changed bool, err erro
 		return false
 	}
 
-	transform := func(rule Rule) (generatedRules []Rule, err error) {
+	transform := func(rule Rule) (Rule, error) {
 
 		var fact Literal
 		var iter Iterator
 		var i int
 		var j int
+		found := false
 		for i, iter = range rule.Iterators {
-			for j, fact = range iter.Literals {
+			for j, fact = range iter.Conditionals {
 				if p.CollectedFacts[fact.Name] && fact.Neg == false {
+					found = true
 					break
 				}
 			}
+			if found {
+				break
+			}
 		}
-		rule.Literals = append(rule.Iterators[i].Literals[:j],
-			rule.Iterators[i].Literals[j+1:]...)
 
-		for _, tuple := range p.findFilteredTuples(fact) {
-			newRule := rule.Copy()
-			newRule.Parent = &rule
-			for k, val := range tuple {
+		newIterators := make([]Iterator, i)
+		copy(newIterators, rule.Iterators[:i])
+
+		newIterator := rule.Iterators[i].Copy()
+		newIterator.Conditionals = append(newIterator.Conditionals[:j],
+			newIterator.Conditionals[j+1:]...)
+
+		for _, tuples := range p.findFilteredTuples(fact) {
+			tmpIterator := newIterator.Copy()
+			for k, val := range tuples {
 				newConstraint := Constraint{
 					LeftTerm:   fact.Terms[k],
-					RightTerm:  Term(strconv.Itoa(val)), // TODO Could be simpler ...
+					RightTerm:  Term(strconv.Itoa(val)),
 					Comparison: tokenComparisonEQ,
 				}
-				newRule.Constraints = append(newRule.Constraints, newConstraint)
+				tmpIterator.Constraints = append(tmpIterator.Constraints, newConstraint)
 			}
-			generatedRules = append(generatedRules, newRule)
+			newIterators = append(newIterators, tmpIterator)
 		}
-		return
+		newIterators = append(newIterators, rule.Iterators[i+1:]...)
+		rule.Iterators = newIterators
+		return rule, nil
 	}
-	return p.RuleExpansion(check, transform)
+	return p.RuleTransformation(check, transform)
 }
 
 // This resolves facts with clauses.
@@ -203,25 +214,69 @@ func (p *Program) InstantiateAndRemoveFactFromGenerator() (changed bool, err err
 	return p.RuleExpansion(check, transform)
 }
 
-func (p *Program) FindNewFacts2() (changed bool, err error) {
-	p.CollectGroundFacts()
-
-	return
-}
-
-func (p *Program) InsertTuple(lit Literal) error {
+func (p *Program) InsertLiteralTuple(lit Literal) error {
 	groundTerms, err := evaluateExpressionTuples(lit.Terms)
 	if err != nil {
 		return err
 	}
-	if !p.PredicateFact[lit.String()] {
+	if !p.PredicateTupleMap[lit.String()] &&
+		!p.PredicateTupleMap[lit.createNegatedLiteral().String()] {
 		p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], groundTerms)
 	}
-	p.PredicateFact[lit.String()] = true
+	p.PredicateTupleMap[lit.String()] = true
+	p.PredicateTupleMap[lit.createNegatedLiteral().String()] = true
 	return nil
 }
 
+func (p *Program) RemoveNegatedGroundGenerator() (changed bool, err error) {
+	removeIfTrue := func(literal Literal) bool {
+		if p.CollectedFacts[literal.Name] &&
+			literal.IsGround() &&
+			literal.Neg == true &&
+			p.PredicateTupleMap[literal.String()] == false {
+			return true
+		}
+		return false
+	}
+
+	for i, r := range p.Rules {
+		for j, g := range r.Generators {
+			if removeIfTrue(g) {
+				changed = true
+				p.Rules[i].Generators = append(p.Rules[i].Generators[:j],
+					p.Rules[i].Generators[j+1:]...)
+				break
+			}
+		}
+	}
+
+	return
+}
+
+func (p *Program) RemoveRulesWithNegatedGroundGenerator() (changed bool, err error) {
+	removeIfTrue := func(r Rule) bool {
+		for _, literal := range r.Generators {
+			if p.CollectedFacts[literal.Name] &&
+				literal.IsGround() &&
+				literal.Neg == true &&
+				p.PredicateTupleMap[literal.createNegatedLiteral().String()] == true {
+				return true
+			}
+		}
+		return false
+	}
+	return p.RemoveRules(removeIfTrue)
+}
+
+/// // A fact is fully collected if it does not occur as a head in any rule.
+/// func (p *Program) DetermineIfFactIsFullyCollected() (changed bool, err error) {
+/// 	p.CollectedFacts[lit.Name] = true
+///
+/// }
+///
+
 func (p *Program) CollectGroundFacts() (changed bool, err error) {
+
 	check := func(r Rule) bool {
 		return len(r.Literals) == 1 &&
 			r.Literals[0].Fact &&
@@ -240,8 +295,11 @@ func (p *Program) CollectGroundFacts() (changed bool, err error) {
 				err,
 			}
 		}
-		p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], res)
-		p.CollectedFacts[lit.Name] = true
+		if !p.PredicateTupleMap[lit.String()] {
+			p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], res)
+			p.PredicateTupleMap[lit.String()] = true
+			p.CollectedFacts[lit.Name] = true
+		}
 		return
 	}
 	return p.RuleExpansion(check, transform)
@@ -333,6 +391,135 @@ func (p *Program) CleanRulesFromGroundBoolExpression() (bool, error) {
 	return p.RuleExpansion(check, transform)
 }
 
+// Remove Iterator if with false constraint
+// Remove true constraints from Iterator
+func (p *Program) CleanIteratorFromGroundBoolExpressions() (bool, error) {
+
+	check := func(r Rule) bool {
+		for _, iter := range r.Iterators {
+			for _, cons := range iter.Constraints {
+				re, _ := cons.GroundBoolExpression()
+				if re {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	transform := func(rule Rule) ([]Rule, error) {
+		newRule := rule.Copy()
+		newRule.Iterators = []Iterator{}
+		for _, iter := range rule.Iterators {
+			newIterator := iter.Copy()
+			isGood := true
+			var newConstraints []Constraint
+			for _, cons := range iter.Constraints {
+				isGround, boolResult := cons.GroundBoolExpression()
+				if isGround {
+					if !boolResult {
+						isGood = false
+						break
+					}
+				} else {
+					newConstraints = append(newConstraints, cons)
+				}
+			}
+			if isGood {
+				newIterator.Constraints = newConstraints
+				newRule.Iterators = append(newRule.Iterators, newIterator)
+			}
+		}
+		return []Rule{newRule}, nil
+	}
+	return p.RuleExpansion(check, transform)
+}
+
+func (p *Program) ConvertHeadOnlyIteratorsToLiterals() (bool, error) {
+
+	check := func(r Rule) bool {
+		for _, iterator := range r.Iterators {
+			if len(iterator.Constraints) == 0 && len(iterator.Conditionals) == 0 {
+				// This should be moved to be a fact!
+				return true
+			}
+		}
+		return false
+	}
+
+	transform := func(rule Rule) (Rule, error) {
+		var it int
+		for it = range rule.Iterators {
+			if len(rule.Iterators[it].Constraints) == 0 && len(rule.Iterators[it].Conditionals) == 0 {
+				break
+			}
+		}
+		rule.Literals = append(rule.Literals, rule.Iterators[it].Head)
+		rule.Iterators = append(rule.Iterators[:it], rule.Iterators[it+1:]...)
+		return rule, nil
+	}
+	return p.RuleTransformation(check, transform)
+}
+
+// for each Constraint X==<Value>
+// Rewrite all Terms with X <- <Value>
+// Only within Iterators
+func (p *Program) TransformConstraintsToInstantiationIterator() (bool, error) {
+
+	check := func(r Rule) bool {
+		for _, iterator := range r.Iterators {
+			for _, cons := range iterator.Constraints {
+				is, _, _, _ := cons.IsInstantiation()
+				if is {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	transform := func(rule Rule) (Rule, error) {
+		var it int
+		var i int
+		var cons Constraint
+		var is bool
+		var variable string
+		var value int
+		var err error
+		for it = range rule.Iterators {
+			for i, cons = range rule.Iterators[it].Constraints {
+				is, variable, value, err = cons.IsInstantiation()
+				if err != nil {
+					return rule, RuleError{rule, "Transform Constraint Problem", err}
+				}
+				if is {
+					break
+				}
+			}
+			if is {
+				break
+			}
+		}
+		rule.Iterators[it].Constraints = append(rule.Iterators[it].Constraints[:i],
+			rule.Iterators[it].Constraints[i+1:]...)
+		if !IsMarkedAsFree(variable) {
+			assignment := map[string]int{variable: value}
+			_, err := rule.Iterators[it].Simplify(assignment)
+			if err != nil {
+				return rule, err
+			}
+		}
+
+		//// Transform iterator into literal if empty!
+		if len(rule.Iterators[it].Constraints) == 0 && len(rule.Iterators[it].Conditionals) == 0 {
+			rule.Literals = append(rule.Literals, rule.Iterators[it].Head)
+			rule.Iterators = append(rule.Iterators[:it], rule.Iterators[it+1:]...)
+		}
+		return rule, err
+	}
+	return p.RuleTransformation(check, transform)
+}
+
 // for each Constraint X==<Value>
 // Rewrite all Terms with X <- <Value>
 func (p *Program) TransformConstraintsToInstantiation() (bool, error) {
@@ -368,7 +555,7 @@ func (p *Program) TransformConstraintsToInstantiation() (bool, error) {
 			assignment := map[string]int{variable: value}
 			_, err := rule.Simplify(assignment)
 			if err != nil {
-				return rule,err
+				return rule, err
 			}
 		}
 		return rule, err
@@ -384,9 +571,18 @@ func (p *Program) ReplaceConstantsAndMathFunctions() {
 	}
 
 	for i := range p.Rules {
-		p.Rules[i].TermTranslation(transform)
+		TermTranslation(p.Rules[i], transform)
 		p.Rules[i].Simplify(p.Constants)
 	}
+}
+
+func (iterator *Iterator) Simplify(assignment map[string]int) (bool, error) {
+
+	transform := func(term Term) (Term, bool, error) {
+		return assign(term, assignment)
+	}
+
+	return TermTranslation(iterator, transform)
 }
 
 func (rule *Rule) Simplify(assignment map[string]int) (bool, error) {
@@ -395,7 +591,7 @@ func (rule *Rule) Simplify(assignment map[string]int) (bool, error) {
 		return assign(term, assignment)
 	}
 
-	return rule.TermTranslation(transform)
+	return TermTranslation(rule, transform)
 }
 
 func (p *Program) CollectGroundTuples() error {
@@ -403,7 +599,7 @@ func (p *Program) CollectGroundTuples() error {
 	for _, r := range p.Rules {
 		for _, literal := range r.Literals {
 			if literal.IsGround() {
-				err := p.InsertTuple(literal)
+				err := p.InsertLiteralTuple(literal)
 				if err != nil {
 					return LiteralError{
 						L:       literal,
@@ -411,8 +607,6 @@ func (p *Program) CollectGroundTuples() error {
 						Message: fmt.Sprintf("%v", err),
 					}
 				}
-				p.PredicateFact[literal.String()] = true
-				p.PredicateFact[literal.createNegatedLiteral().String()] = true
 			}
 		}
 	}
@@ -424,7 +618,7 @@ func (p *Program) CollectGroundTuples() error {
 //  // // So we remove all of them that do contain one.
 //  // func (p *Program) RemoveClausesWithFacts() bool {
 //  // 	removeIfTrue := func(rule Rule) bool {
-//  // 		for _, lit := range rule.Literals {
+//  // 		for _, lit := range rule.Conditionals {
 //  // 			if !lit.Fact && !lit.IsGround() {
 //  // 				return true
 //  // 			}
@@ -434,11 +628,11 @@ func (p *Program) CollectGroundTuples() error {
 //  // 	return p.RemoveRules(removeIfTrue)
 //  // }
 
-func (p *Program) RemoveClausesWithTuplesThatDontExist() bool {
+func (p *Program) RemoveClausesWithTuplesThatDontExist() (bool, error) {
 	removeIfTrue := func(rule Rule) bool {
 		for _, lit := range rule.Literals {
 			if lit.FreeVars().IsEmpty() {
-				if !p.PredicateFact[lit.String()] {
+				if !p.PredicateTupleMap[lit.String()] {
 					return true
 				}
 			}

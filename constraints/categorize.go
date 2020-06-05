@@ -278,7 +278,7 @@ func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 			glob.A(pbs[simp].Typ == LE)
 			simp_translation = TranslateAtMostOne(Count, pbs[simp].IdS()+"-cnt", pbs[simp].Literals())
 		}
-		//simp_translation := TranslateAtMostOne(Count, pbs[simp].IdS()+"-cnt", pbs[simp].Literals())
+		//simp_translation := TranslateAtMostOne(Count, pbs[simp].IdS()+"-cnt", pbs[simp].Conditionals())
 		pbs[simp].Translated = true
 		pbs[simp].Clauses.AddClauseSet(simp_translation.Clauses)
 		simp_translation.PB = pbs[simp]

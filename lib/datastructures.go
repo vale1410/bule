@@ -2,6 +2,7 @@ package lib
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -10,9 +11,9 @@ type Program struct {
 	Constants         map[string]int
 	PredicateToTuples map[Predicate][][]int
 	PredicateToArity  map[Predicate]int
-	PredicateFact     map[string]bool
+	ZeroArity         map[Predicate]bool
+	PredicateTupleMap map[string]bool
 	CollectedFacts    map[Predicate]bool
-	Search            map[Predicate]bool
 	Alternation       [][]Literal
 	existQ            map[int][]Literal
 	forallQ           map[int][]Literal
@@ -42,9 +43,9 @@ type Constraint struct {
 type Clause []Literal
 
 type Iterator struct {
-	Constraints []Constraint
-	Literals    []Literal
-	Head        Literal
+	Constraints  []Constraint
+	Conditionals []Literal
+	Head         Literal
 }
 
 type Literal struct {
@@ -89,16 +90,16 @@ func (literal Literal) Copy() Literal {
 }
 
 // Deep Copy
-func (gen Iterator) Copy() (newGen Iterator) {
-	newGen = gen
-	newGen.Head = gen.Head.Copy()
+func (iterator Iterator) Copy() (newGen Iterator) {
+	newGen = iterator
+	newGen.Head = iterator.Head.Copy()
 	newGen.Constraints = []Constraint{}
-	newGen.Literals = []Literal{}
-	for _, c := range gen.Constraints {
+	newGen.Conditionals = []Literal{}
+	for _, c := range iterator.Constraints {
 		newGen.Constraints = append(newGen.Constraints, c.Copy())
 	}
-	for _, l := range gen.Literals {
-		newGen.Literals = append(newGen.Literals, l.Copy())
+	for _, l := range iterator.Conditionals {
+		newGen.Conditionals = append(newGen.Conditionals, l.Copy())
 	}
 	return
 }
@@ -107,16 +108,20 @@ func (gen Iterator) Copy() (newGen Iterator) {
 func (rule Rule) Copy() (newRule Rule) {
 	newRule = rule
 	newRule.Constraints = []Constraint{}
+	newRule.Generators= []Literal{}
 	newRule.Literals = []Literal{}
 	newRule.Iterators = []Iterator{}
+	for _, g := range rule.Generators{
+		newRule.Generators= append(newRule.Generators, g.Copy())
+	}
 	for _, c := range rule.Constraints {
 		newRule.Constraints = append(newRule.Constraints, c.Copy())
 	}
 	for _, l := range rule.Literals {
 		newRule.Literals = append(newRule.Literals, l.Copy())
 	}
-	for _, g := range rule.Iterators {
-		newRule.Iterators = append(newRule.Iterators, g.Copy())
+	for _, i := range rule.Iterators {
+		newRule.Iterators = append(newRule.Iterators, i.Copy())
 	}
 	return
 }
@@ -133,15 +138,15 @@ func (term Term) String() string {
 	return string(term)
 }
 
-func (g Iterator) String() string {
+func (iterator Iterator) String() string {
 	sb := strings.Builder{}
-	sb.WriteString(g.Head.String())
+	sb.WriteString(iterator.Head.String())
 	sb.WriteString(":")
-	for _, c := range g.Constraints {
+	for _, c := range iterator.Constraints {
 		sb.WriteString(c.String())
 		sb.WriteString(":")
 	}
-	for _, l := range g.Literals {
+	for _, l := range iterator.Conditionals {
 		sb.WriteString(l.String())
 		sb.WriteString(":")
 	}
@@ -150,6 +155,16 @@ func (g Iterator) String() string {
 
 func (literal Literal) String() string {
 	var s string
+	if literal.Neg == true {
+		s += "~"
+	}
+	s += literal.Name.String()
+
+	// is 0-arity atom
+	if len(literal.Terms) == 0 {
+		return s
+	}
+
 	var opening string
 	var closing string
 	if literal.Fact {
@@ -160,10 +175,7 @@ func (literal Literal) String() string {
 		closing = ")"
 	}
 
-	if literal.Neg == true {
-		s = "~"
-	}
-	s = s + literal.Name.String() + opening
+	s += opening
 	for i, x := range literal.Terms {
 		s += x.String()
 		if i < len(literal.Terms)-1 {
@@ -175,14 +187,15 @@ func (literal Literal) String() string {
 
 func (rule *Rule) Debug() string {
 	sb := strings.Builder{}
-	sb.WriteString(rule.Debug())
+	sb.WriteString(rule.String())
 	p := rule.Parent
-	s := "  "
+	s := "\n  "
 	for p != nil {
-		sb.WriteString(" " + p.String())
+		sb.WriteString(s + "╚ " +  p.String())
 		s += "  "
 		p = p.Parent
 	}
+	sb.WriteString(" %% l:" + strconv.Itoa(rule.LineNumber))
 	return sb.String()
 }
 
@@ -190,7 +203,7 @@ func (rule *Rule) String() string {
 
 	sb := strings.Builder{}
 
-	if len(rule.Generators)>0 || len(rule.Constraints) > 0 {
+	if len(rule.Generators) > 0 || len(rule.Constraints) > 0 {
 
 		for _, l := range rule.Generators {
 			sb.WriteString(l.String())
@@ -231,7 +244,7 @@ func (rule *Rule) String() string {
 func (p *Program) Debug() {
 	fmt.Println("Constants:", p.Constants)
 	fmt.Println("Collected Facts", p.CollectedFacts)
-	fmt.Println("PredicatFact", p.PredicateFact)
+	fmt.Println("PredicatFact", p.PredicateTupleMap)
 	fmt.Println("PredicatsToTuples", p.PredicateToTuples)
 	for _, r := range p.Rules {
 		fmt.Println(r.Debug())
@@ -271,7 +284,7 @@ func (err RuleError) Error() string {
 	var sb strings.Builder
 	sb.WriteString(err.Message + ":\n")
 	sb.WriteString(err.Err.Error() + ":\n")
-	sb.WriteString("Rule " + err.R.Debug() + "\n")
+	sb.WriteString("Rule \n" + err.R.Debug() + "\n")
 	return sb.String()
 }
 
@@ -289,16 +302,20 @@ func (err LiteralError) Error() string {
 	return sb.String()
 }
 
-func (p *Program) CheckNoRemainingFacts() error {
+func (p *Program) CheckNoGeneratorsOrIterators() error {
 	for _, r := range p.Rules {
-		for _, l := range r.Literals {
-			if !l.Fact {
-				return LiteralError{
-					l,
-					r,
-					fmt.Sprintf("Literals that are used in search should have paranthesis () and not brackets []. \n" +
-						"They need to be marked as such!"),
-				}
+		if len(r.Generators) > 0 {
+			return RuleError{
+				r,
+				"Should not have any generators anymore!" ,
+				fmt.Errorf("Rule is not free of Generators"),
+			}
+		}
+		if len(r.Iterators) > 0 {
+			return RuleError{
+				r,
+				"Should not have any Iterators anymore!" ,
+				fmt.Errorf("Rule is not free of Iterators: %v", r.Iterators),
 			}
 		}
 	}
@@ -308,7 +325,7 @@ func (p *Program) CheckNoRemainingFacts() error {
 func (p *Program) CheckFactsInIterators() error {
 	for _, r := range p.Rules {
 		for _, g := range r.Iterators {
-			for _, l := range g.Literals {
+			for _, l := range g.Conditionals {
 				if !l.Fact {
 					return LiteralError{
 						l,
@@ -322,7 +339,26 @@ func (p *Program) CheckFactsInIterators() error {
 	return nil
 }
 
+func (p *Program) TreatZeroArityOfLiterals() error {
+	// Fix zero arity predicates to a pseudo 1 arity with value 0
+	for _, r := range p.Rules {
+		all := r.AllLiterals()
+		for _, l := range all {
+			if len(l.Terms) == 0 {
+				p.ZeroArity[l.Name] = true
+				l.Terms = []Term{"0"}
+				if len(all) == 1 {
+					l.Fact = true
+
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (p *Program) CheckArityOfLiterals() error {
+
 	p.PredicateToArity = make(map[Predicate]int)
 	for _, r := range p.Rules {
 		for _, l := range r.AllLiterals() {
@@ -377,7 +413,7 @@ func (p *Program) PrintFacts() {
 	if len(p.CollectedFacts) == 0 {
 		return
 	}
-	fmt.Println("%% Collected Facts:")
+//	fmt.Println("%% Collected Facts:")
 	for pred := range p.CollectedFacts {
 		for _, tuple := range p.PredicateToTuples[pred] {
 			fmt.Print(pred)
