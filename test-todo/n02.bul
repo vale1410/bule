@@ -1,4 +1,3 @@
 p[1..2].
-~p[X-1], q[X].
-%% here we need to rewrite this rule by introducing fresh variable F, with F==<expr>, and p(F). 
+p[X-1] => q[X].
 

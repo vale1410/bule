@@ -1,4 +1,4 @@
 p[1]. 
 q[2]. 
-~p[X], ~q[X], r[X]. 
+p[X], q[X] => r[X]. 
 %% can be solved with introducing fresh variables

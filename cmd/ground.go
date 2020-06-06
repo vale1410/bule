@@ -160,7 +160,7 @@ func stage2Iterators(p *bule.Program) {
 	changed := true
 	for changed {
 
-		debug(2, "This is round: ", round)
+		debug(2, "Stage 2 round: ", round)
 		round++
 		changed = false
 
@@ -201,12 +201,47 @@ func stage3Clauses(p *bule.Program) {
 		}
 	}
 
-	stageInfo(p, "CollectGroundTuples", "")
-	err = p.CollectGroundTuples()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	changed := true
+	stage(p, &changed,
+		p.CollectExplicitTupleDefinitions,
+		"CollectExplicitTupleDefinitions.",
+		"#exist(T), p(1,2)? %%")
+
+	round := 0
+	for changed {
+		debug(2, "Stage 3 round: ", round)
+		round++
+		changed = false
+
+		stage(p, &changed,
+			p.InstantiateExplicitNonGroundLiterals,
+			"fixpoint(InstantiateExplicitNonGroundLiterals.)",
+			"p(X,Y),q(X).% p is explicit -> p(1,2), q(X).")
+
+		stage(p, &changed,
+			p.ConstraintSimplification,
+			"ConstraintSimplification.",
+			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.", )
+
+		stage(p, &changed,
+			p.RemoveClausesWithExplicitLiteralAndTuplesThatDontExist,
+			"RemoveClausesWithExplicitLiteralAndTuplesThatDontExist",
+			"", )
 	}
+
+	debug(2,"No more non-ground explicit variables!")
+	{
+		err = p.CheckNoExplicitDeclarationAndNonGroundExplicit()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+
+	stage(p, &changed,
+		p.CollectGroundTuples,
+		"CollectGroundTuples", "")
+
 
 	{
 		stageInfo(p, "Ground non-Ground Lits", "Ground from all tuples the non-ground literals, until fixpoint.")
@@ -240,8 +275,8 @@ func stage4Printing(p *bule.Program, args []string) {
 	//			}
 
 	if quantificationFlag {
-		stageInfo(p, "Extract Quantors", "")
-		p.ExtractQuantors()
+//		stageInfo(p, "Extract Quantors", "")
+//		p.ExtractQuantors()
 		stageInfo(p, "Merge Quantification Levels", "")
 		p.MergeConsecutiveQuantificationLevels()
 		debug(2, "Merged alternations:", p.Alternation)

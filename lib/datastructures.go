@@ -7,16 +7,17 @@ import (
 )
 
 type Program struct {
-	Rules             []Rule
-	Constants         map[string]int
-	PredicateToTuples map[Predicate][][]int
-	PredicateToArity  map[Predicate]int
-	ZeroArity         map[Predicate]bool
-	PredicateTupleMap map[string]bool
-	CollectedFacts    map[Predicate]bool
-	Alternation       [][]Literal
-	existQ            map[int][]Literal
-	forallQ           map[int][]Literal
+	Rules                 []Rule
+	Constants             map[string]int
+	FinishCollectingFacts map[Predicate]bool
+	PredicateToTuples     map[Predicate][][]int
+	PredicateToArity      map[Predicate]int
+	ZeroArity             map[Predicate]bool
+	Explicit              map[Predicate]bool
+	PredicateTupleMap     map[string]bool
+	Alternation           [][]Literal
+	existQ                map[int][]Literal
+	forallQ               map[int][]Literal
 }
 
 type Rule struct {
@@ -108,11 +109,11 @@ func (iterator Iterator) Copy() (newGen Iterator) {
 func (rule Rule) Copy() (newRule Rule) {
 	newRule = rule
 	newRule.Constraints = []Constraint{}
-	newRule.Generators= []Literal{}
+	newRule.Generators = []Literal{}
 	newRule.Literals = []Literal{}
 	newRule.Iterators = []Iterator{}
-	for _, g := range rule.Generators{
-		newRule.Generators= append(newRule.Generators, g.Copy())
+	for _, g := range rule.Generators {
+		newRule.Generators = append(newRule.Generators, g.Copy())
 	}
 	for _, c := range rule.Constraints {
 		newRule.Constraints = append(newRule.Constraints, c.Copy())
@@ -191,7 +192,7 @@ func (rule *Rule) Debug() string {
 	p := rule.Parent
 	s := "\n  "
 	for p != nil {
-		sb.WriteString(s + "╚ " +  p.String())
+		sb.WriteString(s + "╚ " + p.String())
 		s += "  "
 		p = p.Parent
 	}
@@ -243,7 +244,7 @@ func (rule *Rule) String() string {
 
 func (p *Program) Debug() {
 	fmt.Println("Constants:", p.Constants)
-	fmt.Println("Collected Facts", p.CollectedFacts)
+	fmt.Println("Collected Facts", p.FinishCollectingFacts)
 	fmt.Println("PredicatFact", p.PredicateTupleMap)
 	fmt.Println("PredicatsToTuples", p.PredicateToTuples)
 	for _, r := range p.Rules {
@@ -302,19 +303,41 @@ func (err LiteralError) Error() string {
 	return sb.String()
 }
 
+func (p *Program) CheckNoExplicitDeclarationAndNonGroundExplicit() error {
+	for _, r := range p.Rules {
+		for _, l := range r.AllLiterals() {
+			if p.Explicit[l.Name] && !l.IsGround()  {
+				return LiteralError{
+					*l,
+					r,
+					"Every explicit literal should be ground now!",
+				}
+			}
+			if l.Name.String() == "#exist" || l.Name.String() == "#forall" {
+				return LiteralError{
+					*l,
+					r,
+					"Should not have any exist literals anymore!",
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (p *Program) CheckNoGeneratorsOrIterators() error {
 	for _, r := range p.Rules {
 		if len(r.Generators) > 0 {
 			return RuleError{
 				r,
-				"Should not have any generators anymore!" ,
+				"Should not have any generators anymore!",
 				fmt.Errorf("Rule is not free of Generators"),
 			}
 		}
 		if len(r.Iterators) > 0 {
 			return RuleError{
 				r,
-				"Should not have any Iterators anymore!" ,
+				"Should not have any Iterators anymore!",
 				fmt.Errorf("Rule is not free of Iterators: %v", r.Iterators),
 			}
 		}
@@ -410,11 +433,11 @@ func (p *Program) PrintRules() {
 }
 
 func (p *Program) PrintFacts() {
-	if len(p.CollectedFacts) == 0 {
+	if len(p.FinishCollectingFacts) == 0 {
 		return
 	}
-//	fmt.Println("%% Collected Facts:")
-	for pred := range p.CollectedFacts {
+	//	fmt.Println("%% Collected Facts:")
+	for pred := range p.FinishCollectingFacts {
 		for _, tuple := range p.PredicateToTuples[pred] {
 			fmt.Print(pred)
 			for i, t := range tuple {

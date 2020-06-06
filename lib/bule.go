@@ -54,6 +54,45 @@ func (p *Program) ExpandGroundRanges() (changed bool, err error) {
 	}
 	return p.TermExpansion(check, transform)
 }
+// This resolves facts with clauses.
+func (p *Program) InstantiateExplicitNonGroundLiterals() (changed bool, err error) {
+	// Find rule with non-ground literal that is going to be rolled out
+	check := func(r Rule) bool {
+		for _, lit := range r.Literals {
+			if p.Explicit[lit.Name] && !lit.FreeVars().IsEmpty() {
+				return true
+			}
+		}
+		return false
+	}
+
+	transform := func(rule Rule) (generatedRules []Rule, err error) {
+
+		var litNG Literal // First non-Ground literal
+		var i int
+		for i, litNG = range rule.Literals {
+			if p.Explicit[litNG.Name] && !litNG.FreeVars().IsEmpty() {
+				break
+			}
+		}
+
+		for _, tuple := range p.findFilteredTuples(litNG) {
+			newRule := rule.Copy()
+			for j, val := range tuple {
+				newRule.Literals[i].Terms[j] = Term(strconv.Itoa(val))
+				newConstraint := Constraint{
+					LeftTerm:   litNG.Terms[j],
+					RightTerm:  Term(strconv.Itoa(val)),
+					Comparison: tokenComparisonEQ,
+				}
+				newRule.Constraints = append(newRule.Constraints, newConstraint)
+			}
+			generatedRules = append(generatedRules, newRule)
+		}
+		return generatedRules, err
+	}
+	return p.RuleExpansion(check, transform)
+}
 
 // This resolves facts with clauses.
 func (p *Program) InstantiateNonGroundLiterals() (changed bool, err error) {
@@ -120,7 +159,7 @@ func (p *Program) InstantiateAndRemoveFactFromIterator() (changed bool, err erro
 	check := func(r Rule) bool {
 		for _, iter := range r.Iterators {
 			for _, lit := range iter.Conditionals {
-				if p.CollectedFacts[lit.Name] && lit.Neg == false {
+				if p.FinishCollectingFacts[lit.Name] && lit.Neg == false {
 					return true
 				}
 			}
@@ -137,7 +176,7 @@ func (p *Program) InstantiateAndRemoveFactFromIterator() (changed bool, err erro
 		found := false
 		for i, iter = range rule.Iterators {
 			for j, fact = range iter.Conditionals {
-				if p.CollectedFacts[fact.Name] && fact.Neg == false {
+				if p.FinishCollectingFacts[fact.Name] && fact.Neg == false {
 					found = true
 					break
 				}
@@ -178,7 +217,7 @@ func (p *Program) InstantiateAndRemoveFactFromGenerator() (changed bool, err err
 	// Find rule with fact
 	check := func(r Rule) bool {
 		for _, lit := range r.Generators {
-			if p.CollectedFacts[lit.Name] && lit.Neg == false {
+			if p.FinishCollectingFacts[lit.Name] && lit.Neg == false {
 				return true
 			}
 		}
@@ -190,7 +229,7 @@ func (p *Program) InstantiateAndRemoveFactFromGenerator() (changed bool, err err
 		var fact Literal
 		var i int
 		for i, fact = range rule.Generators {
-			if p.CollectedFacts[fact.Name] && fact.Neg == false {
+			if p.FinishCollectingFacts[fact.Name] && fact.Neg == false {
 				break
 			}
 		}
@@ -230,7 +269,7 @@ func (p *Program) InsertLiteralTuple(lit Literal) error {
 
 func (p *Program) RemoveNegatedGroundGenerator() (changed bool, err error) {
 	removeIfTrue := func(literal Literal) bool {
-		if p.CollectedFacts[literal.Name] &&
+		if p.FinishCollectingFacts[literal.Name] &&
 			literal.IsGround() &&
 			literal.Neg == true &&
 			p.PredicateTupleMap[literal.String()] == false {
@@ -256,7 +295,7 @@ func (p *Program) RemoveNegatedGroundGenerator() (changed bool, err error) {
 func (p *Program) RemoveRulesWithNegatedGroundGenerator() (changed bool, err error) {
 	removeIfTrue := func(r Rule) bool {
 		for _, literal := range r.Generators {
-			if p.CollectedFacts[literal.Name] &&
+			if p.FinishCollectingFacts[literal.Name] &&
 				literal.IsGround() &&
 				literal.Neg == true &&
 				p.PredicateTupleMap[literal.createNegatedLiteral().String()] == true {
@@ -268,12 +307,12 @@ func (p *Program) RemoveRulesWithNegatedGroundGenerator() (changed bool, err err
 	return p.RemoveRules(removeIfTrue)
 }
 
-/// // A fact is fully collected if it does not occur as a head in any rule.
-/// func (p *Program) DetermineIfFactIsFullyCollected() (changed bool, err error) {
-/// 	p.CollectedFacts[lit.Name] = true
-///
-/// }
-///
+// // A fact is fully collected if it does not occur as a head in any rule.
+// func (p *Program) DetermineIfFactIsFullyCollected() (changed bool, err error) {
+// 	inHead := make(map[Predicate]bool,0)
+// 	p.FinishCollectingFacts[lit.Name] = true
+//
+// }
 
 func (p *Program) CollectGroundFacts() (changed bool, err error) {
 
@@ -298,7 +337,7 @@ func (p *Program) CollectGroundFacts() (changed bool, err error) {
 		if !p.PredicateTupleMap[lit.String()] {
 			p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], res)
 			p.PredicateTupleMap[lit.String()] = true
-			p.CollectedFacts[lit.Name] = true
+			p.FinishCollectingFacts[lit.Name] = true
 		}
 		return
 	}
@@ -594,14 +633,103 @@ func (rule *Rule) Simplify(assignment map[string]int) (bool, error) {
 	return TermTranslation(rule, transform)
 }
 
-func (p *Program) CollectGroundTuples() error {
+// Check if rule contains #exist or #forall literal!
+// At this version of BULE it has to have exactly 2 literals, be ground etc.
+// Then take literal and add tuple and add to quantification level
+
+func (p *Program) CollectExplicitTupleDefinitions() (bool, error) {
+	p.forallQ = make(map[int][]Literal, 0)
+	p.existQ = make(map[int][]Literal, 0)
+
+	check := func(r Rule) bool {
+		if r.IsQuestionMark == true {
+			return true
+		}
+		for _, l := range r.Literals {
+			if l.Name == "#exist" || l.Name == "#forall" {
+				return true
+			}
+		}
+
+		//if len(r.Literals) == 2 &&
+		//	(r.Literals[0].Name == "#exist" || r.Literals[0].Name == "#forall") {
+		//	return true
+		//}
+		return false
+	}
+
+	transform := func(rule Rule) ([]Rule, error) {
+		if !rule.IsQuestionMark {
+			return []Rule{}, RuleError{
+				R:       rule,
+				Message: "Must have questions mark!",
+				Err:     nil,
+			}
+		}
+		if !rule.IsGround() {
+			return []Rule{}, RuleError{
+				R:       rule,
+				Message: "Must be ground when explicit collection takes place!",
+				Err:     nil,
+			}
+		}
+		if len(rule.Literals) != 2 &&
+			(rule.Literals[0].Name == "#exist" || rule.Literals[0].Name == "#forall") {
+			return []Rule{}, RuleError{
+				R:       rule,
+				Message: "The clause must have exactly 2 literals (first is quantifier of exist or forall, second literal)!",
+				Err:     nil,
+			}
+		}
+		err := p.InsertLiteralTuple(rule.Literals[1])
+		if err != nil {
+			err = LiteralError{
+				L:       rule.Literals[1],
+				R:       rule,
+				Message: fmt.Sprintf("%v", err),
+			}
+		}
+
+		p.Explicit[rule.Literals[1].Name] = true
+		quantification := rule.Literals[0]
+		if len(quantification.Terms) != 1 {
+			return []Rule{}, LiteralError{
+				L:       quantification,
+				R:       rule,
+				Message: fmt.Sprintf("Wrong arity %v, should be 1",len(quantification.Terms) ),
+			}
+		}
+		val, err := evaluateTermExpression(quantification.Terms[0].String())
+		if err != nil {
+			return []Rule{}, LiteralError{
+				L:       quantification,
+				R:       rule,
+				Message: fmt.Sprintf("Cant evaluate, not ground", quantification.Terms[0]),
+			}
+		}
+		switch quantification.Name {
+		case "#forall":
+			p.forallQ[val] = append(p.forallQ[val], rule.Literals[1:]...)
+		case "#exist":
+			p.existQ[val] = append(p.existQ[val], rule.Literals[1:]...)
+		default:
+			err = fmt.Errorf("First literal in clause must be #forall or #exist. %v", rule)
+		}
+
+		return []Rule{}, err
+	}
+
+	return p.RuleExpansion(check, transform)
+}
+
+func (p *Program) CollectGroundTuples() (bool,error) {
 
 	for _, r := range p.Rules {
 		for _, literal := range r.Literals {
 			if literal.IsGround() {
 				err := p.InsertLiteralTuple(literal)
 				if err != nil {
-					return LiteralError{
+					return true,LiteralError{
 						L:       literal,
 						R:       r,
 						Message: fmt.Sprintf("%v", err),
@@ -610,23 +738,22 @@ func (p *Program) CollectGroundTuples() error {
 			}
 		}
 	}
-	return nil
+	return true,nil
 }
 
-// Probably deprecated
-//  // // At this point no clauses should exist that contains a fact
-//  // // So we remove all of them that do contain one.
-//  // func (p *Program) RemoveClausesWithFacts() bool {
-//  // 	removeIfTrue := func(rule Rule) bool {
-//  // 		for _, lit := range rule.Conditionals {
-//  // 			if !lit.Fact && !lit.IsGround() {
-//  // 				return true
-//  // 			}
-//  // 		}
-//  // 		return false
-//  // 	}
-//  // 	return p.RemoveRules(removeIfTrue)
-//  // }
+func (p *Program) RemoveClausesWithExplicitLiteralAndTuplesThatDontExist() (bool, error) {
+	removeIfTrue := func(rule Rule) bool {
+		for _, lit := range rule.Literals {
+			if p.Explicit[lit.Name] && lit.FreeVars().IsEmpty() {
+				if !p.PredicateTupleMap[lit.String()] {
+					return true
+				}
+			}
+		}
+		return false
+	}
+	return p.RemoveRules(removeIfTrue)
+}
 
 func (p *Program) RemoveClausesWithTuplesThatDontExist() (bool, error) {
 	removeIfTrue := func(rule Rule) bool {
