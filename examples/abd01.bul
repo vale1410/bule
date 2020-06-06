@@ -1,0 +1,17 @@
+
+
+fact[3]. 
+
+#exist(0), s(2).
+fact[X] =>  #forall(X), r(X).
+fact[X] =>  #exist(X), s(X).
+fact[X] =>  #forall(X), t(X).
+s(2).
+r(X), s(X), t(X). 
+
+
+
+r(X), t(X). 
+
+:- dom(X), not r(X), not t(X). 
+
