@@ -1,9 +1,9 @@
-Bule 2.0: A simple CNF Generator
-================================
+The SAT Programming Framework Bule
+=================================
 
 Bule is a tool to create beautiful CNF encodings.
-At first Bule is a grounder for the modelling language Bule. 
-Second, Bule provides a front end for various SAT technologies. 
+Bule is a sophisticated grounder for the modelling language Bule that translates to CNF for SAT Solving. 
+Bule provides a front end for various SAT technologies. 
 
 Features
 --------
