@@ -205,11 +205,11 @@ func stage3Clauses(p *bule.Program) {
 	stage(p, &changed,
 		p.CollectExplicitTupleDefinitions,
 		"CollectExplicitTupleDefinitions.",
-		"#exist(T), p(1,2)? %%")
+		"#exist(3), p(1,2)? %% Then remove this rule.")
 
 	round := 0
 	for changed {
-		debug(2, "Stage 3 round: ", round)
+		debug(2, "Stage 3 iteration; round: ", round)
 		round++
 		changed = false
 

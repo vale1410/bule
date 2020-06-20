@@ -1,6 +1,6 @@
 dom[1..2,1..2].
 init[1,1].
 
-dom[X,Y] => #exist(0), board(X,Y). 
+dom[X,Y] => #exist(0), board(X,Y)?
 dom[X,Y], ~init[X,Y] => board(X,Y). 
 ~board(X,Y), ~board(X-1,Y+1).

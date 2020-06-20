@@ -1,7 +1,3 @@
-#exist(0), board(1,1).
-#exist(0), board(1,2).
-#exist(0), board(2,1).
-#exist(0), board(2,2).
 board(1,1).
 dom[1,1].
 dom[1,2].

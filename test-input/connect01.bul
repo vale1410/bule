@@ -1,3 +1,6 @@
-dom[0..2]. 
+dom[0..3]. 
 
-T#mod2==0, dom[T] => #exist(T), move(X,T):dom[X].
+T#mod2==0, dom[T], dom[X] => #exist(T), move(X,T) ?
+T#mod2==1, dom[T], dom[X] => #forall(T), move(X,T) ?
+
+dom[T] => move(X,T):dom[X].

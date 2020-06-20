@@ -69,7 +69,7 @@ func ParseProgramFromStrings(lines []string) (p Program, err error) {
 		}
 
 		acc += s
-		if !strings.HasSuffix(s, ".") {
+		if !(strings.HasSuffix(s, ".") || strings.HasSuffix(s, "?")) {
 			continue
 		}
 
@@ -320,6 +320,7 @@ func splitIntoTwo(tokens []Token, kinds map[tokenKind]bool) (left Tokens, sep to
 		left = res[0].tokens
 		right = res[1].tokens
 	default:
+		fmt.Println(res)
 		asserts(false, fmt.Sprintf("More than 2 occurences Seperators. "+
 			"Parsing problem with rule tokens %v with kinds %v \n ", tokens, kinds))
 	}
@@ -446,12 +447,12 @@ func printToken(kind tokenKind) (s string) {
 		s = "COLON"
 	case token2TermExpression:
 		s = "TERM"
-	//case tokenConstraint:
-	//	s = "CONSTRAINT"
 	case tokenEquivalence:
 		s = "EQUIVALENCE"
 	case tokenImplication:
 		s = "IMPLICATION"
+	case tokenQuestionsmark:
+		s = "QUESTIONMARK"
 	case tokenDot:
 		s = "DOT"
 	case tokenDoubleDot:
@@ -603,6 +604,9 @@ func lexRuleElement(l *lexer) (fn stateFn) {
 	case r == eof:
 		l.emit(tokenEOF)
 		fn = nil
+	case r == '?':
+		l.emit(tokenQuestionsmark)
+		fn = lexRuleElement
 	case r == '.':
 		l.emit(tokenDot)
 		fn = lexRuleElement

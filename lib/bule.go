@@ -54,6 +54,7 @@ func (p *Program) ExpandGroundRanges() (changed bool, err error) {
 	}
 	return p.TermExpansion(check, transform)
 }
+
 // This resolves facts with clauses.
 func (p *Program) InstantiateExplicitNonGroundLiterals() (changed bool, err error) {
 	// Find rule with non-ground literal that is going to be rolled out
@@ -634,38 +635,34 @@ func (rule *Rule) Simplify(assignment map[string]int) (bool, error) {
 }
 
 // Check if rule contains #exist or #forall literal!
-// At this version of BULE it has to have exactly 2 literals, be ground etc.
+// At this version of BULE it has to have exactly 2 literals, be ground, and have question mark!
 // Then take literal and add tuple and add to quantification level
 
 func (p *Program) CollectExplicitTupleDefinitions() (bool, error) {
 	p.forallQ = make(map[int][]Literal, 0)
 	p.existQ = make(map[int][]Literal, 0)
+	p.Explicit = make(map[Predicate]bool, 0)
 
 	check := func(r Rule) bool {
 		if r.IsQuestionMark == true {
 			return true
 		}
-		for _, l := range r.Literals {
-			if l.Name == "#exist" || l.Name == "#forall" {
-				return true
-			}
-		}
-
-		//if len(r.Literals) == 2 &&
-		//	(r.Literals[0].Name == "#exist" || r.Literals[0].Name == "#forall") {
-		//	return true
+		//for _, l := range r.Literals {
+		//	if l.Name == "#exist" || l.Name == "#forall" {
+		//		return true
+		//	}
 		//}
 		return false
 	}
 
 	transform := func(rule Rule) ([]Rule, error) {
-		if !rule.IsQuestionMark {
-			return []Rule{}, RuleError{
-				R:       rule,
-				Message: "Must have questions mark!",
-				Err:     nil,
-			}
-		}
+		//if !rule.IsQuestionMark {
+		//	return []Rule{}, RuleError{
+		//		R:       rule,
+		//		Message: "Must have questions mark!",
+		//		Err:     nil,
+		//	}
+		//}
 		if !rule.IsGround() {
 			return []Rule{}, RuleError{
 				R:       rule,
@@ -686,7 +683,7 @@ func (p *Program) CollectExplicitTupleDefinitions() (bool, error) {
 			err = LiteralError{
 				L:       rule.Literals[1],
 				R:       rule,
-				Message: fmt.Sprintf("%v", err),
+				Message: fmt.Sprintf("Could not insert tuple into db. %v", err),
 			}
 		}
 
@@ -709,9 +706,9 @@ func (p *Program) CollectExplicitTupleDefinitions() (bool, error) {
 		}
 		switch quantification.Name {
 		case "#forall":
-			p.forallQ[val] = append(p.forallQ[val], rule.Literals[1:]...)
+			p.forallQ[val] = append(p.forallQ[val], rule.Literals[1])
 		case "#exist":
-			p.existQ[val] = append(p.existQ[val], rule.Literals[1:]...)
+			p.existQ[val] = append(p.existQ[val], rule.Literals[1])
 		default:
 			err = fmt.Errorf("First literal in clause must be #forall or #exist. %v", rule)
 		}

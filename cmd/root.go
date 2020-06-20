@@ -38,12 +38,12 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "bule",
+	Use:   "bule ground",
 	Short: "Bule provides SAT Programming at its best!",
 	Long: `
-Bule 2.0: A simple CNF Generator
+Bule 2.3: The SAT Programming System BULE
 
-Bule is a tool to create beautiful CNF encodings. Bule is part of the
+Bule is a tool to program CNF encodings. Bule is part of the
 SAT Programming paradigm and provides easy access and handling of SAT
 technologies such at SAT Solving, QBF, MaxSAT or Approx. Model Counting.
 `,

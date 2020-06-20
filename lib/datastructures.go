@@ -12,7 +12,7 @@ type Program struct {
 	FinishCollectingFacts map[Predicate]bool
 	PredicateToTuples     map[Predicate][][]int
 	PredicateToArity      map[Predicate]int
-	ZeroArity             map[Predicate]bool
+//	ZeroArity             map[Predicate]bool // TODO: do we still need this or can be removed?
 	Explicit              map[Predicate]bool
 	PredicateTupleMap     map[string]bool
 	Alternation           [][]Literal
@@ -362,23 +362,23 @@ func (p *Program) CheckFactsInIterators() error {
 	return nil
 }
 
-func (p *Program) TreatZeroArityOfLiterals() error {
-	// Fix zero arity predicates to a pseudo 1 arity with value 0
-	for _, r := range p.Rules {
-		all := r.AllLiterals()
-		for _, l := range all {
-			if len(l.Terms) == 0 {
-				p.ZeroArity[l.Name] = true
-				l.Terms = []Term{"0"}
-				if len(all) == 1 {
-					l.Fact = true
-
-				}
-			}
-		}
-	}
-	return nil
-}
+//func (p *Program) TreatZeroArityOfLiterals() error {
+//	// Fix zero arity predicates to a pseudo 1 arity with value 0
+//	for _, r := range p.Rules {
+//		all := r.AllLiterals()
+//		for _, l := range all {
+//			if len(l.Terms) == 0 {
+//				p.ZeroArity[l.Name] = true
+//				l.Terms = []Term{"0"}
+//				if len(all) == 1 {
+//					l.Fact = true
+//
+//				}
+//			}
+//		}
+//	}
+//	return nil
+//}
 
 func (p *Program) CheckArityOfLiterals() error {
 
