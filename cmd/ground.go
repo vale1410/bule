@@ -100,6 +100,7 @@ func stage0Prerequisites(p *bule.Program) {
 		err := p.CheckUnboundVariables()
 		if err != nil {
 			fmt.Println(err)
+			fmt.Println("XXX")
 			os.Exit(1)
 		}
 	}

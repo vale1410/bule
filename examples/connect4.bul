@@ -44,31 +44,17 @@ domT[T] => turn[T,T#mod2].
 domC[C], domC[I], 2**(I-1) <= c => chooseC[C,I-1,((C-1)/(2**(I-1)))#mod2]. 
 chooseC[_,I,_] => bitC[I]. 
 
-move(1,1,1).
-move(0,3,2).
-move(1,2,3).
-~occupied(2,2,3).
-%occupied(2,2,4).
-occupied(2,1,3).
-%~board(2,2).
-%moveL(0,4).
-%~moveL(1,4).
-%move(0,2,4).
-%move(1,3,5).
-
-
-domT[T]                          => #exist(T-1) , time(T).
-%white[A], bitC[I], turn[T,A], T>2    => #forall(T), moveL(I,T).  %% FIXME
-white[A], bitC[I], turn[T,A]     => #exist(T), moveL(I,T).  %% FIXME
-black[A], bitC[I], turn[T,A]     => #exist(T), moveL(I,T). 
-turn[T,A], domC[C]               => #exist(T) , move(A,C,T).    
-%domC[C], domR0[R], domT0[T], R <= T  => #exist(T) , occupied(C,R,T). 
-domC[C], domR0[R], domT0[T]      => #exist(T) , occupied(C,R,T). 
-dom[C,R]                         => #exist(d) , board(C,R).
-dom[C,R], C+(q-1)<=c, R<=r       => #exist(d) , win(C,R,1).  
-dom[C,R], C<=c , R+(q-1)<=r      => #exist(d) , win(C,R,2).  
-dom[C,R], C+q-1<=c,R+q-1<=r      => #exist(d) , win(C,R,3).  
-dom[C,R], C+q-1<=c,R+q-1<=r      => #exist(d) , win(C,R,4).  
+domT[T]                           => #exist(T-1) , time(T).
+white[A], bitC[I], turn[T,A], T>2 => #forall(T), moveL(I,T). 
+black[A], bitC[I], turn[T,A]      => #exist(T), moveL(I,T). 
+turn[T,A], domC[C]                => #exist(T) , move(A,C,T).    
+domC[C], domR0[R], domT0[T], R <= T  => #exist(T) , occupied(C,R,T). 
+%%domC[C], domR0[R], domT0[T]       => #exist(T) , occupied(C,R,T). 
+dom[C,R]                          => #exist(d) , board(C,R).
+dom[C,R], C+(q-1)<=c, R<=r        => #exist(d) , win(C,R,1).  
+dom[C,R], C<=c , R+(q-1)<=r       => #exist(d) , win(C,R,2).  
+dom[C,R], C+q-1<=c,R+q-1<=r       => #exist(d) , win(C,R,3).  
+dom[C,R], C+q-1<=c,R+q-1<=r       => #exist(d) , win(C,R,4).  
 
 ~time(T+1), time(T).
 %% white[A], turn[T,A] => ~time(T), time(T+1). %% Dont stop game at whites turn; optional
@@ -81,22 +67,22 @@ dom[C,R], C+q-1<=c,R+q-1<=r      => #exist(d) , win(C,R,4).
 %%dom[C,R], ~init[_,C,R] => ~occupied(C,1,0).
 %%           init[_,C,R] => occupied[C,R,d].
 
-%domC[C], domR[R] => ~occupied(C,R,0).
+domC[C], domR[R] => ~occupied(C,R,0).
 ~occupied(_C,1,0).
 occupied(_C,0,0).
 
 black[A], chooseC[C,I,0] => ~move(A,C,T), ~moveL(I,T).
 black[A], chooseC[C,I,1] => ~move(A,C,T), moveL(I,T).
 
-white[A], chooseC[C,I,0] => ~move(A,C,T), ~moveL(I,T). %%FIXME
-white[A], chooseC[C,I,1] => ~move(A,C,T), moveL(I,T).%%FIXME
+%% white[A], chooseC[C,I,0] => ~move(A,C,T), ~moveL(I,T). %%FIXME
+%% white[A], chooseC[C,I,1] => ~move(A,C,T), moveL(I,T).%%FIXME
 
-%%white[A], domC[C] => %% UNFIXME
-%%    occupied(C,r,T-1),    %% Column is not completely full 
-%%    ~time(T),           %% Game is still running 
-%%     moveL(I,T) : chooseC[C,I,0], 
-%%    ~moveL(I,T) : chooseC[C,I,1], 
-%%    move(A,C,T).        %% White makes a move in column C!
+white[A], domC[C] =>
+    occupied(C,r,T-1),    %% Column is not completely full 
+    ~time(T),           %% Game is still running 
+     moveL(I,T) : chooseC[C,I,0], 
+    ~moveL(I,T) : chooseC[C,I,1], 
+    move(A,C,T).        %% White makes a move in column C!
 
 ~occupied(C,R,T-1),   occupied(C,R,T).  %% board positions dont change
 ~occupied(C,R+1,T+1), occupied(C,R,T).  %% no jumps  (implies gravity)
@@ -105,7 +91,6 @@ move(_,C,T), occupied(C,R,T-1), ~occupied(C,R,T).  %% if board changes, then col
 ~move(_,C,T), ~occupied(C,r,T-1). %% No moves in a column that was full in previous T
 
 %~occupied(C,R-1,T-1), occupied(C,R,T-1), ~move(_A,C,T), board(C,R,T). 
-
 
 occupied(C,R,d), ~board(C,R).
 white[A], turn[T,A] => occupied(C,R,T-1), ~occupied(C,R,T), ~board(C,R).

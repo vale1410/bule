@@ -284,7 +284,9 @@ type RuleError struct {
 func (err RuleError) Error() string {
 	var sb strings.Builder
 	sb.WriteString(err.Message + ":\n")
-	sb.WriteString(err.Err.Error() + ":\n")
+	if err.Err != nil {
+		sb.WriteString(err.Err.Error() + ":\n")
+	}
 	sb.WriteString("Rule \n" + err.R.Debug() + "\n")
 	return sb.String()
 }
