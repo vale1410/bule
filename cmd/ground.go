@@ -289,8 +289,9 @@ func stage4Printing(p *bule.Program, args []string) {
 		p.PrintFacts()
 	}
 
-	unitSlice := args[1:]
 	if unitPropagationFlag || !textualFlag {
+		//unitSlice := args[1:] \\TODO FIXME
+		unitSlice := []string{}
 		units := convertArgsToUnits(unitSlice)
 		clauseProgram := translateFromRuleProgram(*p, units)
 		clauseProgram.Print()
