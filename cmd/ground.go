@@ -111,7 +111,7 @@ func stage1GeneratorsAndFacts(p *bule.Program) {
 	changed := true
 	for changed {
 
-		debug(2, "This is round: ", round)
+		debug(2, "STAGE 0: This is round: ", round)
 		round++
 		changed = false
 
@@ -154,6 +154,11 @@ func stage1GeneratorsAndFacts(p *bule.Program) {
 			"RemoveNegatedGroundGenerator",
 			"~p[1,2]=> q(1,2) and p[1,2] is a fact, then remove from generators!", )
 	}
+
+	stage(p, &changed,
+		p.RemoveRulesWithGenerators,
+		"RemoveRulesWithGeneratorsBecauseTheyHaveEmptyDomains",
+		"Because they have empty domains, e.g. \n edge[_,_,V] => vertex[V]. %% there are no edges!", )
 }
 
 func stage2Iterators(p *bule.Program) {
@@ -189,6 +194,13 @@ func stage2Iterators(p *bule.Program) {
 			"ConvertHeadOnlyIteratorsToLiterals.",
 			"p(1,2) -> p(1,2) %% but now as literal!", )
 	}
+
+
+	stage(p, &changed,
+		p.RemoveLiteralsWithEmptyIterators,
+		"RemoveLiteralsWithEmptyIterators",
+		"win(E):edgeId[1,E]. %% edgeId is empty \n Remove!", )
+
 }
 
 func stage3Clauses(p *bule.Program) {
@@ -230,7 +242,7 @@ func stage3Clauses(p *bule.Program) {
 			"", )
 	}
 
-	debug(2,"No more non-ground explicit variables!")
+	debug(2, "No more non-ground explicit variables!")
 	{
 		err = p.CheckNoExplicitDeclarationAndNonGroundExplicit()
 		if err != nil {
@@ -242,7 +254,6 @@ func stage3Clauses(p *bule.Program) {
 	stage(p, &changed,
 		p.CollectGroundTuples,
 		"CollectGroundTuples", "")
-
 
 	{
 		stageInfo(p, "Ground non-Ground Lits", "Ground from all tuples the non-ground literals, until fixpoint.")
@@ -276,8 +287,8 @@ func stage4Printing(p *bule.Program, args []string) {
 	//			}
 
 	if quantificationFlag {
-//		stageInfo(p, "Extract Quantors", "")
-//		p.ExtractQuantors()
+		//		stageInfo(p, "Extract Quantors", "")
+		//		p.ExtractQuantors()
 		stageInfo(p, "Merge Quantification Levels", "")
 		p.MergeConsecutiveQuantificationLevels()
 		debug(2, "Merged alternations:", p.Alternation)
@@ -308,13 +319,13 @@ func stage(p *bule.Program, change *bool, f func() (bool, error), stage string, 
 		os.Exit(1)
 	}
 	if tmp {
-		debug(2,"Stage changed Program!")
+		debug(2, "Stage changed Program!")
 	}
 	*change = *change || tmp
 }
 
 func runFixpoint(f func() (bool, error)) func() (bool, error) {
-	return func() (changed bool, err error){
+	return func() (changed bool, err error) {
 		ok := true
 		for ok {
 			ok, err = f()

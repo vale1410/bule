@@ -738,6 +738,26 @@ func (p *Program) CollectGroundTuples() (bool,error) {
 	return true,nil
 }
 
+func (p *Program) RemoveRulesWithGenerators() (bool, error) {
+	removeIfTrue := func(rule Rule) bool {
+		if len(rule.Generators) > 0 {
+			return true
+		}
+		return false
+	}
+	return p.RemoveRules(removeIfTrue)
+}
+
+func (p *Program) RemoveLiteralsWithEmptyIterators() (bool, error) {
+	removeIfTrue := func(rule Rule) bool {
+		if len(rule.Iterators) > 0 {
+			return true
+		}
+		return false
+	}
+	return p.RemoveRules(removeIfTrue)
+}
+
 func (p *Program) RemoveClausesWithExplicitLiteralAndTuplesThatDontExist() (bool, error) {
 	removeIfTrue := func(rule Rule) bool {
 		for _, lit := range rule.Literals {

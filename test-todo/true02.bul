@@ -1,0 +1,11 @@
+dom[1..4]. 
+
+dom[X] => #exist(0), p(X)?
+dom[X] => #exist(0), q(X)?
+dom[X] => #exist(0), r(X)?
+dom[X] => #exist(0), s(X)?
+
+r(_). 
+s(X):dom[X]. 
+p(_):#true. 
+q(X):#true. 

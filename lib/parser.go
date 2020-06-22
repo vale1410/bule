@@ -25,6 +25,7 @@ func ParseProgram(fileNames []string) (Program, error) {
 		}
 		file.Close()
 	}
+
 	return ParseProgramFromStrings(lines)
 }
 
