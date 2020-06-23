@@ -41,7 +41,7 @@ var rootCmd = &cobra.Command{
 	Use:   "bule ground",
 	Short: "Bule provides SAT Programming at its best!",
 	Long: `
-Bule 2.3: The SAT Programming System BULE
+Bule 2.4: The SAT Programming System BULE
 
 Bule is a tool to program CNF encodings. Bule is part of the
 SAT Programming paradigm and provides easy access and handling of SAT
