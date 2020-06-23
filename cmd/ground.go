@@ -100,7 +100,6 @@ func stage0Prerequisites(p *bule.Program) {
 		err := p.CheckUnboundVariables()
 		if err != nil {
 			fmt.Println(err)
-			fmt.Println("XXX")
 			os.Exit(1)
 		}
 	}
@@ -133,6 +132,11 @@ func stage1GeneratorsAndFacts(p *bule.Program) {
 			p.CollectGroundFacts,
 			"CollectGroundFacts",
 			"Example: p[1,2]. r[1]. but not p[1],p[2]. and also not p[X,X], or p[1,X].")
+
+		stage(p, &changed,
+			p.FindFactsThatAreFullyCollected,
+			"FindFactsThatAreFullyCollected",
+			"Of all facts that do not occur in the head, they will be set to FinishedCollection.")
 
 		stage(p, &changed,
 			p.InstantiateAndRemoveFactFromGenerator,
@@ -315,6 +319,7 @@ func stage(p *bule.Program, change *bool, f func() (bool, error), stage string, 
 	stageInfo(p, stage, info)
 	tmp, err := f()
 	if err != nil {
+		fmt.Println("ERROR IN STAGE:")
 		fmt.Println(err)
 		os.Exit(1)
 	}

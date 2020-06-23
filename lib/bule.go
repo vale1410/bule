@@ -60,7 +60,7 @@ func (p *Program) InstantiateExplicitNonGroundLiterals() (changed bool, err erro
 	// Find rule with non-ground literal that is going to be rolled out
 	check := func(r Rule) bool {
 		for _, lit := range r.Literals {
-			if p.Explicit[lit.Name] && !lit.FreeVars().IsEmpty() {
+			if p.PredicateExplicit[lit.Name] && !lit.FreeVars().IsEmpty() {
 				return true
 			}
 		}
@@ -72,7 +72,7 @@ func (p *Program) InstantiateExplicitNonGroundLiterals() (changed bool, err erro
 		var litNG Literal // First non-Ground literal
 		var i int
 		for i, litNG = range rule.Literals {
-			if p.Explicit[litNG.Name] && !litNG.FreeVars().IsEmpty() {
+			if p.PredicateExplicit[litNG.Name] && !litNG.FreeVars().IsEmpty() {
 				break
 			}
 		}
@@ -308,12 +308,23 @@ func (p *Program) RemoveRulesWithNegatedGroundGenerator() (changed bool, err err
 	return p.RemoveRules(removeIfTrue)
 }
 
-// // A fact is fully collected if it does not occur as a head in any rule.
-// func (p *Program) DetermineIfFactIsFullyCollected() (changed bool, err error) {
-// 	inHead := make(map[Predicate]bool,0)
-// 	p.FinishCollectingFacts[lit.Name] = true
-//
-// }
+// A fact is fully collected if it does not occur as a head in any rule.
+func (p *Program) FindFactsThatAreFullyCollected() (changed bool, err error) {
+	existInHead := make(map[Predicate]bool)
+	for _, r := range p.Rules {
+		if len(r.Literals) == 1 &&
+			r.Literals[0].Fact {
+			existInHead[r.Literals[0].Name] = true
+		}
+	}
+	for key, value := range p.FinishCollectingFacts {
+		if !value && !existInHead[key] {
+			p.FinishCollectingFacts[key] = true
+			changed = true
+		}
+	}
+	return
+}
 
 func (p *Program) CollectGroundFacts() (changed bool, err error) {
 
@@ -338,7 +349,6 @@ func (p *Program) CollectGroundFacts() (changed bool, err error) {
 		if !p.PredicateTupleMap[lit.String()] {
 			p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], res)
 			p.PredicateTupleMap[lit.String()] = true
-			p.FinishCollectingFacts[lit.Name] = true
 		}
 		return
 	}
@@ -641,7 +651,7 @@ func (rule *Rule) Simplify(assignment map[string]int) (bool, error) {
 func (p *Program) CollectExplicitTupleDefinitions() (bool, error) {
 	p.forallQ = make(map[int][]Literal, 0)
 	p.existQ = make(map[int][]Literal, 0)
-	p.Explicit = make(map[Predicate]bool, 0)
+	p.PredicateExplicit = make(map[Predicate]bool, 0)
 
 	check := func(r Rule) bool {
 		if r.IsQuestionMark == true {
@@ -687,7 +697,7 @@ func (p *Program) CollectExplicitTupleDefinitions() (bool, error) {
 			}
 		}
 
-		p.Explicit[rule.Literals[1].Name] = true
+		p.PredicateExplicit[rule.Literals[1].Name] = true
 		quantification := rule.Literals[0]
 		if len(quantification.Terms) != 1 {
 			return []Rule{}, LiteralError{
@@ -761,7 +771,7 @@ func (p *Program) RemoveLiteralsWithEmptyIterators() (bool, error) {
 func (p *Program) RemoveClausesWithExplicitLiteralAndTuplesThatDontExist() (bool, error) {
 	removeIfTrue := func(rule Rule) bool {
 		for _, lit := range rule.Literals {
-			if p.Explicit[lit.Name] && lit.FreeVars().IsEmpty() {
+			if p.PredicateExplicit[lit.Name] && lit.FreeVars().IsEmpty() {
 				if !p.PredicateTupleMap[lit.String()] {
 					return true
 				}

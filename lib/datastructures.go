@@ -10,11 +10,11 @@ type Program struct {
 	Rules                 []Rule
 	Constants             map[string]int
 	FinishCollectingFacts map[Predicate]bool
-	PredicateToTuples     map[Predicate][][]int
-	PredicateToArity      map[Predicate]int
+	PredicateToTuples     map[Predicate][][]int // Contains a slice for all tuples for predicate
+	PredicateTupleMap     map[string]bool       // hashmap that contains all positive and negative ground atoms in the program
+	PredicateToArity      map[Predicate]int     //
+	PredicateExplicit     map[Predicate]bool    // If there is a explicit quantification for predicate
 //	ZeroArity             map[Predicate]bool // TODO: do we still need this or can be removed?
-	Explicit              map[Predicate]bool
-	PredicateTupleMap     map[string]bool
 	Alternation           [][]Literal
 	existQ                map[int][]Literal
 	forallQ               map[int][]Literal
@@ -242,16 +242,6 @@ func (rule *Rule) String() string {
 	return sb.String()
 }
 
-func (p *Program) Debug() {
-	fmt.Println("Constants:", p.Constants)
-	fmt.Println("Collected Facts", p.FinishCollectingFacts)
-	fmt.Println("PredicatFact", p.PredicateTupleMap)
-	fmt.Println("PredicatsToTuples", p.PredicateToTuples)
-	for _, r := range p.Rules {
-		fmt.Println(r.Debug())
-	}
-}
-
 func (p *Program) PrintDebug(level int) {
 	if DebugLevel >= level {
 		p.PrintFacts()
@@ -308,7 +298,7 @@ func (err LiteralError) Error() string {
 func (p *Program) CheckNoExplicitDeclarationAndNonGroundExplicit() error {
 	for _, r := range p.Rules {
 		for _, l := range r.AllLiterals() {
-			if p.Explicit[l.Name] && !l.IsGround()  {
+			if p.PredicateExplicit[l.Name] && !l.IsGround()  {
 				return LiteralError{
 					*l,
 					r,
@@ -385,8 +375,12 @@ func (p *Program) CheckFactsInIterators() error {
 func (p *Program) CheckArityOfLiterals() error {
 
 	p.PredicateToArity = make(map[Predicate]int)
+	p.FinishCollectingFacts = make(map[Predicate]bool)
 	for _, r := range p.Rules {
 		for _, l := range r.AllLiterals() {
+			if l.Fact {
+				p.FinishCollectingFacts[l.Name] = false
+			}
 			if n, ok := p.PredicateToArity[l.Name]; ok {
 				if n != len(l.Terms) {
 					return LiteralError{*l, r,
@@ -435,9 +429,6 @@ func (p *Program) PrintRules() {
 }
 
 func (p *Program) PrintFacts() {
-	if len(p.FinishCollectingFacts) == 0 {
-		return
-	}
 	//	fmt.Println("%% Collected Facts:")
 	for pred := range p.FinishCollectingFacts {
 		for _, tuple := range p.PredicateToTuples[pred] {
