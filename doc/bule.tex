@@ -16,6 +16,7 @@ literate={~}{{$\neg$}}1
 \newcommand\bigforall{\mbox{\Large $\mathsurround0pt\forall$}}
 \newcommand\bigexists{\mbox{\Large $\mathsurround0pt\exists$}}
 
+\newcommand{\bcore}{\ensuremath{\text{Bule}_\text{core}}\xspace}
 
 \title{Bule: A Grounding Language for Generating CNF Encodings for SAT Solving}
 \author{Jean Christoph Jung\footnote{Universität Bremen, Germany} \and Valentin Mayer-Eichberger\footnote{Technische Universit\"at Berlin, Germany} \and 
@@ -45,7 +46,7 @@ literate={~}{{$\neg$}}1
     implemented the grounder and show its usage through a case study.
 \end{abstract}
 
-\section{Bule Syntax and Semantics}
+\section{\bcore}
 
 Let $\Sigma,\Omega$ be disjoint countably infinite sets of relation
 names. Each relation name $R\in \Sigma\cup\Omega$ has an associated
@@ -58,40 +59,22 @@ $t_1,\ldots,t_n\in\mn{Con}$; ground atoms are also called
 \emph{facts}. An atom $R(t_1,\ldots,t_n)$ is a \emph{$\Sigma$-atom} or
 an \emph{$\Omega$-atom} if $R\in \Sigma$ or $R\in \Omega$,
 respectively. A \emph{literal} is an atom $R(t_1,\ldots,t_n)$ or a negated atom
-$\neg R(t_1,\ldots,t_n)$. \vale{To distinguish $\Sigma$- and $\Omega$-atoms we
-write them with parenthesis $p[]$ or brackets $q[]$, respectively. }
+$\neg R(t_1,\ldots,t_n)$. 
 
-A \emph{Bule knowledge base} is a pair $\Kmc=(\Dmc,\Pmc)$ where $\Dmc$ is a
+A \emph{\bcore knowledge base} is a pair $\Kmc=(\Dmc,\Pmc)$ where $\Dmc$ is a
 finite set of facts and \Pmc is a set of rules of the form 
 %
-\[\alpha \Rightarrow L_1,\ldots,L_m\]
+\[\alpha \Rightarrow _1,\ldots,L_m\]
 %
-where $\alpha$ is a Boolean formula over $\Sigma$-atoms
+where $\alpha$ is a conjunction of $\Sigma$-literals
 and $L_1,\ldots,L_m$ are $\Omega$-literals such that every variable
-that occurs in one of the $L_i$ does occur positively in
-$\alpha$.\footnote{Here we would need the definition of the
-  \emph{polarity} of a variable in a Boolean combination of
-atoms.}\footnote{Why only clauses on the right-hand side?}
-{\color{red}For simplicity, I don't use any syntactic sugar, that is,
-%
-\begin{itemize}
+that occurs in one of the $L_i$ does occur in
+a positive literal in $\alpha$.
 
-  \item no empty $\alpha$ as in the generating clauses
-    $c(I,J),b(I,J)$,
-
-  \item no integers as in $c(I,J),c(I+1,J)$ or $dom[1..k]$,
-
-  \item no $[]$-atoms on the right-hand side, as in $edge[X,\_ ]
-    \Rightarrow node[X]$
-
-\end{itemize}
-Moreover, there are no rules of the form $[c(I)]:dom[I]$ yet. 
-}
-
-The semantics of Bule knowledge base $\Kmc=(\Dmc,\Pmc)$ is defined via
+The semantics of \bcore knowledge bases $\Kmc=(\Dmc,\Pmc)$ is defined via
 groundings. A \emph{substitution} is a map
 $v:\mn{Var}\cup\mn{Con}\to\mn{Con}$ which is the identity on
-$\mn{Con}$. For a Boolean combination of $\Sigma$-atoms $\alpha$ and a
+$\mn{Con}$, that is, $v(a)=a$, for all $a\in\mn{Con}$. For a Boolean combination of $\Sigma$-atoms $\alpha$ and a
 substitution $v$, we define $\Dmc,v\models \alpha$ inductively as
 follows follows: 
 %
@@ -112,7 +95,7 @@ follows follows:
 %
 If $\Dmc,v\models\alpha$, we call $v$ a \emph{model} of $\alpha$.
 
-Now, we assign a set of clauses $\mn{cl}(\Kmc)$ to the Bule knowledge
+Now, we assign a set of clauses $\mn{cl}(\Kmc)$ to the \bcore knowledge
 base $\Kmc=(\Dmc,\Pmc)$ as follows:
 %
 \[v(L_1)\vee\ldots\vee v(L_n)\in \mn{cl}(\Kmc)\]
@@ -123,7 +106,27 @@ facts which we treat as propositional variables here.  We say that
 $\Kmc$ is \emph{satisfiable} if the set of clauses $\mn{cl}(\Kmc)$ is
 satisfiable. 
 
-\section{Syntactic Sugar}
+\section{Bule}
+
+\vale{To distinguish $\Sigma$- and $\Omega$-atoms we
+write them with parenthesis $p[]$ or brackets $q[]$, respectively. }
+
+
+{\color{red}For simplicity, I don't use any syntactic sugar, that is,
+%
+\begin{itemize}
+
+  \item no empty $\alpha$ as in the generating clauses
+    $c(I,J),b(I,J)$,
+
+  \item no integers as in $c(I,J),c(I+1,J)$ or $dom[1..k]$,
+
+  \item no $[]$-atoms on the right-hand side, as in $edge[X,\_ ]
+    \Rightarrow node[X]$
+
+\end{itemize}
+Moreover, there are no rules of the form $[c(I)]:dom[I]$ yet. 
+}
 
 \section{Examples}
 
