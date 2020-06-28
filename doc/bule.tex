@@ -176,10 +176,10 @@ a set of rules of the form
 where $B,B_1,\ldots,B_k$ are $\Sigma$-atoms and every variable that
 occurs in $B$ occurs in one of the $B_i$. We further require that the
 rules in \Jmc are acyclic in the sense that the graph $G_\Jmc = (V_\Jmc,E_\Jmc)$ is
-acyclic, where $V_\Jmc$ is the set of all relation names that occur in
-\Jmc and $(P,R)\in E_\Jmc$ if there is a rule
-$B_1,\ldots,B_k\Rightarrow B$ where $B$ is an $R$-atom and some $B_i$
-is an $P$-atom.  
+acyclic, where $V_\Jmc$ is the set of all relation symbols that occur in
+\Jmc and $(R,R')\in E_\Jmc$ if there is a rule
+$B_1,\ldots,B_k\Rightarrow B$ where $B$ is an atom with relation
+symbol $R'$ and some $B_i$ is an atom with relation symbol $R(\cdot)$.  
 
 An extended \bcore-program is now a pair $\Pi=(\Jmc,\Pmc)$ where
 $\Jmc$ is an extended instance and \Pmc a set of rules as above. Every
@@ -189,8 +189,9 @@ in \Jmc, and define $\Imc_{i+1}$ from $\Imc_i$ by adding, for every
 rule $B_1,\ldots,B_k\Rightarrow B\in \Jmc$ and every model $v$ of
 $B_1\wedge \ldots \wedge B_k$ over $\Imc_i$, the fact $v(B)$ to
 $\Imc_{i+1}$. Note that this process terminates due to acyclicity of
-\Jmc. An extended \bcore-program is satisfiable if the induced
-\bcore-program is satisfiable. 
+\Jmc; $\Imc$ is defined to be fixed point of the sequence $\Imc_n$. An
+extended \bcore-program is satisfiable if the induced \bcore-program
+is satisfiable. 
 
 Extended \bcore-programs can be used to define auxiliary facts which
 are often useful for modeling, e.g.~see the following example. 
