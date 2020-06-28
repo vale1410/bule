@@ -1,10 +1,9 @@
 %% #const n = 4. given external 
 
 dom[1..n]. 
-dom[X], dom[Y] => #exist(0), q(X,Y)?
 
-dom[Y] => q(X,Y) : dom[X].
 dom[X] => q(X,Y) : dom[Y]. 
+dom[Y] => q(X,Y) : dom[X].
 
 % Max one per row and column  
 X1 < X2 => ~q(X1,Y), ~q(X2,Y). 
