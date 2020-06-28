@@ -1,4 +1,0 @@
-
-dom[0..2]. 
-
-#forall(T), ~dom[T], move(X,T):dom[X], T#mod2==0.

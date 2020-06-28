@@ -10,36 +10,36 @@
 %% #const q=4. %% connect q
 %% #const d=6. %% depth d.  black(1), white, black ... 
 
- domX[1..c].
- domY[1..r].
-~domX[X], ~domY[Y], dom[X,Y]. 
+domX[1..c].
+domY[1..r].
+domX[X], domY[Y] => dom[X,Y]. 
+
 connect[0..q-1].
 black[1].
 white[0].
 player[0..1].
-st[0..1].
 t[1..d].
-~t[T], turn[T, T#mod2]. 
+~t[T], turn[T#mod2,T]. 
 
-#forall(T), ~domX[X], ~white[A],  ~turn[T,A], moveL(X,T). 
-#exist(T), ~domX[X], ~t[T], move(X,T).
-#exist(T), ~dom[X,Y], ~t[T], ~player[A], board(X,Y,A,T).
-#exist(T), ~dom[X,Y], ~t[T], occupied(X,Y,T).
+domX[X], white[A], turn[T,A] => #forall(T), moveL(X,T). 
+domX[X],  t[T], => #exist(T), move(X,T).
+dom[X,Y], black[A], turn[T,A], => #exist(T), player[A], board(X,Y,A,T).
+dom[X,Y], t[T], => #exist(T), occupied(X,Y,T).
 
 ~board(X,Y,_,T), occupied(X,Y,T). 
 ~occupied(X,Y,T), board(X,Y,A,T):player[A]. 
 
 %% Winning Positions
+st[0..1].
 % at least one winning position for black
 winS(X,Y,1):X+(q-1)<=c:Y<=r:dom[X,Y], 
     winS(X,Y,0):X<=c:Y+(q-1)<=r:dom[X,Y], 
     winD(X,Y,Z):X+q-1<=c:Y+q-1<=r:dom[X,Y]:st[Z].
 
 % horizontal (Z==0) and vertical(Z==1) winning positions (winS)
-~st[Z], ~white[A], ~board(X+Z*D,Y+(1-Z)*D,A,d):connect[D].
-~st[Z], ~black[A], ~connect[D], board(X+Z*D,Y+(1-Z)*D,A,d), ~winS(X,Y,Z).
+st[Z], white[A] => ~board(X+Z*D,Y+(1-Z)*D,A,d):connect[D].
+st[Z], black[A] => ~connect[D], board(X+Z*D,Y+(1-Z)*D,A,d), ~winS(X,Y,Z).
 %%
 %%% diagonal rising (Z==0) and falling (Z==1) winning positions (winD)
-~st[Z], ~white[A], ~board(X+D,Y+Z*(q-1)+((-1)**Z)*D,A,d):connect[D].
-~st[Z], ~black[A], connect[D], ~board(X+D,Y+Z*(q-1)+((-1)**Z)*D,A,d), winD(X,Y,Z). 
-
+st[Z], white[A] => ~board(X+D,Y+Z*(q-1)+((-1)**Z)*D,A,d):connect[D].
+st[Z], black[A] =>  connect[D], ~board(X+D,Y+Z*(q-1)+((-1)**Z)*D,A,d), winD(X,Y,Z). 

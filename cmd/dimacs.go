@@ -25,10 +25,24 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/vale1410/bule/lib"
 	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
+)
+
+type ClauseProgram struct {
+	clauses     [][]string
+	alternation [][]string // level 0 is exist, then alternating!
+	units       map[string]bool
+	conflict    bool
+	idMap       map[string]int
+}
+
+var (
+	printInfoFlag       bool
+	unitPropagationFlag bool
 )
 
 // dimacsCmd represents the dimacs command
@@ -37,32 +51,34 @@ var dimacsCmd = &cobra.Command{
 	Short: "Grounds to dimacs completely.",
 	Long: `This is a copy from the old grounder that.
 
-		usage: ./ground <filename> [<unit>],
+		usage: bule dimacs <filename> <units>,
 
 		unit is a sequence of literals, e.g. -3 2 5 -4
-		minus meaning negated literal.
+		where minus meaning negated literal.
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("c dimacs grounding called.")
 		if len(args) == 0 {
-			fmt.Println("usage: ./ground <filename> [units]")
+			fmt.Println("usage: bule dimacs <filename> [units]")
 			os.Exit(1)
 		}
-
-		units := make(map[string]bool, 0)
-
-		for i, s := range args {
-			if i < 2 {
-				continue
-			}
-			if strings.HasPrefix(s, "-") {
-				s = "~" + strings.TrimLeft(s, "-")
-			}
-			units[s] = true
-		}
+		units := convertArgsToUnits(args[1:])
 		fmt.Println("run with args")
-		run(args[0], units)
+		p := parseFromFile(args[0])
+		p.run(units)
 	},
+}
+
+func convertArgsToUnits(args []string) map[string]bool {
+	units := make(map[string]bool, 0)
+
+	for _, s := range args {
+		if strings.HasPrefix(s, "-") {
+			s = "~" + strings.TrimLeft(s, "-")
+		}
+		units[s] = true
+	}
+	return units
 }
 
 func init() {
@@ -76,21 +92,41 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// dimacsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	//dimacsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	//	groundCmd.PersistentFlags().StringVarP(&progFlag, "file", "f", "", "Path to File")
+	dimacsCmd.PersistentFlags().BoolVarP(&printInfoFlag, "info", "i", true, "Print information about units as well.")
 }
 
-func run(filename string, units map[string]bool) {
+// This translate from a grounded Bule program to clause representation
+// Assuming the program is ground!!!
+func translateFromRuleProgram(program lib.Program, units map[string]bool) (p ClauseProgram) {
+	p.units = units
+	for _, r := range program.Rules {
+		if len(r.Literals) == 1 {
+			p.units[r.Literals[0].String()] = true
+			continue
+		}
+		clause := make([]string, 0, len(r.Literals))
+		for _, l := range r.Literals {
+			clause = append(clause, l.String())
+		}
+		p.clauses = append(p.clauses, clause)
+	}
 
-	printInfoFlag := true
-	dimacs := true
+	// Assuming quantification levels have been merged
+	for _, level := range program.Alternation {
+		q := make([]string, len(level))
+		for i, literal := range level {
+			q[i] = literal.String()
+		}
+		p.alternation = append(p.alternation, q)
+	}
 
-	qvars := make(map[string]bool, 0)
-	count := 1
+	return
+}
 
-	cls := [][]string{}
-	last := ""
-	alternation := [][]string{}
-
+func parseFromFile(filename string) (p ClauseProgram) {
 	// open a file or stream
 	var scanner *bufio.Scanner
 	file, err := os.Open(filename)
@@ -107,6 +143,12 @@ func run(filename string, units map[string]bool) {
 	scanner.Buffer(buf, maxCapacity)
 
 	acc := ""
+	last := ""
+
+	p.clauses = [][]string{}
+	p.units = map[string]bool{}
+	var alternation [][]string
+	alternationDepth := 0
 
 	for scanner.Scan() {
 
@@ -114,8 +156,8 @@ func run(filename string, units map[string]bool) {
 
 		if !strings.HasPrefix(s, "e ") && !strings.HasPrefix(s, "a ") {
 			s = strings.ReplaceAll(s, " ", ",")
-//			s = strings.ReplaceAll(s, "],", "] ")
-//			s = strings.ReplaceAll(s, "].", "]")
+			//			s = strings.ReplaceAll(s, "],", "] ")
+			//			s = strings.ReplaceAll(s, "].", "]")
 		}
 
 		s = strings.ReplaceAll(s, " ", "")
@@ -123,7 +165,7 @@ func run(filename string, units map[string]bool) {
 			continue
 		}
 
-		if !strings.HasSuffix(s,".") {
+		if !strings.HasSuffix(s, ".") {
 			acc += s
 			continue
 		} else {
@@ -132,18 +174,19 @@ func run(filename string, units map[string]bool) {
 			acc = ""
 		}
 
-		fields := strings.Split(s,",")
+		fields := strings.Split(s, ",")
 		first := fields[0]
 
 		// merge consecutive e's and a's
 		if first == "e" || first == "a" {
-			for _, v := range fields[1:] {
-				qvars[v] = true
-			}
 			if last == first {
 				alternation[len(alternation)-1] = append(alternation[len(alternation)-1], fields[1:]...)
 			} else {
+				if alternationDepth == 0 && first == "a" {
+					alternation = append(alternation, fields)
+				}
 				alternation = append(alternation, fields)
+				alternationDepth++
 			}
 			last = first
 			continue
@@ -152,33 +195,183 @@ func run(filename string, units map[string]bool) {
 		clause := fields
 
 		if len(clause) == 1 {
-			units[clause[0]] = true
+			p.units[clause[0]] = true
 		} else {
-			cls = append(cls, clause)
+			p.clauses = append(p.clauses, clause)
+		}
+	}
+	p.alternation = alternation
+	return
+}
+
+func (p *ClauseProgram) generateIds() {
+
+	//make Ids
+	count := 1
+	vars := make(map[string]int, 0)
+	// generate id's for variables
+	for _, quantifier := range p.alternation {
+		for _, v := range quantifier {
+			if _, b := vars[v]; !b {
+				vars[v] = count
+				count++
+			}
+		}
+	}
+	for lit := range p.units {
+		v := pos(lit)
+		if _, b := vars[v]; !b {
+			vars[v] = count
+			count++
 		}
 	}
 
-	size := 0
+	for _, clause := range p.clauses {
+		for _, lit := range clause {
+			v := pos(lit)
+			if _, b := vars[v]; !b {
+				vars[v] = count
+				count++
+			}
+		}
+	}
+	p.idMap = vars
+}
 
-	var cls2 [][]string
-	conflict := false
+// Finds all variables that are not bound and adds them to the
+// innermost level
+func (p *ClauseProgram) createInnermostExistFromFreeVars() {
 
-	for size < len(units) {
-		//fmt.Println("units", units)
-		size = len(units)
-		cls2 = make([][]string, 0, len(cls))
+	qvars := make(map[string]bool, 0) // vars in quantifier alternation
+	for _, quantifier := range p.alternation {
+		for _, v := range quantifier {
+			qvars[v] = true
+		}
+	}
 
+	var aux []string
+	for v := range p.idMap {
+		if !qvars[v] {
+			aux = append(aux, v)
+		}
+	}
+
+	if len(aux) > 0 {
+		if len(p.alternation)%2 == 1 {
+			p.alternation[len(p.alternation)-1] = append(p.alternation[len(p.alternation)-1], aux...)
+		} else {
+			p.alternation = append(p.alternation, aux)
+		}
+	}
+}
+
+func (p ClauseProgram) PrintDimacs() {
+	vars := p.idMap
+	conflict := p.conflict
+	cls := p.clauses
+	units := p.units
+
+	if printInfoFlag {
+		varids := make([]string, len(vars)+1)
+		for v, i := range vars {
+			varids[i] = v
+		}
+		for i, v := range varids {
+			if i > 0 {
+				fmt.Println("c", i, v)
+			}
+		}
+	}
+
+	if conflict {
+		fmt.Println("p cnf 1 1 \n 0\n")
+		return
+	}
+
+	if printInfoFlag {
+		fmt.Println("p", "cnf", len(vars), len(cls)+len(units))
+	} else {
+		fmt.Println("p", "cnf", len(vars)-len(units), len(cls))
+	}
+	for i, quantifier := range p.alternation {
+
+		if len(quantifier) == 0 {
+			continue
+		}
+
+		if i%2 == 0 {
+			fmt.Print("e ")
+		} else {
+			fmt.Print("a ")
+		}
+
+		for _, v := range quantifier {
+			if !printInfoFlag && units[v] == true {
+				continue
+			}
+			fmt.Print(vars[v], " ")
+		}
+		fmt.Println("0")
+	}
+
+	if printInfoFlag {
+		for lit := range units {
+			if strings.HasPrefix(lit, "~") {
+				fmt.Print("-")
+			}
+			fmt.Print(vars[pos(lit)], " ")
+			fmt.Println(0)
+		}
+	}
+
+	if !textualFlag {
 		for _, clause := range cls {
+			for _, lit := range clause {
+				if strings.HasPrefix(lit, "~") {
+					fmt.Print("-")
+				}
+				fmt.Print(vars[pos(lit)], " ")
+			}
+			fmt.Println("0")
+		}
+	} else {
+		// printout textual representation!!
+		for _, clause := range cls {
+			for i, lit := range clause {
+				if i != 0 {
+					fmt.Print(", ")
+				}
+				fmt.Print(lit)
+			}
+			fmt.Println(".")
+		}
+	}
+}
+
+// This is a very slow implementation of unit propagation
+// units and clauses within program are updated.
+func (p *ClauseProgram) unitPropagation() {
+
+	size := 0
+	var cls2 [][]string
+
+	// Unit propagation
+	for size < len(p.units) {
+		//fmt.Println("units", units)
+		size = len(p.units)
+		cls2 = make([][]string, 0, len(p.clauses))
+
+		for _, clause := range p.clauses {
 			clause2 := make([]string, 0, len(clause))
 			keepClause := true
 
 			//fmt.Println("clause", clause)
 			for _, lit := range clause {
-				if _, b := units[lit]; b {
+				if _, b := p.units[lit]; b {
 					keepClause = false
 				}
-				//fmt.Println(units, lit, neg(lit))
-				if _, b := units[neg(lit)]; !b {
+				//fmt.Println(units, lit, negate(lit))
+				if _, b := p.units[negate(lit)]; !b {
 					clause2 = append(clause2, lit)
 				} else {
 					//fmt.Println("remove", lit, "from", clause)
@@ -186,169 +379,37 @@ func run(filename string, units map[string]bool) {
 			}
 			//fmt.Println("clause2", clause2)
 			if len(clause2) == 1 {
-				units[clause2[0]] = true
+				p.units[clause2[0]] = true
 			} else if len(clause2) == 0 {
-				fmt.Println("c conflict:", clause)
-				conflict = true
+				debug(2, "c conflict:", clause)
+				p.conflict = true
 			}
 
 			if keepClause && len(clause2) > 1 {
 				cls2 = append(cls2, clause2)
-
 			}
 		}
-		cls = cls2
+		p.clauses = cls2
+	}
+	return
+}
+
+func (p ClauseProgram) Print() {
+	p.run(map[string]bool{})
+}
+
+func (p ClauseProgram) run(additionalUnits map[string]bool) {
+
+	for unit := range additionalUnits {
+		p.units[unit] = true
 	}
 
-	vars := make(map[string]int, 0)
-	{ // generate id's for variables
-		for _, quantifier := range alternation {
-			for i, v := range quantifier {
-				if i == 0 {
-					continue
-				}
-				if _, b := vars[v]; !b {
-					vars[v] = count
-					count++
-				}
-			}
-		}
-		for lit := range units {
-			v := pos(lit)
-			if _, b := vars[v]; !b {
-				vars[v] = count
-				count++
-			}
-		}
-
-		for _, clause := range cls {
-			for _, lit := range clause {
-				v := pos(lit)
-				if _, b := vars[v]; !b {
-					vars[v] = count
-					count++
-				}
-			}
-		}
+	if unitPropagationFlag {
+		p.unitPropagation()
 	}
-
-	// TODO:remove units from all levels and dont give them in the formula
-	//	{ // remove units from outermost E quantifier
-	//		if len(alternation) > 0 && alternation[0][0] == "e" {
-	//			for i := 1; i < len(alternation[0]); i++ {
-	//				if units[alternation[0][i]] {
-	//					alternation[0] = append(alternation[0][:i], alternation[0][i+1:]...)
-	//					i--
-	//				}
-	//			}
-	//		}
-	//	}
-
-	{ // create innermost EXIST for auxiliary variables
-		var aux []string
-		for v := range vars {
-			if !qvars[v] {
-				aux = append(aux, v)
-			}
-		}
-
-		if len(aux) > 0 {
-			if len(alternation) > 0 && alternation[len(alternation)-1][0] == "e" {
-				alternation[len(alternation)-1] = append(alternation[len(alternation)-1], aux...)
-			} else {
-				alternation = append(alternation, append([]string{"e"}, aux...))
-			}
-		}
-	}
-
-	if dimacs {
-
-		if printInfoFlag {
-			varids := make([]string, len(vars)+1)
-			for v, i := range vars {
-				varids[i] = v
-			}
-			for i, v := range varids {
-				if i > 0 {
-					fmt.Println("c", i, v)
-				}
-			}
-		}
-
-		if conflict {
-			fmt.Println("p cnf 1 1 \n 0\n")
-			return
-		}
-
-		if printInfoFlag {
-			fmt.Println("p", "cnf", len(vars), len(cls)+len(units))
-		} else {
-			fmt.Println("p", "cnf", len(vars)-len(units), len(cls))
-		}
-		for _, quantifier := range alternation {
-			//fmt.Println(quantifier)
-			if len(quantifier) == 1 {
-				continue
-			}
-			for i, v := range quantifier {
-				if i == 0 {
-					fmt.Print(v, " ")
-					continue
-				}
-				if !printInfoFlag && units[v] == true {
-					continue
-				}
-				fmt.Print(vars[v], " ")
-			}
-			fmt.Println("0")
-		}
-
-		if printInfoFlag {
-			for lit := range units {
-				if strings.HasPrefix(lit, "~") {
-					fmt.Print("-")
-				}
-				fmt.Print(vars[pos(lit)], " ")
-				fmt.Println(0)
-			}
-		}
-
-		for _, clause := range cls {
-
-			for _, lit := range clause {
-				if strings.HasPrefix(lit, "~") {
-					fmt.Print("-")
-				}
-				fmt.Print(vars[pos(lit)], " ")
-			}
-			fmt.Println("0")
-		}
-
-	} else {
-
-		for _, quantifier := range alternation {
-			for _, v := range quantifier {
-				fmt.Print(v, " ")
-			}
-			fmt.Println()
-		}
-
-		//     fmt.Println("c units")
-		for unit := range units {
-			fmt.Println(unit)
-
-		}
-		//		fmt.Println("c clauses")
-		for _, clause := range cls {
-
-			for _, v := range clause {
-				fmt.Print(v, " ")
-			}
-			fmt.Println()
-		}
-
-	}
-
+	p.generateIds()
+	p.createInnermostExistFromFreeVars()
+	p.PrintDimacs()
 }
 
 func pos(s string) string {
@@ -358,7 +419,7 @@ func pos(s string) string {
 		return s
 	}
 }
-func neg(s string) string {
+func negate(s string) string {
 	if strings.HasPrefix(s, "~") {
 		return strings.TrimLeft(s, "~")
 	} else {

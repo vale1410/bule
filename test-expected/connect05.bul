@@ -1,8 +1,8 @@
-#exist(0), plays(0,0).
-#exist(1), plays(1,1).
-#exist(2), plays(0,2).
-#exist(3), plays(1,3).
 dom[0].
 dom[1].
 dom[2].
 dom[3].
+plays(0,0).
+plays(0,2).
+plays(1,1).
+plays(1,3).

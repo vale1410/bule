@@ -20,3 +20,4 @@ clean:
 	rm -fr $(NAME).out
 	rm -fr $(NAME).aux
 	rm -fr $(NAME).log
+	rm -fr *.aux

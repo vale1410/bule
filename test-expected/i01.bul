@@ -1,0 +1,9 @@
+board(1,2).
+board(2,1).
+board(2,2).
+dom[1,1].
+dom[1,2].
+dom[2,1].
+dom[2,2].
+init[1,1].
+~board(2,1), ~board(1,2).

@@ -10,31 +10,31 @@ import (
 	"unicode/utf8"
 )
 
-func ParseProgram(fileName string) Program {
-	// open a file or stream
-	var scanner *bufio.Scanner
-	file, err := os.Open(fileName)
-	if err != nil {
-		fmt.Println("File not found. waiting for program in Stdin. Finish with ctrl-D")
-		//scanner = bufio.NewScanner(os.Stdin)
-		return Program{}
-	} else {
-		defer file.Close()
-		scanner = bufio.NewScanner(file)
-	}
+func ParseProgram(fileNames []string) (Program, error) {
+	Debug(2, "opening files:", fileNames)
 	var lines []string
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
+	for _, fileName := range fileNames {
+		var scanner *bufio.Scanner
+		file, err := os.Open(fileName)
+		if err != nil {
+			return Program{}, err
+		}
+		scanner = bufio.NewScanner(file)
+		for scanner.Scan() {
+			lines = append(lines, scanner.Text())
+		}
+		file.Close()
 	}
+
 	return ParseProgramFromStrings(lines)
 }
 
-func ParseProgramFromStrings(lines []string) (p Program) {
+func ParseProgramFromStrings(lines []string) (p Program, err error) {
 
 	p.PredicateToTuples = make(map[Predicate][][]int)
-	p.GroundFacts = make(map[Predicate]bool)
+	p.FinishCollectingFacts = make(map[Predicate]bool)
 	p.Constants = make(map[string]int)
-	p.PredicateGroundTuple = map[string]bool{}
+	p.PredicateTupleMap = map[string]bool{}
 
 	acc := ""
 	for row, s := range lines {
@@ -51,28 +51,38 @@ func ParseProgramFromStrings(lines []string) (p Program) {
 		if strings.HasPrefix(s, "#const") {
 			s = strings.TrimPrefix(s, "#const")
 			s = strings.TrimSuffix(s, ".")
-			def := strings.Split(s, "=")
-			asserts(len(def) == 2, s)
-			term, _ := assign(Term(def[1]), p.Constants)
-			asserts(groundMathExpression(term.String()), "is not ground:"+term.String())
-			p.Constants[def[0]] = evaluateTermExpression(term.String())
+			defs := strings.Split(s, ",")
+			for _, def := range defs {
+				def := strings.Split(def, "=")
+				asserts(len(def) == 2, s)
+				term, _, err := assign(Term(def[1]), p.Constants)
+				if err != nil {
+					return p, err
+				}
+				asserts(groundMathExpression(term.String()), "is not ground:"+term.String())
+				val, err := evaluateTermExpression(term.String())
+				if err != nil {
+					return p, err
+				}
+				p.Constants[def[0]] = val
+			}
 			continue
 		}
 
 		acc += s
-		if !strings.HasSuffix(s, ".") {
+		if !(strings.HasSuffix(s, ".") || strings.HasSuffix(s, "?")) {
 			continue
 		}
 
 		rule, err := parseRule(acc)
 		if err != nil {
-			fmt.Printf("Parsing Error in Row %v: %v\n", row, err)
-			os.Exit(1)
+			return p, fmt.Errorf("Parsing Error in Row %v: %w\n", row, err)
 		}
+		rule.LineNumber = row + 1
 		p.Rules = append(p.Rules, rule)
 		acc = ""
 	}
-	return p
+	return p, nil
 }
 
 func lexRule(text string) (ts Tokens) {
@@ -83,17 +93,18 @@ func lexRule(text string) (ts Tokens) {
 	return ts
 }
 
-// <Constraint>, <Literals> <-> head(1,2,3).
-// <Constraint>, <Literals> -> head(1,2,3).
-// <Constraint>, <Literals> -> head(1,2,3)?
-// <ClauseDisjunction>.
-// <ClauseDisjunction>?
+// <Constraint>, <Guard> => <Fact>.
+// <Constraint>, <Guard> => <Conditionals>?
+// <Constraint>, <Guard> => <Conditionals>.
 
 func parseRule(text string) (rule Rule, err error) {
 
-	// TODO: error handling
 	tokens := lexRule(text)
-	if tokens[len(tokens)-1].kind == tokenEOF {
+	last := tokens[len(tokens)-1]
+	if last.kind == tokenError {
+		return rule, fmt.Errorf("Lexing Error in %v \n in rule %v", last.value, text)
+	}
+	if last.kind == tokenEOF {
 		tokens = tokens[:len(tokens)-1]
 	}
 	rule.initialTokens = tokens
@@ -102,18 +113,16 @@ func parseRule(text string) (rule Rule, err error) {
 	left, sep, right := splitIntoTwo(rule.initialTokens, splitEquivalences)
 	switch sep {
 	case tokenEmpty:
-		rule.parseClausesOrHead(left)
-		rule.Typ = ruleTypeDisjunction
+		rule.parseClauses(left)
 	case tokenImplication:
-		rule.parseGuardsIntoRuleElements(left)
-		rule.parseClausesOrHead(right)
-		rule.Typ = ruleTypeDisjunction
+		rule.parseGeneratorAndConstraints(left)
+		rule.parseClauses(right)
 	}
 	return rule, err
 
 }
 
-func (rule *Rule) parseGuardsIntoRuleElements(tokens Tokens) {
+func (rule *Rule) parseGeneratorAndConstraints(tokens Tokens) {
 
 	splitRuleElementsSeparators := map[tokenKind]bool{token2RuleComma: true}
 	rest := splitTokens(tokens, splitRuleElementsSeparators)
@@ -121,54 +130,57 @@ func (rule *Rule) parseGuardsIntoRuleElements(tokens Tokens) {
 		assert(len(sep.tokens) > 0)
 		//asserts(sep.separator.kind != tokenEmpty, "sep:", sep.tokens.String(), " - all tokens: ", tokens.String())
 
-		//parse for Generators
-		splitGenerator := map[tokenKind]bool{tokenColon: true}
-		generator := splitTokens(sep.tokens, splitGenerator)
-		asserts(len(generator) == 1, "no generators allowed in guards yet!"+tokens.String())
-		if checkIfLiteral(generator[0].tokens) {
-			lit := parseLiteral(generator[0].tokens)
-			rule.Literals = append(rule.Literals, lit.createNegatedLiteral())
+		//parse for Iterators
+		splitIterator := map[tokenKind]bool{tokenColon: true}
+		iterator := splitTokens(sep.tokens, splitIterator)
+		asserts(len(iterator) == 1, "no iterator allowed in guards yet!"+tokens.String())
+		if checkIfLiteral(iterator[0].tokens) {
+			lit := parseLiteral(iterator[0].tokens)
+			//rule.Conditionals = append(rule.Conditionals, lit.createNegatedLiteral())
+			rule.Generators = append(rule.Generators, lit)
 		} else {
-			rule.Constraints = append(rule.Constraints, parseConstraint(generator[0].tokens))
+			rule.Constraints = append(rule.Constraints, parseConstraint(iterator[0].tokens))
 		}
 	}
 }
 
-func (rule *Rule) parseClausesOrHead(tokens Tokens) {
+func (rule *Rule) parseClauses(tokens Tokens) {
 
 	splitRuleElementsSeparators := map[tokenKind]bool{tokenDot: true, tokenQuestionsmark: true, token2RuleComma: true}
 	rest := splitTokens(tokens, splitRuleElementsSeparators)
 	for _, sep := range rest {
-		assert(len(sep.tokens) > 0)
+		asserts(len(sep.tokens) > 0, "problem:", rule.String())
 		asserts(sep.separator.kind != tokenEmpty, "sep:", sep.tokens.String(), " - all tokens: ", tokens.String())
-
-		//parse for Generators
-		splitGenerator := map[tokenKind]bool{tokenColon: true}
-		generator := splitTokens(sep.tokens, splitGenerator)
-		if len(generator) == 1 {
-			if checkIfLiteral(generator[0].tokens) {
-				rule.Literals = append(rule.Literals, parseLiteral(generator[0].tokens))
+		if sep.separator.kind == tokenQuestionsmark {
+			rule.IsQuestionMark = true
+		}
+		//parse for Iterators
+		splitIterator := map[tokenKind]bool{tokenColon: true}
+		iterator := splitTokens(sep.tokens, splitIterator)
+		if len(iterator) == 1 {
+			if checkIfLiteral(iterator[0].tokens) {
+				rule.Literals = append(rule.Literals, parseLiteral(iterator[0].tokens))
 			} else {
-				rule.Constraints = append(rule.Constraints, parseConstraint(generator[0].tokens))
+				rule.Constraints = append(rule.Constraints, parseConstraint(iterator[0].tokens))
 			}
 		} else {
-			rule.Generators = append(rule.Generators, parseGenerators(generator))
+			rule.Iterators = append(rule.Iterators, parseIterator(iterator))
 		}
 	}
 }
 
 // First element is a Literal
-func parseGenerators(generators []SepToken) (generator Generator) {
+func parseIterator(iteratorDef []SepToken) (iterator Iterator) {
 
-	for i, genElement := range generators {
+	for i, genElement := range iteratorDef {
 		if i == 0 {
 			assert(checkIfLiteral(genElement.tokens))
-			generator.Head = parseLiteral(genElement.tokens)
+			iterator.Head = parseLiteral(genElement.tokens)
 		} else {
 			if checkIfLiteral(genElement.tokens) {
-				generator.Literals = append(generator.Literals, parseLiteral(genElement.tokens))
+				iterator.Conditionals = append(iterator.Conditionals, parseLiteral(genElement.tokens))
 			} else {
-				generator.Constraints = append(generator.Constraints, parseConstraint(genElement.tokens))
+				iterator.Constraints = append(iterator.Constraints, parseConstraint(genElement.tokens))
 			}
 		}
 	}
@@ -210,15 +222,15 @@ func parseLiteral(tokens Tokens) (literal Literal) {
 			terms = append(terms, Term(acc))
 			acc = ""
 		case tokenAtomParanthesisRight:
-			asserts(literal.Search, "Should not be a fact atom")
+			asserts(!literal.Fact, "Should not be a fact atom")
 			terms = append(terms, Term(acc))
 		case tokenAtomBracketRight:
-			asserts(!literal.Search, "Should not be a search atom")
+			asserts(literal.Fact, "Should not be a search atom")
 			terms = append(terms, Term(acc))
 		case tokenAtomBracketLeft:
-			literal.Search = false
+			literal.Fact = true
 		case tokenAtomParanthesisLeft:
-			literal.Search = true
+			literal.Fact = false
 		default:
 			asserts(false, "Atom Structure:", tok.value, " ", tokens.Debug())
 		}
@@ -309,6 +321,7 @@ func splitIntoTwo(tokens []Token, kinds map[tokenKind]bool) (left Tokens, sep to
 		left = res[0].tokens
 		right = res[1].tokens
 	default:
+		fmt.Println(res)
 		asserts(false, fmt.Sprintf("More than 2 occurences Seperators. "+
 			"Parsing problem with rule tokens %v with kinds %v \n ", tokens, kinds))
 	}
@@ -435,12 +448,12 @@ func printToken(kind tokenKind) (s string) {
 		s = "COLON"
 	case token2TermExpression:
 		s = "TERM"
-	//case tokenConstraint:
-	//	s = "CONSTRAINT"
 	case tokenEquivalence:
 		s = "EQUIVALENCE"
 	case tokenImplication:
 		s = "IMPLICATION"
+	case tokenQuestionsmark:
+		s = "QUESTIONMARK"
 	case tokenDot:
 		s = "DOT"
 	case tokenDoubleDot:
@@ -592,6 +605,9 @@ func lexRuleElement(l *lexer) (fn stateFn) {
 	case r == eof:
 		l.emit(tokenEOF)
 		fn = nil
+	case r == '?':
+		l.emit(tokenQuestionsmark)
+		fn = lexRuleElement
 	case r == '.':
 		l.emit(tokenDot)
 		fn = lexRuleElement
@@ -651,6 +667,16 @@ func lexAtom(l *lexer) stateFn {
 		switch {
 		case r == eof:
 			return l.lexEOF(token2AtomName)
+		case r == '=':
+			l.backup()
+			l.emit(token2AtomName)
+			return lexRuleElement
+		case r == '.':
+			l.backup()
+			l.emit(token2AtomName)
+			l.next()
+			l.emit(token2RuleComma)
+			return lexRuleElement
 		case r == ',':
 			l.backup()
 			l.emit(token2AtomName)
