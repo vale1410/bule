@@ -1,0 +1,30 @@
+%% #const n = 4. given external 
+
+dom[1..n]. 
+
+%============= non-generitc for n==8
+dom[X] => q(X,1), q(X,2), q(X,3), q(X,4), q(X,5), q(X,6), q(X,7), q(X,8). 
+dom[Y] => q(1,Y), q(2,Y), q(3,Y), q(4,Y), q(5,Y), q(6,Y), q(7,Y), q(8,Y). 
+%%% %============= Generic for all n
+%%% dom[Y]                   => ~b(0,Y). 
+%%% dom[Y]                   =>  b(n,Y). 
+%%% dom[X+1], dom[X], dom[Y] => ~b(X,Y),   b(X+1,Y). 
+%%% dom[X+1], dom[X], dom[Y] =>  q(X+1,Y), b(X,Y), ~b(X+1,Y).
+%%% 
+%%% dom[X]                   => ~a(X,0). 
+%%% dom[X]                   =>  a(X,n). 
+%%% dom[Y+1], dom[Y], dom[X] => ~a(X,Y), a(X,Y+1). 
+%%% dom[Y+1], dom[Y], dom[X] =>  q(X,Y+1), a(X,Y), ~a(X,Y+1).
+%%% % ============= generic with iterators: 
+%%% dom[X] => q(X,Y) : dom[Y]. 
+%%% dom[Y] => q(X,Y) : dom[X].
+%%% %=============
+
+% Max one per row and column  
+dom[Y], dom[X1], dom[X2], X1 < X2 => ~q(X1,Y), ~q(X2,Y). 
+dom[Y1], dom[Y2], dom[X], Y1 < Y2 => ~q(X,Y1), ~q(X,Y2). 
+
+% diagonals
+dom[Y1], dom[Y2], dom[X1], dom[X2], X1 < X2, Y1 >= Y2, X1 + Y1 == X2 + Y2 => ~q(X1,Y1), ~q(X2,Y2). 
+dom[Y1], dom[Y2], dom[X1], dom[X2], X1 < X2, Y1 <= Y2, X1 + Y2 == X2 + Y1 => ~q(X1,Y1), ~q(X2,Y2). 
+
