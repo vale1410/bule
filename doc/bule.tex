@@ -93,34 +93,34 @@ $R(t_1,\ldots,t_n)$ is \emph{ground} if $t_1,\ldots,t_n\in\mn{Con}$;
 ground atoms are also called \emph{facts}. An atom $R(t_1,\ldots,t_n)$
 is a \emph{$\Sigma$-atom} or an \emph{$\Omega$-atom} if $R\in \Sigma$
 or $R\in \Omega$, respectively. A \emph{literal} is an atom
-$R(t_1,\ldots,t_n)$ or a negated atom $\neg R(t_1,\ldots,t_n)$.
+$R(t_1,\ldots,t_n)$ or a negated atom $\neg R(t_1,\ldots,t_n)$. An
+\emph{instance} is a finite set of facts. 
 A \emph{substitution} is a map
 $v:\mn{Var}\cup\mn{Con}\to\mn{Con}$ which is the identity on
-$\mn{Con}$, that is, $v(a)=a$, for all $a\in\mn{Con}$. Let $\Dmc$ be
-a finite set of facts, $\alpha$ a Boolean formula over atoms, and
+$\mn{Con}$, that is, $v(a)=a$, for all $a\in\mn{Con}$. Let $\Imc$ be
+an instance, $\alpha$ a Boolean formula over atoms, and
 $v$ a substitution. We define $\Dmc,v\models \alpha$ inductively as
 follows: 
 %
 \begin{align*}
   %
-%   \Dmc,v & \models \mn{true} \\
   %
-  \Dmc,v & \models R(t_1,\ldots,t_n) && \text{if
-  $R(v(t_1),\ldots,v(t_n))\in \Dmc$} \\
+  \Imc,v & \models R(t_1,\ldots,t_n) && \text{if
+  $R(v(t_1),\ldots,v(t_n))\in \Imc$} \\
   %
-  \Dmc, v& \models \neg \alpha && \text{if $\Dmc,v\not\models \alpha$}
+  \Imc, v& \models \neg \alpha && \text{if $\Imc,v\not\models \alpha$}
   \\
   %
-  \Dmc, v& \models \alpha \wedge \alpha' && \text{if $\Dmc,v\models
-  \alpha$ and $\Dmc,v\models\alpha'$}
+  \Imc, v& \models \alpha \wedge \alpha' && \text{if $\Imc,v\models
+  \alpha$ and $\Imc,v\models\alpha'$}
   %
 \end{align*}
 %
-If $\Dmc,v\models\alpha$, we call $v$ a \emph{model} of $\alpha$ in
-\Dmc. A \emph{clause} is a disjunction of literals.
+If $\Imc,v\models\alpha$, we call $v$ a \emph{model} of $\alpha$ over
+the instance \Imc. A \emph{clause} is a disjunction of literals.
 
 
-A \emph{\bcore knowledge base} is a pair $\Kmc=(\Dmc,\Pmc)$ where $\Dmc$ is a
+A \emph{\bcore-program} is a pair $\Pi=(\Imc,\Pmc)$ where $\Imc$ is a
 finite set of facts and \Pmc is a set of rules of the form 
 %
 \[B_1, \ldots, B_k \Rightarrow L_1, \ldots, L_m\]
@@ -130,22 +130,28 @@ and $L_1,\ldots,L_m$ are $\Omega$-literals such that every variable
 that occurs in one of the $L_i$ does occur in one of the 
 $B_i$.
 
-The semantics of \bcore knowledge bases $\Kmc=(\Dmc,\Pmc)$ is defined via
-groundings. More precisely, with every \bcore knowledge
-base $\Kmc=(\Dmc,\Pmc)$, we associate a set 
-$\mn{cl}(\Kmc)$ of ground clauses as follows.
-For every rule $B_1,\ldots,B_k \Rightarrow L_1,\ldots, L_n\in\Pmc$ and every
-model $v$ of $B_1\wedge\ldots\wedge B_k$ in \Dmc, $\mn{cl}(\Kmc)$ contains the clause
+The semantics of \bcore-programs $\Pi=(\Imc,\Pmc)$ is defined via
+groundings. More precisely, with every \bcore-program
+$\Pi=(\Imc,\Pmc)$, we associate a set $\mn{cl}(\Pi)$ of ground clauses
+as follows.  For every rule $B_1,\ldots,B_k \Rightarrow L_1,\ldots,
+L_n\in\Pmc$ and every model $v$ of $B_1\wedge\ldots\wedge B_k$ in
+\Imc, $\mn{cl}(\Pi)$ contains the clause
 %
 \[v(L_1)\vee\ldots\vee v(L_n).\]
 %
-We say that $\Kmc$ is \emph{satisfiable} if the set of clauses
-$\mn{cl}(\Kmc)$ is satisfiable, that is, there is a finite set of
-facts $\Mmc$ such that $\Mmc\models\mn{cl}(\Kmc)$ (note that
-$\mn{cl}(\Kmc)$ is ground, so we do not need a substitution).
+We say that $\Pi$ is \emph{satisfiable} if the set of clauses
+$\mn{cl}(\Pi)$ is satisfiable, that is, there is an instance $\Mmc$
+such that $\Mmc,\emptyset \models\mn{cl}(\Pi)$ (note that
+$\mn{cl}(\Pi)$ is ground, so the empty substitution $\emptyset$
+suffices).
 
-{\color{blue} Although \bcore is a relatively simple language, we can
-already model natural problems with it. 
+{\color{red} Although \bcore is a relatively simple language, we can
+already model natural problems with it. To distinguish $\Sigma$- and
+$\Omega$-atoms we write them with parenthesis $p[\cdot]$ or brackets
+$q(\cdot)$,
+respectively.
+
+
 
 \begin{example}
   
@@ -156,8 +162,42 @@ already model natural problems with it.
 
 \subsection{Full \bule}
 
-\vale{To distinguish $\Sigma$- and $\Omega$-atoms we
-write them with parenthesis $p[]$ or brackets $q[]$, respectively. }
+We extend \bcore with \emph{extended instances}, \emph{iterators},
+\emph{integers}, and \emph{implicit declarations} and define the
+semantics by mapping to \bcore. We start with definitions. 
+
+An \emph{extended instance \Jmc} is a union of an instance \Imc with a
+a set of rules of the form
+%
+\[B_1,\ldots,B_k\Rightarrow B\]
+%
+where $B,B_1,\ldots,B_k$ are $\Sigma$-atoms and every variable that
+occurs in $B$ occurs in one of the $B_i$. We further require that the
+rules in \Jmc are acyclic in the sense that the graph $G_\Jmc = (V_\Jmc,E_\Jmc)$ is
+acyclic, where $V_\Jmc$ is the set of all relation names that occur in
+\Jmc and $(P,R)\in E_\Jmc$ if there is a rule
+$B_1,\ldots,B_k\Rightarrow B$ where $B$ is an $R$-atom and some $B_i$
+is an $P$-atom.  
+
+An extended \bcore-program is now a pair $\Pi=(\Jmc,\Pmc)$ where
+$\Jmc$ is an extended instance and \Pmc a set of rules as above. Every
+extended \bcore-program \emph{induces} a \bcore-program $(\Imc,\Pmc)$
+via an inductive process as follows. Let $\Imc_0$ be the set of facts
+in \Jmc, and define $\Imc_{i+1}$ from $\Imc_i$ by adding, for every
+rule $B_1,\ldots,B_k\Rightarrow B\in \Jmc$ and every model $v$ of
+$B_1\wedge \ldots \wedge B_k$ over $\Imc_i$, the fact $v(B)$ to
+$\Imc_{i+1}$. Note that this process terminates due to acyclicity of
+\Jmc. An extended \bcore-program is satisfiable if the induced
+\bcore-program is satisfiable. 
+
+Extended \bcore-programs can be used to define auxiliary facts which
+are often useful for modeling, e.g.~see the following example. 
+%
+\begin{example}
+  %
+  \textcolor{red}{TODO.}
+  %
+\end{example}
 
 
 {\color{red}For simplicity, I don't use any syntactic sugar, that is,
@@ -169,8 +209,6 @@ write them with parenthesis $p[]$ or brackets $q[]$, respectively. }
 
   \item no integers as in $c(I,J),c(I+1,J)$ or $dom[1..k]$,
 
-  \item no $[]$-atoms on the right-hand side, as in $edge[X,\_ ]
-    \Rightarrow node[X]$
 
 \end{itemize}
 Moreover, there are no rules of the form $[c(I)]:dom[I]$ yet. 
