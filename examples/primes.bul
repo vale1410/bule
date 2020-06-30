@@ -1,0 +1,20 @@
+n[0..31].
+p[2].
+p[3].
+p[5].
+p[7].
+p[11].
+p[13].
+p[17].
+p[19].
+p[23].
+p[29].
+d[0..4].
+
+d[D], D#mod2 == 0 => #exist[D], m(D)?
+d[D], D#mod2 == 1 => #forall[D], m(D)?
+
+n[D], d[I] => choose[D,I,(D/(2**I))#mod2]. 
+p[P] => ~m(I):choose[P,I,1], m(I):choose[P,I,0].
+
+

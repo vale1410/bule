@@ -1,0 +1,12 @@
+n[2..4].
+d[0..1].
+
+d[D], D#mod2 == 0 => #exist[D], m(D)?
+d[D], D#mod2 == 1 => #forall[D], m(D)?
+
+% Is bit of number N  is 0 or 1, respectively.
+n[D], d[I] => choose[D,I,(D/(2**I))#mod2]. 
+
+n[Q], n[R], Q > 1, R > Q, P == Q*R => ~m(I):choose[P,I,1], m(I):choose[P,I,0].
+
+

@@ -281,11 +281,23 @@ A special case of the counter encoding resolves to the ladder encoding when $J==
 
 TODO. We should how to do order and logarithmic encodings. 
 
-\subsection{Generalised Geography}
+\subsection{Prime Game}
 
-To demonstrate the QBF ability we show an encoding for GG here: 
+Here we show that Bule can be used to model PSPACE complete problems in QBF. 
 
-TODO 
+Two players choosing the bits of a 5 bit number from lowest to highest bit such that 
+the second player wins if the number is prime and the first if it is not. 
+\begin{lstlisting}
+n[0..31]. d[0..4].
+p[2]. p[3]. p[5]. p[7]. p[11]. p[13]. p[17]. p[19]. p[23]. p[29].
+
+d[D], D#mod2 == 0 => #exist[D], m(D)?
+d[D], D#mod2 == 1 => #forall[D], m(D)?
+
+n[D], d[I] => choose[D,I,(D/(2**I))#mod2]. 
+p[P] => ~m(I):choose[P,I,1], m(I):choose[P,I,0].
+\end{lstlisting}
+
 
 \section{Complexity}
 
