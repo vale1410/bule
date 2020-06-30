@@ -1,10 +1,20 @@
-dom[1].dom[2]. dom[3]. dom[4]. 
-dom[Z1], dom[Z], Z1!=Z2 => notEqual[Z1,Z2]. 
+dom[1].
+dom[2]. 
+dom[3]. 
+dom[4]. 
+ne[1,2]. 
+ne[1,3]. 
+ne[1,4]. 
+ne[2,3]. 
+ne[2,4]. 
+ne[3,4].
 
+dom[X], dom[Y] => #exist(0), q(X,Y)?
+
+% AtLeast one per row and column
 dom[X] => q(X,1), q(X,2), q(X,3), q(X,4).
 dom[Y] => q(1,Y), q(2,Y), q(3,Y), q(4,Y).
 
 % Max one per row and column  
-dom[Y],  notEqual[X1,X2] => ~q(X1,Y), ~q(X2,Y). 
+dom[Y],  ne[X1,X2] => ~q(X1,Y), ~q(X2,Y). 
 dom[Y1], dom[Y2], dom[X]  => ~q(X,Y1), ~q(X,Y2). 
-

@@ -2,7 +2,7 @@
 
 dom[1..n]. 
 
-%============= non-generitc for n==8
+%============= non-generic for n==8
 dom[X] => q(X,1), q(X,2), q(X,3), q(X,4), q(X,5), q(X,6), q(X,7), q(X,8). 
 dom[Y] => q(1,Y), q(2,Y), q(3,Y), q(4,Y), q(5,Y), q(6,Y), q(7,Y), q(8,Y). 
 %%% %============= Generic for all n

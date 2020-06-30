@@ -7,21 +7,20 @@
 
 \title{ SAT Programming}
 \author{\IEEEauthorblockN{Jean Christoph Jung}
-\IEEEauthorblockA{\textit{Universit\"at Bremen} \\
-Bremen, Germany}
-}
-\author{\IEEEauthorblockN{ Valentin Mayer-Eichberger}
-\IEEEauthorblockA{\textit{Technische Universit\"at} \\
-Berlin, Germany}
+
+\IEEEauthorblockA{\textit{Universit\"at Bremen} \\ Bremen, Germany} \and
+Valentin Mayer-Eichberger \\
+\IEEEauthorblockA{\textit{Technische Universit\"at Berlin} \\ Berlin, Germany}
 }
 
 \begin{document}
 
 \maketitle
 
+\newcommand{\bflat}{\ensuremath{\text{Bule}_\text{flat}}\xspace}
 \newcommand{\bcore}{\ensuremath{\text{Bule}_\text{core}}\xspace}
+\newcommand{\bfull}{\ensuremath{\text{Bule}_\text{full}}\xspace}
 \newcommand{\bule}{\ensuremath{\text{Bule}}\xspace}
-
 
 \begin{abstract}
     SAT Programming extends SAT Solving by a declarative modelling language. 
@@ -48,6 +47,7 @@ Berlin, Germany}
 
 \end{abstract}
 
+\tableofcontents
 
 \section{Related Works and Citations and Ideas}
 
@@ -73,39 +73,32 @@ already ground problems. We will try to change that !
 How do we avoid the challenges in stable models, minimal models, well-founded
 semantics etc. ?  Isn't this just Tight, stratified, normal logic program?
 
+\section{Bule Syntax and Semantics}
+
+For didactic reasons, we define syntax and semantics of \bule in three stages. 
+We start with a fully ground program without term variables in \bflat, which is essentially CNF with readable literals. 
+The non-ground language \bcore contains the basic functionality of the modelling language. 
+Third we present the complete language \bfull, that allows for several extensions to ease modeling. 
+
+\subsection{\bflat}
 
 A ground Bule program is a set of clauses with literals. 
 
-\section{Bule Syntax and Semantics}
-
-For didactic reasons, we define syntax and semantics of \bule in two
-stages. We start with \bcore which contains the main functionality and
-then present several extensions which ease modeling. 
-
 \subsection{\bcore}
 
-Let $\Sigma,\Omega$ be disjoint countably infinite sets of relation
-symbols.  Each relation symbol $R\in \Sigma\cup\Omega$ has an
-associated arity $\mn{ar}(R)$.  Let us further fix a countably
-infinite supply of constant symbols \mn{Con} and variable symbols
-$\mn{Var}$.  An \emph{atom} is of the form $R(t_1,\ldots,t_n)$ for
-some $R\in \Sigma\cup\Omega$ and
-$t_1,\ldots,t_n\in\mn{Con}\cup\mn{Var}$ and $n=\mn{ar}(R)$. An atom
-$R(t_1,\ldots,t_n)$ is \emph{ground} if $t_1,\ldots,t_n\in\mn{Con}$;
-ground atoms are also called \emph{facts}. An atom $R(t_1,\ldots,t_n)$
-is a \emph{$\Sigma$-atom} or an \emph{$\Omega$-atom} if $R\in \Sigma$
-or $R\in \Omega$, respectively. A \emph{literal} is an atom
-$R(t_1,\ldots,t_n)$ or a negated atom $\neg R(t_1,\ldots,t_n)$. An
-\emph{instance} is a finite set of facts. 
-A \emph{substitution} is a map
-$v:\mn{Var}\cup\mn{Con}\to\mn{Con}$ which is the identity on
-$\mn{Con}$, that is, $v(a)=a$, for all $a\in\mn{Con}$. Let $\Imc$ be
-an instance, $\alpha$ a Boolean formula over atoms, and
-$v$ a substitution. We define $\Dmc,v\models \alpha$ inductively as
-follows: 
+Let $\Sigma,\Omega$ be disjoint countably infinite sets of relation symbols.  
+Each relation symbol $R\in \Sigma\cup\Omega$ has an associated arity $\mn{ar}(R)$.  
+Let us further fix a countably infinite supply of constant symbols \mn{Con} and variable symbols $\mn{Var}$.  
+An \emph{atom} is of the form $R(t_1,\ldots,t_n)$ for some $R\in \Sigma\cup\Omega$ and $t_1,\ldots,t_n\in\mn{Con}\cup\mn{Var}$ and $n=\mn{ar}(R)$. 
+An atom $R(t_1,\ldots,t_n)$ is \emph{ground} if $t_1,\ldots,t_n\in\mn{Con}$; ground atoms are also called \emph{facts}. 
+An atom $R(t_1,\ldots,t_n)$ is a \emph{$\Sigma$-atom} or an \emph{$\Omega$-atom} if $R\in \Sigma$ or $R\in \Omega$, respectively. 
+A \emph{literal} is an atom $R(t_1,\ldots,t_n)$ or a negated atom $\neg R(t_1,\ldots,t_n)$. 
+An \emph{instance} is a finite set of facts. A \emph{substitution} is a map $v:\mn{Var}\cup\mn{Con}\to\mn{Con}$ which is the identity on $\mn{Con}$, that is, $v(a)=a$, for all $a\in\mn{Con}$.
+et $\Imc$ be an instance, $\alpha$ a Boolean formula over atoms, and $v$ a substitution. 
+
+We define $\Dmc,v\models \alpha$ inductively as follows: 
 %
 \begin{align*}
-  %
   %
   \Imc,v & \models R(t_1,\ldots,t_n) && \text{if
   $R(v(t_1),\ldots,v(t_n))\in \Imc$} \\
@@ -118,41 +111,29 @@ follows:
   %
 \end{align*}
 %
-If $\Imc,v\models\alpha$, we call $v$ a \emph{model} of $\alpha$ over
-the instance \Imc. A \emph{clause} is a disjunction of literals.
+If $\Imc,v\models\alpha$, we call $v$ a \emph{model} of $\alpha$ over the instance \Imc. 
+A \emph{clause} is a disjunction of literals.
 
-
-A \emph{\bcore-program} is a pair $\Pi=(\Imc,\Pmc)$ where $\Imc$ is a
-finite set of facts and \Pmc is a set of rules of the form 
+A \emph{\bcore-program} is a pair $\Pi=(\Imc,\Pmc)$ where $\Imc$ is a finite set of facts and \Pmc is a set of rules of the form 
 %
 \[B_1, \ldots, B_k \Rightarrow L_1, \ldots, L_m\]
 %
-where $B_1,\ldots,B_k$ are $\Sigma$-atoms
-and $L_1,\ldots,L_m$ are $\Omega$-literals such that every variable
-that occurs in one of the $L_i$ does occur in one of the 
-$B_i$.
+where $B_1,\ldots,B_k$ are $\Sigma$-atoms and $L_1,\ldots,L_m$ are $\Omega$-literals such that every variable that occurs in one of the $L_i$ does occur in one of the $B_i$.
 
-The semantics of \bcore-programs $\Pi=(\Imc,\Pmc)$ is defined via
-groundings. More precisely, with every \bcore-program
-$\Pi=(\Imc,\Pmc)$, we associate a set $\mn{cl}(\Pi)$ of ground clauses
-as follows.  For every rule $B_1,\ldots,B_k \Rightarrow L_1,\ldots,
-L_n\in\Pmc$ and every model $v$ of $B_1\wedge\ldots\wedge B_k$ in
-\Imc, $\mn{cl}(\Pi)$ contains the clause
+The semantics of \bcore-programs $\Pi=(\Imc,\Pmc)$ is defined via groundings. 
+More precisely, with every \bcore-program $\Pi=(\Imc,\Pmc)$, we associate a set $\mn{cl}(\Pi)$ of ground clauses as follows.  
+For every rule $B_1,\ldots,B_k \Rightarrow L_1,\ldots, L_n\in\Pmc$ and every model $v$ of $B_1\wedge\ldots\wedge B_k$ in \Imc, $\mn{cl}(\Pi)$ contains the clause
 %
 \[v(L_1)\vee\ldots\vee v(L_n).\]
 %
-We say that $\Pi$ is \emph{satisfiable} if the set of clauses
-$\mn{cl}(\Pi)$ is satisfiable, that is, there is an instance $\Mmc$
-such that $\Mmc,\emptyset \models\mn{cl}(\Pi)$ (note that
-$\mn{cl}(\Pi)$ is ground, so the empty substitution $\emptyset$
-suffices).
+We say that $\Pi$ is \emph{satisfiable} if the set of clauses $\mn{cl}(\Pi)$ is satisfiable, that is, 
+there is an instance $\Mmc$ such that $\Mmc,\emptyset \models\mn{cl}(\Pi)$ (note that $\mn{cl}(\Pi)$ is ground, so the empty substitution $\emptyset$ suffices).
 
 {\color{red} Although \bcore is a relatively simple language, we can
 already model natural problems with it. To distinguish $\Sigma$- and
-$\Omega$-atoms we write them with parenthesis $p[\cdot]$ or brackets
-$q(\cdot)$,
+$\Omega$-atoms we write them with parenthesis $p(\;\;\cdot)$ or brackets
+$q(\;\;\cdot)$,
 respectively.
-
 
 
 \begin{example}
@@ -162,7 +143,7 @@ respectively.
 }
 
 
-\subsection{Full \bule}
+\subsection{\bfull}
 
 We extend \bcore with \emph{extended instances}, \emph{iterators},
 \emph{integers}, and \emph{implicit declarations} and define the
@@ -219,8 +200,84 @@ Moreover, there are no rules of the form $[c(I)]:dom[I]$ yet.
 
 \section{Examples}
 
-\subsection{The Counter Encoding for Cardinality Constraints}
+\subsection{$4x4$ NQueens as \bflat}
 
+Flat Bule only contains grounded clauses. It's essentially a pretty print of CNF.
+
+\begin{lstlisting}
+q(1,1), q(1,2), q(1,3), q(1,4).
+q(2,1), q(2,2), q(2,3), q(2,4).
+q(3,1), q(3,2), q(3,3), q(3,4).
+q(4,1), q(4,2), q(4,3), q(4,4).
+q(1,1), q(2,1), q(3,1), q(4,1).
+...
+~q(1,1), ~q(2,1).
+~q(1,1), ~q(3,1).
+~q(1,1), ~q(4,1).
+~q(2,1), ~q(3,1).
+~q(2,1), ~q(4,1).
+~q(3,1), ~q(4,1).
+~q(1,2), ~q(2,2).
+~q(1,2), ~q(3,2).
+...
+~q(3,4), ~q(3,4).
+~q(4,4), ~q(4,4).
+\end{lstlisting}
+
+\subsection{Simplified $4x4$ NQueens as \bcore}
+
+Only vertical and horizontal constraints.
+
+\begin{lstlisting}
+dom[1].dom[2]. dom[3]. dom[4]. 
+ne[1,2]. ne[1,3]. ne[1,4]. ne[2,3]. ne[2,4]. ne[3,4].
+
+% AtLeast one per row and column
+dom[X] => q(X,1), q(X,2), q(X,3), q(X,4).
+dom[Y] => q(1,Y), q(2,Y), q(3,Y), q(4,Y).
+
+% Max one per row and column  
+dom[Y],  ne[X1,X2] => ~q(X1,Y), ~q(X2,Y). 
+dom[Y1], dom[Y2], dom[X]  => ~q(X,Y1), ~q(X,Y2). 
+\end{lstlisting}
+
+\subsection{Generic NQueens in \bfull}
+
+\begin{lstlisting}
+dom[1..n]. 
+
+dom[X] => q(X,Y) : dom[Y]. 
+dom[Y] => q(X,Y) : dom[X].
+
+% Max one per row and column  
+X1 < X2 => ~q(X1,Y), ~q(X2,Y). 
+Y1 < Y2 => ~q(X,Y1), ~q(X,Y2). 
+
+% diagonals
+X1 < X2, Y1 >= Y2, X1 + Y1 == X2 + Y2 => ~q(X1,Y1), ~q(X2,Y2). 
+X1 < X2, Y1 <= Y2, X1 + Y2 == X2 + Y1 => ~q(X1,Y1), ~q(X2,Y2). 
+\end{lstlisting}
+
+\subsection{Reachability}
+
+Given a set of edges $(V1,V2)$, with $V1 < V2$, consisting of vertices 0..n-1. 
+
+\begin{lstlisting}
+e[V1,_] => v[V1]. %% collect vertices
+e[_,V1] => v[V2]. %% collect vertices
+
+%% vertices encoded 0..n-1, so the set of vertices is at the same time also the
+%% possible length between them 
+v[V1], v[V2], v[D] => r(V1,V2,D)?
+
+e[V1,V2] => r(V1,V2,1). 
+e[V2,V3] => ~r(V1,V2,K), r(V2,V3,K+1). 
+
+r(V1,V2,K), r(V1,V2,K+1). 
+v[V1], v[V2], ~e[V1,V3] => ~r(V1,V3,K), r(V2,V3,K-1) : e[V2,V3].
+\end{lstlisting}
+
+\subsection{Counter Encoding}
 
 Given the search atoms $element(1\ldots n)$, the counter encodings encodes the
 number of true elements (CNF encoding of Cardinality as defined in \cite{Sinz05})
@@ -232,11 +289,10 @@ under the current assignment:
 ~element(I), ~count(I-1,J-1), count(I,J).
  element(I), ~count(I,J),     count(I-1,J).
 
- count(0,0).
-~count(0,1).
- count(n,k).
-~count(n,k+1).
+ count(0,0). ~count(0,1). count(n,k). ~count(n,k+1).
 \end{lstlisting}
+
+A special case of the counter encoding resolves to the ladder encoding when $J==1$. 
 
 \section{Relationship to other KR languages}
 

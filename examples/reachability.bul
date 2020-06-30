@@ -1,0 +1,14 @@
+%% given: edge[V1,V2], with V1 < V2, consisting of vertices 0..n-1. 
+
+e[V1,_] => v[V1]. %% collect vertices
+e[_,V1] => v[V2]. %% collect vertices
+
+%% vertices encoded 0..n-1, so the set of vertices is at the same time also the
+%% possible length between them 
+v[V1], v[V2], v[D] => r(V1,V2,D)?
+
+e[V1,V2] => r(V1,V2,1). 
+e[V2,V3] => ~r(V1,V2,K), r(V2,V3,K+1). 
+
+r(V1,V2,K), r(V1,V2,K+1). 
+v[V1], v[V2], ~e[V1,V3] => ~r(V1,V3,K), r(V2,V3,K-1) : e[V2,V3].
