@@ -7,10 +7,11 @@
 
 \title{ SAT Programming}
 \author{\IEEEauthorblockN{Jean Christoph Jung}
-
 \IEEEauthorblockA{\textit{Universit\"at Bremen} \\ Bremen, Germany} \and
 Valentin Mayer-Eichberger \\
-\IEEEauthorblockA{\textit{Technische Universit\"at Berlin} \\ Berlin, Germany}
+\IEEEauthorblockA{\textit{Technische Universit\"at Berlin} \\ Berlin, Germany} \and
+Abdallah Saffidine \\
+\IEEEauthorblockA{\textit{University of New South Wales} \\ Sydney, Australia}
 }
 
 \begin{document}
@@ -20,6 +21,7 @@ Valentin Mayer-Eichberger \\
 \newcommand{\bflat}{\ensuremath{\text{Bule}_\text{flat}}\xspace}
 \newcommand{\bcore}{\ensuremath{\text{Bule}_\text{core}}\xspace}
 \newcommand{\bfull}{\ensuremath{\text{Bule}_\text{full}}\xspace}
+\newcommand{\bnice}{\ensuremath{\text{Bule}_\text{nice}}\xspace}
 \newcommand{\bule}{\ensuremath{\text{Bule}}\xspace}
 
 \begin{abstract}
@@ -167,19 +169,19 @@ are often useful for modeling, e.g.~see the following example.
 \end{example}
 
 
-{\color{red}For simplicity, I don't use any syntactic sugar, that is,
-%
+\subsection{\bnice}
+
+To make it easier to define the semantics of \bfull we omitted the syntactic sugar. 
+The language \bnice on the other hand contains all syntactic sugar and makes modelling very convenient.  
+Features like: 
+
 \begin{itemize}
-
-  \item no empty $\alpha$ as in the generating clauses
-    $c(I,J),b(I,J)$,
-
-  \item no integers as in $c(I,J),c(I+1,J)$ or $dom[1..k]$,
-
-
+  \item iterators of the form $c(I):dom[I]$
+  \item ranges $dom[1..k]$ 
+  \item implicit definition of term variables as in the clause $~c(I,J),b(I,J).$.
+  \item simple arithmetic as in the rule $c(I,J),c(I+1,J).$ 
+  \item more arithmetic as in the rule $ I== 0 \ldots Y^2, k[K] \Rightarrow c(I^K\%2).$
 \end{itemize}
-Moreover, there are no rules of the form $[c(I)]:dom[I]$ yet. 
-}
 
 \section{Examples}
 
@@ -241,26 +243,22 @@ X1 < X2, Y1 >= Y2, X1 + Y1 == X2 + Y2 => ~q(X1,Y1), ~q(X2,Y2).
 X1 < X2, Y1 <= Y2, X1 + Y2 == X2 + Y1 => ~q(X1,Y1), ~q(X2,Y2). 
 \end{lstlisting}
 
+To make it more compact we could leave the diagonals out. 
+
 \subsection{Reachability}
 
-Given a set of edges $(V1,V2)$, with $V1 < V2$, consisting of vertices from the set $\{0\ldots n-1\}$. 
-The following encodes the reachability in the induced graph. 
+Given a set of edges, the following program encodes reachability in the induced graph, i.e. 
 
 \begin{lstlisting}
-%% vertices encoded 0..n-1, so the set of vertices is at the same time also the
-%% possible length between them 
-v[V1], v[V2], D == 0..n-1 => r(V1,V2,D)?
-
-e[V1,V2] => r(V1,V2,1). 
-e[V2,V3] => ~r(V1,V2,K), r(V2,V3,K+1). 
-
-r(V1,V2,K), r(V1,V2,K+1). 
-v[V1], v[V2], ~e[V1,V3] => ~r(V1,V3,K), r(V2,V3,K-1) : e[V2,V3].
+\input{../examples/reachability.bul}
 \end{lstlisting}
 
 \subsection{Cardinality Encoding through Counters}
 
-Given the search atoms $element(1\ldots n)$, the counter encodings encodes enforces that there are exactly $k$  variables true (\cite{Sinz05}).
+Bule does not have native cardinality constraints. 
+The following encoding is easy to adapt to encode cardinality constraints in CNF 
+It also showcases how the counter encoding by \cite{Sinz05} looks in Bule. 
+Given the search atoms $element(1\ldots n)$, the counter encodings encodes enforces that there are exactly $k$  variables true .
 
 \begin{lstlisting}
 ~count(I,J),  count(I+1,J).
@@ -272,10 +270,13 @@ Given the search atoms $element(1\ldots n)$, the counter encodings encodes enfor
 \end{lstlisting}
 
 Removing the second last unit the clause set becomes an AtMost constraint ( respectively the last unit an AtLeast constraint). 
-When $n==1$ As special case of the counter encoding resolves to the ladder encoding 
-\subsection{Domain Encodings}
+For $k=1$ the counter encoding resolves to the ladder encoding (cite Ian Gent). 
 
-TODO. We should how to do order and logarithmic encodings. 
+\subsection{Planning Problem}
+
+Find a good planning problems. 
+Sokoban might be too complicated. 
+Is there a simpler one ? 
 
 \subsection{Prime Game}
 
@@ -286,8 +287,8 @@ Two players choosing the bits of a 5 bit number from lowest to highest bit such 
 the second player wins if the number is prime and the first if it is not. 
 
 We apply the adaptive LOG encoding here such that. This encoding translates
-naturally to Bule. We introduce a generator fact {\verb choose} that encodes
-the bit representation of a number $D$ with the $I$s bit to 1 (resp. 0). 
+naturally to Bule. We introduce a generator fact {\verb bit(D,I,P)} that is the 
+bit representation of the  number $D$ with the $I$s bit to 1 (resp. 0). 
 
 \begin{lstlisting}
 n[0..31]. d[0..4].
@@ -296,13 +297,35 @@ p[2]. p[3]. p[5]. p[7]. p[11]. p[13]. p[17]. p[19]. p[23]. p[29].
 d[D], D#mod2 == 0 => #exist[D], m(D)?
 d[D], D#mod2 == 1 => #forall[D], m(D)?
 
-n[D], d[I] => choose[D,I,(D/(2**I))#mod2]. 
-p[P] => ~m(I):choose[P,I,1], m(I):choose[P,I,0].
+n[D], d[I] => bit[D,I,(D/(2**I))#mod2]. 
+p[P] => ~m(I):bit[P,I,1], m(I):bit[P,I,0].
 \end{lstlisting}
+
+\subsection{Generalised Arc Consistency in Bule}
+
+\begin{lstlisting}
+%% clauseset given as cl[ID,Var,Polarity]. polarity 1 is positive, 0 negated. 
+%% for example if clause 2 is 6 -3 0, that would be cl[2,3,1]. cl[2,6,0].
+%% v[V], contains all variables V. 
+%% c[C], contains all variables Cls IDs
+a[0]. a[1]. 
+v[V], a[A] => assign1(V,A)?
+c[C], => assign1(V,A):cl[C,V,A]. 
+
+
+\end{lstlisting}
+
+
+
+\subsection{Approx Model Counting}
+
+Find a cool probability problem where we define two SAT problems. 
+One for the nominator, one for the denominator. 
+
 
 \section{Complexity}
 
-\bflat is obviously NPComplete. 
+\bflat is NPComplete, and PSPACE with quantifier prefix. 
 \bfull is NEXPTIME complete. 
 This should be very straight forward adaptation of Datalog?
 
