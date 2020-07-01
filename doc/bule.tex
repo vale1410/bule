@@ -221,7 +221,7 @@ dom[Y] => q(1,Y), q(2,Y), q(3,Y), q(4,Y).
 
 % Max one per row and column  
 dom[Y],  ne[X1,X2] => ~q(X1,Y), ~q(X2,Y). 
-dom[Y1], dom[Y2], dom[X]  => ~q(X,Y1), ~q(X,Y2). 
+dom[X],  ne[Y1,Y2] => ~q(X,Y1), ~q(X,Y2). 
 \end{lstlisting}
 
 \subsection{Generic NQueens in \bfull}
@@ -243,15 +243,13 @@ X1 < X2, Y1 <= Y2, X1 + Y2 == X2 + Y1 => ~q(X1,Y1), ~q(X2,Y2).
 
 \subsection{Reachability}
 
-Given a set of edges $(V1,V2)$, with $V1 < V2$, consisting of vertices 0..n-1. 
+Given a set of edges $(V1,V2)$, with $V1 < V2$, consisting of vertices from the set $\{0\ldots n-1\}$. 
+The following encodes the reachability in the induced graph. 
 
 \begin{lstlisting}
-e[V1,_] => v[V1]. %% collect vertices
-e[_,V1] => v[V2]. %% collect vertices
-
 %% vertices encoded 0..n-1, so the set of vertices is at the same time also the
 %% possible length between them 
-v[V1], v[V2], v[D] => r(V1,V2,D)?
+v[V1], v[V2], D == 0..n-1 => r(V1,V2,D)?
 
 e[V1,V2] => r(V1,V2,1). 
 e[V2,V3] => ~r(V1,V2,K), r(V2,V3,K+1). 
@@ -260,11 +258,9 @@ r(V1,V2,K), r(V1,V2,K+1).
 v[V1], v[V2], ~e[V1,V3] => ~r(V1,V3,K), r(V2,V3,K-1) : e[V2,V3].
 \end{lstlisting}
 
-\subsection{Counter Encoding}
+\subsection{Cardinality Encoding through Counters}
 
-Given the search atoms $element(1\ldots n)$, the counter encodings encodes the
-number of true elements (CNF encoding of Cardinality as defined in \cite{Sinz05})
-under the current assignment:
+Given the search atoms $element(1\ldots n)$, the counter encodings encodes enforces that there are exactly $k$  variables true (\cite{Sinz05}).
 
 \begin{lstlisting}
 ~count(I,J),  count(I+1,J).
@@ -275,8 +271,8 @@ under the current assignment:
  count(0,0). ~count(0,1). count(n,k). ~count(n,k+1).
 \end{lstlisting}
 
-A special case of the counter encoding resolves to the ladder encoding when $J==1$. 
-
+Removing the second last unit the clause set becomes an AtMost constraint ( respectively the last unit an AtLeast constraint). 
+When $n==1$ As special case of the counter encoding resolves to the ladder encoding 
 \subsection{Domain Encodings}
 
 TODO. We should how to do order and logarithmic encodings. 
@@ -284,6 +280,7 @@ TODO. We should how to do order and logarithmic encodings.
 \subsection{Prime Game}
 
 Here we show that Bule can be used to model PSPACE complete problems in QBF. 
+We also show how to do LOG encoding.  
 
 Two players choosing the bits of a 5 bit number from lowest to highest bit such that 
 the second player wins if the number is prime and the first if it is not. 
@@ -302,7 +299,6 @@ d[D], D#mod2 == 1 => #forall[D], m(D)?
 n[D], d[I] => choose[D,I,(D/(2**I))#mod2]. 
 p[P] => ~m(I):choose[P,I,1], m(I):choose[P,I,0].
 \end{lstlisting}
-
 
 \section{Complexity}
 
