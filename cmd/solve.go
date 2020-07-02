@@ -94,16 +94,16 @@ to quickly create a Cobra application.`,
 			}
 		}
 
-		log.Println("Ground program writen to ", outputGroundFile)
+		debug(1,"Ground program writen to ", outputGroundFile)
 
 		var cmdOutput []byte
 		// Run File with DEPQBF
 		isTrue := true
 		{
-				log.Println("depqbf", "--qdo", "--no-dynamic-nenofex", outputGroundFile)
+				debug(1,"depqbf", "--qdo", "--no-dynamic-nenofex", outputGroundFile)
 				cmdOutput, err = exec.Command("depqbf", "--qdo", "--no-dynamic-nenofex", outputGroundFile).Output()
 				if exitError, ok := err.(*exec.ExitError); ok {
-					log.Println("DEPQBF exist status:", exitError.ExitCode())
+					debug(1,"DEPQBF exist status:", exitError.ExitCode())
 					if  exitError.ExitCode() == 10 {
 						isTrue = true
 					} else if  exitError.ExitCode() == 20 {
@@ -118,12 +118,11 @@ to quickly create a Cobra application.`,
 					log.Println("Omitting parsing because of error in solving: ", err)
 					return
 				}
-				log.Println("success: depqbf")
 		}
 
 		// Parse output and return result
 		{
-			fmt.Println("Output by DEPQBF")
+			debug(1,"Output by DEPQBF")
 			scanner := bufio.NewScanner(strings.NewReader(string(cmdOutput)))
 			result := []int{}
 			for scanner.Scan() {
