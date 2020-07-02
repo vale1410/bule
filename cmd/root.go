@@ -32,22 +32,26 @@ import (
 )
 
 var (
-	debugFlag int
-	cfgFile   string
+	debugFlag   int
+	cfgFile     string
+	versionFlag bool
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "bule ground",
+	Use:   "bule",
 	Short: "Bule provides SAT Programming at its best!",
 	Long: `
-Bule 2.4: The SAT Programming System BULE
+The SAT Programming System Bule
 
-Bule is a tool to program CNF encodings. Bule is part of the
-SAT Programming paradigm and provides easy access and handling of SAT
-technologies such at SAT Solving, QBF, MaxSAT or Approx. Model Counting.
 `,
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) {
+
+		if versionFlag {
+			fmt.Println("Bule Version 2.5. Copyright Valentin Mayer-Eichberger, 02.07.2020")
+			return
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -68,8 +72,9 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.bule.yaml)")
 	rootCmd.PersistentFlags().IntVarP(&debugFlag, "debug", "d", 0, "Debug level")
+	rootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", false, "Version Information")
 
-	// Cobra also supports local flags, which will only run
+	// Cobra also supports local flags, which will only prepare
 	// when this action is called directly.
 	//	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 

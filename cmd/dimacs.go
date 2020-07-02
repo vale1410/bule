@@ -63,9 +63,10 @@ var dimacsCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		units := convertArgsToUnits(args[1:])
-		fmt.Println("run with args")
+		fmt.Println("prepare with args")
 		p := parseFromFile(args[0])
-		p.run(units)
+		sb := p.prepare(units)
+		fmt.Println(sb.String())
 	},
 }
 
@@ -90,7 +91,7 @@ func init() {
 	// and all subcommands, e.g.:
 	// dimacsCmd.PersistentFlags().String("foo", "", "A help for foo")
 
-	// Cobra supports local flags which will only run when this command
+	// Cobra supports local flags which will only prepare when this command
 	// is called directly, e.g.:
 	//dimacsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
@@ -265,7 +266,8 @@ func (p *ClauseProgram) createInnermostExistFromFreeVars() {
 	}
 }
 
-func (p ClauseProgram) PrintDimacs() {
+func (p ClauseProgram) PrintDimacs() strings.Builder {
+	sb := strings.Builder{}
 	vars := p.idMap
 	conflict := p.conflict
 	cls := p.clauses
@@ -278,20 +280,20 @@ func (p ClauseProgram) PrintDimacs() {
 		}
 		for i, v := range varids {
 			if i > 0 {
-				fmt.Println("c", i, v)
+				sb.WriteString(fmt.Sprintln("c", i, v))
 			}
 		}
 	}
 
 	if conflict {
-		fmt.Println("p cnf 1 1 \n 0\n")
-		return
+		sb.WriteString(fmt.Sprintln("p cnf 1 1 \n 0\n"))
+		return sb
 	}
 
 	if printInfoFlag {
-		fmt.Println("p", "cnf", len(vars), len(cls)+len(units))
+		sb.WriteString(fmt.Sprintln("p", "cnf", len(vars), len(cls)+len(units)))
 	} else {
-		fmt.Println("p", "cnf", len(vars)-len(units), len(cls))
+		sb.WriteString(fmt.Sprintln("p", "cnf", len(vars)-len(units), len(cls)))
 	}
 	for i, quantifier := range p.alternation {
 
@@ -300,27 +302,27 @@ func (p ClauseProgram) PrintDimacs() {
 		}
 
 		if i%2 == 0 {
-			fmt.Print("e ")
+			sb.WriteString(fmt.Sprint("e "))
 		} else {
-			fmt.Print("a ")
+			sb.WriteString(fmt.Sprint("a "))
 		}
 
 		for _, v := range quantifier {
 			if !printInfoFlag && units[v] == true {
 				continue
 			}
-			fmt.Print(vars[v], " ")
+			sb.WriteString(fmt.Sprint(vars[v], " "))
 		}
-		fmt.Println("0")
+		sb.WriteString(fmt.Sprintln("0"))
 	}
 
 	if printInfoFlag {
 		for lit := range units {
 			if strings.HasPrefix(lit, "~") {
-				fmt.Print("-")
+				sb.WriteString(fmt.Sprint("-"))
 			}
-			fmt.Print(vars[pos(lit)], " ")
-			fmt.Println(0)
+			sb.WriteString(fmt.Sprint(vars[pos(lit)], " "))
+			sb.WriteString(fmt.Sprintln(0))
 		}
 	}
 
@@ -328,24 +330,25 @@ func (p ClauseProgram) PrintDimacs() {
 		for _, clause := range cls {
 			for _, lit := range clause {
 				if strings.HasPrefix(lit, "~") {
-					fmt.Print("-")
+					sb.WriteString(fmt.Sprint("-"))
 				}
-				fmt.Print(vars[pos(lit)], " ")
+				sb.WriteString(fmt.Sprint(vars[pos(lit)], " "))
 			}
-			fmt.Println("0")
+			sb.WriteString(fmt.Sprintln("0"))
 		}
 	} else {
 		// printout textual representation!!
 		for _, clause := range cls {
 			for i, lit := range clause {
 				if i != 0 {
-					fmt.Print(", ")
+					sb.WriteString(fmt.Sprint(", "))
 				}
-				fmt.Print(lit)
+				sb.WriteString(fmt.Sprint(lit))
 			}
-			fmt.Println(".")
+			sb.WriteString(fmt.Sprintln("."))
 		}
 	}
+	return sb
 }
 
 // This is a very slow implementation of unit propagation
@@ -394,11 +397,12 @@ func (p *ClauseProgram) unitPropagation() {
 	return
 }
 
-func (p ClauseProgram) Print() {
-	p.run(map[string]bool{})
+func (p *ClauseProgram) StringBuilder() strings.Builder {
+	sb := p.prepare(map[string]bool{})
+	return  sb
 }
 
-func (p ClauseProgram) run(additionalUnits map[string]bool) {
+func (p *ClauseProgram) prepare(additionalUnits map[string]bool) strings.Builder {
 
 	for unit := range additionalUnits {
 		p.units[unit] = true
@@ -409,7 +413,7 @@ func (p ClauseProgram) run(additionalUnits map[string]bool) {
 	}
 	p.generateIds()
 	p.createInnermostExistFromFreeVars()
-	p.PrintDimacs()
+	return p.PrintDimacs()
 }
 
 func pos(s string) string {

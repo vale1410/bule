@@ -40,7 +40,7 @@ var groundCmd = &cobra.Command{
 	Use:   "ground",
 	Short: "Grounds to CNF from a program written in Bule format",
 	Long: `Grounds to CNF from a program written in Bule format
-How to run it: 
+How to prepare it:
 bule ground <program.bul> [options].
 `,
 	Args: cobra.MinimumNArgs(1),
@@ -54,6 +54,7 @@ bule ground <program.bul> [options].
 
 		p, err := bule.ParseProgram(args)
 		if err != nil {
+			fmt.Println("Error parsing program")
 			fmt.Println(err)
 			os.Exit(1)
 		}
@@ -63,7 +64,6 @@ bule ground <program.bul> [options].
 		stage2Iterators(&p)
 		stage3Clauses(&p)
 		stage4Printing(&p, args)
-
 	},
 }
 
@@ -146,23 +146,23 @@ func stage1GeneratorsAndFacts(p *bule.Program) {
 		stage(p, &changed,
 			p.ConstraintSimplification,
 			"Do Fixpoint of TransformConstraintsToInstantiation.",
-			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.", )
+			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
 
 		stage(p, &changed,
 			p.RemoveRulesWithNegatedGroundGenerator,
 			"RemoveRulesWithNegatedGroundGenerator.",
-			"~p[1,2]=> q(1,2) and p[1,2] is not a fact then remove rule!", )
+			"~p[1,2]=> q(1,2) and p[1,2] is not a fact then remove rule!")
 
 		stage(p, &changed,
 			p.RemoveNegatedGroundGenerator,
 			"RemoveNegatedGroundGenerator",
-			"~p[1,2]=> q(1,2) and p[1,2] is a fact, then remove from generators!", )
+			"~p[1,2]=> q(1,2) and p[1,2] is a fact, then remove from generators!")
 	}
 
 	stage(p, &changed,
 		p.RemoveRulesWithGenerators,
 		"RemoveRulesWithGeneratorsBecauseTheyHaveEmptyDomains",
-		"Because they have empty domains, e.g. \n edge[_,_,V] => vertex[V]. %% there are no edges!", )
+		"Because they have empty domains, e.g. \n edge[_,_,V] => vertex[V]. %% there are no edges!")
 }
 
 func stage2Iterators(p *bule.Program) {
@@ -186,24 +186,23 @@ func stage2Iterators(p *bule.Program) {
 		stage(p, &changed,
 			p.ConstraintSimplification,
 			"ConstraintSimplification.",
-			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.", )
+			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
 
 		stage(p, &changed,
 			p.CleanIteratorFromGroundBoolExpressions,
 			"CleanIteratorFromGroundBoolExpressions.",
-			"p(X,Y):q[X,Y]:#true -> p(X,Y):q[X,Y]", )
+			"p(X,Y):q[X,Y]:#true -> p(X,Y):q[X,Y]")
 
 		stage(p, &changed,
 			p.ConvertHeadOnlyIteratorsToLiterals,
 			"ConvertHeadOnlyIteratorsToLiterals.",
-			"p(1,2) -> p(1,2) %% but now as literal!", )
+			"p(1,2) -> p(1,2) %% but now as literal!")
 	}
-
 
 	stage(p, &changed,
 		p.RemoveLiteralsWithEmptyIterators,
 		"RemoveLiteralsWithEmptyIterators",
-		"win(E):edgeId[1,E]. %% edgeId is empty \n Remove!", )
+		"win(E):edgeId[1,E]. %% edgeId is empty \n Remove!")
 
 }
 
@@ -238,12 +237,12 @@ func stage3Clauses(p *bule.Program) {
 		stage(p, &changed,
 			p.ConstraintSimplification,
 			"ConstraintSimplification.",
-			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.", )
+			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
 
 		stage(p, &changed,
 			p.RemoveClausesWithExplicitLiteralAndTuplesThatDontExist,
 			"RemoveClausesWithExplicitLiteralAndTuplesThatDontExist",
-			"", )
+			"")
 	}
 
 	debug(2, "No more non-ground explicit variables!")
@@ -279,24 +278,16 @@ func stage3Clauses(p *bule.Program) {
 			p.RemoveClausesWithTuplesThatDontExist()
 		}
 	}
-}
-
-func stage4Printing(p *bule.Program, args []string) {
-
-	//			{
-	//
-	//				stageInfo(p, "RemoveClausesWithFacts", "")
-	//				tmp := p.RemoveClausesWithFacts()
-	//				changed = tmp || changed
-	//			}
 
 	if quantificationFlag {
-		//		stageInfo(p, "Extract Quantors", "")
-		//		p.ExtractQuantors()
 		stageInfo(p, "Merge Quantification Levels", "")
 		p.MergeConsecutiveQuantificationLevels()
 		debug(2, "Merged alternations:", p.Alternation)
 	}
+
+}
+
+func stage4Printing(p *bule.Program, args []string) {
 
 	debug(1, "Output")
 
@@ -309,7 +300,8 @@ func stage4Printing(p *bule.Program, args []string) {
 		unitSlice := []string{}
 		units := convertArgsToUnits(unitSlice)
 		clauseProgram := translateFromRuleProgram(*p, units)
-		clauseProgram.Print()
+		sb := clauseProgram.StringBuilder()
+		fmt.Println(sb.String())
 	} else {
 		p.Print()
 	}
