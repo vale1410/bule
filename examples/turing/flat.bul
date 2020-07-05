@@ -1,0 +1,65 @@
+symb[0..a].   %%%%%%%%%% 0 is blank symbol.
+symb[S1], symb[S2], S1 != S2 => neqSymb[S1, S2]. 
+type[0..s]. % 0 is the initial state.
+accept[1]. % 1 is the accepting state.
+universal[2]. % forall states.
+neqType[Q1, Q2]. % for Q1 != Q2.
+neqDire[-1, 1].
+initTape[L, S].
+initialized[L]. % must match initTape.
+transition[SI, QI, SO, QO, D]. %%%%%%%% D=Direction    D=-1 left,    D=1 right
+
+%%%%% MACHINE resources %%%%%%%%%
+time[0..t].
+cell[-l..l]. % head initially on location 0.
+
+
+cell[L1], cell[L2], L1 < L2 => neqCell[L1, L2]. % for L1 != L2.
+time[T] => next[T, T+1].
+cell[L] => left[L, L+1].
+
+time[T], cell[L], symb[S]    => #exist(T), tape(L, S, T)?
+time[T], type[Q]             => #exist(T), state(Q, T)?
+time[T], cell[L]             => #exist(T), head(L, T)?
+time[T], transition[SI, QI, SO, QO, D], ~universal[QI] => #exists(T), move(T, SI, QI, SO, QO, D)?
+time[T], transition[SI, QI, SO, QO, D],  universal[QI] => #forall(T), move(T, SI, QI, SO, QO, D)?
+time[T], symb[S], universal[QI] => #exists(T), cheat(T, S, QI)?
+
+%%%%%%%%%%%% exist choice %%%%%%%%%%%%
+time[T], ~universal[QI], transition[SI, QI, SO, QO, D], transition[SI, QI, SE, QE, E], neqSymb[SO, SE] => ~move(T, SI, QI, SO, QO, D), ~move(T, SI, QI, SE, QE, E).
+time[T], ~universal[QI], transition[SI, QI, SO, QO, D], transition[SI, QI, SE, QE, E], neqType[QO, QE] => ~move(T, SI, QI, SO, QO, D), ~move(T, SI, QI, SE, QE, E).
+time[T], ~universal[QI], transition[SI, QI, SO, QO, D], transition[SI, QI, SE, QE, E], neqDire[ D,  E] => ~move(T, SI, QI, SO, QO, D), ~move(T, SI, QI, SE, QE, E).
+
+%%%%%%%%%%%% forall choice %%%%%%%%%%%%
+time[T],  universal[QI], transition[SI, QI, SO, QO, D] => cheat(T, SI, QI) => ~move(T, SI, QI, SO, QO, D).
+
+%%%%%%%%%%%% initial configuration %%%%%%%%%%
+cell[L], initTape[L, SI] => tape(L, SI, 0).
+cell[L], initTape[L, SI], neqSymb[SI, SE] => ~tape(L, SE, 0).
+cell[L], ~initialized[L] =>  tape(L, 0, 0).
+cell[L], ~initialized[L], neqSymb[0, S] => ~tape(L, S, 0).
+head(0, 0).
+cell[L], L != 0 => ~head(L, 0).
+state(0, 0).
+type[Q], neqType(0, Q) => ~state(Q, 0).
+
+%%%%%%%%% accepting condition %%%%%%%%%%%
+cheat[T', S, Q'] : time[T'] : symb[S] : universal[Q'], state(Q, T) : time[T] : accept[Q].
+
+
+%%%%%%%%%%%% dynamics %%%%%%%%%%
+transition[SI, QI, SO, QO,  D], next[TI, TO], cell[LI]                       => move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) =>  state(QO, TO).
+transition[SI, QI, SO, QO,  D], next[TI, TO], cell[LI], neqType[QO, QE]      => move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) => ~state(QE, TO).
+transition[SI, QI, SO, QO,  D], next[TI, TO], cell[LI]                       => move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) =>  tape(LI, SO, TO).
+transition[SI, QI, SO, QO,  D], next[TI, TO], cell[LI], neqSymb[SO, SE]      => move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) => ~tape(LI, SE, TO).
+transition[SI, QI, SO, QO, -1], next[TI, TO], left[LO, LI]                   => move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) =>  head(LO, TO).
+transition[SI, QI, SO, QO, -1], next[TI, TO], left[LO, LI], neqCell[LO, LE]  => move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) => ~head(LE, TO).
+transition[SI, QI, SO, QO,  1], next[TI, TO], left[LI, LO]                   => move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) =>  head(LO, TO).
+transition[SI, QI, SO, QO,  1], next[TI, TO], left[LI, LO], neqCell[LO, LE]  => move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) => ~head(LE, TO).
+
+%%%%%% unaffected cells. / frame axioms %%%%%%%%
+next[TI, TO], neqCell[LI, LE], symb[SI]        => head(LI, TI), tape(LE, SI, TI) => tape(LE, SI, TO).
+next[TI, TO], neqCell[LI, LE], neqSymb[SI, SE] => head(LI, TI), tape(LE, SI, TI) => ~tape(LE, SE, TO).
+
+
+
