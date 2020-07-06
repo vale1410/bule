@@ -1,7 +1,7 @@
 #const n=5.
 dom[0..n].
 
-dom[V], dom[I], 2**I < n => #exist(V), bit(V,I,(V/(2**I))#mod2)?
+dom[V], dom[I], 2**I < n :: #exist(V), bit(V,I,(V/(2**I))#mod2)?
 
 
 bit(_,_,_).

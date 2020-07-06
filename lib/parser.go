@@ -109,12 +109,13 @@ func parseRule(text string) (rule Rule, err error) {
 	}
 	rule.initialTokens = tokens
 
-	splitEquivalences := map[tokenKind]bool{tokenImplication: true}
+	//splitEquivalences := map[tokenKind]bool{tokenImplication: true}
+	splitEquivalences := map[tokenKind]bool{tokenDoubleColon: true}
 	left, sep, right := splitIntoTwo(rule.initialTokens, splitEquivalences)
 	switch sep {
 	case tokenEmpty:
 		rule.parseClauses(left)
-	case tokenImplication:
+	case tokenDoubleColon:
 		rule.parseGeneratorAndConstraints(left)
 		rule.parseClauses(right)
 	}
@@ -146,6 +147,9 @@ func (rule *Rule) parseGeneratorAndConstraints(tokens Tokens) {
 
 func (rule *Rule) parseClauses(tokens Tokens) {
 
+
+
+
 	splitRuleElementsSeparators := map[tokenKind]bool{tokenDot: true, tokenQuestionsmark: true, token2RuleComma: true}
 	rest := splitTokens(tokens, splitRuleElementsSeparators)
 	for _, sep := range rest {
@@ -158,11 +162,7 @@ func (rule *Rule) parseClauses(tokens Tokens) {
 		splitIterator := map[tokenKind]bool{tokenColon: true}
 		iterator := splitTokens(sep.tokens, splitIterator)
 		if len(iterator) == 1 {
-			if checkIfLiteral(iterator[0].tokens) {
-				rule.Literals = append(rule.Literals, parseLiteral(iterator[0].tokens))
-			} else {
-				rule.Constraints = append(rule.Constraints, parseConstraint(iterator[0].tokens))
-			}
+			rule.Literals = append(rule.Literals, parseLiteral(iterator[0].tokens))
 		} else {
 			rule.Iterators = append(rule.Iterators, parseIterator(iterator))
 		}
@@ -365,7 +365,8 @@ const (
 	token2RuleComma           // ,
 	tokenColon                // :
 	tokenEquivalence          // <->
-	tokenImplication          // -> or =>
+	tokenImplication          //  =>
+	tokenDoubleColon          // ::
 	tokenDot                  // .
 	tokenQuestionsmark        // ?
 	tokenDoubleDot            // ..
@@ -450,6 +451,8 @@ func printToken(kind tokenKind) (s string) {
 		s = "TERM"
 	case tokenEquivalence:
 		s = "EQUIVALENCE"
+	case tokenDoubleColon:
+		s = "DOUBLECOLUMN"
 	case tokenImplication:
 		s = "IMPLICATION"
 	case tokenQuestionsmark:
@@ -620,13 +623,8 @@ func lexRuleElement(l *lexer) (fn stateFn) {
 			return l.errorf("%s", "This should be an implication")
 		}
 	case r == '-':
-		if l.next() == '>' {
-			l.emit(tokenImplication)
-			return lexRuleElement
-		} else {
-			l.backup()
-			fn = lexConstraintLeft
-		}
+		l.backup()
+		fn = lexConstraintLeft
 	case r == '<':
 		if l.next() == '-' && l.next() == '>' {
 			l.emit(tokenEquivalence)
@@ -639,8 +637,14 @@ func lexRuleElement(l *lexer) (fn stateFn) {
 		l.emit(token2RuleComma)
 		fn = lexRuleElement
 	case r == ':':
-		l.emit(tokenColon)
-		fn = lexRuleElement
+		if l.next() == ':' {
+			l.emit(tokenDoubleColon)
+			fn = lexRuleElement
+		} else {
+			l.backup()
+			l.emit(tokenColon)
+			fn = lexRuleElement
+		}
 	case r == '~':
 		l.emit(tokenNegation)
 		fn = lexRuleElement

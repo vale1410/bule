@@ -2,7 +2,7 @@ dom[1..2,1..2].
 init[0,1,1].
 init[1,2,1].
 
-dom[X,Y] => #exist(0), board(X,Y)?
+dom[X,Y] :: #exist(0), board(X,Y)?
 
-dom[X,Y], init[0,X,Y] =>  board(X,Y). 
-dom[X,Y], init[1,X,Y] => ~board(X,Y). 
+dom[X,Y], init[0,X,Y] ::  board(X,Y). 
+dom[X,Y], init[1,X,Y] :: ~board(X,Y). 
