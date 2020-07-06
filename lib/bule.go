@@ -420,23 +420,20 @@ func (p *Program) CleanRulesFromGroundBoolExpression() (bool, error) {
 		return false
 	}
 
-	transform := func(rule Rule) (result []Rule, err error) {
-		newRule := rule
+	transform := func(rule Rule) ([]Rule, error) {
+		newRule := rule.Copy()
 		newRule.Constraints = []Constraint{}
 		for _, cons := range rule.Constraints {
 			isGround, boolResult := cons.GroundBoolExpression()
 			if isGround {
-				if boolResult {
-					result = []Rule{newRule}
-				} else {
-					result = []Rule{}
-					break
+				if !boolResult {
+					return []Rule{}, nil
 				}
 			} else {
-				newRule.Constraints = append(rule.Constraints, cons)
+				newRule.Constraints = append(newRule.Constraints, cons)
 			}
 		}
-		return
+		return []Rule{newRule}, nil
 	}
 	return p.RuleExpansion(check, transform)
 }
