@@ -1,0 +1,7 @@
+%sigma(M)=4 s(M)=6
+symb[0..1].
+type[0..2].
+transition[0, 1, 1, 2, 1]. %A0 1RB
+transition[1, 1, 1, 2, 0]. %A1 1LB
+transition[0, 2, 1, 1, 0]. %B0 1LA
+transition[1, 2, 1, 0, 1]. %B1 1RH
