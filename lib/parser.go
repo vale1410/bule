@@ -109,15 +109,14 @@ func parseRule(text string) (rule Rule, err error) {
 	}
 	rule.initialTokens = tokens
 
-	//splitEquivalences := map[tokenKind]bool{tokenImplication: true}
-	splitEquivalences := map[tokenKind]bool{tokenDoubleColon: true}
-	left, sep, right := splitIntoTwo(rule.initialTokens, splitEquivalences)
+	splitDoubleColon := map[tokenKind]bool{tokenDoubleColon: true}
+	left, sep, right := splitIntoTwo(rule.initialTokens, splitDoubleColon)
 	switch sep {
 	case tokenEmpty:
-		rule.parseClauses(left)
+		rule.parseImplication(left)
 	case tokenDoubleColon:
 		rule.parseGeneratorAndConstraints(left)
-		rule.parseClauses(right)
+		rule.parseImplication(right)
 	}
 	return rule, err
 
@@ -145,10 +144,28 @@ func (rule *Rule) parseGeneratorAndConstraints(tokens Tokens) {
 	}
 }
 
+func (rule *Rule) parseImplication(tokens Tokens) {
+
+	splitImplication:= map[tokenKind]bool{tokenImplication: true}
+	left, sep, right := splitIntoTwo(rule.initialTokens, splitImplication)
+	switch sep {
+	case tokenEmpty:
+		rule.parseClauses(left)
+	case tokenImplication:
+		rule.parseClauses(left)
+		// Invert the first part of the implication!
+		for i, iterator := range rule.Iterators{
+			rule.Iterators[i].Head =  iterator.Head.createNegatedLiteral()
+		}
+		for i, literal := range rule.Literals {
+			rule.Literals[i] =  literal.createNegatedLiteral()
+		}
+		rule.parseClauses(right)
+	}
+}
+
+
 func (rule *Rule) parseClauses(tokens Tokens) {
-
-
-
 
 	splitRuleElementsSeparators := map[tokenKind]bool{tokenDot: true, tokenQuestionsmark: true, token2RuleComma: true}
 	rest := splitTokens(tokens, splitRuleElementsSeparators)
