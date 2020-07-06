@@ -14,6 +14,10 @@ Abdallah Saffidine \\
 \IEEEauthorblockA{\textit{University of New South Wales} \\ Sydney, Australia}
 }
 
+\newcommand{\abd}[1]{\textcolor[rgb]{1.00,0.00,0.00}{(abd: #1).} }
+\newcommand{\vale}[1]{\textcolor[rgb]{1.00,0.00,0.0}{(vale: #1). } }
+\newcommand{\jean}[1]{\textcolor[rgb]{1.00,0.00,0.80}{(jean: #1). } }
+
 \begin{document}
 
 \maketitle
@@ -60,10 +64,39 @@ already ground problems. We will try to change that !
 
 \section{Bule Syntax and Semantics}
 
+\vale{has to be updated to the hierachy}
 For didactic reasons, we define syntax and semantics of \bule in three stages. 
 We start with a fully ground program without term variables in \bflat, which is essentially CNF with readable literals. 
 The non-ground language \bcore contains the basic functionality of the modelling language. 
 Third we present the complete language \bfull, that allows for several extensions to ease modeling. 
+
+\begin{itemize}
+    \item \bflat: 
+        \begin{itemize}
+            \item set of ground clauses with meaningful identifiers 
+        \end{itemize}
+    \item \bcore Non-ground language with clean semantics
+        \begin{itemize}
+            \item fully bound (i.e. all variables are bound by a positive generator) 
+            \item Exponential compression in the arity of the variables. 
+        \end{itemize}
+    \item \bfull 
+        \begin{itemize}
+            \item All term variables still need to be bound! 
+            \item Grounding fact definitions. 
+            \item arithmetic (fully ground), exponential compression!
+            \item ranges, exponential compression!
+            \item iterators 
+        \end{itemize}
+    \item \bnice is just for modelling and close to the implementation. 
+        \begin{itemize}
+            \item Implicitly bound variables, i.e. variables can be free. 
+            \item \ldots
+        \end{itemize}
+\end{itemize}
+
+Orthogonal to this hierarchy is the hierarchy of quantifier levels. 
+
 
 \subsection{\bflat}
 
@@ -183,7 +216,11 @@ Features like:
   \item more arithmetic as in the rule $ I== 0 \ldots Y^2, k[K] \Rightarrow c(I^K\%2).$
 \end{itemize}
 
-\section{Examples}
+\section{Implementation Details}
+
+\vale{Program transformations. Multiple stages of grounding. Conceptual algorithm with some states.}
+
+\section{Application}
 
 \subsection{$4x4$ NQueens as \bflat}
 
@@ -325,9 +362,12 @@ One for the nominator, one for the denominator.
 
 \section{Complexity}
 
-\bflat is NPComplete, and PSPACE with quantifier prefix. 
-\bfull is NEXPTIME complete. 
-This should be very straight forward adaptation of Datalog?
+\abd{Analyse} and \jean{check}. 
+
+\bflat only horn is P-Complete, \bflat NP-Complete, \bflat with a quantifier prefix block  is PSPACE-Complete?
+\bcore : EXPTIME-Complete, with quantification  EXPSPACE?
+\bfull : 2EXPTIME-Complete, with quantification  2EXPSPACE? 
+\bnice : has lots of syntactic sugar to be used in modelling. 
 
 \section{Related Works and Citations and Ideas}
 
@@ -336,6 +376,13 @@ semantics and loop formulas. From a logic programming point of view we treat tig
 
 \begin{itemize}
     \item Writing Declarative Specification for Clauses: \cite{Gebser16} 
+        \begin{itemize}
+            \item The proposed language is a syntactic alternative to \bcore
+            \item It uses translation forth and back between ASP
+            \item no complexity for non-ground language analysed. 
+            \item Does not distinguish syntactically between grounding facts and search variables as we do. 
+            \item \bnice provides convenient modelling support that their language does not have. Implicit variables for instances. 
+        \end{itemize}
     \item Disjunctive Datalog, DLV \cite{Eiter97} or even just Datalog \cite{Gottlob89}
     \item Assat, translating ASP programs to SAT \cite{Lin04}
     \item \cite{Janhunen11}. Compact Translations of Non-disjunctive Answer Set
