@@ -85,13 +85,12 @@ Third we present the complete language \bfull, that allows for several extension
             \item All term variables still need to be bound! 
             \item Grounding fact definitions. 
             \item arithmetic (fully ground), exponential compression!
-            \item ranges, exponential compression!
-            \item iterators 
+            \item Ranges, exponential compression!
         \end{itemize}
     \item \bnice is just for modelling and close to the implementation. 
         \begin{itemize}
             \item Implicitly bound variables, i.e. variables can be free. 
-            \item \ldots
+            \item Iterators (see the encoding for ATLEASTONE)
         \end{itemize}
 \end{itemize}
 
@@ -255,12 +254,12 @@ dom[1].dom[2]. dom[3]. dom[4].
 ne[1,2]. ne[1,3]. ne[1,4]. ne[2,3]. ne[2,4]. ne[3,4].
 
 % AtLeast one per row and column
-dom[X] => q(X,1), q(X,2), q(X,3), q(X,4).
-dom[Y] => q(1,Y), q(2,Y), q(3,Y), q(4,Y).
+dom[X] :: q(X,1), q(X,2), q(X,3), q(X,4).
+dom[Y] :: q(1,Y), q(2,Y), q(3,Y), q(4,Y).
 
 % Max one per row and column  
-dom[Y],  ne[X1,X2] => ~q(X1,Y), ~q(X2,Y). 
-dom[X],  ne[Y1,Y2] => ~q(X,Y1), ~q(X,Y2). 
+dom[Y],  ne[X1,X2] :: ~q(X1,Y), ~q(X2,Y). 
+dom[X],  ne[Y1,Y2] :: ~q(X,Y1), ~q(X,Y2). 
 \end{lstlisting}
 
 \subsection{Generic NQueens in \bfull}
@@ -268,16 +267,16 @@ dom[X],  ne[Y1,Y2] => ~q(X,Y1), ~q(X,Y2).
 \begin{lstlisting}
 dom[1..n]. 
 
-dom[X] => q(X,Y) : dom[Y]. 
-dom[Y] => q(X,Y) : dom[X].
+dom[X] :: q(X,Y) : dom[Y]. 
+dom[Y] :: q(X,Y) : dom[X].
 
 % Max one per row and column  
-X1 < X2 => ~q(X1,Y), ~q(X2,Y). 
-Y1 < Y2 => ~q(X,Y1), ~q(X,Y2). 
+X1 < X2 :: ~q(X1,Y), ~q(X2,Y). 
+Y1 < Y2 :: ~q(X,Y1), ~q(X,Y2). 
 
 % diagonals
-X1 < X2, Y1 >= Y2, X1 + Y1 == X2 + Y2 => ~q(X1,Y1), ~q(X2,Y2). 
-X1 < X2, Y1 <= Y2, X1 + Y2 == X2 + Y1 => ~q(X1,Y1), ~q(X2,Y2). 
+X1 < X2, Y1 >= Y2, X1 + Y1 == X2 + Y2 :: ~q(X1,Y1), ~q(X2,Y2). 
+X1 < X2, Y1 <= Y2, X1 + Y2 == X2 + Y1 :: ~q(X1,Y1), ~q(X2,Y2). 
 \end{lstlisting}
 
 To make it more compact we could leave the diagonals out. 
@@ -329,11 +328,11 @@ bit representation of the  number $D$ with the $I$s bit to 1 (resp. 0).
 n[0..31]. d[0..4].
 p[2]. p[3]. p[5]. p[7]. p[11]. p[13]. p[17]. p[19]. p[23]. p[29].
 
-d[D], D#mod2 == 0 => #exist[D], m(D)?
-d[D], D#mod2 == 1 => #forall[D], m(D)?
+d[D], D#mod2 == 0 :: #exist[D], m(D)?
+d[D], D#mod2 == 1 :: #forall[D], m(D)?
 
-n[D], d[I] => bit[D,I,(D/(2**I))#mod2]. 
-p[P] => ~m(I):bit[P,I,1], m(I):bit[P,I,0].
+n[D], d[I] :: bit[D,I,(D/(2**I))#mod2]. 
+p[P] :: ~m(I):bit[P,I,1], m(I):bit[P,I,0].
 \end{lstlisting}
 
 \subsection{Generalised Arc Consistency in Bule}
@@ -344,9 +343,8 @@ p[P] => ~m(I):bit[P,I,1], m(I):bit[P,I,0].
 %% v[V], contains all variables V. 
 %% c[C], contains all variables Cls IDs
 a[0]. a[1]. 
-v[V], a[A] => assign1(V,A)?
-c[C], => assign1(V,A):cl[C,V,A]. 
-
+v[V], a[A] :: assign1(V,A)?
+c[C] :: assign1(V,A):cl[C,V,A]. 
 
 \end{lstlisting}
 
