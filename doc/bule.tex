@@ -135,13 +135,13 @@ A \emph{clause} is a disjunction of literals.
 
 A \emph{\bcore-program} is a pair $\Pi=(\Imc,\Pmc)$ where $\Imc$ is a finite set of facts and \Pmc is a set of rules of the form 
 %
-\[B_1, \ldots, B_k \Rightarrow L_1, \ldots, L_m\]
+\[B_1, \ldots, B_k :: L_1, \ldots, L_m\]
 %
 where $B_1,\ldots,B_k$ are $\Sigma$-atoms and $L_1,\ldots,L_m$ are $\Omega$-literals such that every variable that occurs in one of the $L_i$ does occur in one of the $B_i$.
 
 The semantics of \bcore-programs $\Pi=(\Imc,\Pmc)$ is defined via groundings. 
 More precisely, with every \bcore-program $\Pi=(\Imc,\Pmc)$, we associate a set $\mn{cl}(\Pi)$ of ground clauses as follows.  
-For every rule $B_1,\ldots,B_k \Rightarrow L_1,\ldots, L_n\in\Pmc$ and every model $v$ of $B_1\wedge\ldots\wedge B_k$ in \Imc, $\mn{cl}(\Pi)$ contains the clause
+For every rule $B_1,\ldots,B_k :: L_1,\ldots, L_n\in\Pmc$ and every model $v$ of $B_1\wedge\ldots\wedge B_k$ in \Imc, $\mn{cl}(\Pi)$ contains the clause
 %
 \[v(L_1)\vee\ldots\vee v(L_n).\]
 %
@@ -171,14 +171,14 @@ semantics by mapping to \bcore. We start with definitions.
 An \emph{extended instance \Jmc} is a union of an instance \Imc with a
 a set of rules of the form
 %
-\[B_1,\ldots,B_k\Rightarrow B\]
+\[B_1,\ldots,B_k\rightarrow B\]
 %
 where $B,B_1,\ldots,B_k$ are $\Sigma$-atoms and every variable that
 occurs in $B$ occurs in one of the $B_i$. We further require that the
 rules in \Jmc are acyclic in the sense that the graph $G_\Jmc = (V_\Jmc,E_\Jmc)$ is
 acyclic, where $V_\Jmc$ is the set of all relation symbols that occur in
 \Jmc and $(R,R')\in E_\Jmc$ if there is a rule
-$B_1,\ldots,B_k\Rightarrow B$ where $B$ is an atom with relation
+$B_1,\ldots,B_k\rightarrow B$ where $B$ is an atom with relation
 symbol $R'$ and some $B_i$ is an atom with relation symbol $R(\cdot)$.  
 
 An extended \bcore-program is now a pair $\Pi=(\Jmc,\Pmc)$ where
@@ -186,7 +186,7 @@ $\Jmc$ is an extended instance and \Pmc a set of rules as above. Every
 extended \bcore-program \emph{induces} a \bcore-program $(\Imc,\Pmc)$
 via an inductive process as follows. Let $\Imc_0$ be the set of facts
 in \Jmc, and define $\Imc_{i+1}$ from $\Imc_i$ by adding, for every
-rule $B_1,\ldots,B_k\Rightarrow B\in \Jmc$ and every model $v$ of
+rule $B_1,\ldots,B_k\rightarrow B\in \Jmc$ and every model $v$ of
 $B_1\wedge \ldots \wedge B_k$ over $\Imc_i$, the fact $v(B)$ to
 $\Imc_{i+1}$. Note that this process terminates due to acyclicity of
 \Jmc; $\Imc$ is defined to be fixed point of the sequence $\Imc_n$. An
@@ -214,7 +214,7 @@ Features like:
   \item ranges $dom[1..k]$ 
   \item implicit definition of term variables as in the clause $~c(I,J),b(I,J).$.
   \item simple arithmetic as in the rule $c(I,J),c(I+1,J).$ 
-  \item more arithmetic as in the rule $ I== 0 \ldots Y^2, k[K] \Rightarrow c(I^K\%2).$
+  \item more arithmetic as in the rule $ I== 0 \ldots Y^2, k[K] :: c(I^K\%2).$
 \end{itemize}
 
 \section{Implementation Details}
@@ -247,19 +247,20 @@ Given a set of edges, the following program encodes reachability in the induced 
 
 \lstinputlisting{programs/reachability.bul}
 
-\subsection{Cardinality Encoding through Counters}
+\subsection{Cardinality Encoding}
 
-Bule does not have native cardinality constraints. 
+Bule does not provide native cardinality constraints. 
 There is plenty of literature on how to efficiently encode such constraints to CNF maintaining good properties. 
-We present the encoding named the \emph{counter} encoding based on \cite{Sinz05} in Bule syntax.
+We show the \emph{counter} encoding based on \cite{Sinz05} in \bnice syntax.
 Assume that the variables $element(1\ldots n)$ are already defined, as well as 
 the auxiliary variables $count(I,J)$. 
-The encoding consists of mainly 4 different types of clauses: 
+The encoding consists of 4 different types of clauses: 
 
 \lstinputlisting{programs/counter.bul}
 
-Removing the second last unit the clause set becomes an AtMost constraint ( respectively the last unit an AtLeast constraint). 
-For $k=1$ the counter encoding resolves to the ladder encoding (cite Ian Gent). 
+Variations of this encoding can express other types of cardinality.
+If the second last unit is omitted, the clause set defines an AtMost constraint ( respectively the last unit an AtLeast constraint). 
+For $k=1$ the counter encoding comes down to the ladder encoding (cite Ian Gent). 
 
 \subsection{Planning Problem}
 
@@ -267,7 +268,7 @@ Find a good planning problems.
 Sokoban might be too complicated. 
 Is there a simpler one ? 
 
-\subsection{Prime Game}
+\subsection{Prime Game: QBF}
 
 Here we show that Bule can be used to model PSPACE complete problems in QBF. 
 We also show how to do LOG encoding.  
