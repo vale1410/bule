@@ -5,7 +5,6 @@ dom[0..n].
 cnt[0..k+1]. 
 
 dom[X], X>0 => #exist(0), element(X).
-
 J-1<=I, I-J<=k, dom[I], cnt[J] => #exist(I), count(I,J).
 
 ~count(I,J),  count(I+1,J).

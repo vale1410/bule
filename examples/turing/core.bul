@@ -4,8 +4,8 @@
 
 %initTape[L, S].
 %initialized[L]. % must match initTape.
-symb[S1], symb[S2], S1 != S2 :: neqSymb[S1, S2].
-type[Q1], type[Q2], Q1 != Q2 :: neqType[Q1, Q2]. % for Q1 != Q2.
+symb[S1], symb[S2], S1 != S2 -> neqSymb[S1, S2].
+type[Q1], type[Q2], Q1 != Q2 -> neqType[Q1, Q2]. % for Q1 != Q2.
 neqDire[0, 1].
 neqDire[1, 0].
 
@@ -52,14 +52,14 @@ cheat[T1, S, Q] : time[T1] : symb[S] : universal[Q], state(0, T) : time[T].
 
 
 %%%%%%%%%%%% dynamics %%%%%%%%%%
-%% transition[SI, QI, SO, QO,  D], next[TI, TO], cell[LI]                       :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) ::  state(QO, TO).
-%% transition[SI, QI, SO, QO,  D], next[TI, TO], cell[LI], neqType[QO, QE]      :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) :: ~state(QE, TO).
-%% transition[SI, QI, SO, QO,  D], next[TI, TO], cell[LI]                       :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) ::  tape(LI, SO, TO).
-%% transition[SI, QI, SO, QO,  D], next[TI, TO], cell[LI], neqSymb[SO, SE]      :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) :: ~tape(LI, SE, TO).
-%% transition[SI, QI, SO, QO, -1], next[TI, TO], left[LO, LI]                   :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) ::  head(LO, TO).
-%% transition[SI, QI, SO, QO, -1], next[TI, TO], left[LO, LI], neqCell[LO, LE]  :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) :: ~head(LE, TO).
-%% transition[SI, QI, SO, QO,  1], next[TI, TO], left[LI, LO]                   :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) ::  head(LO, TO).
-%% transition[SI, QI, SO, QO,  1], next[TI, TO], left[LI, LO], neqCell[LO, LE]  :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) :: ~head(LE, TO).
+%% transition[SI, QI, SO, QO,  D], next[TI, TO], cell[LI]                       :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) =>  state(QO, TO).
+%% transition[SI, QI, SO, QO,  D], next[TI, TO], cell[LI], neqType[QO, QE]      :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) => ~state(QE, TO).
+%% transition[SI, QI, SO, QO,  D], next[TI, TO], cell[LI]                       :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) =>  tape(LI, SO, TO).
+%% transition[SI, QI, SO, QO,  D], next[TI, TO], cell[LI], neqSymb[SO, SE]      :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) => ~tape(LI, SE, TO).
+%% transition[SI, QI, SO, QO, -1], next[TI, TO], left[LO, LI]                   :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) =>  head(LO, TO).
+%% transition[SI, QI, SO, QO, -1], next[TI, TO], left[LO, LI], neqCell[LO, LE]  :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) => ~head(LE, TO).
+%% transition[SI, QI, SO, QO,  1], next[TI, TO], left[LI, LO]                   :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) =>  head(LO, TO).
+%% transition[SI, QI, SO, QO,  1], next[TI, TO], left[LI, LO], neqCell[LO, LE]  :: move(TI, SI, QI, SO, QO, D), head(LI, TI), tape(LI, SI, TI), state(QI, TI) => ~head(LE, TO).
 %% next[TI, TO], neqCell[LI, LE], symb[SI]        :: head(LI, TI), tape(LE, SI, TI) :: tape(LE, SI, TO).
 %% next[TI, TO], neqCell[LI, LE], neqSymb[SI, SE] :: head(LI, TI), tape(LE, SI, TI) :: ~tape(LE, SE, TO).
 transition[SI, QI, SO, QO, D], next[TI, TO], cell[LI]                       :: ~move(TI, SI, QI, SO, QO, D), ~head(LI, TI), ~tape(LI, SI, TI), ~state(QI, TI),  state(QO, TO).

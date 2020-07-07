@@ -113,16 +113,26 @@ func parseRule(text string) (rule Rule, err error) {
 	left, sep, right := splitIntoTwo(rule.initialTokens, splitDoubleColon)
 	switch sep {
 	case tokenEmpty:
-		rule.parseClauses(left)
+		err := rule.parseClauses(left)
+		if err != nil {
+			return rule, err
+		}
 	case tokenDoubleColon:
 		rule.parseGeneratorAndConstraints(left)
-		rule.parseClauses(right)
+		err := rule.parseClauses(right)
+		if err != nil {
+			return rule, fmt.Errorf("decompress %v: %v", text, err)
+		}
 	case tokenSimpleImplication: // Generator -> fact.
 		rule.parseGeneratorAndConstraints(left)
 		if right[len(right)-1].kind != tokenDot {
 			return rule, fmt.Errorf("Lexing fact definitions. Last element should be a dot(.), but is %v", right)
 		}
-		rule.Literals = []Literal{parseLiteral(right[:len(right)-1])}
+		literal := parseLiteral(right[:len(right)-1])
+		if !literal.Fact {
+			return rule, fmt.Errorf("Problems parsing rule %v. Should be fact as last literal.", rule.Debug())
+		}
+		rule.Literals = []Literal{literal}
 	default:
 		return rule, fmt.Errorf("Problems parsing rule %v.", rule.Debug())
 	}
@@ -173,7 +183,7 @@ func (rule *Rule) parseGeneratorAndConstraints(tokens Tokens) {
 //}
 
 
-func (rule *Rule) parseClauses(tokens Tokens) {
+func (rule *Rule) parseClauses(tokens Tokens) error {
 
 	splitRuleElementsSeparators := map[tokenKind]bool{tokenDot: true, tokenQuestionsmark: true, token2RuleComma: true}
 	rest := splitTokens(tokens, splitRuleElementsSeparators)
@@ -187,11 +197,16 @@ func (rule *Rule) parseClauses(tokens Tokens) {
 		splitIterator := map[tokenKind]bool{tokenColon: true}
 		iterator := splitTokens(sep.tokens, splitIterator)
 		if len(iterator) == 1 {
-			rule.Literals = append(rule.Literals, parseLiteral(iterator[0].tokens))
+			literal := parseLiteral(iterator[0].tokens)
+		//	if literal.Fact {
+		//		return fmt.Errorf("%s should not be fact in rule %s", literal.String(), tokens )
+		//	}
+			rule.Literals = append(rule.Literals, literal)
 		} else {
 			rule.Iterators = append(rule.Iterators, parseIterator(iterator))
 		}
 	}
+	return nil
 }
 
 // First element is a Literal

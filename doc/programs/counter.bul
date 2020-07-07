@@ -1,0 +1,6 @@
+~count(I,J),  count(I+1,J).
+ count(I-1,J-1), ~count(I,J).
+~element(I), ~count(I-1,J-1), count(I,J).
+ element(I), ~count(I,J),     count(I-1,J).
+
+ count(0,0). ~count(0,1). count(n,k). ~count(n,k+1).

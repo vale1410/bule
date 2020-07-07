@@ -5,7 +5,7 @@ build:
 test: build
 	./all.sh	
 
-release: 
+release: build
 	rm -fr release
 	mkdir release
 	env GOOS=linux GOARCH=amd64 go build main.go

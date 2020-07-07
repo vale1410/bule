@@ -1,0 +1,11 @@
+dom[1].dom[2]. dom[3]. dom[4]. 
+ne[1,2]. ne[1,3]. ne[1,4]. ne[2,3]. ne[2,4]. ne[3,4].
+
+% AtLeast one per row and column
+dom[X] :: q(X,1), q(X,2), q(X,3), q(X,4).
+dom[Y] :: q(1,Y), q(2,Y), q(3,Y), q(4,Y).
+
+% Max one per row and column  
+dom[Y],  ne[X1,X2] :: ~q(X1,Y), ~q(X2,Y). 
+dom[X],  ne[Y1,Y2] :: ~q(X,Y1), ~q(X,Y2). 
+
