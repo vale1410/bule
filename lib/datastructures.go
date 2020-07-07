@@ -219,7 +219,11 @@ func (rule *Rule) String() string {
 		sb.Reset()
 		sb.WriteString(tmp)
 
-		sb.WriteString(" => ")
+		if len(rule.Literals) == 1 && rule.Literals[0].Fact {
+			sb.WriteString(" -> ")
+		} else {
+			sb.WriteString(" :: ")
+		}
 	}
 
 	for _, g := range rule.Iterators {

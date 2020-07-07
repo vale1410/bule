@@ -109,14 +109,22 @@ func parseRule(text string) (rule Rule, err error) {
 	}
 	rule.initialTokens = tokens
 
-	splitDoubleColon := map[tokenKind]bool{tokenDoubleColon: true}
+	splitDoubleColon := map[tokenKind]bool{tokenSimpleImplication: true, tokenDoubleColon: true}
 	left, sep, right := splitIntoTwo(rule.initialTokens, splitDoubleColon)
 	switch sep {
 	case tokenEmpty:
-		rule.parseImplication(left)
+		rule.parseClauses(left)
 	case tokenDoubleColon:
 		rule.parseGeneratorAndConstraints(left)
-		rule.parseImplication(right)
+		rule.parseClauses(right)
+	case tokenSimpleImplication: // Generator -> fact.
+		rule.parseGeneratorAndConstraints(left)
+		if right[len(right)-1].kind != tokenDot {
+			return rule, fmt.Errorf("Lexing fact definitions. Last element should be a dot(.), but is %v", right)
+		}
+		rule.Literals = []Literal{parseLiteral(right[:len(right)-1])}
+	default:
+		return rule, fmt.Errorf("Problems parsing rule %v.", rule.Debug())
 	}
 	return rule, err
 
@@ -129,14 +137,12 @@ func (rule *Rule) parseGeneratorAndConstraints(tokens Tokens) {
 	for _, sep := range rest {
 		assert(len(sep.tokens) > 0)
 		//asserts(sep.separator.kind != tokenEmpty, "sep:", sep.tokens.String(), " - all tokens: ", tokens.String())
-
 		//parse for Iterators
 		splitIterator := map[tokenKind]bool{tokenColon: true}
 		iterator := splitTokens(sep.tokens, splitIterator)
 		asserts(len(iterator) == 1, "no iterator allowed in guards yet!"+tokens.String())
 		if checkIfLiteral(iterator[0].tokens) {
 			lit := parseLiteral(iterator[0].tokens)
-			//rule.Conditionals = append(rule.Conditionals, lit.createNegatedLiteral())
 			rule.Generators = append(rule.Generators, lit)
 		} else {
 			rule.Constraints = append(rule.Constraints, parseConstraint(iterator[0].tokens))
@@ -144,25 +150,27 @@ func (rule *Rule) parseGeneratorAndConstraints(tokens Tokens) {
 	}
 }
 
-func (rule *Rule) parseImplication(tokens Tokens) {
 
-	splitImplication:= map[tokenKind]bool{tokenImplication: true}
-	left, sep, right := splitIntoTwo(rule.initialTokens, splitImplication)
-	switch sep {
-	case tokenEmpty:
-		rule.parseClauses(left)
-	case tokenImplication:
-		rule.parseClauses(left)
-		// Invert the first part of the implication!
-		for i, iterator := range rule.Iterators{
-			rule.Iterators[i].Head =  iterator.Head.createNegatedLiteral()
-		}
-		for i, literal := range rule.Literals {
-			rule.Literals[i] =  literal.createNegatedLiteral()
-		}
-		rule.parseClauses(right)
-	}
-}
+// TODO
+//func (rule *Rule) parseImplication(tokens Tokens) {
+//
+//	splitImplication:= map[tokenKind]bool{tokenImplication: true}
+//	left, sep, right := splitIntoTwo(rule.initialTokens, splitImplication)
+//	switch sep {
+//	case tokenEmpty:
+//		rule.parseClauses(left)
+//	case tokenImplication:
+//		rule.parseClauses(left)
+//		// Invert the first part of the implication!
+//		for i, iterator := range rule.Iterators{
+//			rule.Iterators[i].Head =  iterator.Head.createNegatedLiteral()
+//		}
+//		for i, literal := range rule.Literals {
+//			rule.Literals[i] =  literal.createNegatedLiteral()
+//		}
+//		rule.parseClauses(right)
+//	}
+//}
 
 
 func (rule *Rule) parseClauses(tokens Tokens) {
@@ -382,7 +390,8 @@ const (
 	token2RuleComma           // ,
 	tokenColon                // :
 	tokenEquivalence          // <->
-	tokenImplication          //  =>
+	tokenSimpleImplication    // ->
+	tokenImplication          // =>
 	tokenDoubleColon          // ::
 	tokenDot                  // .
 	tokenQuestionsmark        // ?
@@ -469,7 +478,9 @@ func printToken(kind tokenKind) (s string) {
 	case tokenEquivalence:
 		s = "EQUIVALENCE"
 	case tokenDoubleColon:
-		s = "DOUBLECOLUMN"
+		s = "DOUBLECOLON"
+	case tokenSimpleImplication:
+		s = "SIMPLEIMPLICATION"
 	case tokenImplication:
 		s = "IMPLICATION"
 	case tokenQuestionsmark:
@@ -640,8 +651,13 @@ func lexRuleElement(l *lexer) (fn stateFn) {
 			return l.errorf("%s", "This should be an implication")
 		}
 	case r == '-':
-		l.backup()
-		fn = lexConstraintLeft
+		if l.next() == '>' {
+			l.emit(tokenSimpleImplication)
+			fn = lexRuleElement
+		} else {
+			l.backup()
+			fn = lexConstraintLeft
+		}
 	case r == '<':
 		if l.next() == '-' && l.next() == '>' {
 			l.emit(tokenEquivalence)
@@ -817,6 +833,15 @@ func lexConstraintRight(l *lexer) stateFn {
 		switch {
 		case r == eof:
 			return l.errorf("%s", "Constraint lexing should not end here.?")
+		case r ==  '-':
+			if l.next() == '>' {
+				l.backup()
+				l.backup()
+				l.emit(token2TermExpression)
+				return lexRuleElement
+			} else {
+				l.backup()
+			}
 		case isTermExpressionFinish(r):
 			l.backup()
 			l.emit(token2TermExpression)

@@ -49,6 +49,7 @@ and usage of using your command.
 			return
 		}
 
+		start := time.Now()
 		bule.DebugLevel = debugFlag
 
 		p, err := bule.ParseProgram(args)
@@ -92,6 +93,7 @@ and usage of using your command.
 		}
 
 		debug(1,"Ground program writen to ", outputGroundFile)
+		fmt.Printf("c program grounded in %s. Solving...\n",time.Since(start))
 
 		var cmdOutput []byte
 		// Run File with DEPQBF
@@ -148,9 +150,9 @@ and usage of using your command.
 				fmt.Println("TRUE")
 				for _, id := range result {
 					if id > 0 {
-						fmt.Print(reverseMap[id]," ")
+						fmt.Println(reverseMap[id])
 					} else {
-						fmt.Print("~",reverseMap[-1*id]," ")
+						fmt.Printf("~%s\n",reverseMap[-1*id])
 					}
 				}
 				fmt.Println()
@@ -169,7 +171,7 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// solveCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// solveCmd.PersistentFlags().String("r", "", "A help for foo")
 
 	// Cobra supports local flags which will only prepare when this command
 	// is called directly, e.g.:
