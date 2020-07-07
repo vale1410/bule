@@ -99,23 +99,6 @@ Third we present the complete language \bfull, that allows for several extension
 Orthogonal to this hierarchy is the hierarchy of quantifier levels. 
 And a problem can be horn (max 1 positive literal per clause) or not. 
 
-\begin{table}
-    \centering
-    \caption{Complexity Results}
-    \label{tab:challenges}
-    \begin{tabular}{ll|llll}
-        \toprule
-        & & \multicolumn{2}{l}{Horn} & \multirow{2}{*}{Not Horn}  \\
-%        \cmidrule(r){3-4} \cmidrule(l){5-6}
-        Language & Syntax & exist & exist/forall & exist & exist/forall  \\
-        \midrule
-        \bflat & Clauses and negation  &   &   &   \\
-        \bcore & $X,::$    &   &   &   \\
-        \bfull & $->$      &   &   &   \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
 \subsection{\bflat}
 
 A ground Bule program is a set of clauses with literals. 
@@ -296,29 +279,16 @@ We apply the adaptive LOG encoding here such that. This encoding translates
 naturally to Bule. We introduce a generator fact {\verb bit(D,I,P)} that is the 
 bit representation of the  number $D$ with the $I$s bit to 1 (resp. 0). 
 
-\begin{lstlisting}
-n[0..31]. d[0..4].
-p[2]. p[3]. p[5]. p[7]. p[11]. p[13]. p[17]. p[19]. p[23]. p[29].
+\lstinputlisting{programs/prime.bul}
 
-d[D], D#mod2 == 0 :: #exist[D], m(D)?
-d[D], D#mod2 == 1 :: #forall[D], m(D)?
+\subsection{Synthesis: Unit Propagation Complete}
 
-n[D], d[I] :: bit[D,I,(D/(2**I))#mod2]. 
-p[P] :: ~m(I):bit[P,I,1], m(I):bit[P,I,0].
-\end{lstlisting}
+Boolean function synthesis is a common application of QBF.
+For SAT programming one of the quality aspect of the CNF decomposition is the strenght of unit propagation on any partial assignment. 
+In this section we show how to encode whether a concrete CNF formula is unit propagation complete (UPC), i.e. UP detects inconsistencies on any partial assignment (citation needed).  
+For this we program a kind of meta reasoning, which demonstrates the power of QBF. 
 
-\subsection{Generalised Arc Consistency in Bule}
-
-\begin{lstlisting}
-%% clauseset given as cl[ID,Var,Polarity]. polarity 1 is positive, 0 negated. 
-%% for example if clause 2 is 6 -3 0, that would be cl[2,3,1]. cl[2,6,0].
-%% v[V], contains all variables V. 
-%% c[C], contains all variables Cls IDs
-a[0]. a[1]. 
-v[V], a[A] :: assign1(V,A)?
-c[C] :: assign1(V,A):cl[C,V,A]. 
-
-\end{lstlisting}
+\lstinputlisting{programs/gac.bul}
 
 
 
@@ -332,10 +302,26 @@ One for the nominator, one for the denominator.
 
 \abd{Analyse} and \jean{check}. 
 
-\bflat only horn is P-Complete, \bflat NP-Complete, \bflat with a quantifier prefix block  is PSPACE-Complete?
-\bcore : EXPTIME-Complete, with quantification  EXPSPACE?
-\bfull : 2EXPTIME-Complete, with quantification  2EXPSPACE? 
-\bnice : has lots of syntactic sugar to be used in modelling. 
+In Table \ref{tab:complexity} we give an overview of the complexity classes
+that each fragment of is complete for. The proof follows from the reduction of
+Turing machines into an expression in Bule using subset of constructs.
+
+\begin{table}
+    \caption{Complexity Results}
+    \centering
+    \label{tab:complexity}
+    \begin{tabular}{l|cc|cc}
+        \toprule
+        & \multicolumn{2}{c}{Horn} & \multicolumn{2}{c}{Not Horn}  \\
+        \;\; Quant. & $\exists$ & $\exists, \forall, \exists \ldots$ & $\exists$ & $\exists, \forall, \exists \ldots$ \\
+        Fragment&  &  &  &  \\
+        \midrule
+         \bflat   & \ptime & \pspace   & \np       & \pspace  \\
+         \bcore   & \exptime  & \expspace & \nexptime  & \expspace  \\
+         \bfull   & &  &   &   \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 \section{Related Works and Citations and Ideas}
 

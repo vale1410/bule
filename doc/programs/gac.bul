@@ -1,0 +1,9 @@
+%% clauseset given as cl[ID,Var,Polarity]. polarity 1 is positive, 0 negated. 
+%% for example if clause 2 is 6 -3 0, that would be cl[2,3,1]. cl[2,6,0].
+%% v[V], contains all variables V. 
+%% c[C], contains all variables Cls IDs
+
+a[0]. a[1]. 
+v[V], a[A] :: assign1(V,A)?
+
+c[C] :: assign1(V,A):cl[C,V,A]. 
