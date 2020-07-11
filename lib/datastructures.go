@@ -7,14 +7,23 @@ import (
 )
 
 type Program struct {
+
 	Rules                 []Rule
 	Constants             map[string]int
+
+	// grounding stuff, backups, hashmaps
 	FinishCollectingFacts map[Predicate]bool
-	PredicateToTuples     map[Predicate][][]int // Contains a slice for all tuples for predicate
-	PredicateTupleMap     map[string]bool       // hashmap that contains all positive and negative ground atoms in the program
-	PredicateToArity      map[Predicate]int     //
-	PredicateExplicit     map[Predicate]bool    // If there is a explicit quantification for predicate
-//	ZeroArity             map[Predicate]bool // TODO: do we still need this or can be removed?
+	PredicateToTuples     map[Predicate][][]int  // Contains a slice for all tuples for predicate
+	PredicateTupleMap     map[string]bool        // hashmap that contains all positive and negative ground atoms in the program
+	PredicateToArity      map[Predicate]int      //
+	PredicateExplicit     map[Predicate]bool     // If there is a explicit quantification for predicate
+
+	// handle string terms
+	PredicateStringTerm   map[Predicate][]bool    // If true, then it's a string term
+	String2IntId 		  map[string]int// StringReplacement
+	IntId2String 		  []string               // StringReplacement
+
+	//Quantification
 	Alternation           [][]Literal
 	existQ                map[int][]Literal
 	forallQ               map[int][]Literal

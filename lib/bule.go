@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"github.com/Knetic/govaluate"
 	"github.com/scylladb/go-set/strset"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
+	"sort"
 )
 
 func (p *Program) ConstraintSimplification() (bool, error) {
@@ -610,6 +612,83 @@ func (p *Program) TransformConstraintsToInstantiation() (bool, error) {
 	return p.RuleTransformation(check, transform)
 }
 
+func (p *Program) CollectStringTermsToIntegers() error {
+
+	variable := regexp.MustCompile(`^[A-Z_][a-zA-Z0-9'_]*$`)
+	termConstant := regexp.MustCompile(`^[a-z][a-zA-Z0-9'_]*$`)
+	number := regexp.MustCompile(`^[0-9-]+$`)
+	p.PredicateStringTerm = make(map[Predicate][]bool)
+	p.String2IntId = make(map[string]int)
+
+	for predicate , arity := range p.PredicateToArity {
+		p.PredicateStringTerm[predicate] = make([]bool,arity)
+	}
+
+	// set positions to true if there is at least one string
+	for _, r := range p.Rules {
+		for _, lit := range r.AllLiterals() {
+			for i, t := range lit.Terms {
+				if termConstant.MatchString(t.String()) {
+					p.PredicateStringTerm[lit.Name][i] = true
+				}
+			}
+		}
+	}
+	// Collect !
+	for _, r := range p.Rules {
+		for _, lit := range r.AllLiterals() {
+			for i, t := range lit.Terms {
+				if p.PredicateStringTerm[lit.Name][i] {
+					if  variable.MatchString(t.String()) {
+						continue
+					} else if _, ok := p.String2IntId[t.String()]; ok {
+						continue
+					} else if termConstant.MatchString(t.String()) ||
+						number.MatchString(t.String()) {
+						p.String2IntId[t.String()] = 0 // Does not matter, right id is set in next loop
+						p.IntId2String = append(p.IntId2String, t.String())
+					} else {
+						return RuleError{
+							R:       r,
+							Message: "",
+							Err: fmt.Errorf("%v position in literal %v should be constant symbol.",i,lit),
+						}
+					}
+				}
+			}
+		}
+	}
+	// Sort and make Map
+	sort.Strings(p.IntId2String)
+	for i, s := range p.IntId2String {
+		p.String2IntId[s] = i
+	}
+	// Replace !
+	for _, r := range p.Rules {
+		for _, lit := range r.AllLiterals() {
+			for i, t := range lit.Terms {
+				if p.PredicateStringTerm[lit.Name][i] {
+					if  variable.MatchString(t.String()) {
+						continue
+					} else {
+						id := p.String2IntId[t.String()]
+						lit.Terms[i] = Term(strconv.Itoa(id))
+					}
+				}
+			}
+		}
+	}
+
+	//for key, val := range p.PredicateStringTerm {
+	//	fmt.Println(key, val)
+	//}
+	//p.Print()
+	fmt.Println(p.String2IntId)
+	fmt.Println(p.IntId2String)
+
+	return nil
+}
+
 func (p *Program) ReplaceConstantsAndMathFunctions() {
 
 	transform := func(term Term) (Term, bool, error) {
@@ -700,7 +779,7 @@ func (p *Program) CollectExplicitTupleDefinitions() (bool, error) {
 			return []Rule{}, LiteralError{
 				L:       quantification,
 				R:       rule,
-				Message: fmt.Sprintf("Wrong arity %v, should be 1",len(quantification.Terms) ),
+				Message: fmt.Sprintf("Wrong arity %v, should be 1", len(quantification.Terms)),
 			}
 		}
 		val, err := evaluateTermExpression(quantification.Terms[0].String())
@@ -726,14 +805,14 @@ func (p *Program) CollectExplicitTupleDefinitions() (bool, error) {
 	return p.RuleExpansion(check, transform)
 }
 
-func (p *Program) CollectGroundTuples() (bool,error) {
+func (p *Program) CollectGroundTuples() (bool, error) {
 
 	for _, r := range p.Rules {
 		for _, literal := range r.Literals {
 			if literal.IsGround() {
 				err := p.InsertLiteralTuple(literal)
 				if err != nil {
-					return true,LiteralError{
+					return true, LiteralError{
 						L:       literal,
 						R:       r,
 						Message: fmt.Sprintf("%v", err),
@@ -742,7 +821,7 @@ func (p *Program) CollectGroundTuples() (bool,error) {
 			}
 		}
 	}
-	return true,nil
+	return true, nil
 }
 
 func (p *Program) RemoveRulesWithGenerators() (bool, error) {
