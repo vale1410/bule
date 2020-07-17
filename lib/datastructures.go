@@ -2,31 +2,31 @@ package lib
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 )
 
 type Program struct {
-
-	Rules                 []Rule
-	Constants             map[string]int
+	Rules     []Rule
+	Constants map[string]int
 
 	// grounding stuff, backups, hashmaps
 	FinishCollectingFacts map[Predicate]bool
-	PredicateToTuples     map[Predicate][][]int  // Contains a slice for all tuples for predicate
-	PredicateTupleMap     map[string]bool        // hashmap that contains all positive and negative ground atoms in the program
-	PredicateToArity      map[Predicate]int      //
-	PredicateExplicit     map[Predicate]bool     // If there is a explicit quantification for predicate
+	PredicateToTuples     map[Predicate][][]string // Contains a slice for all tuples for predicate
+	PredicateTupleMap     map[string]bool       // hashmap that contains all positive and negative ground atoms in the program
+	PredicateToArity      map[Predicate]int     //
+	PredicateExplicit     map[Predicate]bool    // If there is a explicit quantification for predicate
 
 	// handle string terms
-	PredicateStringTerm   map[Predicate][]bool    // If true, then it's a string term
-	String2IntId 		  map[string]int// StringReplacement
-	IntId2String 		  []string               // StringReplacement
+	PredicateStringTerm map[Predicate][]bool // If true, then it's a string term
+	String2IntId        map[string]int       // StringReplacement
+	IntId2String        []string             // StringReplacement
 
 	//Quantification
-	Alternation           [][]Literal
-	existQ                map[int][]Literal
-	forallQ               map[int][]Literal
+	Alternation [][]Literal
+	existQ      map[int][]Literal
+	forallQ     map[int][]Literal
 }
 
 type Rule struct {
@@ -144,26 +144,72 @@ func (name Predicate) String() string {
 	return string(name)
 }
 
+// is either a constant term or a number
+func (term Term) Ground() bool {
+	termConstant := regexp.MustCompile(`^[a-z][a-zA-Z0-9'_]*$`)
+	number := regexp.MustCompile(`^[0-9-]+$`)
+	return termConstant.MatchString(term.String()) || number.MatchString(term.String())
+}
+
 func (term Term) String() string {
 	return string(term)
 }
 
 func (iterator Iterator) String() string {
 	sb := strings.Builder{}
-	sb.WriteString(iterator.Head.String())
+	sb.WriteString(iterator.Head.IdString())
 	sb.WriteString(":")
 	for _, c := range iterator.Constraints {
 		sb.WriteString(c.String())
 		sb.WriteString(":")
 	}
 	for _, l := range iterator.Conditionals {
-		sb.WriteString(l.String())
+		sb.WriteString(l.IdString())
 		sb.WriteString(":")
 	}
 	return strings.TrimSuffix(sb.String(), ":")
 }
 
-func (literal Literal) String() string {
+// This is equivalent to the String() method but maps onto the
+// string terms, if term is string
+func (p *Program) OutputString(literal Literal) string {
+	var s string
+	if literal.Neg == true {
+		s += "~"
+	}
+	s += literal.Name.String()
+
+	// is 0-arity atom
+	if len(literal.Terms) == 0 {
+		return s
+	}
+
+	var opening string
+	var closing string
+	if literal.Fact {
+		opening = "["
+		closing = "]"
+	} else {
+		opening = "("
+		closing = ")"
+	}
+
+	s += opening
+	for i, x := range literal.Terms {
+		id, err := strconv.Atoi(x.String())
+		if 	err == nil && p.PredicateStringTerm[literal.Name][i] {
+			s += p.IntId2String[id]
+		} else {
+			s += x.String()
+		}
+		if i < len(literal.Terms)-1 {
+			s += ","
+		}
+	}
+	return s + closing
+}
+
+func (literal Literal) IdString() string {
 	var s string
 	if literal.Neg == true {
 		s += "~"
@@ -216,7 +262,7 @@ func (rule *Rule) String() string {
 	if len(rule.Generators) > 0 || len(rule.Constraints) > 0 {
 
 		for _, l := range rule.Generators {
-			sb.WriteString(l.String())
+			sb.WriteString(l.IdString())
 			sb.WriteString(", ")
 		}
 
@@ -241,7 +287,7 @@ func (rule *Rule) String() string {
 	}
 
 	for _, l := range rule.Literals {
-		sb.WriteString(l.String())
+		sb.WriteString(l.IdString())
 		sb.WriteString(", ")
 	}
 	tmp := strings.TrimSuffix(sb.String(), ", ")
@@ -303,7 +349,7 @@ type LiteralError struct {
 func (err LiteralError) Error() string {
 	var sb strings.Builder
 	sb.WriteString(err.Message + ":\n")
-	sb.WriteString("Literal " + err.L.String() + "\n")
+	sb.WriteString("Literal " + err.L.IdString() + "\n")
 	sb.WriteString("Rule " + err.R.Debug() + "\n")
 	return sb.String()
 }
@@ -311,7 +357,7 @@ func (err LiteralError) Error() string {
 func (p *Program) CheckNoExplicitDeclarationAndNonGroundExplicit() error {
 	for _, r := range p.Rules {
 		for _, l := range r.AllLiterals() {
-			if p.PredicateExplicit[l.Name] && !l.IsGround()  {
+			if p.PredicateExplicit[l.Name] && !l.IsGround() {
 				return LiteralError{
 					*l,
 					r,

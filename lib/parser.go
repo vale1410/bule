@@ -31,7 +31,7 @@ func ParseProgram(fileNames []string) (Program, error) {
 
 func ParseProgramFromStrings(lines []string) (p Program, err error) {
 
-	p.PredicateToTuples = make(map[Predicate][][]int)
+	p.PredicateToTuples = make(map[Predicate][][]string)
 	p.FinishCollectingFacts = make(map[Predicate]bool)
 	p.Constants = make(map[string]int)
 	p.PredicateTupleMap = map[string]bool{}

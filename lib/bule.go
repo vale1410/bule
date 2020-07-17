@@ -82,10 +82,10 @@ func (p *Program) InstantiateExplicitNonGroundLiterals() (changed bool, err erro
 		for _, tuple := range p.findFilteredTuples(litNG) {
 			newRule := rule.Copy()
 			for j, val := range tuple {
-				newRule.Literals[i].Terms[j] = Term(strconv.Itoa(val))
+				newRule.Literals[i].Terms[j] = Term(val)
 				newConstraint := Constraint{
 					LeftTerm:   litNG.Terms[j],
-					RightTerm:  Term(strconv.Itoa(val)),
+					RightTerm:  Term(val),
 					Comparison: tokenComparisonEQ,
 				}
 				newRule.Constraints = append(newRule.Constraints, newConstraint)
@@ -122,10 +122,10 @@ func (p *Program) InstantiateNonGroundLiterals() (changed bool, err error) {
 		for _, tuple := range p.findFilteredTuples(litNG) {
 			newRule := rule.Copy()
 			for j, val := range tuple {
-				newRule.Literals[i].Terms[j] = Term(strconv.Itoa(val))
+				newRule.Literals[i].Terms[j] = Term(val)
 				newConstraint := Constraint{
 					LeftTerm:   litNG.Terms[j],
-					RightTerm:  Term(strconv.Itoa(val)),
+					RightTerm:  Term(val),
 					Comparison: tokenComparisonEQ,
 				}
 				newRule.Constraints = append(newRule.Constraints, newConstraint)
@@ -138,9 +138,9 @@ func (p *Program) InstantiateNonGroundLiterals() (changed bool, err error) {
 }
 
 // given a literal p(X,4,2,Y), a simple and quick way to find all tuples that fulfil this!
-func (p *Program) findFilteredTuples(literal Literal) [][]int {
+func (p *Program) findFilteredTuples(literal Literal) [][]string {
 	positions, values := literal.findGroundTerms()
-	filteredTuples := make([][]int, 0, len(p.PredicateToTuples[literal.Name]))
+	filteredTuples := make([][]string, 0, len(p.PredicateToTuples[literal.Name]))
 	for _, tuple := range p.PredicateToTuples[literal.Name] {
 		good := true
 		for i, p := range positions {
@@ -201,7 +201,7 @@ func (p *Program) InstantiateAndRemoveFactFromIterator() (changed bool, err erro
 			for k, val := range tuples {
 				newConstraint := Constraint{
 					LeftTerm:   fact.Terms[k],
-					RightTerm:  Term(strconv.Itoa(val)),
+					RightTerm:  Term(val),
 					Comparison: tokenComparisonEQ,
 				}
 				tmpIterator.Constraints = append(tmpIterator.Constraints, newConstraint)
@@ -244,7 +244,7 @@ func (p *Program) InstantiateAndRemoveFactFromGenerator() (changed bool, err err
 			for j, val := range tuple {
 				newConstraint := Constraint{
 					LeftTerm:   fact.Terms[j],
-					RightTerm:  Term(strconv.Itoa(val)),
+					RightTerm:  Term(val),
 					Comparison: tokenComparisonEQ,
 				}
 				newRule.Constraints = append(newRule.Constraints, newConstraint)
@@ -261,12 +261,12 @@ func (p *Program) InsertLiteralTuple(lit Literal) error {
 	if err != nil {
 		return err
 	}
-	if !p.PredicateTupleMap[lit.String()] &&
-		!p.PredicateTupleMap[lit.createNegatedLiteral().String()] {
+	if !p.PredicateTupleMap[lit.IdString()] &&
+		!p.PredicateTupleMap[lit.createNegatedLiteral().IdString()] {
 		p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], groundTerms)
 	}
-	p.PredicateTupleMap[lit.String()] = true
-	p.PredicateTupleMap[lit.createNegatedLiteral().String()] = true
+	p.PredicateTupleMap[lit.IdString()] = true
+	p.PredicateTupleMap[lit.createNegatedLiteral().IdString()] = true
 	return nil
 }
 
@@ -275,7 +275,7 @@ func (p *Program) RemoveNegatedGroundGenerator() (changed bool, err error) {
 		if p.FinishCollectingFacts[literal.Name] &&
 			literal.IsGround() &&
 			literal.Neg == true &&
-			p.PredicateTupleMap[literal.String()] == false {
+			p.PredicateTupleMap[literal.IdString()] == false {
 			return true
 		}
 		return false
@@ -301,7 +301,7 @@ func (p *Program) RemoveRulesWithNegatedGroundGenerator() (changed bool, err err
 			if p.FinishCollectingFacts[literal.Name] &&
 				literal.IsGround() &&
 				literal.Neg == true &&
-				p.PredicateTupleMap[literal.createNegatedLiteral().String()] == true {
+				p.PredicateTupleMap[literal.createNegatedLiteral().IdString()] == true {
 				return true
 			}
 		}
@@ -348,9 +348,9 @@ func (p *Program) CollectGroundFacts() (changed bool, err error) {
 				err,
 			}
 		}
-		if !p.PredicateTupleMap[lit.String()] {
+		if !p.PredicateTupleMap[lit.IdString()] {
 			p.PredicateToTuples[lit.Name] = append(p.PredicateToTuples[lit.Name], res)
-			p.PredicateTupleMap[lit.String()] = true
+			p.PredicateTupleMap[lit.IdString()] = true
 		}
 		return
 	}
@@ -679,12 +679,8 @@ func (p *Program) CollectStringTermsToIntegers() error {
 		}
 	}
 
-	//for key, val := range p.PredicateStringTerm {
-	//	fmt.Println(key, val)
-	//}
-	//p.Print()
-	fmt.Println(p.String2IntId)
-	fmt.Println(p.IntId2String)
+	//fmt.Println(p.String2IntId)
+	//fmt.Println(p.IntId2String)
 
 	return nil
 }
@@ -848,7 +844,7 @@ func (p *Program) RemoveClausesWithExplicitLiteralAndTuplesThatDontExist() (bool
 	removeIfTrue := func(rule Rule) bool {
 		for _, lit := range rule.Literals {
 			if p.PredicateExplicit[lit.Name] && lit.FreeVars().IsEmpty() {
-				if !p.PredicateTupleMap[lit.String()] {
+				if !p.PredicateTupleMap[lit.IdString()] {
 					return true
 				}
 			}
@@ -862,7 +858,7 @@ func (p *Program) RemoveClausesWithTuplesThatDontExist() (bool, error) {
 	removeIfTrue := func(rule Rule) bool {
 		for _, lit := range rule.Literals {
 			if lit.FreeVars().IsEmpty() {
-				if !p.PredicateTupleMap[lit.String()] {
+				if !p.PredicateTupleMap[lit.IdString()] {
 					return true
 				}
 			}
@@ -940,7 +936,8 @@ func (term Term) FreeVars() *strset.Set {
 	variables := strings.FieldsFunc(s, f)
 	set := strset.New()
 	for _, x := range variables {
-		if !number(x) {
+		//if !number(x) {
+		if !Term(x).Ground() {
 			set.Add(x)
 		}
 	}
@@ -1018,22 +1015,22 @@ func evaluateTermExpression(termExpression string) (int, error) {
 }
 
 // Evaluates a ground math expression, needs to pass mathExpression
-func evaluateExpressionTuples(terms []Term) (result []int, err error) {
+func evaluateExpressionTuples(terms []Term) (result []string, err error) {
 	for _, t := range terms {
 		val, err := evaluateTermExpression(string(t))
 		if err != nil {
 			return result, err
 		}
-		result = append(result, val)
+		result = append(result, strconv.Itoa(val))
 	}
 	return
 }
 
-func (literal *Literal) findGroundTerms() (positions []int, values []int) {
+func (literal *Literal) findGroundTerms() (positions []int, values []string) {
 	for i, t := range literal.Terms {
-		if v, ok := strconv.Atoi(t.String()); ok == nil {
+		if t.Ground() {
 			positions = append(positions, i)
-			values = append(values, v)
+			values = append(values, t.String())
 		}
 	}
 	return

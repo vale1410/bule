@@ -103,14 +103,18 @@ func init() {
 // Assuming the program is ground!!!
 func translateFromRuleProgram(program lib.Program, units map[string]bool) (p ClauseProgram) {
 	p.units = units
+	fmt.Println("ARRAY: ", program.IntId2String)
+	fmt.Println("BOOLs: ", program.PredicateStringTerm)
 	for _, r := range program.Rules {
 		if len(r.Literals) == 1 {
-			p.units[r.Literals[0].String()] = true
+			p.units[program.OutputString(r.Literals[0])] = true
 			continue
 		}
 		clause := make([]string, 0, len(r.Literals))
 		for _, l := range r.Literals {
-			clause = append(clause, l.String())
+			s := program.OutputString(l)
+			fmt.Println("TEST", s)
+			clause = append(clause, s)
 		}
 		p.clauses = append(p.clauses, clause)
 	}
@@ -119,7 +123,7 @@ func translateFromRuleProgram(program lib.Program, units map[string]bool) (p Cla
 	for _, level := range program.Alternation {
 		q := make([]string, len(level))
 		for i, literal := range level {
-			q[i] = literal.String()
+			q[i] = program.OutputString(literal)
 		}
 		p.alternation = append(p.alternation, q)
 	}
