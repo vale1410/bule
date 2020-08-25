@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/cobra"
 	bule "github.com/vale1410/bule/lib"
 	"os"
+	"strconv"
 )
 
 var (
@@ -69,7 +70,7 @@ bule ground <program.bul> [options].
 
 func stage0Prerequisites(p *bule.Program) {
 	for key, val := range constStringMap {
-		p.Constants[key] = val
+		p.Constants[key] = strconv.Itoa(val)
 	}
 
 	//		debug(1, "Input:")

@@ -357,17 +357,18 @@ func (p *Program) CollectGroundFacts() (changed bool, err error) {
 	return p.RuleExpansion(check, transform)
 }
 
-// Checks if constraint is of the form X==<math>, or <math>==X
+// Checks if constraint is of the form X==<math>, or <math>==X  ( math is ground )
 // It also does very simple equation solving for equations with one variable, like X-3+1==<math> .
-func (constraint Constraint) IsInstantiation() (is bool, variable string, value int, err error) {
+func (constraint Constraint) IsInstantiation() (is bool, variable string, value string, err error) {
 	if constraint.Comparison != tokenComparisonEQ {
-		return false, "", 0, nil
+		return false, "", "", nil
 	}
 
 	freeVars := constraint.FreeVars()
 	if freeVars.Size() != 1 {
-		return false, "", 0, nil
+		return false, "", "", nil
 	}
+
 	freeVar := freeVars.Pop()
 	mathExpression := ""
 	varExpression := ""
@@ -382,29 +383,29 @@ func (constraint Constraint) IsInstantiation() (is bool, variable string, value 
 	}
 
 	if !strings.HasPrefix(varExpression, freeVar) {
-		return false, "", 0, nil
+		return false, "", "", nil
 	}
 
 	remainingExpression := strings.TrimPrefix(varExpression, freeVar)
 	asserts(Term(remainingExpression).FreeVars().IsEmpty(), "Must be math expression: "+remainingExpression)
 	if remainingExpression == "" {
 		val, err := evaluateTermExpression(mathExpression)
-		return true, freeVar, val, err
+		return true, freeVar, strconv.Itoa(val), err
 	}
 
 	if strings.HasPrefix(remainingExpression, "+") {
 		tmp := strings.TrimPrefix(remainingExpression, "+")
 		val, err := evaluateTermExpression(mathExpression + "-(" + tmp + ")")
-		return true, freeVar, val, err
+		return true, freeVar, strconv.Itoa(val), err
 	}
 
 	if strings.HasPrefix(remainingExpression, "-") {
 		tmp := strings.TrimPrefix(remainingExpression, "-")
 		val, err := evaluateTermExpression(mathExpression + "+(" + tmp + ")")
-		return true, freeVar, val, err
+		return true, freeVar, strconv.Itoa(val), err
 	}
 
-	return false, "", 0, nil
+	return false, "", "", nil
 }
 
 // Remove Rules with false constraint
@@ -533,7 +534,7 @@ func (p *Program) TransformConstraintsToInstantiationIterator() (bool, error) {
 		var cons Constraint
 		var is bool
 		var variable string
-		var value int
+		var value string
 		var err error
 		for it = range rule.Iterators {
 			for i, cons = range rule.Iterators[it].Constraints {
@@ -552,7 +553,7 @@ func (p *Program) TransformConstraintsToInstantiationIterator() (bool, error) {
 		rule.Iterators[it].Constraints = append(rule.Iterators[it].Constraints[:i],
 			rule.Iterators[it].Constraints[i+1:]...)
 		if !IsMarkedAsFree(variable) {
-			assignment := map[string]int{variable: value}
+			assignment := map[string]string{variable: value}
 			_, err := rule.Iterators[it].Simplify(assignment)
 			if err != nil {
 				return rule, err
@@ -588,7 +589,7 @@ func (p *Program) TransformConstraintsToInstantiation() (bool, error) {
 		var cons Constraint
 		var is bool
 		var variable string
-		var value int
+		var value string
 		var err error
 		for i, cons = range rule.Constraints {
 			is, variable, value, err = cons.IsInstantiation()
@@ -601,7 +602,7 @@ func (p *Program) TransformConstraintsToInstantiation() (bool, error) {
 		}
 		rule.Constraints = append(rule.Constraints[:i], rule.Constraints[i+1:]...)
 		if !IsMarkedAsFree(variable) {
-			assignment := map[string]int{variable: value}
+			assignment := map[string]string{variable: value}
 			_, err := rule.Simplify(assignment)
 			if err != nil {
 				return rule, err
@@ -698,7 +699,7 @@ func (p *Program) ReplaceConstantsAndMathFunctions() {
 	}
 }
 
-func (iterator *Iterator) Simplify(assignment map[string]int) (bool, error) {
+func (iterator *Iterator) Simplify(assignment map[string]string) (bool, error) {
 
 	transform := func(term Term) (Term, bool, error) {
 		return assign(term, assignment)
@@ -707,7 +708,7 @@ func (iterator *Iterator) Simplify(assignment map[string]int) (bool, error) {
 	return TermTranslation(iterator, transform)
 }
 
-func (rule *Rule) Simplify(assignment map[string]int) (bool, error) {
+func (rule *Rule) Simplify(assignment map[string]string) (bool, error) {
 
 	transform := func(term Term) (Term, bool, error) {
 		return assign(term, assignment)
@@ -954,7 +955,7 @@ func (constraint *Constraint) GroundBoolExpression() (isGround bool, result bool
 }
 
 // Makes a deep copy and creates a new Literal
-func (literal Literal) assign(assignment map[string]int) (newLiteral Literal, err error) {
+func (literal Literal) assign(assignment map[string]string) (newLiteral Literal, err error) {
 	newLiteral = literal.Copy()
 	for i, term := range literal.Terms {
 		newLiteral.Terms[i], _, err = assign(term, assignment)
@@ -963,12 +964,12 @@ func (literal Literal) assign(assignment map[string]int) (newLiteral Literal, er
 }
 
 //returns true if term has been changed
-func assign(term Term, assignment map[string]int) (Term, bool, error) {
+func assign(term Term, assignment map[string]string) (Term, bool, error) {
 	output := term.String()
 	for Const, Val := range assignment {
-		// TODO currenlty variables need to be prefix free, i.e. X, Xa, will make problems :\
+		// TODO currently variables need to be prefix free, i.e. X, Xa, will make problems :\
 		// Use Term parser for getting proper FreeVariables. Or the FreeVariables function
-		output = strings.ReplaceAll(output, Const, strconv.Itoa(Val))
+		output = strings.ReplaceAll(output, Const, Val)
 	}
 	if groundMathExpression(output) {
 		val, err := evaluateTermExpression(output)

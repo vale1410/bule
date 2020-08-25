@@ -33,7 +33,7 @@ func ParseProgramFromStrings(lines []string) (p Program, err error) {
 
 	p.PredicateToTuples = make(map[Predicate][][]string)
 	p.FinishCollectingFacts = make(map[Predicate]bool)
-	p.Constants = make(map[string]int)
+	p.Constants = make(map[string]string)
 	p.PredicateTupleMap = map[string]bool{}
 
 	acc := ""
@@ -60,11 +60,13 @@ func ParseProgramFromStrings(lines []string) (p Program, err error) {
 					return p, err
 				}
 				asserts(groundMathExpression(term.String()), "is not ground:"+term.String())
-				val, err := evaluateTermExpression(term.String())
+				// Just checking that it's a ground expression ! We do not allow
+				// non ground stuff in #const expressions.
+				_, err = evaluateTermExpression(term.String())
 				if err != nil {
 					return p, err
 				}
-				p.Constants[def[0]] = val
+				p.Constants[def[0]] = term.String()
 			}
 			continue
 		}

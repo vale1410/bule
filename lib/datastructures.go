@@ -9,7 +9,7 @@ import (
 
 type Program struct {
 	Rules     []Rule
-	Constants map[string]int
+	Constants map[string]string
 
 	// grounding stuff, backups, hashmaps
 	FinishCollectingFacts map[Predicate]bool
