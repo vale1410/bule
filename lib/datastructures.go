@@ -196,12 +196,13 @@ func (p *Program) OutputString(literal Literal) string {
 
 	s += opening
 	for i, x := range literal.Terms {
-		id, err := strconv.Atoi(x.String())
-		if 	err == nil && p.PredicateStringTerm[literal.Name][i] {
-			s += p.IntId2String[id]
-		} else {
-			s += x.String()
-		}
+		//id, err := strconv.Atoi(x.String())
+		//if 	err == nil && p.PredicateStringTerm[literal.Name][i] {
+		//	s += p.IntId2String[id]
+		//} else {
+		//	s += x.String()
+		//}
+		s += x.String() // Replace with stuff above, not sure if it still needed.
 		if i < len(literal.Terms)-1 {
 			s += ","
 		}

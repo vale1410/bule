@@ -314,7 +314,6 @@ func stage4Printing(p *bule.Program, args []string) {
 		sb := clauseProgram.StringBuilder()
 		fmt.Println(sb.String())
 	} else {
-		fmt.Println("DEBUG")
 		p.Print()
 	}
 }
