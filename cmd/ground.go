@@ -96,15 +96,15 @@ func stage0Prerequisites(p *bule.Program) {
 	stageInfo(p, "Replace Constants and Math", "(#const a=3. and Function Symbols (#mod)")
 	p.ReplaceConstantsAndMathFunctions()
 
-//	{
-//		stageInfo(p, "CollectStringTermsToIntegers", "If there is a q[a] or p(a) somwhere, replace by q[4] , and mark IndexToString[4]='a'. Also remember that first entry of q is Int2String.")
-//		err := p.CollectStringTermsToIntegers()
-//		if err != nil {
-//			fmt.Println(err)
-//			os.Exit(1)
-//		}
-//	}
-//
+	{
+		stageInfo(p, "CollectStringTermsToIntegers", "If there is a q[a] or p(a) somewhere, replace by q[4] , and mark IndexToString[4]='a'. Also remember that first entry of q is Int2String.")
+		err := p.CollectStringTermsToIntegers()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+
 
 	{
 		stageInfo(p, "CheckUnboundVariables", "Check for unbound variables that are not marked as such.")
