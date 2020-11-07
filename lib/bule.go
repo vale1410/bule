@@ -631,6 +631,7 @@ func (p *Program) CollectStringTermsToIntegers() error {
 			for i, t := range lit.Terms {
 				if termConstant.MatchString(t.String()) {
 					p.PredicateStringTerm[lit.Name][i] = true
+					fmt.Println("XXX", lit.Name, i, p.PredicateStringTerm[lit.Name][i], true)
 				}
 			}
 		}

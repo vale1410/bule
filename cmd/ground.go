@@ -307,7 +307,7 @@ func stage4Printing(p *bule.Program, args []string) {
 	}
 
 	if unitPropagationFlag || !textualFlag {
-		//unitSlice := args[1:] \\TODO FIXME, currenlty turned off
+		//unitSlice := args[1:] \\TODO FIXME, currently turned off
 		unitSlice := []string{}
 		units := convertArgsToUnits(unitSlice)
 		clauseProgram := translateFromRuleProgram(*p, units)
