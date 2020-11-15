@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
-	"sort"
 )
 
 func (p *Program) ConstraintSimplification() (bool, error) {
@@ -613,76 +612,32 @@ func (p *Program) TransformConstraintsToInstantiation() (bool, error) {
 	return p.RuleTransformation(check, transform)
 }
 
+// If a term matches Constant term expression (as a string) then replace it by a number and
+// remember this in maps. Replace this everywhere !
+// Assumptions: Integers above 1*10^9 never used in the programs !
 func (p *Program) CollectStringTermsToIntegers() error {
 
-	variable := regexp.MustCompile(`^[A-Z_][a-zA-Z0-9'_]*$`)
 	termConstant := regexp.MustCompile(`^[a-z][a-zA-Z0-9'_]*$`)
-	number := regexp.MustCompile(`^[0-9-]+$`)
-	p.PredicateStringTerm = make(map[Predicate][]bool)
+	//variable := regexp.MustCompile(`^[A-Z_][a-zA-Z0-9'_]*$`)
+	//number := regexp.MustCompile(`^[0-9-]+$`)
+	nextId := 1000000001 // This is the first ID used.
 	p.String2IntId = make(map[string]int)
+	p.IntId2String = make(map[int]string)
 
-	for predicate , arity := range p.PredicateToArity {
-		p.PredicateStringTerm[predicate] = make([]bool,arity)
-	}
-
-	// set positions to true if there is at least one string
 	for _, r := range p.Rules {
-		for _, lit := range r.AllLiterals() {
-			for i, t := range lit.Terms {
-				if termConstant.MatchString(t.String()) {
-					p.PredicateStringTerm[lit.Name][i] = true
-					fmt.Println("XXX", lit.Name, i, p.PredicateStringTerm[lit.Name][i], true)
+		for _, t := range r.AllTerms() {
+			if termConstant.MatchString(t.String()) {
+				if id, ok := p.String2IntId[t.String()]; ok {
+					*t = Term(strconv.Itoa(id))
+				} else {
+					p.String2IntId[t.String()] = nextId
+					p.IntId2String[nextId] = t.String()
+					*t = Term(strconv.Itoa(nextId))
+					nextId++
 				}
 			}
 		}
 	}
-	// Collect !
-	for _, r := range p.Rules {
-		for _, lit := range r.AllLiterals() {
-			for i, t := range lit.Terms {
-				if p.PredicateStringTerm[lit.Name][i] {
-					if  variable.MatchString(t.String()) {
-						continue
-					} else if _, ok := p.String2IntId[t.String()]; ok {
-						continue
-					} else if termConstant.MatchString(t.String()) ||
-						number.MatchString(t.String()) {
-						p.String2IntId[t.String()] = 0 // Does not matter, right id is set in next loop
-						p.IntId2String = append(p.IntId2String, t.String())
-					} else {
-						return RuleError{
-							R:       r,
-							Message: "",
-							Err: fmt.Errorf("%v position in literal %v should be constant symbol.",i,lit),
-						}
-					}
-				}
-			}
-		}
-	}
-	// Sort and make Map
-	sort.Strings(p.IntId2String)
-	for i, s := range p.IntId2String {
-		p.String2IntId[s] = i
-	}
-	// Replace !
-	for _, r := range p.Rules {
-		for _, lit := range r.AllLiterals() {
-			for i, t := range lit.Terms {
-				if p.PredicateStringTerm[lit.Name][i] {
-					if  variable.MatchString(t.String()) {
-						continue
-					} else {
-						id := p.String2IntId[t.String()]
-						lit.Terms[i] = Term(strconv.Itoa(id))
-					}
-				}
-			}
-		}
-	}
-
-	//fmt.Println(p.String2IntId)
-	//fmt.Println(p.IntId2String)
 
 	return nil
 }

@@ -14,14 +14,13 @@ type Program struct {
 	// grounding stuff, backups, hashmaps
 	FinishCollectingFacts map[Predicate]bool
 	PredicateToTuples     map[Predicate][][]string // Contains a slice for all tuples for predicate
-	PredicateTupleMap     map[string]bool       // hashmap that contains all positive and negative ground atoms in the program
-	PredicateToArity      map[Predicate]int     //
-	PredicateExplicit     map[Predicate]bool    // If there is a explicit quantification for predicate
+	PredicateTupleMap     map[string]bool          // hashmap that contains all positive and negative ground atoms in the program
+	PredicateToArity      map[Predicate]int        //
+	PredicateExplicit     map[Predicate]bool       // If there is a explicit quantification for predicate
 
 	// handle string terms
-	PredicateStringTerm map[Predicate][]bool // If true, then it's a string term
 	String2IntId        map[string]int       // StringReplacement
-	IntId2String        []string             // StringReplacement
+	IntId2String        map[int]string             // StringReplacement
 
 	//Quantification
 	Alternation [][]Literal
@@ -70,7 +69,6 @@ func (literal *Literal) IsGround() bool {
 }
 
 type Term string
-
 type Predicate string
 
 func (rule *Rule) IsGround() bool {
@@ -195,17 +193,18 @@ func (p *Program) OutputString(literal Literal) string {
 	}
 
 	s += opening
+	// See if integer should be replaced with string for pretty printing
 	for i, x := range literal.Terms {
-		if 	p.PredicateStringTerm[literal.Name][i] {
-			id, err := strconv.Atoi(x.String())
-			if err != nil {
-				panic("Should be a int because ith term is marked as IndId to String.")
-			}
-			s += p.IntId2String[id]
-		} else {
+		id, err := strconv.Atoi(x.String())
+		if err != nil { // This is not a int
 			s += x.String()
+		} else {
+			if str,ok := p.IntId2String[id];  ok {
+				s += str
+			} else {
+				s += x.String()
+			}
 		}
-		//s += x.String() // Replace with stuff above, not sure if it still needed.
 		if i < len(literal.Terms)-1 {
 			s += ","
 		}
@@ -520,7 +519,7 @@ func (p *Program) PrintQuantification() {
 			fmt.Print("a ")
 		}
 		for _, v := range quantifier {
-			fmt.Print(v, " ")
+			fmt.Print(" ", p.OutputString(v))
 		}
 		fmt.Println()
 	}
