@@ -1,4 +1,4 @@
-dom[1..n]. 
+dom[1..4]. 
 
 dom[X] :: q(X,Y) : dom[Y]. 
 dom[Y] :: q(X,Y) : dom[X].
