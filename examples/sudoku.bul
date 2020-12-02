@@ -1,0 +1,115 @@
+%rules for sudoku game
+
+#const dim=9
+
+box[0..2,0..2].
+dom2D[1..dim,1..dim].
+dom[1..dim].
+
+boxBegin[1,1].
+boxBegin[1,4].
+boxBegin[1,7].
+boxBegin[4,1].
+boxBegin[4,4].
+boxBegin[4,7].
+boxBegin[7,1].
+boxBegin[7,4].
+boxBegin[7,7].
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% game is pre-filled with (gruped by column):
+% instance #1 (uncomment to use)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%q(3,1,5).
+%q(7,1,6).
+
+%q(6,2,2).
+
+%q(8,3,3).
+
+%q(1,4,8).
+%q(8,4,4).
+%q(9,4,2).
+
+%q(4,5,7).
+%q(6,5,3).
+
+%q(1,6,1).
+
+%q(2,7,4).
+%q(4,7,8).
+%q(5,7,1).
+%q(9,7,6).
+
+%q(2,8,3).
+%q(7,8,7).
+
+%q(7,9,5).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% instance #2 (uncomment to use)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+q(1,1,8).
+
+q(3,2,7).
+q(4,2,5).
+q(9,2,9).
+
+q(2,3,3).
+q(7,3,1).
+q(8,3,8).
+
+q(2,4,6).
+q(6,4,1).
+q(8,4,5).
+
+q(3,5,9).
+q(5,5,4).
+
+q(4,6,7).
+q(5,6,5).
+
+q(3,7,2).
+q(5,7,7).
+q(9,7,4).
+
+q(6,8,3).
+q(7,8,6).
+q(8,8,1).
+
+q(7,9,8).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%in every cell at least 1 val
+dom2D[X,Y] :: q(X,Y,Z) : dom[Z].
+
+
+%each val in at least 1 cell
+dom[Z] :: q(X,Y,Z) : dom2D[X,Y].
+
+
+%each cell contains no more than 1 val
+dom2D[X,Y], dom[Z1], dom[Z2], Z1 < Z2 :: ~q(X,Y,Z1), ~q(X,Y,Z2). 
+
+
+%no two same vals in a column
+dom[X1], dom[X2], X1 < X2 :: ~q(X1,Y,Z), ~q(X2,Y,Z).
+
+
+%no two same vals in a row
+dom[Y1], dom[Y2], Y1 < Y2 :: ~q(X,Y1,Z), ~q(X,Y2,Z).
+
+
+%no repeating vals in a box..
+boxBegin[ROOTX,ROOTY],
+box[X1,Y], box[X2,Y], X1<X2
+	:: ~q(ROOTX+X1,ROOTY+Y,Z), ~q(ROOTX+X2,ROOTY+Y,Z).
+
+%..
+%..continued..
+boxBegin[ROOTX,ROOTY],
+box[X1,Y1], box[X2,Y2], X1<=X2, Y1!=Y2
+	:: ~q(ROOTX+X1,ROOTY+Y1,Z), ~q(ROOTX+X2,ROOTY+Y2,Z).
+
