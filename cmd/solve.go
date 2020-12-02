@@ -108,6 +108,7 @@ and usage of using your command.
 					} else if  exitError.ExitCode() == 20 {
 						isTrue = false
 					} else {
+					    log.Println("exitError of DEPQBF is",  exitError.ExitCode())
 						log.Println("Error DEPQBF log:\n ", string(cmdOutput))
 						log.Println("Omitting parsing because of error in solving: ", err)
 						return

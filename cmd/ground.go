@@ -202,7 +202,7 @@ func stage2Iterators(p *bule.Program) {
 		stage(p, &changed,
 			p.CleanIteratorFromGroundBoolExpressions,
 			"CleanIteratorFromGroundBoolExpressions.",
-			"p(X,Y):q[X,Y]:#true -> p(X,Y):q[X,Y]")
+			"p(X,Y):q[X,Y]:#true :: p(X,Y):q[X,Y]")
 
 		stage(p, &changed,
 			p.ConvertHeadOnlyIteratorsToLiterals,
