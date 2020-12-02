@@ -5,6 +5,7 @@ Bule is a tool to create beautiful CNF encodings.
 Bule is a sophisticated grounder for the modelling language Bule that translates to CNF for SAT Solving. 
 Bule provides a front end for various SAT technologies. 
 
+
 Features
 --------
 
@@ -19,6 +20,14 @@ Features
 
 * Multiple cardinality encodings
 * Full Pseudo Boolean Translations to CNF
+
+How to encode Sudoku in Bule
+----
+
+blablabla
+
+
+
 
 Links
 -----
