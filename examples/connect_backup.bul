@@ -26,6 +26,9 @@
 
 connect[0..q-1].
 
+black[1].
+white[0].
+player[0..1].
 % direction: used in the different winning configurations.
 dir[0..1].
 
@@ -40,8 +43,7 @@ domC[C], domR[R]  ::  dom[C,R].
 domT0[0..d].
 domT[1..d].
 % time 1, player white
-domT[T], T#mod2==0  ::  turn[T,black]. 
-domT[T], T#mod2==1  ::  turn[T,white]. 
+domT[T]  ::  turn[T,T#mod2]. 
 
 %% chooseC[Column,BitRepresentationOfColumn]
 domC[C], domC[I], 2**(I-1) <= c  ::  chooseC[C,I-1,((C-1)/(2**(I-1)))#mod2]. 
@@ -51,9 +53,9 @@ chooseC[_,I,_]  ::  bitC[I].
 domT[T]                               ::  #exist(T-1) , time(T)? 
 
 % black chooses bit of column 
-bitC[I], turn[T,black]          ::  #exist(T), moveL(I,T)? 
+black[A], bitC[I], turn[T,A]          ::  #exist(T), moveL(I,T)? 
 % white chooses bit of column 
-bitC[I], turn[T,white]          ::  #forall(T), moveL(I,T)?
+white[A], bitC[I], turn[T,A]          ::  #forall(T), moveL(I,T)?
 
 % player chooses column 
 turn[T,A], domC[C]                    ::  #exist(T) , move(A,C,T)?    
@@ -82,11 +84,11 @@ dom[C,R], dir[Z], C+q-1<=c,R+q-1<=r   ::  #exist(d) , winD(C,R,Z)?
 ~occupied(_C,1,0).
 occupied(_C,0,0).
 
-chooseC[C,I,0]  ::  ~move(black,C,T), ~moveL(I,T).
-chooseC[C,I,1]  ::  ~move(black,C,T), moveL(I,T).
+black[A], chooseC[C,I,0]  ::  ~move(A,C,T), ~moveL(I,T).
+black[A], chooseC[C,I,1]  ::  ~move(A,C,T), moveL(I,T).
 
-chooseC[C,I,0]  ::  ~move(white,C,T), ~moveL(I,T). %%FIXME
-chooseC[C,I,1]  ::  ~move(white,C,T), moveL(I,T).%%FIXME
+white[A], chooseC[C,I,0]  ::  ~move(A,C,T), ~moveL(I,T). %%FIXME
+white[A], chooseC[C,I,1]  ::  ~move(A,C,T), moveL(I,T).%%FIXME
 
 %%white[A], domC[C]  ::  %% UNFIXME
 %%    occupied(C,r,T-1),    %% Column is not completely full 
@@ -101,13 +103,12 @@ chooseC[C,I,1]  ::  ~move(white,C,T), moveL(I,T).%%FIXME
 move(_,C,T), occupied(C,R,T-1), ~occupied(C,R,T).  %% if board changes, then column must be played
 ~move(_,C,T), ~occupied(C,r,T-1). %% No moves in a column that was full in previous T
 
-%% Whats this ? 
 %~occupied(C,R-1,T-1), occupied(C,R,T-1), ~move(_A,C,T), board(C,R,T). 
 
-occupied(C,R,d), ~board(C,R).
-turn[T,white]  ::  occupied(C,R,T-1), ~occupied(C,R,T), ~board(C,R).
 
-%% Whats this ? 
+occupied(C,R,d), ~board(C,R).
+white[A], turn[T,A]  ::  occupied(C,R,T-1), ~occupied(C,R,T), ~board(C,R).
+
 %black[A], turn[T,A]  ::  occupied(C,R,T-1), ~occupied(C,R,T), board(C,R), debug(1).
 
 %% Winning Positions

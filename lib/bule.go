@@ -740,7 +740,7 @@ func (p *Program) CollectExplicitTupleDefinitions() (bool, error) {
 			return []Rule{}, LiteralError{
 				L:       quantification,
 				R:       rule,
-				Message: fmt.Sprintf("Cant evaluate, not ground", quantification.Terms[0]),
+				Message: fmt.Sprintf("Cant evaluate, not ground: %v", quantification.Terms[0]),
 			}
 		}
 		switch quantification.Name {
@@ -921,12 +921,31 @@ func (literal Literal) assign(assignment map[string]string) (newLiteral Literal,
 
 //returns true if term has been changed
 func assign(term Term, assignment map[string]string) (Term, bool, error) {
+	dividerSet :="%-*/+()."
 	output := term.String()
-	for Const, Val := range assignment {
-		// TODO currently variables need to be prefix free, i.e. X, Xa, will make problems :\
-		// Use Term parser for getting proper FreeVariables. Or the FreeVariables function
-		output = strings.ReplaceAll(output, Const, Val)
+	acc := strings.Builder{}
+	for variable, val := range assignment {
+		xx := output
+		for {
+			index := strings.Index(xx, variable)
+			if index == -1 {
+				acc.WriteString(xx)
+				break
+			}
+			// Must be symbol before and after that makes makes this change
+			if (index == 0 || strings.ContainsAny(xx[index-1:index],dividerSet )) &&
+				(index+len(variable) == len(xx) || strings.ContainsAny(xx[index+len(variable):index+len(variable)+1], dividerSet) ) {
+				acc.WriteString(xx[:index] + val)
+				xx = xx[index+len(variable):]
+			} else {
+				acc.WriteString(xx[:index+len(variable)])
+				xx = xx[index+len(variable):]
+			}
+		}
+		output = acc.String()
+		acc.Reset()
 	}
+
 	if groundMathExpression(output) {
 		val, err := evaluateTermExpression(output)
 		if err != nil {
