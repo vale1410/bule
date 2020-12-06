@@ -25,7 +25,7 @@ func (p *Program) ConstraintSimplification() (bool, error) {
 			//Debug(2, "Remove clauses with contradictions, e.g.  (1==2) or (1!=1),  and remove true constraints, e.g.  (1>2, 1==1).")
 			finalChanged, err = p.CleanRulesFromGroundBoolExpression()
 			if err != nil {
-				return true, fmt.Errorf("Remove of clauses failed %v. \n %w", i, err)
+				return true, fmt.Errorf("remove of clauses failed %v. \n %w", i, err)
 			}
 			break
 		}
@@ -678,9 +678,9 @@ func (rule *Rule) Simplify(assignment map[string]string) (bool, error) {
 // Then take literal and add tuple and add to quantification level
 
 func (p *Program) CollectExplicitTupleDefinitions() (bool, error) {
-	p.forallQ = make(map[int][]Literal, 0)
-	p.existQ = make(map[int][]Literal, 0)
-	p.PredicateExplicit = make(map[Predicate]bool, 0)
+	p.forallQ = make(map[int][]Literal)
+	p.existQ = make(map[int][]Literal)
+	p.PredicateExplicit = make(map[Predicate]bool)
 
 	check := func(r Rule) bool {
 		if r.IsQuestionMark == true {
@@ -827,8 +827,8 @@ func (p *Program) RemoveClausesWithTuplesThatDontExist() (bool, error) {
 
 func (p *Program) ExtractQuantors() {
 
-	p.forallQ = make(map[int][]Literal, 0)
-	p.existQ = make(map[int][]Literal, 0)
+	p.forallQ = make(map[int][]Literal)
+	p.existQ = make(map[int][]Literal)
 
 	checkA := func(r Rule) bool {
 
@@ -859,7 +859,6 @@ func (p *Program) ExtractQuantors() {
 
 	p.RuleExpansion(checkA, transformA)
 	p.RuleExpansion(checkE, transformE)
-	return
 }
 
 // only works on disjunctions
@@ -908,15 +907,6 @@ func (constraint *Constraint) GroundBoolExpression() (isGround bool, result bool
 	}
 	result = evaluateBoolExpression(constraint.String())
 	return
-}
-
-// Makes a deep copy and creates a new Literal
-func (literal Literal) assign(assignment map[string]string) (newLiteral Literal, err error) {
-	newLiteral = literal.Copy()
-	for i, term := range literal.Terms {
-		newLiteral.Terms[i], _, err = assign(term, assignment)
-	}
-	return newLiteral, nil
 }
 
 //returns true if term has been changed
