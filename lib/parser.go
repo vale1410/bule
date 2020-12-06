@@ -95,9 +95,9 @@ func lexRule(text string) (ts Tokens) {
 	return ts
 }
 
-// <Constraint>, <Guard> => <Fact>.
-// <Constraint>, <Guard> => <Conditionals>?
-// <Constraint>, <Guard> => <Conditionals>.
+// <Constraint>, <Generator> :: <Fact>.
+// <Constraint>, <Generator> :: <Conditionals>?
+// <Constraint>, <Generator> :: <Conditionals>.
 
 func parseRule(text string) (rule Rule, err error) {
 
@@ -139,7 +139,6 @@ func parseRule(text string) (rule Rule, err error) {
 		return rule, fmt.Errorf("Problems parsing rule %v.", rule.Debug())
 	}
 	return rule, err
-
 }
 
 func (rule *Rule) parseGeneratorAndConstraints(tokens Tokens) {
