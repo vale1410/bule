@@ -277,8 +277,9 @@ func (rule *Rule) String() string {
 		sb.Reset()
 		sb.WriteString(tmp)
 
+		// WHY this? Can be removed?
 		if len(rule.Literals) == 1 && rule.Literals[0].Fact {
-			sb.WriteString(" -> ")
+			sb.WriteString(" -> ") //
 		} else {
 			sb.WriteString(" :: ")
 		}
@@ -385,14 +386,14 @@ func (p *Program) CheckNoGeneratorsOrIterators() error {
 			return RuleError{
 				r,
 				"Should not have any generators anymore!",
-				fmt.Errorf("Rule is not free of Generators"),
+				fmt.Errorf("rule is not free of Generators"),
 			}
 		}
 		if len(r.Iterators) > 0 {
 			return RuleError{
 				r,
 				"Should not have any Iterators anymore!",
-				fmt.Errorf("Rule is not free of Iterators: %v", r.Iterators),
+				fmt.Errorf("rule is not free of Iterators: %v", r.Iterators),
 			}
 		}
 	}
