@@ -3,15 +3,15 @@
 dom[1..9].
 boxOffset[0..2,0..2].
 
-%%boxBegin[1,1].
-%%boxBegin[1,4].
-%%boxBegin[1,7].
-%%boxBegin[4,1].
-%%boxBegin[4,4].
-%%boxBegin[4,7].
-%%boxBegin[7,1].
-%%boxBegin[7,4].
-%%boxBegin[7,7].
+boxBegin[1,1].
+boxBegin[1,4].
+boxBegin[1,7].
+boxBegin[4,1].
+boxBegin[4,4].
+boxBegin[4,7].
+boxBegin[7,1].
+boxBegin[7,4].
+boxBegin[7,7].
 
 % Rules
 % in every cell at least 1 val
@@ -34,4 +34,3 @@ dom[Y1], dom[Y2], Y1 < Y2 :: ~q(X,Y1,Z), ~q(X,Y2,Z).
 %% implied by 30 (or 27 respectively)
 boxBegin[ROOTX,ROOTY], boxOffset[X1,Y1], boxOffset[X2,Y2], X1<X2, Y1!=Y2
 	:: ~q(ROOTX+X1,ROOTY+Y1,Z), ~q(ROOTX+X2,ROOTY+Y2,Z).
-
