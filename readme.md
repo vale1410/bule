@@ -24,6 +24,9 @@ Features
 Bule's syntax and simple programs
 ---------------------------------
 
+
+### Literals and basic clauses
+
 Let us have a 0-arity literal q.\
 Also, let's have a 1-clause rule of form:
 
@@ -68,10 +71,10 @@ Will translate to:
 
 dom[1].\
 dom[2].\
-dom[3].\
+dom[3].
 
 Let us have a 1-arity literal p(X)\
-Then, we can generate a set of clauses of form p(X) with variable X bound to dom:\
+Then, we can generate a set of clauses of form p(X) with variable X bound to dom:
 
 dom[X] :: p(X).
 
@@ -96,30 +99,10 @@ Note that adding the rule 'Y < 3' skips last iteration step (~q(9)) as 3 < 3 <=>
 
 ---
 
-### Modelling a Sudoku game in Bule
+### Modelling Sudoku game in Bule
 
-Sudoku board indexing:
 
- (1,1)X  X | (1,4) X  X | (1,7) X  X |\
-                                      \					
-  X   X	 X |  X    X  X |  X    X  X |\
-                                      \
-  X   X	 X |  X    X  X |  X    X  X |\
- ----------+------------+------------+\
- (4,1)X  X | (4,4) X  X | (4,7) X  X |\
-                                      \
-  X   X	 X |  X    X  X |  X    X  X |\
-                                      \
-  X   X	 X |  X    X  X |  X    X  X |\
- ----------+------------+------------+\
- (7,1)X  X | (7,4) X  X | (7,7) X  X |\
-                                      \
-  X   X	 X |  X    X  X |  X    X  X |\
-                                      \
-  X   X	 X |  X    X  X |  X    X  X |\
- ----------+------------+------------+
-
-Based on that, let's have a domain for single row / single column indexing
+Let's have a domain for single row / single column indexing
 
 dom[1..9].
 
@@ -189,7 +172,8 @@ q(1,1,9), q(1,2,9), .., q(1,9,9), q(2,1,9), q(2,2,9), .., q(2,9,9), .. .., q(9,9
 dom[X1], dom[X2], X1 < X2 :: ~q(X1,Y,Z), ~q(X2,Y,Z).
 
 Here, we bind X1, X2 and generate clauses for all X1,X2 pairs, where X1 < X2 holds\
-Restriction X1 != X2 is also valid, but generates redundant symmetrical literals\
+Restriction X1 != X2 is also valid, but generates redundant symmetrical literals
+
 Knowing that X1 < X2 (hence X1 != X2), Y is a column index and Z is a value,\
 ~q(X1,Y,Z), ~q(X2,Y,Z) evaluates to False if both literals are True (NOT True AND NOT True <=> False)\
 we can't ever satisfy this clause with two same values Z in different rows in the same column Y
@@ -200,7 +184,7 @@ we can't ever satisfy this clause with two same values Z in different rows in th
 
 dom[Y1], dom[Y2], Y1 < Y2 :: ~q(X,Y1,Z), ~q(X,Y2,Z).
 
-% here, we follow the same logic as in rule #3, but for rows
+Here, we follow the same logic as in rule #3, but for rows
 
 --- 
 
@@ -211,7 +195,8 @@ boxOffset[X1,Y1], box[X2,Y2], X1 <= X2, Y1 != Y2\
 	:: ~q(ROOTX + X1,ROOTY + Y1,Z), ~q(ROOTX + X2,ROOTY + Y2,Z).
 
 We bind ROOTX, ROOTY to the starting index of our inner box\
-We bind X1, X2, Y to offset within that box\
+We bind X1, X2, Y to offset within that box
+
 For any pair X1, X2 including X1 == X2, there can't exist the same value Z in different columns Y1, Y2\
 This rule is executed for all 9 value-pairs of ROOTX, ROOTY (each for 1 box within Sudoku board)
 
@@ -221,9 +206,10 @@ We can pre-fill our Sudoku game with literals such as:
 
 q(1,1,4).\
 q(5,3,6).\
-q(9,9,3).
+q(7,9,3).\
+q(9,9,5).
 
-Etc. then solve it for that instance
+etc. then solve it for that instance
 
 
 Links
