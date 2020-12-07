@@ -65,7 +65,9 @@ UNSAT
 Say we want to define a domain 'dom' on set {1,2,3}\
 We can achieve this with range expression (both brackets are inclusive):
 
+```prolog
 dom[1..3].
+```
 
 Will translate to:
 
@@ -76,7 +78,9 @@ dom[3].
 Let us have a 1-arity literal p(X)\
 Then, we can generate a set of clauses of form p(X) with variable X bound to dom:
 
+```prolog
 dom[X] :: p(X).
+```
 
 Which translates to:
 
