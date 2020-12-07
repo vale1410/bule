@@ -1,0 +1,27 @@
+% Bule rules for Sudoku game
+dom[1..9].
+delta[0..2,0..2].
+start[1].
+start[4].
+start[7].
+
+% in every cell at least 1 val
+dom[X], dom[Y] :: q(X,Y,Z) : dom[Z].
+
+% each val in at least 1 cell
+dom[Z] :: q(X,Y,Z) : dom[X] : dom[Y].
+
+% each cell contains no more than 1 val
+dom[X],dom[Y], dom[Z1], dom[Z2], Z1 < Z2 :: ~q(X,Y,Z1), ~q(X,Y,Z2). 
+
+% no two same vals in a column
+dom[X1], dom[X2], X1 < X2 :: ~q(X1,Y,Z), ~q(X2,Y,Z).
+
+% no two same vals in a row
+dom[Y1], dom[Y2], Y1 < Y2 :: ~q(X,Y1,Z), ~q(X,Y2,Z).
+
+% no two same vals in a single box
+%% note that we do not need the rules for X1==X2 (or Y1==Y2) because they are
+%% implied by 29 (or 26 respectively)
+start[RX], start[RY], delta[X1,Y1], delta[X2,Y2], X1<X2, Y1!=Y2
+	:: ~q(RX+X1,RY+Y1,Z), ~q(RX+X2,RY+Y2,Z).
