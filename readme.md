@@ -30,18 +30,27 @@ Bule's syntax and simple programs
 Let us have a 0-arity literal q.\
 Also, let's have a 1-clause rule of form:
 
+```prolog
 q.
+```
 
 We can observe that this rule is easily satisfiable when q <=> True.\
+
+```prolog
+>>> bule solve prog.bul
 SAT
+q.
+```
 
 ---
 
 Let us have another 0-arity literal p\
 Also, let's have a 2-clause rule of form:
 
+```prolog
 q.\
 p.
+```
 
 That effectively translates to p AND q\
 We can observe that this rule is satisfiable when both literals are True.\
@@ -51,9 +60,11 @@ SAT
 
 Adding a negation of one of the literals to our rule breaks satisfiability
 
-q.\
-p.\
+```prolog
+q.
+p.
 ~q.
+```
 
 Because q AND p AND (NOT q)) <=> (q AND (NOT q)) AND p <=> False AND p <=> False\
 UNSAT
