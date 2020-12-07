@@ -82,11 +82,13 @@ dom[1..3].
 
 Will translate to:
 
-dom[1].\
-dom[2].\
+```prolog
+dom[1].
+dom[2].
 dom[3].
+```
 
-Let us have a 1-arity literal p(X)\
+Let us have a 1-arity literal `p(X)`
 Then, we can generate a set of clauses of form p(X) with variable X bound to dom:
 
 ```prolog
@@ -95,14 +97,18 @@ dom[X] :: p(X).
 
 Which translates to:
 
-p(1).\
-p(2).\
+```prolog
+p(1).
+p(2).
 p(3).
+```
 
-Let us have  another 1-arity literal q(Y)\
+Let us have  another 1-arity literal `q(Y)`
 We can then iterate over Y within a single clause to add more literals:
 
+```prolog
 dom[X] :: p(X), ~q(Y*Y) : dom[Y] : Y < 3.
+```
 
 Gives:
 
