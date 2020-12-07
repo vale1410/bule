@@ -20,7 +20,5 @@ dom[X1], dom[X2], X1 < X2 :: ~q(X1,Y,Z), ~q(X2,Y,Z).
 dom[Y1], dom[Y2], Y1 < Y2 :: ~q(X,Y1,Z), ~q(X,Y2,Z).
 
 % no two same vals in a single box
-%% note that we do not need the rules for X1==X2 (or Y1==Y2) because they are
-%% implied by 29 (or 26 respectively)
-start[RX], start[RY], delta[X1,Y1], delta[X2,Y2], X1<X2, Y1!=Y2
+start[RX], start[RY], delta[X1,Y1], delta[X2,Y2], X1<X2, Y1<Y2
 	:: ~q(RX+X1,RY+Y1,Z), ~q(RX+X2,RY+Y2,Z).
