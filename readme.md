@@ -1,6 +1,8 @@
 The SAT Programming Framework Bule
 =================================
 
+[toc]
+
 Bule is a tool to create beautiful CNF encodings.
 Bule is a sophisticated grounder for the modelling language Bule that translates to CNF for SAT Solving. 
 Bule provides a front end for various SAT technologies. 
@@ -242,7 +244,10 @@ Links
 * http://bach.istc.kobe-u.ac.jp/sugar/
 * https://accu.org/journals/overload/27/150/horenovsky_2640/
 
-Documentation
+Paper on Bule
 -------------
 
 See folder ./doc
+
+
+
