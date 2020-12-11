@@ -69,7 +69,7 @@ p.
 ~q.
 ```
 
-Because `q AND p AND (NOT q)` <=> `(q AND (NOT q)) AND p` <=> `False AND p` <=> `False`\
+Because `q AND p AND (NOT q)` <=> `(q AND (NOT q)) AND p` <=> `False AND p` <=> `False`.
 ```prolog
 UNSAT
 ```
