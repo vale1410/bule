@@ -36,7 +36,7 @@ Also, let's have a 1-clause rule of form:
 q.
 ```
 
-We can observe that this rule is easily satisfiable when `q <=> True`.\
+We can observe that this rule is easily satisfiable when `q <=> True`.
 
 ```prolog
 >>> bule solve prog.bul
@@ -45,7 +45,7 @@ SAT
 
 ---
 
-Let us have another 0-arity literal p\
+Let us have another 0-arity literal `p`.\
 Also, let's have a 2-clause rule of form:
 
 ```prolog
@@ -53,15 +53,15 @@ q.
 p.
 ```
 
-That effectively translates to p AND q\
-We can observe that this rule is satisfiable when both literals are True.\
+That effectively translates to `p AND q`\
+We can observe that this rule is satisfiable when both literals are True.
 ```prolog
 SAT
 ```
 
 ---
 
-Adding a negation of one of the literals to our rule breaks satisfiability
+Adding a negation of one of the literals to our rule breaks satisfiability.
 
 ```prolog
 q.
@@ -69,14 +69,16 @@ p.
 ~q.
 ```
 
-Because `q AND p AND (NOT q))` <=> `(q AND (NOT q)) AND p` <=> `False AND p <=> False`\
+Because `q AND p AND (NOT q)` <=> `(q AND (NOT q)) AND p` <=> `False AND p` <=> `False`\
+```prolog
 UNSAT
+```
 
 ---
 
 ### Ranges and generators
 
-Say we want to define a domain `dom` on set `{1,2,3}`\
+Say we want to define a domain `dom` on set `{1,2,3}`.\
 We can achieve this with range expression (both brackets are inclusive):
 
 ```prolog
@@ -92,7 +94,7 @@ dom[3].
 ```
 
 Let us have a 1-arity literal `p(X)`
-Then, we can generate a set of clauses of form p(X) with variable X bound to dom:
+Then, we can generate a set of clauses of form `p(X)` with variable `X` bound to `dom`:
 
 ```prolog
 dom[X] :: p(X).
@@ -121,7 +123,7 @@ p(2), ~q(1), ~q(4).
 p(3), ~q(1), ~q(4).
 ```
 
-Note that adding the rule `Y < 3` skips last iteration step `~q(9)` as `3 < 3` <=> `False`
+Note that adding the rule `Y < 3` skips last iteration step `~q(9)` as `3 < 3` <=> `False`.
 
 ---
 
@@ -134,7 +136,7 @@ Let's have a domain for single row / single column indexing
 dom[1..9].
 ```
 
-Similarly, let's define a 2D domain for our X,Y coordinates:
+Similarly, let's define a 2D domain for our `X, Y` coordinates:
 
 ```prolog
 domCoords[1..9,1..9].
@@ -215,12 +217,12 @@ q(1,1,9), q(1,2,9), .., q(1,9,9), q(2,1,9), q(2,2,9), .., q(2,9,9), .. .., q(9,9
 dom[X1], dom[X2], X1 < X2 :: ~q(X1,Y,Z), ~q(X2,Y,Z).
 ```
 
-Here, we bind `X1, X2` and generate clauses for all `X1,X 2` pairs, where `X1 < X2` holds\
-Restriction `X1 != X2` is also valid, but generates redundant symmetrical literals
+Here, we bind `X1, X2` and generate clauses for all `X1, X2` pairs, where `X1 < X2` holds.\
+Restriction `X1 != X2` is also valid, but generates redundant symmetrical literals.
 
-Knowing that `X1 < X`2 (hence `X1 != X`2), `Y` is a column index and `Z` is a value,\
-`~q(X1,Y,Z), ~q(X2,Y,Z)` evaluates to False if both literals are True \
-we can't ever satisfy this clause with two same values `Z` in different rows in the same column `Y`
+Knowing that `X1 < X`2, hence `X1 != X2`, `Y` is a column index and `Z` is a value,\
+`~q(X1,Y,Z), ~q(X2,Y,Z)` evaluates to False if both literals are True. \
+We can't ever satisfy this clause with two same values `Z` in different rows in the same column `Y`.
 
 ---
 
@@ -230,7 +232,7 @@ we can't ever satisfy this clause with two same values `Z` in different rows in 
 dom[Y1], dom[Y2], Y1 < Y2 :: ~q(X,Y1,Z), ~q(X,Y2,Z).
 ```
 
-Here, we follow the same logic as in rule #3, but for rows
+Here, we follow the same logic as in **rule 3**, but for rows.
 
 --- 
 
@@ -245,9 +247,9 @@ boxOffset[X1,Y1], box[X2,Y2],X1 <= X2, Y1 != Y2
 We bind `ROOTX, ROOTY` to the starting index of our inner box\
 We bind `X1, X2, Y` to offset within that box
 
-For any pair `X1, X2` including `X1 == X2`, there can't exist the same value `Z` in different columns `Y1, Y2`\
-This rule is executed for all 9 value-pairs of `ROOTX, ROOTY` (each for 1 box within Sudoku board)\
-For `Y1 == Y2`, rule #3 holds implicitly
+For any pair `X1, X2` including `X1 == X2`, there can't exist the same value `Z` in different columns `Y1, Y2`.\
+This rule is executed for all 9 value-pairs of `ROOTX, ROOTY` (each for 1 box within Sudoku board).\
+For `Y1 == Y2`, **rule 3** holds implicitly.
 
 ---
 
