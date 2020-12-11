@@ -67,15 +67,6 @@ and usage of using your command.
 		unitSlice := []string{}
 		units := convertArgsToUnits(unitSlice)
 		clauseProgram := translateFromRuleProgram(p, units)
-
-		if len(clauseProgram.alternation) <= 1 	 {
-			fmt.Println("This is a SAT Programm!", err)
-			// clauseProgramm.IsSAT = true
-			// -> Actually now we can also call a SAT solver!
-		} else {
-			fmt.Println("This is a QBF Programm!", err)
-		}
-
 		tmpFolder := os.TempDir()
 		timestamp := time.Now().Format("2006_01_02T15_04_05")
 		outputGroundFile := filepath.Join(tmpFolder, "tmp_"+timestamp+".bul")

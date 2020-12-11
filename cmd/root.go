@@ -22,14 +22,21 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/vale1410/bule/lib"
-	"os"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
+
+var ErrExit = func(err error, code int) {
+	fmt.Fprintf(os.Stderr, "fatal:\t%s\n\tExiting with code %d.\n", err.Error(), code)
+	os.Exit(code)
+}
 
 var (
 	debugFlag   int
@@ -48,7 +55,7 @@ The SAT Programming System Bule
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if versionFlag {
-			fmt.Println("Bule Version 2.8. Copyright Valentin Mayer-Eichberger, 07.12.2020")
+			fmt.Println("Bule Version 2.7. Copyright Valentin Mayer-Eichberger, 15.11.2020")
 			return
 		}
 	},
@@ -89,20 +96,21 @@ func initConfig() {
 		// Find home directory.
 		home, err := homedir.Dir()
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			ErrExit(errors.New("Couldn't resolve $HOME dir."), 1)
 		}
 
-		// Search config in home directory with name ".bule" (without extension).
-		viper.AddConfigPath(home)
+		// Locate config file as specified below.
+		viper.AddConfigPath(home) // priority #1
+		viper.AddConfigPath(".")  // priority #2
 		viper.SetConfigName(".bule")
+		viper.SetConfigType("yaml")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		fmt.Printf("[using configuration file '%s']\n", viper.ConfigFileUsed())
 	}
 }
 
