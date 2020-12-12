@@ -179,10 +179,19 @@ and usage of using your command.
 		execFlags := strings.Split(si.Flags, " ")
 		_ = execFlags
 
+		// Reason on SAT and QBF solver wrt. implicit problem type!!
+
+		// IF its a SAT problem and it is called with a SAT solver -> remove e line
+
+		// If it is a SAT problem called with a QBF solver -> fine -> same, give hint
+
+		// If it is a QBF problem called with a SAT solver -> PROBLEM!!! ABORT
+
 		isTrue := true
 		{
-			debug(1, "depqbf", "--qdo", "--no-dynamic-nenofex", outputGroundFile)
-			cmdOutput, err = exec.Command("depqbf", "--qdo", "--no-dynamic-nenofex", outputGroundFile).Output()
+			flagsSplit := strings.Fields(si.Flags)
+			fmt.Println(si.Prog, flagsSplit, outputGroundFile)
+			cmdOutput, err = exec.Command(si.Prog, append(flagsSplit, outputGroundFile)...).Output()
 			if exitError, ok := err.(*exec.ExitError); ok {
 				debug(1, "DEPQBF exist status:", exitError.ExitCode())
 				if exitError.ExitCode() == 10 {

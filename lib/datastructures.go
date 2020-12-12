@@ -168,6 +168,10 @@ func (iterator Iterator) String() string {
 	return strings.TrimSuffix(sb.String(), ":")
 }
 
+func (p *Program) IsSATProblem() bool{
+	return len(p.Alternation) == 0
+}
+
 // This is equivalent to the String() method but maps onto the
 // string terms, if term is string
 func (p *Program) OutputString(literal Literal) string {

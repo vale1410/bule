@@ -296,6 +296,7 @@ func (p ClauseProgram) PrintDimacs() strings.Builder {
 	} else {
 		sb.WriteString(fmt.Sprintln("p", "cnf", len(vars)-len(units), len(cls)))
 	}
+
 	for i, quantifier := range p.alternation {
 
 		if len(quantifier) == 0 {

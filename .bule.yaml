@@ -1,3 +1,15 @@
 solvers:
-  sat: {}
-  qbf: {}
+  sat:
+    cmsat:
+      prog: cmsat
+      flags: ""
+      type: SAT
+  qbf:
+    caqe:
+      prog: caqe
+      flags: --qdo
+      type: QBF
+    depqbf:
+      prog: depqbf
+      flags: --no-dynamic-nenofex --qdo
+      type: QBF
