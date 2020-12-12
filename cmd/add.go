@@ -214,7 +214,7 @@ var addCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(addCmd)
-	addCmd.Flags().StringVarP(&label, "label", "", "", "label for solver instance")
+	addCmd.Flags().StringVarP(&label, "label", "l", "", "label for solver instance")
 	addCmd.Flags().BoolVarP(&setDefault, "setdefault", "", false, "set instance as default solver for SAT/QBF")
 	addCmd.Flags().BoolVarP(&newConfig, "newconfig", "", false, "create empty Bule configuration in current directory")
 }

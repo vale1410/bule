@@ -110,7 +110,7 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Printf("[using configuration file '%s']\n", viper.ConfigFileUsed())
+		fmt.Fprintf(os.Stderr, "[using configuration file '%s']\n", viper.ConfigFileUsed())
 	}
 }
 

@@ -20,6 +20,18 @@ func formatOutput(st SolverT, msi map[string]SolverInstance) {
 	}
 }
 
+func (s *Solvers) get(label string) (*SolverInstance, error) {
+	if si, exists := s.Sat[label]; exists {
+		return &si, nil
+	} else {
+		if si, exists := s.Qbf[label]; exists {
+			return &si, nil
+		} else {
+			return nil, ErrNoSuchLabel
+		}
+	}
+}
+
 //-----------------------------------------------------------------------------
 // Command  logic
 //-----------------------------------------------------------------------------
