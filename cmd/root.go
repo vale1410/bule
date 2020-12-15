@@ -22,7 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -32,11 +31,6 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
-
-var ErrExit = func(err error, code int) {
-	fmt.Fprintf(os.Stderr, "fatal:\t%s\n\tExiting with code %d.\n", err.Error(), code)
-	os.Exit(code)
-}
 
 var (
 	debugFlag   int
@@ -55,7 +49,7 @@ The SAT Programming System Bule
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if versionFlag {
-			fmt.Println("Bule Version 2.8. Copyright Valentin Mayer-Eichberger & Sebastian J., 12.12.2020")
+			fmt.Println("Bule Version 2.8. Copyright Valentin Mayer-Eichberger & Sebastian Jurkowski, 12.12.2020")
 			return
 		}
 	},
@@ -65,8 +59,7 @@ The SAT Programming System Bule
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		BuleExit(os.Stderr, errRuntimeCommand)
 	}
 }
 
@@ -83,7 +76,7 @@ func init() {
 
 	// Cobra also supports local flags, which will only prepare
 	// when this action is called directly.
-	//	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 }
 
@@ -96,7 +89,7 @@ func initConfig() {
 		// Find home directory.
 		home, err := homedir.Dir()
 		if err != nil {
-			ErrExit(errors.New("Couldn't resolve $HOME dir."), 1)
+			BuleExit(os.Stderr, errPathResolve)
 		}
 
 		// Locate config file as specified below.
@@ -110,8 +103,9 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintf(os.Stderr, "[using configuration file '%s']\n", viper.ConfigFileUsed())
+		fmt.Fprintf(os.Stderr, "<using config. file '%s'>\n", viper.ConfigFileUsed())
 	}
+
 }
 
 func debug(level int, s ...interface{}) {

@@ -75,3 +75,37 @@ $ bule completion fish > ~/.config/fish/completions/bule.fish
 func init() {
 	rootCmd.AddCommand(completionCmd)
 }
+
+// Autocompletion rules
+func autoCompleteBuleFiles(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return []string{"bul", "bule"}, cobra.ShellCompDirectiveFilterFileExt
+}
+
+func autoCompleteSolverInstance(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	var s Solvers
+	if err := s.load(); !err.isNil() {
+		BuleExit(os.Stderr, err)
+	}
+	labelsSat := make([]string, 0, len(s.Sat))
+	labelsQbf := make([]string, 0, len(s.Qbf))
+	labelsAll := make([]string, 0, cap(labelsSat)+cap(labelsQbf))
+	// add Sat instances
+	for label := range s.Sat {
+		labelsSat = append(labelsSat, label)
+	}
+	// add Qbf instances
+	for label := range s.Qbf {
+		labelsQbf = append(labelsQbf, label)
+	}
+	// sort them and make default instance 1st
+	sortSwap(&labelsSat, "default")
+	sortSwap(&labelsQbf, "default")
+	// merge sorted instances
+	for _, label := range labelsSat {
+		labelsAll = append(labelsAll, label)
+	}
+	for _, label := range labelsQbf {
+		labelsAll = append(labelsAll, label)
+	}
+	return labelsAll, cobra.ShellCompDirectiveDefault
+}

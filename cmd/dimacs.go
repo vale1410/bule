@@ -25,9 +25,10 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"github.com/vale1410/bule/lib"
 	"os"
 	"strings"
+
+	"github.com/vale1410/bule/lib"
 
 	"github.com/spf13/cobra"
 )
@@ -401,7 +402,7 @@ func (p *ClauseProgram) unitPropagation() {
 
 func (p *ClauseProgram) StringBuilder() strings.Builder {
 	sb := p.prepare(map[string]bool{})
-	return  sb
+	return sb
 }
 
 func (p *ClauseProgram) prepare(additionalUnits map[string]bool) strings.Builder {

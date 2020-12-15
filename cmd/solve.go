@@ -42,45 +42,9 @@ import (
 // Command  logic
 //-----------------------------------------------------------------------------
 
-// Autocompletion
-func autoCompleteBuleFiles(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	return []string{"bul", "bule"}, cobra.ShellCompDirectiveFilterFileExt
-}
-
-func autoCompleteSolverInstance(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	var s Solvers
-	if err := s.load(); err != nil {
-		ErrExit(err, 1)
-	}
-	labelsSat := make([]string, 0, len(s.Sat))
-	labelsQbf := make([]string, 0, len(s.Qbf))
-	labelsAll := make([]string, 0, cap(labelsSat)+cap(labelsQbf))
-	// add Sat instances
-	for label := range s.Sat {
-		labelsSat = append(labelsSat, satPrefix+label)
-	}
-	// add Qbf instances
-	for label := range s.Qbf {
-		labelsQbf = append(labelsQbf, qbfPrefix+label)
-	}
-	// sort them and make default instance 1st
-	sortSwap(&labelsSat, satPrefix+"default")
-	sortSwap(&labelsQbf, qbfPrefix+"default")
-	// merge sorted instances
-	for _, label := range labelsSat {
-		labelsAll = append(labelsAll, label)
-	}
-	for _, label := range labelsQbf {
-		labelsAll = append(labelsAll, label)
-	}
-	return labelsAll, cobra.ShellCompDirectiveDefault
-}
+const defaultInstance string = "default"
 
 // Flags
-const defaultInstance string = "default"
-const satPrefix string = "[SAT]"
-const qbfPrefix string = "[QBF]"
-
 var (
 	withInstance string
 )
@@ -88,7 +52,7 @@ var (
 // solveCmd represents the solve command
 var solveCmd = &cobra.Command{
 	Use:   "solve",
-	Short: "Grounds the bule formula and passes it to DEPQBF, then it outputs a model if it exists. ",
+	Short: "Grounds the bule formula and passes it to a solver instance, then it outputs a model if it exists. ",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command.
 `,
@@ -106,8 +70,8 @@ and usage of using your command.
 		}
 
 		var s Solvers
-		if err := s.load(); err != nil {
-			ErrExit(err, 1)
+		if err := s.load(); !err.isNil() {
+			BuleExit(os.Stderr, err)
 		}
 
 		start := time.Now()
@@ -115,9 +79,7 @@ and usage of using your command.
 
 		p, err := bule.ParseProgram(args)
 		if err != nil {
-			fmt.Println("Error parsing program")
-			fmt.Println(err)
-			os.Exit(1)
+			BuleExit(os.Stderr, errParse)
 		}
 
 		stage0Prerequisites(&p)
@@ -141,7 +103,10 @@ and usage of using your command.
 			defer file.Close()
 
 			sb := clauseProgram.StringBuilder()
-			_, err = io.WriteString(file, sb.String())
+			dimacsOut := dimacsTidyUp(sb.String(), p.IsSATProblem())
+			fmt.Println(dimacsOut)
+
+			_, err = io.WriteString(file, dimacsOut)
 			if err != nil {
 				fmt.Println("Error writing file.", err)
 				os.Exit(1)
@@ -152,60 +117,81 @@ and usage of using your command.
 				os.Exit(1)
 			}
 		}
-
 		debug(1, "Ground program writen to ", outputGroundFile)
 		fmt.Printf("c program grounded in %s. Solving...\n", time.Since(start))
 
 		var cmdOutput []byte
+		var si *SolverInstance
+		var bErr BuleErrorT
 
-		// if user specified -w --with flag
+		// user specified instance
 		if withInstance != defaultInstance {
-			// trim the helper prefix
-			if strings.HasPrefix(withInstance, satPrefix) {
-				withInstance = withInstance[len(satPrefix):]
+			if si, bErr = s.get(withInstance); !bErr.isNil() {
+				BuleExit(os.Stderr, bErr)
 			} else {
-				if strings.HasPrefix(withInstance, qbfPrefix) {
-					withInstance = withInstance[len(qbfPrefix):]
+				switch si.Type {
+				case SAT:
+					if p.IsSATProblem() {
+						// OK, solving SAT problem with SAT instance
+					} else {
+						// Error, solving QBF problem with SAT instance
+						BuleExit(os.Stderr, newBuleErrInadequateSolver(QBF, si.Prog))
+					}
+				case QBF:
+					if p.IsSATProblem() {
+						// Fair, solving SAT problem with QBF instance
+						fmt.Println("*hint* Use a dedicated SAT solver for this problem.")
+					} else {
+						// OK, solving QBF problem with QBF instance
+					}
+				default:
+					BuleExit(os.Stderr, errUnknownSolverType)
+				}
+			}
+		} else {
+			// try to infer a default solver instance
+			if p.IsSATProblem() {
+				fmt.Println("This is a SAT problem\n")
+				if si, bErr = s.getSat(defaultInstance); !bErr.isNil() {
+					// no default SAT solvers, try QBF
+					if si, bErr = s.getQbf(defaultInstance); !bErr.isNil() {
+						// no default QBF solvers, error
+						BuleExit(os.Stderr, newBuleErrInadequateSolver(SAT, defaultInstance))
+					}
+				}
+			} else {
+				fmt.Println("This is a QBF problem\n")
+				if si, bErr = s.getQbf(defaultInstance); !bErr.isNil() {
+					// no default QBF solvers, error (can't solve with default SAT!)
+					BuleExit(os.Stderr, newBuleErrInadequateSolver(QBF, defaultInstance))
 				}
 			}
 		}
-		// TODO: make this implicitly chose right solver by .cnf output
-		var si *SolverInstance
-		if si, err = s.get(withInstance); err != nil {
-			ErrExit(ErrNoSuchLabel, 1)
-		} else {
-			fmt.Printf(">>> Using %v solver instance: %s %s\n", si.Type, si.Prog, si.Flags)
-		}
-		execFlags := strings.Split(si.Flags, " ")
-		_ = execFlags
+		fmt.Printf(">>> Using a %v solver instance %s %s\n", si.Type, si.Prog, si.Flags)
 
-		// Reason on SAT and QBF solver wrt. implicit problem type!!
-
-		// IF its a SAT problem and it is called with a SAT solver -> remove e line
-
-		// If it is a SAT problem called with a QBF solver -> fine -> same, give hint
-
-		// If it is a QBF problem called with a SAT solver -> PROBLEM!!! ABORT
+		flagsSplit := strings.Fields(si.Flags)
+		progName := strings.ToUpper(filepath.Base(si.Prog))
 
 		isTrue := true
 		{
-			flagsSplit := strings.Fields(si.Flags)
-			fmt.Println(si.Prog, flagsSplit, outputGroundFile)
 			cmdOutput, err = exec.Command(si.Prog, append(flagsSplit, outputGroundFile)...).Output()
 			if exitError, ok := err.(*exec.ExitError); ok {
-				debug(1, "DEPQBF exist status:", exitError.ExitCode())
-				if exitError.ExitCode() == 10 {
+				debug(1, fmt.Sprintf("%s exist status:", si.Prog), exitError.ExitCode())
+				switch UnifySolverOutput(progName, exitError.ExitCode()) {
+				case SOLVER_TRUE:
 					isTrue = true
-				} else if exitError.ExitCode() == 20 {
+				case SOLVER_FALSE:
 					isTrue = false
-				} else {
-					log.Println("exitError of DEPQBF is", exitError.ExitCode())
-					log.Println("Error DEPQBF log:\n ", string(cmdOutput))
+				case SOLVER_ERROR:
+					fallthrough
+				default:
+					log.Println(fmt.Sprintf("Exit error of %s is", progName), exitError.ExitCode())
+					log.Println(fmt.Sprintf("Error %s log:\n ", progName), string(cmdOutput))
 					log.Println("Omitting parsing because of error in solving: ", err)
 					return
 				}
 			} else if err != nil {
-				log.Println("Error DEPQBF log:\n ", string(cmdOutput))
+				log.Println(fmt.Sprintf("Error %s log:\n ", progName), string(cmdOutput))
 				log.Println("Omitting parsing because of error in solving: ", err)
 				return
 			}
@@ -213,7 +199,7 @@ and usage of using your command.
 
 		// Parse output and return result
 		{
-			debug(1, "Output by DEPQBF")
+			debug(1, fmt.Sprintf("Output by %s", progName))
 			scanner := bufio.NewScanner(strings.NewReader(string(cmdOutput)))
 			result := []int{}
 			for scanner.Scan() {
@@ -274,4 +260,49 @@ func sortSwap(sPtr *[]string, key string) {
 		}
 	}
 	*sPtr = s
+}
+
+func dimacsTidyUp(dimacsOut string, isSat bool) string {
+
+	if !isSat {
+		// is QBF, keep full notation
+		return dimacsOut
+	}
+	lines := strings.Split(dimacsOut, "\n")
+	for i, line := range lines {
+		if line := strings.TrimSpace(line); len(line) > 0 {
+			switch string(line[0]) {
+			case "c":
+			case "p":
+			case "e":
+				// remove elem.
+				head, tail := splitRemove(&lines, uint(i))
+				// build recursively
+				return strings.Join(*head, "\n") + dimacsTidyUp(strings.Join(*tail, "\n"), isSat)
+			case "a":
+				// remove elem.
+				head, tail := splitRemove(&lines, uint(i))
+				// build recursively
+				return strings.Join(*head, "\n") + dimacsTidyUp(strings.Join(*tail, "\n"), isSat)
+			default:
+			}
+		}
+	}
+	return strings.Join(lines, "\n")
+}
+
+func splitRemove(xs *[]string, i uint) (headPtr *[]string, tailPtr *[]string) {
+	var head, tail []string
+	if int(i) >= len(*xs) {
+		headPtr = xs
+		tailPtr = &tail
+		return
+	}
+	head = (*xs)[:i]
+	headPtr = &head
+	if int(i) < (len(*xs) - 1) {
+		tail = (*xs)[i+1:]
+	}
+	tailPtr = &tail
+	return
 }
