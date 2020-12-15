@@ -45,7 +45,7 @@ func (be *BuleErrorT) isNil() bool {
 	return be.equals(buleOK)
 }
 
-// No errorss
+// No error
 var buleOK = BuleErrorT{errors.New(""), 0}
 
 // System
