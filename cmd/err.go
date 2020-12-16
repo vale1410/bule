@@ -42,7 +42,7 @@ func (be *BuleErrorT) is(other BuleErrorT) bool {
 }
 
 func (be *BuleErrorT) isNil() bool {
-	return be.equals(buleOK)
+	return be.is(buleOK)
 }
 
 // No error
