@@ -219,7 +219,7 @@ and usage of using your command.
 				//if strings.HasPrefix(s, "s ") {
 				//	continue
 				//}
-				if strings.HasPrefix(s, "V ") {
+				if strings.HasPrefix(s, "V ") || strings.HasPrefix(s, "v ") {
 					fields := strings.Fields(s)
 					v, err := strconv.Atoi(fields[1])
 					if err != nil {
@@ -280,36 +280,16 @@ func dimacsTidyUp(dimacsOut string, isSat bool) string {
 		return dimacsOut
 	}
 	lines := strings.Split(dimacsOut, "\n")
-	for i, line := range lines {
-		if line := strings.TrimSpace(line); len(line) > 0 {
+	xs := make([]string, 0, len(lines))
+	for _, line := range lines {
+		if len(line) > 0 {
 			switch string(line[0]) {
-			case "c":
-			case "p":
 			case "e":
-				// remove elem.
-				head, tail := splitRemoveJoin(lines, uint(i), "\n")
-				// rebuild string recursively
-				return head + dimacsTidyUp(tail, isSat)
 			case "a":
-				// remove elem.
-				head, tail := splitRemoveJoin(lines, uint(i), "\n")
-				// rebuild string recursively
-				return head + dimacsTidyUp(tail, isSat)
 			default:
+				xs = append(xs, line)
 			}
 		}
 	}
-	return strings.Join(lines, "\n")
-}
-
-func splitRemoveJoin(xs []string, i uint, sep string) (head string, tail string) {
-	if int(i) >= len(xs) {
-		head = strings.Join(xs, sep)
-		return
-	}
-	head = strings.Join(xs[:i], sep)
-	if int(i) < (len(xs) - 1) {
-		tail = strings.Join(xs[i+1:], sep)
-	}
-	return
+	return strings.Join(xs, "\n")
 }
