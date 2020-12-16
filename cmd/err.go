@@ -78,7 +78,7 @@ var errNoSuchInstance = BuleErrorT{errors.New("No such instance in configuration
 var errRuntimeCommand = BuleErrorT{errors.New("While executing cobra command"), BULE_ERR_CLASS_RUNTIME + 1}
 var newBuleErrDecode = func(receiver interface{}) BuleErrorT {
 	return BuleErrorT{
-		errors.New(fmt.Sprintf("Couldn't map %s file contents to program structure %",
+		errors.New(fmt.Sprintf("Couldn't map %s file contents to program structure %T",
 			filepath.Ext(viper.ConfigFileUsed())[1:], reflect.TypeOf(receiver))),
 		BULE_ERR_CLASS_RUNTIME + 2}
 }
@@ -102,7 +102,7 @@ func BuleLogErr(wr io.Writer, be BuleErrorT) {
 func BuleExit(wr io.Writer, be BuleErrorT) {
 	var bytes []byte
 	if !be.isNil() {
-		bytes = []byte(fmt.Sprintf("*****\t%s.\n\tExiting with code %d.\n", be.err.Error(), be.code))
+		bytes = []byte(fmt.Sprintf("******\t%s.\n\tExiting with code %d.\n", be.err.Error(), be.code))
 	}
 	wr.Write(bytes)
 	os.Exit(be.code)

@@ -104,7 +104,6 @@ and usage of using your command.
 
 			sb := clauseProgram.StringBuilder()
 			dimacsOut := dimacsTidyUp(sb.String(), p.IsSATProblem())
-			fmt.Println(dimacsOut)
 
 			_, err = io.WriteString(file, dimacsOut)
 			if err != nil {
@@ -118,13 +117,13 @@ and usage of using your command.
 			}
 		}
 		debug(1, "Ground program writen to ", outputGroundFile)
-		fmt.Printf("c program grounded in %s. Solving...\n", time.Since(start))
+		fmt.Fprintf(os.Stderr, "C program grounded in %s.\n", time.Since(start))
 
 		var cmdOutput []byte
 		var si *SolverInstance
 		var bErr BuleErrorT
+		var hint string
 
-		// user specified instance
 		if withInstance != defaultInstance {
 			if si, bErr = s.get(withInstance); !bErr.isNil() {
 				BuleExit(os.Stderr, bErr)
@@ -140,7 +139,7 @@ and usage of using your command.
 				case QBF:
 					if p.IsSATProblem() {
 						// Fair, solving SAT problem with QBF instance
-						fmt.Println("*hint* Use a dedicated SAT solver for this problem.")
+						hint = "Use a dedicated SAT solver for this problem."
 					} else {
 						// OK, solving QBF problem with QBF instance
 					}
@@ -151,26 +150,38 @@ and usage of using your command.
 		} else {
 			// try to infer a default solver instance
 			if p.IsSATProblem() {
-				fmt.Println("This is a SAT problem\n")
 				if si, bErr = s.getSat(defaultInstance); !bErr.isNil() {
 					// no default SAT solvers, try QBF
 					if si, bErr = s.getQbf(defaultInstance); !bErr.isNil() {
 						// no default QBF solvers, error
 						BuleExit(os.Stderr, newBuleErrInadequateSolver(SAT, defaultInstance))
+					} else {
+						hint = "Use a dedicated SAT solver for this problem."
 					}
 				}
 			} else {
-				fmt.Println("This is a QBF problem\n")
 				if si, bErr = s.getQbf(defaultInstance); !bErr.isNil() {
 					// no default QBF solvers, error (can't solve with default SAT!)
 					BuleExit(os.Stderr, newBuleErrInadequateSolver(QBF, defaultInstance))
 				}
 			}
 		}
-		fmt.Printf(">>> Using a %v solver instance %s %s\n", si.Type, si.Prog, si.Flags)
+		// printsolver details and some hints
+		if p.IsSATProblem() {
+			fmt.Fprintf(os.Stderr, "This is a SAT problem\n")
+		} else {
+			fmt.Fprintf(os.Stderr, "This is a QBF problem\n")
+		}
+		fmt.Fprintf(os.Stderr, "Using a %v solver instance '%s %s'\n", si.Type, si.Prog, si.Flags)
+		if len(hint) > 0 {
+			fmt.Fprintf(os.Stderr, "*hint* %s\n", hint)
+		}
 
+		// prepare fields
 		flagsSplit := strings.Fields(si.Flags)
 		progName := strings.ToUpper(filepath.Base(si.Prog))
+
+		fmt.Fprintf(os.Stderr, "Solving. . .\n\n")
 
 		isTrue := true
 		{
@@ -276,14 +287,14 @@ func dimacsTidyUp(dimacsOut string, isSat bool) string {
 			case "p":
 			case "e":
 				// remove elem.
-				head, tail := splitRemove(&lines, uint(i))
-				// build recursively
-				return strings.Join(*head, "\n") + dimacsTidyUp(strings.Join(*tail, "\n"), isSat)
+				head, tail := splitRemoveJoin(lines, uint(i), "\n")
+				// rebuild string recursively
+				return head + dimacsTidyUp(tail, isSat)
 			case "a":
 				// remove elem.
-				head, tail := splitRemove(&lines, uint(i))
-				// build recursively
-				return strings.Join(*head, "\n") + dimacsTidyUp(strings.Join(*tail, "\n"), isSat)
+				head, tail := splitRemoveJoin(lines, uint(i), "\n")
+				// rebuild string recursively
+				return head + dimacsTidyUp(tail, isSat)
 			default:
 			}
 		}
@@ -291,18 +302,14 @@ func dimacsTidyUp(dimacsOut string, isSat bool) string {
 	return strings.Join(lines, "\n")
 }
 
-func splitRemove(xs *[]string, i uint) (headPtr *[]string, tailPtr *[]string) {
-	var head, tail []string
-	if int(i) >= len(*xs) {
-		headPtr = xs
-		tailPtr = &tail
+func splitRemoveJoin(xs []string, i uint, sep string) (head string, tail string) {
+	if int(i) >= len(xs) {
+		head = strings.Join(xs, sep)
 		return
 	}
-	head = (*xs)[:i]
-	headPtr = &head
-	if int(i) < (len(*xs) - 1) {
-		tail = (*xs)[i+1:]
+	head = strings.Join(xs[:i], sep)
+	if int(i) < (len(xs) - 1) {
+		tail = strings.Join(xs[i+1:], sep)
 	}
-	tailPtr = &tail
 	return
 }
