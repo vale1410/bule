@@ -11,7 +11,7 @@ mkdir -p test-output
 for x in test-input/*.bul
 do 
     name=$(basename $x)
-    ./main ground  -t=1 -u=0 -i=1 -q=0 --facts $x | sed 's/%.*//g' | sed '/^\s*$/d' | sort > test-output/$name
+    ./main ground  -t=1 -u=0 -i=1 -q=0 --facts $x 2>/dev/null | sed 's/%.*//g' | sed '/^\s*$/d' | sort > test-output/$name 
     diff -B -b test-expected/$name test-output/$name > /dev/null
     if [ $? -ne 0 ] ; then 
         echo test failed: $name
