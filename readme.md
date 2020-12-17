@@ -1,4 +1,5 @@
 <img src="logo.png" alt="Bule Logo" width="50"/>
+
 # The SAT Programming Language **Bule**
 
 Bule is a tool to create beautiful CNF encodings.
