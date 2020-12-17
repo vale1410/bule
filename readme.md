@@ -7,8 +7,7 @@ Bule is a tool to create beautiful CNF encodings.
 Bule is a sophisticated grounder for the modelling language Bule that translates to CNF for SAT Solving. 
 Bule provides a front end for various SAT technologies. 
 
-Features
---------
+## Features
 
 * Grounding of the declarative modelling language Bule. 
 * satisfiability solving - allowing any number of SAT solvers to be called with the grounded CNF formula
@@ -22,10 +21,56 @@ Features
 * Multiple cardinality encodings
 * Full Pseudo Boolean Translations to CNF
 
+## Basic Configuration For SAT and QBF
 
-Bule's syntax and simple programs
----------------------------------
+Now you can now add SAT and QBF solvers to the configuration of bule and solve your formulas with them!
+As a start, for QBF add depqbf and caqe and for SAT kissat and cryptominisat to your path. The programs can be found here:  http://lonsing.github.io/depqbf/https://github.com/ltentrup/caqe
+https://github.com/msoos/cryptominisat/
+http://fmv.jku.at/kissat/
 
+Now let's add them: 
+```
+>>> bule add depqbf @"--no-dynamic-nenofex --qdo" QBF -l default
+>>> bule add cryptominisat @ SAT -l default
+```
+
+with `bule list` you can list all configurations: 
+
+```
+>>> bule list 
+```
+
+To test the configuration take a look at the small examples in bule/examples/:
+qbf_false.bul  sat_false.bul  qbf_true.bul sat_true.bul 
+
+with `solve` bule should give you the expected answers. 
+
+For example: 
+
+```
+>>> bule solve examples/sat_true.bul
+C program grounded in 11.870796ms.
+This is a SAT problem
+Using a SAT solver instance 'cmsat '
+Solving. . .
+
+-------- Solver output -----
+2020/12/17 02:31:15 solver>>  c Outputting solution to console
+2020/12/17 02:31:15 solver>>  c CryptoMiniSat version 5.7.1
+...
+...
+2020/12/17 02:31:15 solver>>  c Mem used                 : 0.00        MB
+2020/12/17 02:31:15 solver>>  c Total time (this thread) : 0.00
+2020/12/17 02:31:15 solver>>  s SATISFIABLE
+-------- Solver output end -----
+s SAT
+--------
+~q.
+p.
+--------
+```
+
+## Bule's syntax and simple programs
 
 ### Literals and basic clauses
 
