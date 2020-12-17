@@ -19,11 +19,16 @@ Bule provides a front end for various SAT technologies.
 ## Basic Configuration For SAT and QBF
 
 Now you can now add SAT and QBF solvers to the configuration of bule and solve your formulas with them!
-As a start, for QBF add depqbf and caqe and for SAT kissat and cryptominisat to your path. The programs can be found here:  http://lonsing.github.io/depqbf/https://github.com/ltentrup/caqe
-https://github.com/msoos/cryptominisat/
-http://fmv.jku.at/kissat/
+As a start, for QBF add depqbf and caqe and for SAT kissat and cryptominisat to your path. 
+The installation instructions can be found here:  
+* http://lonsing.github.io/depqbf/
+* https://github.com/ltentrup/caqe
+* https://github.com/msoos/cryptominisat/
+* http://fmv.jku.at/kissat/
 
-Now let's add them: 
+
+Now let's add the solvers to the configuration file (usually at `~/.bule.yaml`): 
+
 ```
 >>> bule add depqbf @"--no-dynamic-nenofex --qdo" QBF -l default
 >>> bule add cryptominisat @ SAT -l default
@@ -36,7 +41,10 @@ with `bule list` you can list all configurations: 
 ```
 
 To test the configuration take a look at the small examples in bule/examples/:
-qbf_false.bul  sat_false.bul  qbf_true.bul sat_true.bul 
+* `qbf_false.bul`
+* `sat_false.bul`
+* `qbf_true.bul`
+* `sat_true.bul`
 
 with `solve` bule should give you the expected answers. 
 
