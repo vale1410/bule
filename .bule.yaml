@@ -1,7 +1,0 @@
-solvers:
-  sat: {}
-  qbf:
-    default:
-      prog: depqbf
-      flags: ""
-      type: QBF

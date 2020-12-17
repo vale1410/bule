@@ -215,19 +215,21 @@ and usage of using your command.
 			result := []int{}
 			for scanner.Scan() {
 				s := scanner.Text()
-				//fmt.Println(s)
-				//if strings.HasPrefix(s, "s ") {
-				//	continue
-				//}
 				if strings.HasPrefix(s, "V ") || strings.HasPrefix(s, "v ") {
 					fields := strings.Fields(s)
-					v, err := strconv.Atoi(fields[1])
-					if err != nil {
-						log.Println("Error in parsing result: ", err)
-						os.Exit(1)
+					for _,field := range fields[1:] {
+						v, err := strconv.Atoi(field)
+						if err != nil {
+							log.Println("Error in parsing result: ", err)
+							os.Exit(1)
+						}
+						if v != 0 {
+							result = append(result, v)
+						}
 					}
-					result = append(result, v)
 					continue
+				} else {
+					log.Println("solver>> ", s)
 				}
 			}
 			reverseMap := map[int]string{}
@@ -236,19 +238,18 @@ and usage of using your command.
 			}
 
 			if isTrue {
-				fmt.Println("TRUE")
+				fmt.Println("s SAT\n--------")
 				for _, id := range result {
 					if id > 0 {
-						fmt.Println(reverseMap[id])
+						fmt.Printf("%s.\n", reverseMap[id])
 					} else {
-						fmt.Printf("~%s\n", reverseMap[-1*id])
+						fmt.Printf("~%s.\n", reverseMap[-1*id])
 					}
 				}
-				fmt.Println()
 			} else {
-				fmt.Println("FALSE")
-
+				fmt.Println("s UNSAT")
 			}
+			fmt.Println("--------")
 		}
 	},
 }
