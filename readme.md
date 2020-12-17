@@ -1,4 +1,4 @@
-# ![Bule Logo](logo.png) The SAT Programming Language **Bule**
+# ![Bule Logo](logo.png =50) The SAT Programming Language **Bule**
 
 Bule is a tool to create beautiful CNF encodings.
 Bule is a sophisticated grounder for the modelling language Bule that translates to CNF for SAT Solving. 
