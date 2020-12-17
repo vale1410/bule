@@ -1,23 +1,18 @@
 The SAT Programming Framework Bule
 =================================
 
-[toc]
-
 Bule is a tool to create beautiful CNF encodings.
 Bule is a sophisticated grounder for the modelling language Bule that translates to CNF for SAT Solving. 
 Bule provides a front end for various SAT technologies. 
 
 ## Features
 
-* Grounding of the declarative modelling language Bule. 
+* Grounding with the declarative modelling language Bule
 * satisfiability solving - allowing any number of SAT solvers to be called with the grounded CNF formula
 * debugging facilities for CNF formulas, statistics on size and quality 
 * QBF solving
-* Model Counting and Approximate model counting. 
+* Model Counting and Approximate model counting
 * Various encodings for cardinality constraints and Pseudo Boolean constaints. 
-
-### Constraints to SAT translations: 
-
 * Multiple cardinality encodings
 * Full Pseudo Boolean Translations to CNF
 
