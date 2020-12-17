@@ -49,7 +49,7 @@ The SAT Programming System Bule
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if versionFlag {
-			fmt.Println("Bule Version 2.8. Copyright Valentin Mayer-Eichberger & Sebastian Jurkowski, 12.12.2020")
+			fmt.Println("Bule Version 2.9. Copyright Valentin Mayer-Eichberger & Sebastian Jurkowski, 16.12.2020")
 			return
 		}
 	},

@@ -213,6 +213,7 @@ and usage of using your command.
 			debug(1, fmt.Sprintf("Output by %s", progName))
 			scanner := bufio.NewScanner(strings.NewReader(string(cmdOutput)))
 			result := []int{}
+			fmt.Println("-------- Solver output ----- ")
 			for scanner.Scan() {
 				s := scanner.Text()
 				if strings.HasPrefix(s, "V ") || strings.HasPrefix(s, "v ") {
@@ -236,6 +237,8 @@ and usage of using your command.
 			for k, v := range clauseProgram.idMap {
 				reverseMap[v] = k
 			}
+
+			fmt.Println("-------- Solver output end ----- ")
 
 			if isTrue {
 				fmt.Println("s SAT\n--------")
