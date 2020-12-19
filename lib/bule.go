@@ -911,7 +911,7 @@ func (constraint *Constraint) GroundBoolExpression() (isGround bool, result bool
 
 //returns true if term has been changed
 func assign(term Term, assignment map[string]string) (Term, bool, error) {
-	dividerSet :="%-*/+()."
+	dividerSet := "%-*/+()."
 	output := term.String()
 	acc := strings.Builder{}
 	for variable, val := range assignment {
@@ -923,8 +923,8 @@ func assign(term Term, assignment map[string]string) (Term, bool, error) {
 				break
 			}
 			// Must be symbol before and after that makes makes this change
-			if (index == 0 || strings.ContainsAny(xx[index-1:index],dividerSet )) &&
-				(index+len(variable) == len(xx) || strings.ContainsAny(xx[index+len(variable):index+len(variable)+1], dividerSet) ) {
+			if (index == 0 || strings.ContainsAny(xx[index-1:index], dividerSet)) &&
+				(index+len(variable) == len(xx) || strings.ContainsAny(xx[index+len(variable):index+len(variable)+1], dividerSet)) {
 				acc.WriteString(xx[:index] + val)
 				xx = xx[index+len(variable):]
 			} else {

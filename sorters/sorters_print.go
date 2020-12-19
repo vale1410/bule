@@ -177,7 +177,7 @@ func PrintSorterTikZ(sorter Sorter, filename string) {
 		maxLayerDist = 0
 	}
 
-	for i, _ := range sorter.In {
+	for i := range sorter.In {
 
 		s1 := "    \\draw[thick] (%v,%v) to (%v,%v);\n"
 		file.Write([]byte(fmt.Sprintf(s1, -layerDist, i, length-groupDist+layerDist, i)))

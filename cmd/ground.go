@@ -105,7 +105,6 @@ func stage0Prerequisites(p *bule.Program) {
 		}
 	}
 
-
 	{
 		stageInfo(p, "CheckUnboundVariables", "Check for unbound variables that are not marked as such.")
 		err := p.CheckUnboundVariables()

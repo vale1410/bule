@@ -15,7 +15,7 @@ func TestAtMostOne(test *testing.T) {
 	lits := make([]sat.Literal, k)
 	atoms := make(map[string]bool)
 
-	for i, _ := range lits {
+	for i := range lits {
 		lits[i] = sat.Literal{true, sat.NewAtomP1(sat.Pred("x"), i)}
 		atoms[lits[i].A.Id()] = true
 	}

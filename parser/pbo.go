@@ -44,7 +44,7 @@ func (p *Problem) PrintGringo() {
 			atoms[x.Literal.A.Id()] = true
 		}
 	}
-	for x, _ := range atoms {
+	for x := range atoms {
 		fmt.Println("{", x, "}.")
 	}
 }
@@ -66,7 +66,7 @@ func (p *Problem) PrintGurobi() {
 		}
 	}
 	fmt.Println("Binary")
-	for aS, _ := range atoms {
+	for aS := range atoms {
 		fmt.Print(aS + " ")
 	}
 	fmt.Println()

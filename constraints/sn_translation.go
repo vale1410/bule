@@ -183,7 +183,7 @@ func (t *SortingNetwork) CreateBags() {
 
 	t.Bags = make([][]sat.Literal, len(Binary(maxWeight)))
 
-	for i, _ := range t.Bags {
+	for i := range t.Bags {
 		t.Bags[i] = make([]sat.Literal, bagSize[i])
 	}
 

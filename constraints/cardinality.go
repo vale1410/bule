@@ -77,7 +77,7 @@ func TranslateAtMostOne(typ OneTranslationType, tag string, lits []sat.Literal) 
 		counterId := newId()
 
 		auxs := make([]sat.Literal, len(lits))
-		for i, _ := range auxs {
+		for i := range auxs {
 			auxs[i] = sat.Literal{true, sat.NewAtomP2(pred, counterId, i)}
 		}
 		trans.Aux = auxs
@@ -170,7 +170,7 @@ func TranslateExactlyOne(typ OneTranslationType, tag string, lits []sat.Literal)
 		counterId := newId()
 
 		auxs := make([]sat.Literal, len(lits))
-		for i, _ := range auxs {
+		for i := range auxs {
 			auxs[i] = sat.Literal{true, sat.NewAtomP2(pred, counterId, i)}
 		}
 		trans.Aux = auxs

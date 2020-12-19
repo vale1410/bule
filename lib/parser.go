@@ -161,7 +161,6 @@ func (rule *Rule) parseGeneratorAndConstraints(tokens Tokens) {
 	}
 }
 
-
 // TODO
 //func (rule *Rule) parseImplication(tokens Tokens) {
 //
@@ -183,7 +182,6 @@ func (rule *Rule) parseGeneratorAndConstraints(tokens Tokens) {
 //	}
 //}
 
-
 func (rule *Rule) parseClauses(tokens Tokens) error {
 
 	splitRuleElementsSeparators := map[tokenKind]bool{tokenDot: true, tokenQuestionsmark: true, token2RuleComma: true}
@@ -199,9 +197,9 @@ func (rule *Rule) parseClauses(tokens Tokens) error {
 		iterator := splitTokens(sep.tokens, splitIterator)
 		if len(iterator) == 1 {
 			literal := parseLiteral(iterator[0].tokens)
-		//	if literal.Fact {
-		//		return fmt.Errorf("%s should not be fact in rule %s", literal.String(), tokens )
-		//	}
+			//	if literal.Fact {
+			//		return fmt.Errorf("%s should not be fact in rule %s", literal.String(), tokens )
+			//	}
 			rule.Literals = append(rule.Literals, literal)
 		} else {
 			rule.Iterators = append(rule.Iterators, parseIterator(iterator))
@@ -849,7 +847,7 @@ func lexConstraintRight(l *lexer) stateFn {
 		switch {
 		case r == eof:
 			return l.errorf("%s", "Constraint lexing should not end here.?")
-		case r ==  '-':
+		case r == '-':
 			if l.next() == '>' {
 				l.backup()
 				l.backup()

@@ -21,7 +21,6 @@ func TestParser1c(t *testing.T) {
 	checkLexing(in, out, t)
 }
 
-
 func TestParser1a(t *testing.T) {
 	in := "move[A,b+1,4*(a*b)]."
 	out := "ATOM{move}-AtomBL{[}-TERM{A}-TERMCOMMA{,}-TERM{b+1}-TERMCOMMA{,}-TERM{4*(a*b)}-AtomBR{]}-DOT{.}-"

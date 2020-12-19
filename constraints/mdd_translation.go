@@ -137,7 +137,7 @@ func CreateMDDChain(store *mdd.IntervalMddStore, K int64, entries []Entry, chain
 			acc := int64(0)
 
 			//			fmt.Printf("entries:%v  chain: %v", entries, chain)
-			for i, _ := range chain {
+			for i := range chain {
 
 				glob.A(len(chain) <= len(entries), "chain and PB are not aligned!!!! ")
 				glob.A(chain[i] == entries[i].Literal, "chain and PB are not aligned!!!! ")

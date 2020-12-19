@@ -132,7 +132,7 @@ func (pb *Threshold) RewriteSameWeights() {
 
 				output := make(Lits, most)
 				input := make(Lits, len(es))
-				for j, _ := range input {
+				for j := range input {
 					if j < most {
 						output[j] = sat.Literal{true, sat.NewAtomP3(pred, pb.Id, rewrite, j)}
 						newEntries[pos] = Entry{output[j], es[j].Weight}
@@ -176,7 +176,7 @@ func (pb *Threshold) RewriteSameWeights() {
 
 		output := make(Lits, most)
 		input := make(Lits, len(es))
-		for j, _ := range input {
+		for j := range input {
 			if j < most {
 				output[j] = sat.Literal{true, sat.NewAtomP3(pred, pb.Id, rewrite, j)}
 				newEntries[pos] = Entry{output[j], es[j].Weight}

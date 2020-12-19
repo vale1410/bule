@@ -19,8 +19,8 @@ type Program struct {
 	PredicateExplicit     map[Predicate]bool       // If there is a explicit quantification for predicate
 
 	// handle string terms
-	String2IntId        map[string]int       // StringReplacement
-	IntId2String        map[int]string             // StringReplacement
+	String2IntId map[string]int // StringReplacement
+	IntId2String map[int]string // StringReplacement
 
 	//Quantification
 	Alternation [][]Literal
@@ -168,7 +168,7 @@ func (iterator Iterator) String() string {
 	return strings.TrimSuffix(sb.String(), ":")
 }
 
-func (p *Program) IsSATProblem() bool{
+func (p *Program) IsSATProblem() bool {
 	return len(p.Alternation) == 0
 }
 
@@ -203,7 +203,7 @@ func (p *Program) OutputString(literal Literal) string {
 		if err != nil { // This is not a int
 			s += x.String()
 		} else {
-			if str,ok := p.IntId2String[id];  ok {
+			if str, ok := p.IntId2String[id]; ok {
 				s += str
 			} else {
 				s += x.String()

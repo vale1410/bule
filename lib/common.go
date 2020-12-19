@@ -9,7 +9,6 @@ var (
 	DebugLevel int
 )
 
-
 func Debug(level int, s ...interface{}) {
 	if level <= DebugLevel {
 		fmt.Print("% ")
@@ -61,5 +60,3 @@ func makeSet(a, b int) (c []int) {
 	}
 	return
 }
-
-

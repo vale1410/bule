@@ -47,7 +47,7 @@ func (p *Program) CheckUnboundVariables() error {
 }
 
 // Remove all rules where check is true.
-func (p *Program) RemoveRules(ifTrueRemove func(r Rule) bool) (changed bool, err error ) {
+func (p *Program) RemoveRules(ifTrueRemove func(r Rule) bool) (changed bool, err error) {
 	var newRules []Rule
 	for _, rule := range p.Rules {
 		if !ifTrueRemove(rule) {
@@ -93,7 +93,7 @@ func (p *Program) RuleTransformation(check func(r Rule) bool,
 }
 
 // Check terms in literals and expands the rules according to the *first* term found according to it's expansion.
-func (p *Program) TermExpansion(check func(r Term) bool, expand func(Term) ([]Term,error)) (changed bool, err error) {
+func (p *Program) TermExpansion(check func(r Term) bool, expand func(Term) ([]Term, error)) (changed bool, err error) {
 
 	checkRule := func(r Rule) bool {
 		for _, t := range r.AllTerms() {
@@ -126,8 +126,9 @@ func (p *Program) TermExpansion(check func(r Term) bool, expand func(Term) ([]Te
 	}
 	return p.RuleExpansion(checkRule, expandRule)
 }
+
 type TermIterator interface {
-	AllTerms()	[]*Term
+	AllTerms() []*Term
 }
 
 func TermTranslation(termIterator TermIterator, transform func(Term) (Term, bool, error)) (changed bool, err error) {
@@ -141,7 +142,6 @@ func TermTranslation(termIterator TermIterator, transform func(Term) (Term, bool
 	}
 	return
 }
-
 
 //func (iterator *Iterator) TermTranslation(transform func(Term) (Term, bool, error)) (changed bool, err error) {
 //	var ok bool
@@ -224,7 +224,6 @@ func (rule Rule) AllLiterals() (literals []*Literal) {
 	return
 }
 
-
 /// IDEA to unify treatment of Iterator and Rule
 type Groundable interface {
 	Terms() []*Term
@@ -245,4 +244,3 @@ func Expansion(func(Groundable) (changed bool, result []Groundable, err error)) 
 ///func Instantiate(g *Groundable) error  {
 ///	return nil
 ///}
-

@@ -134,7 +134,7 @@ func CreateSortingNetwork(s int, cut int, typ SortingNetworkType) (sorter Sorter
 
 	offset := 2
 
-	for i, _ := range output {
+	for i := range output {
 		output[i] = i + offset
 	}
 	input := make([]int, n)
@@ -194,7 +194,7 @@ func (s *Sorter) Normalize(offset int, in []int) (maxId int) {
 
 	if len(in) == 0 {
 		in = make([]int, len(s.In))
-		for i, _ := range in {
+		for i := range in {
 			in[i] = offset
 			offset++
 		}

@@ -241,7 +241,7 @@ func (t *SortingNetwork) writeTikz(file *os.File) {
 		maxLayerDist = 0
 	}
 
-	for i, _ := range sorter.In {
+	for i := range sorter.In {
 		s1 := "    \\draw[thick] (%v,%v) to (%v,%v);\n"
 		hight := float64(i) * lineDist
 		var d float64

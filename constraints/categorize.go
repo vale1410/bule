@@ -145,7 +145,7 @@ func doChaining(pbs []*Threshold, complOcc map[sat.Literal][]int, simplOcc map[s
 
 	//3) amo/ex matchings
 
-	for comp, _ := range pbs {
+	for comp := range pbs {
 		if matchings, b := amo_matchings[comp]; b {
 			workOnMatching(pbs, comp, matchings, lit2id, litSets)
 		}
@@ -261,10 +261,10 @@ func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 			compEntries[i+comp_offset] = *ie.c
 			simpEntries[i+simp_offset] = *ie.s
 		}
-		for i, _ := range comp_rest {
+		for i := range comp_rest {
 			compEntries[comp_offset+len(ind_entries)+i] = *comp_rest[i]
 		}
-		for i, _ := range simp_rest {
+		for i := range simp_rest {
 			simpEntries[i] = *simp_rest[i]
 		}
 
@@ -284,7 +284,7 @@ func workOnMatching(pbs []*Threshold, comp int, matchings []Matching,
 		simp_translation.PB = pbs[simp]
 		// replaces entries with auxiliaries of the AMO
 		last := int64(0)
-		for i, _ := range ind_entries {
+		for i := range ind_entries {
 			tmp := compEntries[i+comp_offset].Weight
 			compEntries[i+comp_offset].Weight -= last
 			glob.A(compEntries[i+comp_offset].Weight >= 0, "After rewriting PB weights cannot be negative")

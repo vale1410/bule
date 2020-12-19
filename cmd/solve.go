@@ -218,7 +218,7 @@ and usage of using your command.
 				s := scanner.Text()
 				if strings.HasPrefix(s, "V ") || strings.HasPrefix(s, "v ") {
 					fields := strings.Fields(s)
-					for _,field := range fields[1:] {
+					for _, field := range fields[1:] {
 						v, err := strconv.Atoi(field)
 						if err != nil {
 							log.Println("Error in parsing result: ", err)
