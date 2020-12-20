@@ -314,19 +314,14 @@ q(9,9,5).
 etc. then solve it for that instance
 
 
-Links
+Related Links
 -----
+
 * http://www.satlive.org/ 
 * http://www.cs.utexas.edu/users/vl/tag/SAT-grounders
 * http://minisat.se/MiniSat+.html
 * http://potassco.sourceforge.net/
 * http://bach.istc.kobe-u.ac.jp/sugar/
 * https://accu.org/journals/overload/27/150/horenovsky_2640/
-
-Paper on Bule
--------------
-
-See folder ./doc
-
 
 
