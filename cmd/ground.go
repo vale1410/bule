@@ -193,10 +193,11 @@ func stage2Iterators(p *bule.Program) {
 			p.InstantiateAndRemoveFactFromIterator,
 			"InstantiateAndRemoveFactFromIterator", "")
 
-		stage(p, &changed,
-			p.ConstraintSimplification,
-			"ConstraintSimplification.",
-			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
+		// Can this be omitted ? All tests run through successfully
+///		stage(p, &changed,
+///			p.ConstraintSimplification,
+///			"ConstraintSimplification.",
+///			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
 
 		stage(p, &changed,
 			p.CleanIteratorFromGroundBoolExpressions,

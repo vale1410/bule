@@ -16,10 +16,15 @@
 %%  q=4, c=7. r=6. d=c*r. %%  > original! black win!
 
 %% %% easy
-#const q=2.
-#const c=2. 
-#const r=2. 
-#const d=2. 
+%% #const q=2.
+%% #const c=2. 
+%% #const r=2. 
+%% #const d=2. 
+
+#const q=4.
+#const c=7. 
+#const r=6. 
+#const d=42. 
 %#const d=c*r.
 %#const d=2*((c*r+1)/2)-1. 
 
