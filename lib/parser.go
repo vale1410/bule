@@ -722,11 +722,17 @@ func lexAtom(l *lexer) stateFn {
 			l.backup()
 			l.emit(token2AtomName)
 			return lexRuleElement
-		case r == '.':
+		case r == '.' :
 			l.backup()
 			l.emit(token2AtomName)
 			l.next()
-			l.emit(token2RuleComma)
+			l.emit(tokenDot)
+			return lexRuleElement
+		case r == '?':
+			l.backup()
+			l.emit(token2AtomName)
+			l.next()
+			l.emit(tokenQuestionsmark)
 			return lexRuleElement
 		case r == ',':
 			l.backup()
