@@ -19,12 +19,12 @@ cell[L1], cell[L2], L1 != L2 -> neqCell[L1, L2]. % for L1 != L2.
 time[T] -> next[T, T+1].
 cell[L] -> left[L, L+1].
 
-time[T], cell[L], symb[S]    :: #exist(T), tape(L, S, T)?
-time[T], type[Q]             :: #exist(T), state(Q, T)?
-time[T], cell[L]             :: #exist(T), head(L, T)?
-time[T], transition[SI, QI, SO, QO, D], ~universal[QI] :: #exist(T), move(T, SI, QI, SO, QO, D)?
+time[T], cell[L], symb[S]    :: #exists(T), tape(L, S, T)?
+time[T], type[Q]             :: #exists(T), state(Q, T)?
+time[T], cell[L]             :: #exists(T), head(L, T)?
+time[T], transition[SI, QI, SO, QO, D], ~universal[QI] :: #exists(T), move(T, SI, QI, SO, QO, D)?
 time[T], transition[SI, QI, SO, QO, D],  universal[QI] :: #forall(T), move(T, SI, QI, SO, QO, D)?
-time[T], symb[S], universal[QI] :: #exist(T), cheat(T, S, QI)?
+time[T], symb[S], universal[QI] :: #exists(T), cheat(T, S, QI)?
 
 %%%%%%%%%%%% exist choice %%%%%%%%%%%%
 time[T], type[QI], symb[SI], QI!=0, ~universal[QI] :: move(T, SI, QI, SO, QO, D) : transition[SI, QI, SO, QO, D].

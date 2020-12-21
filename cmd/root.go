@@ -49,7 +49,7 @@ The SAT Programming System Bule
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if versionFlag {
-			fmt.Println("Bule Version 2.9. Copyright Valentin Mayer-Eichberger & Sebastian Jurkowski, 16.12.2020")
+			fmt.Println("Bule Version 2.10. Copyright Valentin Mayer-Eichberger & Sebastian Jurkowski, 20.12.2020")
 			return
 		}
 	},
@@ -103,9 +103,9 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintf(os.Stderr, "<using config. file '%s'>\n", viper.ConfigFileUsed())
+		//fmt.Fprintf(os.Stderr, "<using config. file '%s'>\n", viper.ConfigFileUsed())
+		debug(2, "using config file", viper.ConfigFileUsed())
 	}
-
 }
 
 func debug(level int, s ...interface{}) {

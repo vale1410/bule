@@ -15,16 +15,17 @@
 %%  q=4, c=6. r=7. d=c*r. %%  > black win!
 %%  q=4, c=7. r=6. d=c*r. %%  > original! black win!
 
-%% %% easy
-%% #const q=2.
-%% #const c=2. 
-%% #const r=2. 
-%% #const d=2. 
+%% easy
+#const q=2.
+#const c=2. 
+#const r=2. 
+#const d=2. 
 
-#const q=4.
-#const c=7. 
-#const r=6. 
-#const d=42. 
+%%  #const q=4.
+%%  #const c=7. 
+%%  #const r=6. 
+%%  #const d=42. 
+
 %#const d=c*r.
 %#const d=2*((c*r+1)/2)-1. 
 
@@ -52,24 +53,21 @@ domC[C], domC[I], 2**(I-1) <= c  ::  chooseC[C,I-1,((C-1)/(2**(I-1)))#mod2].
 chooseC[_,I,_]  ::  bitC[I]. 
 
 % game is still running ? 
-domT[T]                               ::  #exist(T-1) , time(T)? 
-
+#exists(T-1), domT[T]  :: time(T)? 
 % black chooses bit of column 
-bitC[I], turn[T,black]          ::  #exist(T), moveL(I,T)? 
+#exists(T), bitC[I], turn[T,black] :: moveL(I,T)? 
 % white chooses bit of column 
-bitC[I], turn[T,white]          ::  #forall(T), moveL(I,T)?
-
+#forall(T), bitC[I], turn[T,white] :: moveL(I,T)?
 % player chooses column 
-turn[T,A], domC[C]                    ::  #exist(T) , move(A,C,T)?    
-
+#exists(T), turn[T,A], domC[C]     :: move(A,C,T)?    
 % in cell C,R there is a stone
-%domC[C], domR0[R], domT0[T], R <= T   ::  #exist(T) , occupied(C,R,T)? 
-domC[C], domR0[R], domT0[T]           ::  #exist(T) , occupied(C,R,T)? 
+%domC[C], domR0[R], domT0[T], R <= T   ::  #exists(T) , occupied(C,R,T)? 
 
-dom[C,R]                              ::  #exist(d) , board(C,R)?
-dom[C,R], C+(q-1)<=c, R<=r            ::  #exist(d) , winO(C,R,1)?
-dom[C,R], C<=c , R+(q-1)<=r           ::  #exist(d) , winO(C,R,0)?
-dom[C,R], dir[Z], C+q-1<=c,R+q-1<=r   ::  #exist(d) , winD(C,R,Z)?
+#exists(T), domC[C], domR0[R], domT0[T] :: occupied(C,R,T)? 
+#exists(d), dom[C,R]                              :: board(C,R)?
+#exists(d), dom[C,R], C+(q-1)<=c, R<=r            :: winO(C,R,1)?
+#exists(d), dom[C,R], C<=c , R+(q-1)<=r           :: winO(C,R,0)?
+#exists(d), dom[C,R], dir[Z], C+q-1<=c,R+q-1<=r   :: winD(C,R,Z)?
 
 ~time(T+1), time(T).
 %% white[A], turn[T,A]  ::  ~time(T), time(T+1). %% Dont stop game at whites turn; optional

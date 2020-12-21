@@ -12,19 +12,21 @@ type Program struct {
 	Constants map[string]string
 
 	// grounding stuff, backups, hashmaps
-	FinishCollectingFacts map[Predicate]bool
-	PredicateToTuples     map[Predicate][][]string // Contains a slice for all tuples for predicate
-	PredicateTupleMap     map[string]bool          // hashmap that contains all positive and negative ground atoms in the program
 	PredicateToArity      map[Predicate]int        //
 	PredicateExplicit     map[Predicate]bool       // If there is a explicit quantification for predicate
+	FinishCollectingFacts map[Predicate]bool       // True if no more rules with that predicate in in the head.
+	PredicateToTuples     map[Predicate][][]string // Contains a slice of all tuples
+	PredicateTupleMap     map[string]bool          // hashmap that contains all positive and negative ground atoms in the program
 
 	// handle string terms
+	// String terms are replaced by integers.
+	// These two mappings are the bijective mapping from integers to these strings:
 	String2IntId map[string]int // StringReplacement
 	IntId2String map[int]string // StringReplacement
 
 	//Quantification
 	Alternation [][]Literal
-	existQ      map[int][]Literal
+	existsQ     map[int][]Literal
 	forallQ     map[int][]Literal
 }
 
@@ -372,7 +374,7 @@ func (p *Program) CheckNoExplicitDeclarationAndNonGroundExplicit() error {
 					"Every explicit literal should be ground now!",
 				}
 			}
-			if l.Name.String() == "#exist" || l.Name.String() == "#forall" {
+			if l.Name.String() == "#exists" || l.Name.String() == "#forall" {
 				return LiteralError{
 					*l,
 					r,
@@ -530,7 +532,7 @@ func (p *Program) PrintQuantification() {
 	}
 }
 
-// Translates forallQ and existQ into quantification
+// Translates forallQ and existsQ into quantification
 func (p *Program) MergeConsecutiveQuantificationLevels() {
 
 	maxIndex := -1
@@ -540,7 +542,7 @@ func (p *Program) MergeConsecutiveQuantificationLevels() {
 			maxIndex = k
 		}
 	}
-	for k := range p.existQ {
+	for k := range p.existsQ {
 		if maxIndex < k {
 			maxIndex = k
 		}
@@ -560,7 +562,7 @@ func (p *Program) MergeConsecutiveQuantificationLevels() {
 				acc = atoms
 			}
 		}
-		if atoms, ok := p.existQ[i]; ok {
+		if atoms, ok := p.existsQ[i]; ok {
 			if last == "e" {
 				acc = append(acc, atoms...)
 			} else {

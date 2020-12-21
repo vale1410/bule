@@ -151,7 +151,7 @@ func stage1GeneratorsAndFacts(p *bule.Program) {
 		stage(p, &changed,
 			p.InstantiateAndRemoveFactFromGenerator,
 			"InstantiateAndRemoveFactFromGenerator",
-			"Example: a fact p(T1,T2) with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
+			"Example: a fact p[T1,T2] with tuples (v11,v12)..(vn2,vn1) occurs in clause, expand clause with (T1 == v11, T2 == v12).")
 
 		stage(p, &changed,
 			p.ConstraintSimplification,
@@ -168,6 +168,11 @@ func stage1GeneratorsAndFacts(p *bule.Program) {
 			"RemoveNegatedGroundGenerator",
 			"~p[1,2]=> q(1,2) and p[1,2] is a fact, then remove from generators!")
 	}
+
+	stage(p, &changed,
+		p.CollectExplicitTupleDefinitions,
+		"CollectExplicitTupleDefinitions.",
+		"#exists[3] :: p(1,2)? %% Then remove this rule.")
 
 	stage(p, &changed,
 		p.RemoveRulesWithGenerators,
@@ -192,12 +197,6 @@ func stage2Iterators(p *bule.Program) {
 		stage(p, &changed,
 			p.InstantiateAndRemoveFactFromIterator,
 			"InstantiateAndRemoveFactFromIterator", "")
-
-		// Can this be omitted ? All tests run through successfully
-///		stage(p, &changed,
-///			p.ConstraintSimplification,
-///			"ConstraintSimplification.",
-///			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
 
 		stage(p, &changed,
 			p.CleanIteratorFromGroundBoolExpressions,
@@ -229,11 +228,6 @@ func stage3Clauses(p *bule.Program) {
 	}
 
 	changed := true
-	stage(p, &changed,
-		p.CollectExplicitTupleDefinitions,
-		"CollectExplicitTupleDefinitions.",
-		"#exist(3), p(1,2)? %% Then remove this rule.")
-
 	round := 0
 	for changed {
 		debug(2, "Stage 3 iteration; round: ", round)

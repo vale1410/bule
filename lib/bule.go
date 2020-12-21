@@ -310,6 +310,7 @@ func (p *Program) RemoveRulesWithNegatedGroundGenerator() (changed bool, err err
 }
 
 // A fact is fully collected if it does not occur as a head in any rule.
+// Exception is #exist and #forall
 func (p *Program) FindFactsThatAreFullyCollected() (changed bool, err error) {
 	existInHead := make(map[Predicate]bool)
 	for _, r := range p.Rules {
@@ -319,7 +320,7 @@ func (p *Program) FindFactsThatAreFullyCollected() (changed bool, err error) {
 		}
 	}
 	for key, value := range p.FinishCollectingFacts {
-		if !value && !existInHead[key] {
+		if !value && !existInHead[key] && key != "#exists" && key != "#forall" {
 			p.FinishCollectingFacts[key] = true
 			changed = true
 		}
@@ -674,60 +675,73 @@ func (rule *Rule) Simplify(assignment map[string]string) (bool, error) {
 }
 
 // Check if rule contains #exist or #forall literal!
-// At this version of BULE it has to have exactly 2 literals, be ground, and have question mark!
+// At version 3.0 of BULE, a definition rule has to have exactly 1 literal in the generator,
+// 1 literal be ground, and have question mark!
 // Then take literal and add tuple and add to quantification level
-
 func (p *Program) CollectExplicitTupleDefinitions() (bool, error) {
 	p.forallQ = make(map[int][]Literal)
-	p.existQ = make(map[int][]Literal)
+	p.existsQ = make(map[int][]Literal)
 	p.PredicateExplicit = make(map[Predicate]bool)
 
 	check := func(r Rule) bool {
 		if r.IsQuestionMark == true {
 			return true
 		}
-		//for _, l := range r.Literals {
-		//	if l.Name == "#exist" || l.Name == "#forall" {
-		//		return true
-		//	}
-		//}
+		for _, l := range r.Generators {
+			if l.Name == "#exists" || l.Name == "#forall" {
+				return true
+			}
+		}
 		return false
 	}
 
 	transform := func(rule Rule) ([]Rule, error) {
-		//if !rule.IsQuestionMark {
-		//	return []Rule{}, RuleError{
-		//		R:       rule,
-		//		Message: "Must have questions mark!",
-		//		Err:     nil,
-		//	}
-		//}
+		if !rule.IsQuestionMark {
+			return []Rule{}, RuleError{
+				R:       rule,
+				Message: "Variable declaration (with #exists or #forall) must have questions mark.",
+				Err:     nil,
+			}
+		}
+
 		if !rule.IsGround() {
 			return []Rule{}, RuleError{
 				R:       rule,
-				Message: "Must be ground when explicit collection takes place!",
+				Message: "Must be ground when variable declaration is called!",
 				Err:     nil,
 			}
 		}
-		if len(rule.Literals) != 2 &&
-			(rule.Literals[0].Name == "#exist" || rule.Literals[0].Name == "#forall") {
+
+		if len(rule.Literals) != 1 || len(rule.Generators) != 1 {
 			return []Rule{}, RuleError{
 				R:       rule,
-				Message: "The clause must have exactly 2 literals (first is quantifier of exist or forall, second literal)!",
+				Message: "Wrong structure of rule: The definition of #exists (or #forall) must follow the structure: #exists[..], <constraints> :: newVariable(...)?. ",
 				Err:     nil,
 			}
 		}
-		err := p.InsertLiteralTuple(rule.Literals[1])
+
+		newVariable := rule.Literals[0]
+		quantification := rule.Generators[0]
+		p.PredicateExplicit[newVariable.Name] = true
+
+		if !(rule.Generators[0].Name == "#exists" || rule.Generators[0].Name == "#forall") {
+			return []Rule{}, RuleError{
+				R:       rule,
+				Message: "First generator needs to be #exists or #forall!",
+				Err:     nil,
+			}
+		}
+
+
+		err := p.InsertLiteralTuple(newVariable)
 		if err != nil {
 			err = LiteralError{
-				L:       rule.Literals[1],
+				L:       rule.Literals[0],
 				R:       rule,
 				Message: fmt.Sprintf("Could not insert tuple into db. %v", err),
 			}
 		}
 
-		p.PredicateExplicit[rule.Literals[1].Name] = true
-		quantification := rule.Literals[0]
 		if len(quantification.Terms) != 1 {
 			return []Rule{}, LiteralError{
 				L:       quantification,
@@ -735,6 +749,7 @@ func (p *Program) CollectExplicitTupleDefinitions() (bool, error) {
 				Message: fmt.Sprintf("Wrong arity %v, should be 1", len(quantification.Terms)),
 			}
 		}
+
 		val, err := evaluateTermExpression(quantification.Terms[0].String())
 		if err != nil {
 			return []Rule{}, LiteralError{
@@ -745,11 +760,11 @@ func (p *Program) CollectExplicitTupleDefinitions() (bool, error) {
 		}
 		switch quantification.Name {
 		case "#forall":
-			p.forallQ[val] = append(p.forallQ[val], rule.Literals[1])
-		case "#exist":
-			p.existQ[val] = append(p.existQ[val], rule.Literals[1])
+			p.forallQ[val] = append(p.forallQ[val], newVariable)
+		case "#exists":
+			p.existsQ[val] = append(p.existsQ[val], newVariable)
 		default:
-			err = fmt.Errorf("First literal in clause must be #forall or #exist. %v", rule)
+			err = fmt.Errorf("first literal in clause must be #forall or #exists %v", rule)
 		}
 
 		return []Rule{}, err
@@ -828,7 +843,7 @@ func (p *Program) RemoveClausesWithTuplesThatDontExist() (bool, error) {
 func (p *Program) ExtractQuantors() {
 
 	p.forallQ = make(map[int][]Literal)
-	p.existQ = make(map[int][]Literal)
+	p.existsQ = make(map[int][]Literal)
 
 	checkA := func(r Rule) bool {
 
@@ -838,22 +853,22 @@ func (p *Program) ExtractQuantors() {
 	transformA := func(rule Rule) (remove []Rule, err error) {
 		lit := rule.Literals[0]
 		asserts(len(lit.Terms) == 1, "Wrong arity for forall")
-		val, err := strconv.Atoi(string(lit.Terms[0].String()))
+		val, err := strconv.Atoi(lit.Terms[0].String())
 		asserte(err)
 		p.forallQ[val] = append(p.forallQ[val], rule.Literals[1:]...)
 		return
 	}
 
 	checkE := func(r Rule) bool {
-		return len(r.Literals) > 0 && r.Literals[0].Name == "#exist"
+		return len(r.Literals) > 0 && r.Literals[0].Name == "#exists"
 	}
 
 	transformE := func(rule Rule) (remove []Rule, err error) {
 		lit := rule.Literals[0]
-		asserts(len(lit.Terms) == 1, "Wrong arity for exist")
-		val, err := strconv.Atoi(string(lit.Terms[0].String()))
+		asserts(len(lit.Terms) == 1, "Wrong arity for exists")
+		val, err := strconv.Atoi(lit.Terms[0].String())
 		asserte(err)
-		p.existQ[val] = append(p.existQ[val], rule.Literals[1:]...)
+		p.existsQ[val] = append(p.existsQ[val], rule.Literals[1:]...)
 		return
 	}
 
@@ -946,14 +961,9 @@ func assign(term Term, assignment map[string]string) (Term, bool, error) {
 	return Term(output), term.String() != output, nil
 }
 
-func number(s string) bool {
-	_, err := strconv.Atoi(s)
-	return err == nil
-}
-
 func groundMathExpression(s string) bool {
 	//	r, _ := regexp.MatchString("[0-9+*/%]+", s)
-	return "" == strings.Trim(string(s), "0123456789+*%-/()")
+	return "" == strings.Trim(s, "0123456789+*%-/()")
 }
 
 // Evaluates a ground math expression, needs to path mathExpression

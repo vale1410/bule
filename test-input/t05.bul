@@ -3,5 +3,5 @@ q[1..2,1..3].
 
 r[0]. 
 q[X,_] :: r[X].
-r[A]   :: #exist(A), b(A)?
+#exists[A], r[A] :: b(A)?
 
