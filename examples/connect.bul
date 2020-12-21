@@ -63,11 +63,11 @@ chooseC[_,I,_]  ::  bitC[I].
 % in cell C,R there is a stone
 %domC[C], domR0[R], domT0[T], R <= T   ::  #exists(T) , occupied(C,R,T)? 
 
-#exists(T), domC[C], domR0[R], domT0[T] :: occupied(C,R,T)? 
-#exists(d), dom[C,R]                              :: board(C,R)?
-#exists(d), dom[C,R], C+(q-1)<=c, R<=r            :: winO(C,R,1)?
-#exists(d), dom[C,R], C<=c , R+(q-1)<=r           :: winO(C,R,0)?
-#exists(d), dom[C,R], dir[Z], C+q-1<=c,R+q-1<=r   :: winD(C,R,Z)?
+#exists[T], domC[C], domR0[R], domT0[T] :: occupied(C,R,T)?
+#exists[d], dom[C,R]                              :: board(C,R)?
+#exists[d], dom[C,R], C+(q-1)<=c, R<=r            :: winO(C,R,1)?
+#exists[d], dom[C,R], C<=c , R+(q-1)<=r           :: winO(C,R,0)?
+#exists[d], dom[C,R], dir[Z], C+q-1<=c,R+q-1<=r   :: winD(C,R,Z)?
 
 ~time(T+1), time(T).
 %% white[A], turn[T,A]  ::  ~time(T), time(T+1). %% Dont stop game at whites turn; optional
