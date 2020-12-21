@@ -23,7 +23,7 @@ output[5]=UNSAT
 
 for i in $(seq 1 5)
 do 
-    r=$(bule ground examples/connect3.bul --const=$input[$i] | depqbf)
+    r=$(bule ground examples/connect.bul --const=$input[$i] | depqbf)
 
     if [[ $r == $output[$i] ]]
     then 
