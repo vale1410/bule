@@ -22,7 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -48,10 +47,6 @@ The SAT Programming System Bule
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if versionFlag {
-			fmt.Println("Bule Version 2.10. Copyright Valentin Mayer-Eichberger & Sebastian Jurkowski, 20.12.2020")
-			return
-		}
 	},
 }
 

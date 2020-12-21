@@ -52,18 +52,18 @@ func IdGenerator(m int) (g Gen) {
 
 func (g *Gen) refresh() {
 	g.mapping = make(map[string]int)
-	g.idMap = make([]Atom, *glob.First_aux_id_flag)
-	g.nextId = *glob.First_aux_id_flag - 1
+	g.idMap = make([]Atom, glob.First_aux_id_flag)
+	g.nextId = glob.First_aux_id_flag - 1
 }
 
 func (g *Gen) putAtom(a Atom) {
 	if _, b := g.mapping[a.Id()]; !b {
 		succ := false
-		if *glob.Infer_var_ids {
+		if glob.Infer_var_ids {
 			id, err := strconv.Atoi(strings.TrimLeft(a.Id(), "v"))
 			v := strings.TrimRight(a.Id(), "0123456789")
 			if v == "v" && err == nil {
-				glob.A(*glob.First_aux_id_flag > id, "Inferred number ID if higher than First_aux_id. Use values for first_aux  that a larger than id in all variables v<id>.")
+				glob.A(glob.First_aux_id_flag > id, "Inferred number ID if higher than First_aux_id. Use values for first_aux  that a larger than id in all variables v<id>.")
 				succ = true
 				g.mapping[a.Id()] = id
 				g.idMap[id] = a
@@ -118,7 +118,7 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, nextOpt int64, lb int64) (resul
 	timeout := make(chan bool, 1)
 
 	go func() {
-		time.Sleep(time.Duration(*glob.Timeout_flag) * time.Second)
+		time.Sleep(time.Duration(glob.Timeout_flag) * time.Second)
 		timeout <- true
 	}()
 
@@ -155,7 +155,7 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, nextOpt int64, lb int64) (resul
 		}
 		time_before := time.Now()
 
-		if *glob.Cnf_tmp_flag != "" {
+		if glob.Cnf_tmp_flag != "" {
 			g.PrintDIMACS(current, false)
 		}
 		go g.solveProblem(current, result_chan)
@@ -265,20 +265,20 @@ func (g *Gen) Solve(cs ClauseSet, opt Optimizer, nextOpt int64, lb int64) (resul
 
 	//	fmt.Printf("cTIME: %.3f s\n", time.Since(time_total).Seconds())
 	//	fmt.Printf("%v;%v;%v;%v;%v;%v;%v;%.2f;%v;%v;%v\n", "name", "seed", "Amo_chain", "Amo_reuse", "Rewrite_same", "result.M", "maxS(result.Value)", "time ins", "iterations", "cs.Size()", "current.Size()-cs.Size()")
-	//	fmt.Printf("%v;%v;%v;%v;%v;%v;%v;%.2f;%v;%v;%v\n", *glob.Filename_flag, *glob.Seed_flag, *glob.Amo_chain_flag, *glob.Amo_reuse_flag, *glob.Rewrite_same_flag, result.M, maxS(result.Value), time.Since(time_total).Seconds(), iterations, cs.Size(), current.Size()-cs.Size())
-	fmt.Printf("%v;%v;%v;%.2f\n", *glob.Filename_flag, result.M, maxS(result.Value), time.Since(time_total).Seconds())
+	//	fmt.Printf("%v;%v;%v;%v;%v;%v;%v;%.2f;%v;%v;%v\n", glob.Filename_flag, glob.Seed_flag, glob.Amo_chain_flag, glob.Amo_reuse_flag, glob.Rewrite_same_flag, result.M, maxS(result.Value), time.Since(time_total).Seconds(), iterations, cs.Size(), current.Size()-cs.Size())
+	fmt.Printf("%v;%v;%v;%.2f\n", glob.Filename_flag, result.M, maxS(result.Value), time.Since(time_total).Seconds())
 
 	return
 }
 
 func nextOptValue(lb int64, result *Result) (finished bool, nextOpt int64) {
-	switch *glob.Search_strategy_flag {
+	switch glob.Search_strategy_flag {
 	case "iterative":
 		finished, nextOpt = nextOptIterative(lb, result)
 	case "binary":
 		finished, nextOpt = nextOptBinary(lb, result)
 	default:
-		glob.A(false, "Search strategy not implemented", *glob.Search_strategy_flag)
+		glob.A(false, "Search strategy not implemented", glob.Search_strategy_flag)
 	}
 	return
 }
@@ -374,10 +374,10 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 
 	var solver *exec.Cmd
 
-	switch *glob.Solver_flag {
+	switch glob.Solver_flag {
 	case "minisat":
 		//solver = exec.Command("minisat", "-rnd-seed=123")
-		//solver = exec.Command("minisat", "-rnd-seed="+strconv.FormatInt(*glob.Seed_flag, 10))
+		//solver = exec.Command("minisat", "-rnd-seed="+strconv.FormatInt(glob.Seed_flag, 10))
 		solver = exec.Command("minisat")
 	case "glucose":
 		solver = exec.Command("glucose", "-model")
@@ -390,15 +390,15 @@ func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 	case "plingeling":
 		solver = exec.Command("plingeling")
 	case "dimetheus":
-		solver = exec.Command("dimetheus", "-seed="+strconv.FormatInt(*glob.Seed_flag, 10))
+		solver = exec.Command("dimetheus", "-seed="+strconv.FormatInt(glob.Seed_flag, 10))
 	case "cmsat":
 		solver = exec.Command("cmsat")
 	case "local":
-		solver = exec.Command("CCAnr", strconv.FormatInt(*glob.Seed_flag, 10))
+		solver = exec.Command("CCAnr", strconv.FormatInt(glob.Seed_flag, 10))
 	case "microsat":
 		solver = exec.Command("microsat")
 	default:
-		glob.A(false, "Solver not available", *glob.Solver_flag)
+		glob.A(false, "Solver not available", glob.Solver_flag)
 	}
 
 	stdin, err := solver.StdinPipe()
@@ -498,8 +498,8 @@ func (g *Gen) PrintDIMACS(cs ClauseSet, inferPrimeVars bool) {
 
 	var out io.Writer
 
-	if *glob.Cnf_tmp_flag != "" {
-		file, err := os.Create(*glob.Cnf_tmp_flag)
+	if glob.Cnf_tmp_flag != "" {
+		file, err := os.Create(glob.Cnf_tmp_flag)
 		if err != nil {
 			panic(err)
 		}
@@ -513,7 +513,7 @@ func (g *Gen) PrintDIMACS(cs ClauseSet, inferPrimeVars bool) {
 		out = os.Stdout
 	}
 
-	if !*glob.Infer_var_ids {
+	if !glob.Infer_var_ids {
 		fmt.Fprintf(out, "p cnf %d %d\n", g.nextId, len(cs.list))
 	}
 

@@ -68,7 +68,7 @@ func (node Node) Print() {
 func Init() (b MddStore) {
 	b.Nodes = make([]*Node, 2)
 	b.store = make(map[string]int, 2)
-	b.MaxNodes = *glob.MDD_max_flag
+	b.MaxNodes = glob.MDD_max_flag
 	b.Nodes[0] = &Node{Id: 0, Level: 0} // id 0
 	b.Nodes[1] = &Node{Id: 1, Level: 0} // id 1
 	b.store[b.Nodes[0].str()] = 0

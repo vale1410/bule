@@ -10,8 +10,8 @@ func Init() {
 }
 
 func D(arg ...interface{}) {
-	if *Debug_flag {
-		if *Debug_filename == "" {
+	if Debug_flag {
+		if Debug_filename == "" {
 			for _, s := range arg {
 				fmt.Print(s, " ")
 			}

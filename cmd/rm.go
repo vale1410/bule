@@ -87,7 +87,7 @@ var rmCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(rmCmd)
-	rmCmd.Flags().BoolVarP(&purge, "purge", "", false, "Remove ALL avaialble solver instances.")
+	rmCmd.Flags().BoolVarP(&purge, "purge", "", false, "Remove ALL available solvers.")
 	rmCmd.Flags().BoolVarP(&rmsat, "SAT", "", false, "Remove a particular SAT instance.")
 	rmCmd.Flags().BoolVarP(&rmqbf, "QBF", "", false, "Remove a particular QBF instance.")
 }

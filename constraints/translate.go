@@ -153,7 +153,7 @@ func (pb *Threshold) TranslateComplexThreshold() {
 	pb.SortDescending()
 
 	var err error
-	switch *glob.Complex_flag {
+	switch glob.Complex_flag {
 	case "mdd":
 		pb.Print10()
 		pb.TranslateByMDD()
@@ -187,7 +187,7 @@ func (pb *Threshold) TranslateComplexThreshold() {
 			pb.TransTyp = CSN
 		}
 	default:
-		panic("Complex_flag option not available: " + *glob.Complex_flag)
+		panic("Complex_flag option not available: " + glob.Complex_flag)
 	}
 
 	glob.A(pb.Clauses.Size() > 0, pb.Id, " non-trivial pb should produce some clauses...")

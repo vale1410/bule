@@ -33,7 +33,7 @@ var (
 	quantificationFlag bool
 	withFactsFlag      bool
 	textualFlag        bool
-	constStringMap     map[string]int
+	constStringMapFlag map[string]int
 )
 
 // groundCmd represents the ground command
@@ -69,7 +69,7 @@ bule ground <program.bul> [options].
 }
 
 func stage0Prerequisites(p *bule.Program) {
-	for key, val := range constStringMap {
+	for key, val := range constStringMapFlag {
 		p.Constants[key] = strconv.Itoa(val)
 	}
 
@@ -356,5 +356,5 @@ func init() {
 	groundCmd.PersistentFlags().BoolVarP(&textualFlag, "text", "t", false, "true: print grounded textual bule format. false: print dimacs format for QBF and SAT solvers.")
 	groundCmd.PersistentFlags().BoolVarP(&printInfoFlag, "info", "i", true, "Print all units as well.")
 	groundCmd.PersistentFlags().BoolVarP(&unitPropagationFlag, "up", "u", true, "Perform Unitpropagation.")
-	groundCmd.PersistentFlags().StringToIntVarP(&constStringMap, "const", "c", map[string]int{}, "Comma separated list of constant instantiations: c=d.")
+	groundCmd.PersistentFlags().StringToIntVarP(&constStringMapFlag, "const", "c", map[string]int{}, "Comma separated list of constant instantiations: c=d.")
 }

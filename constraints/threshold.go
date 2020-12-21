@@ -117,12 +117,12 @@ func (pb *Threshold) RewriteSameWeights() {
 		if last == x.Weight {
 			es = append(es, entries[i])
 		} else {
-			if len(es) >= *glob.Len_rewrite_same_flag {
+			if len(es) >= glob.Len_rewrite_same_flag {
 				rewrite++
 				var most int
 				if pb.Typ == OPT {
-					if *glob.Opt_bound_flag >= 0 {
-						most = int(min(int64(len(es)), int64(math.Floor(float64(*glob.Opt_bound_flag)/float64(last)))))
+					if glob.Opt_bound_flag >= 0 {
+						most = int(min(int64(len(es)), int64(math.Floor(float64(glob.Opt_bound_flag)/float64(last)))))
 					} else {
 						most = len(es)
 					}
@@ -158,13 +158,13 @@ func (pb *Threshold) RewriteSameWeights() {
 		}
 		last = x.Weight
 	}
-	if len(es) >= *glob.Len_rewrite_same_flag {
+	if len(es) >= glob.Len_rewrite_same_flag {
 		rewrite++
 		var most int
 		if pb.Typ == OPT {
-			if *glob.Opt_bound_flag != math.MaxInt64 {
-				//		glob.D(pb.Id, "Check", *glob.Opt_bound_flag+pb.Offset)
-				most = int(min(int64(len(es)), int64(math.Floor(float64(*glob.Opt_bound_flag+pb.Offset)/float64(last)))))
+			if glob.Opt_bound_flag != math.MaxInt64 {
+				//		glob.D(pb.Id, "Check", glob.Opt_bound_flag+pb.Offset)
+				most = int(min(int64(len(es)), int64(math.Floor(float64(glob.Opt_bound_flag+pb.Offset)/float64(last)))))
 			} else {
 				most = len(es)
 			}

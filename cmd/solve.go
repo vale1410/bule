@@ -52,7 +52,7 @@ var (
 // solveCmd represents the solve command
 var solveCmd = &cobra.Command{
 	Use:   "solve",
-	Short: "Grounds the bule formula and passes it to a solver instance, then it outputs a model if it exists. ",
+	Short: "Grounds the bule formula and passes it to a solver instance, then it outputs a model if it exists.",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command.
 `,
@@ -62,6 +62,7 @@ and usage of using your command.
 	// 	}
 	// 	return []string{"foo", "bar", "baz"}, cobra.ShellCompDirectiveNoFileComp
 	// },
+
 	ValidArgsFunction: autoCompleteBuleFiles,
 	Run: func(cmd *cobra.Command, args []string) {
 
