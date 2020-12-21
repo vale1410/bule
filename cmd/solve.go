@@ -35,7 +35,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	bule "github.com/vale1410/bule/lib"
+	bule "github.com/vale1410/bule/grounder"
 )
 
 //-----------------------------------------------------------------------------

@@ -28,7 +28,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/vale1410/bule/lib"
+	"github.com/vale1410/bule/grounder"
 
 	"github.com/spf13/cobra"
 )
@@ -102,7 +102,7 @@ func init() {
 
 // This translate from a grounded Bule program to clause representation
 // Assuming the program is ground!!!
-func translateFromRuleProgram(program lib.Program, units map[string]bool) (p ClauseProgram) {
+func translateFromRuleProgram(program grounder.Program, units map[string]bool) (p ClauseProgram) {
 	p.units = units
 	for _, r := range program.Rules {
 		if len(r.Literals) == 1 {

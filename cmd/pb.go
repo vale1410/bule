@@ -22,8 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +32,9 @@ var pbCmd = &cobra.Command{
 	Long: `This is essentially the Pseudo Boolean Solver Bule 1.0.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("pb called")
+
+
+
 	},
 }
 

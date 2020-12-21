@@ -26,7 +26,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/vale1410/bule/lib"
+	"github.com/vale1410/bule/grounder"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -109,5 +109,5 @@ func initConfig() {
 }
 
 func debug(level int, s ...interface{}) {
-	lib.Debug(level, s...)
+	grounder.Debug(level, s...)
 }
