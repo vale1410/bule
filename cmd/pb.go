@@ -42,7 +42,6 @@ var pbCmd = &cobra.Command{
 	Long: `This is essentially the Pseudo Boolean Solver Bule 1.0.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		//		glob.Init()
 
 		if len(args) >= 2 {
 			fmt.Println("Command line flags not recognized", flag.Args())

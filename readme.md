@@ -17,6 +17,44 @@ Bule provides a front end for various SAT technologies.
 * Multiple cardinality encodings
 * Full Pseudo Boolean Translations to CNF
 
+## Introductory Example
+
+The syntax of Bule aims to be easy to understand and straight forward. 
+The roots lie in the syntax of Prolog and lparse (Answer Set Programming). 
+
+Let’s start with a simple example: 
+```prolog
+p, q.
+```
+
+Each line is a clause and p and q are 0-arity predicates. 
+Bule can ground this to DIMACS format: 
+
+
+``` 
+>>> bule ground prog.bul
+p cnf 2 1
+1 2 0
+```
+
+You can also let bule solve the problem: 
+
+```
+>>> bule solve prob.bul
+...
+-------- Solver output end -----
+s SAT
+--------
+~p.
+q.
+--------
+```
+
+The solution is given as one assignment to the problem. 
+
+Let’s do this with a slightly more interesting program in QBF:
+
+
 ## Basic Configuration For SAT and QBF
 
 Now you can now add SAT and QBF solvers to the configuration of bule and solve your formulas with them!
