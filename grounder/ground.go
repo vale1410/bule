@@ -919,7 +919,28 @@ func (constraint *Constraint) GroundBoolExpression() (isGround bool, result bool
 	if !isGround {
 		return
 	}
-	result = evaluateBoolExpression(constraint.String())
+	left, errL := evaluateTermExpression(string(constraint.LeftTerm))
+	if errL != nil {
+		panic(errL)
+	}
+	right, errR := evaluateTermExpression(string(constraint.RightTerm))
+	if errR != nil {
+		panic(errL)
+	}
+	switch constraint.Comparison {
+	case tokenComparisonLT: // <
+		result = left < right
+	case tokenComparisonGT: // >
+		result = left > right
+	case tokenComparisonLE: // <=
+		result = left <= right
+	case tokenComparisonGE: // >=
+		result = left >= right
+	case tokenComparisonEQ: // ==
+		result = left == right
+	case tokenComparisonNQ: // !=
+		result = left != right
+	}
 	return
 }
 
@@ -965,15 +986,16 @@ func groundMathExpression(s string) bool {
 	return "" == strings.Trim(s, "0123456789+*%-/()")
 }
 
-// Evaluates a ground math expression, needs to path mathExpression
-func evaluateBoolExpression(termComparison string) bool {
-	//	termComparison = strings.ReplaceAll(termComparison, "#mod", "%")
-	expression, err := govaluate.NewEvaluableExpression(termComparison)
-	assertx(err, termComparison)
-	result, err := expression.Evaluate(nil)
-	assertx(err, termComparison)
-	return result.(bool)
-}
+// TODO REMOVE
+//// Evaluates a ground math expression, needs to path mathExpression
+//func evaluateBoolExpression(termComparison string) bool {
+//	//	termComparison = strings.ReplaceAll(termComparison, "#mod", "%")
+//	expression, err := govaluate.NewEvaluableExpression(termComparison)
+//	assertx(err, termComparison)
+//	result, err := expression.Evaluate(nil)
+//	assertx(err, termComparison)
+//	return result.(bool)
+//}
 
 // Evaluates a ground math expression, needs to path mathExpression
 func evaluateTermExpression(termExpression string) (int, error) {
