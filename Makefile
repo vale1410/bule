@@ -1,3 +1,5 @@
+
+
 build:
 	go build main.go
 	mv main bule 
@@ -10,7 +12,7 @@ release: build
 	mkdir release
 	env GOOS=linux GOARCH=amd64 go build main.go
 	mv main release/bule_x64
-	go build main.go
+	env GOOS=darwin GOARCH=amd64 go build main.go
 	mv main release/bule_mac64
 	env GOOS=windows GOARCH=amd64 go build main.go
 	mv main.exe release/bule_win64.exe
