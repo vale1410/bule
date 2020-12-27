@@ -72,19 +72,60 @@ func ParseProgramFromStrings(lines []string) (p Program, err error) {
 		}
 
 		acc += s
+
 		if !(strings.HasSuffix(s, ".") || strings.HasSuffix(s, "?")) {
 			continue
 		}
 
-		rule, err := parseRule(acc)
-		if err != nil {
-			return p, fmt.Errorf("Parsing Error in Row %v: %w\n", row, err)
+		// Split into mulitple rules if we use single dot somewhere. E.g. x[1].y[1..3].
+		scanner := bufio.NewScanner(strings.NewReader(acc))
+		scanner.Split(splitBuleRule)
+		var rulesString []string
+		for scanner.Scan() {
+			rulesString = append(rulesString, scanner.Text())
 		}
-		rule.LineNumber = row + 1
-		p.Rules = append(p.Rules, rule)
+
+		for _, tmp := range rulesString {
+			rule, err := parseRule(tmp)
+			if err != nil {
+				return p, fmt.Errorf("Parsing Error in Row %v: %w\n", row, err)
+			}
+			rule.LineNumber = row + 1
+			p.Rules = append(p.Rules, rule)
+		}
 		acc = ""
 	}
 	return p, nil
+}
+
+
+func splitBuleRule(data []byte, atEOF bool) (advance int, token []byte, err error) {
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+	// Scan until space, marking end of word.
+	for width, i := 0, 0; i < len(data); i += width {
+		var r rune
+		r, width = utf8.DecodeRune(data[i:])
+		if r == '.' {
+			if len(data) == i+width { // Last element in data
+				return i + width, data[:i+width], nil
+			} else {
+				r2, width2 := utf8.DecodeRune(data[i+width:])
+				if r2 == '.' {
+					width += width2
+				} else {
+					return i + width, data[:i+width], nil
+				}
+			}
+		}
+	}
+	// If we're at EOF, we have a final, non-empty, non-terminated word. Return it.
+	if atEOF {
+		return len(data), data, nil
+	}
+	// Request more data.
+	return 0, nil, nil
 }
 
 func lexRule(text string) (ts Tokens) {
@@ -831,46 +872,35 @@ func lexConstraintLeft(l *lexer) stateFn {
 	}
 }
 
-//// TODO SPECIAL
-//func lexSpecialFn(l *lexer, fn stateFn) stateFn {
-//	r1 := l.next()
-//	r2 := l.next()
-//	r3 := l.next()
-//	if r1 == 'l' && r2 == 'o' && r3 == 'g' {
-//		l.emit(tokenTermLogarithm)
-//		return fn
-//	} else if r1 == 'm' && r2 == 'o' && r3 == 'd' {
-//		l.emit(tokenTermModulo)
-//		return fn
-//	} else {
-//		return l.errorf("Wrong special function")
-//	}
-//}
-
 func lexConstraintRight(l *lexer) stateFn {
 	for {
 		r := l.next()
 		switch {
 		case r == eof:
-			return l.errorf("%s", "Constraint lexing should not end here.?")
-		case r == '-':
-			if l.next() == '>' {
-				l.backup()
+			return l.errorf("%s", "Constraint lexing should not end here.")
+//		case r == '-':
+//			if l.next() == '>' {
+//				l.backup()
+//				l.backup()
+//				l.emit(token2TermExpression)
+//				return lexRuleElement
+//			} else {
+//				l.backup()
+//			}
+		case r == '.':
+			l.next()
+			rr := l.next()
+			if rr != '.' {
+				continue
+			} else {
 				l.backup()
 				l.emit(token2TermExpression)
 				return lexRuleElement
-			} else {
-				l.backup()
 			}
 		case isTermExpressionFinish(r):
 			l.backup()
 			l.emit(token2TermExpression)
 			return lexRuleElement
-		//case r == '#':// TODO SPECIAL
-		//	l.backup()
-		//	l.emit(token2TermExpression)
-		//	l.next()
-		//	return lexSpecialFn(l, lexConstraintRight)
 		case isTermExpressionRune(r):
 			continue
 		default:
@@ -880,7 +910,7 @@ func lexConstraintRight(l *lexer) stateFn {
 }
 
 func isTermExpressionFinish(r rune) bool {
-	return strings.ContainsRune(",:.=", r)
+	return strings.ContainsRune(",:", r)
 }
 
 func isTermExpressionRune(r rune) bool {

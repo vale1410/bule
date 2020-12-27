@@ -125,11 +125,6 @@ func stage1GeneratorsAndFacts(p *bule.Program) {
 		changed = false
 
 		stage(p, &changed,
-			p.ConstraintSimplification,
-			"Do Fixpoint of TransformConstraintsToInstantiation.",
-			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
-
-		stage(p, &changed,
 			runFixpoint(p.ExpandGroundRanges),
 			"ExpandGroundRanges",
 			"p[1..2]. and also X==1..2, but not Y==A..B.")

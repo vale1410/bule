@@ -282,13 +282,7 @@ func (rule *Rule) String() string {
 		tmp := strings.TrimSuffix(sb.String(), ", ")
 		sb.Reset()
 		sb.WriteString(tmp)
-
-		// WHY this? Can be removed?
-		if len(rule.Literals) == 1 && rule.Literals[0].Fact {
-			sb.WriteString(" -> ") //
-		} else {
-			sb.WriteString(" :: ")
-		}
+		sb.WriteString(" :: ")
 	}
 
 	for _, g := range rule.Iterators {
@@ -422,24 +416,6 @@ func (p *Program) CheckFactsInIterators() error {
 	}
 	return nil
 }
-
-//func (p *Program) TreatZeroArityOfLiterals() error {
-//	// Fix zero arity predicates to a pseudo 1 arity with value 0
-//	for _, r := range p.Rules {
-//		all := r.AllLiterals()
-//		for _, l := range all {
-//			if len(l.Terms) == 0 {
-//				p.ZeroArity[l.Name] = true
-//				l.Terms = []Term{"0"}
-//				if len(all) == 1 {
-//					l.Fact = true
-//
-//				}
-//			}
-//		}
-//	}
-//	return nil
-//}
 
 func (p *Program) CheckArityOfLiterals() error {
 

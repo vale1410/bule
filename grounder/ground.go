@@ -732,7 +732,6 @@ func (p *Program) CollectExplicitTupleDefinitions() (bool, error) {
 			}
 		}
 
-
 		err := p.InsertLiteralTuple(newVariable)
 		if err != nil {
 			err = LiteralError{
