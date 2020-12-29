@@ -1,4 +1,4 @@
-<img src="logo.png" alt="Bule Logo" width="50"/>
+<img src="logo.png" alt="Bule Logo" width="400"/>
 
 # The SAT Programming Language **Bule**
 
