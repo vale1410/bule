@@ -158,11 +158,11 @@ func init() {
 	rootCmd.AddCommand(pbCmd)
 
 	pbCmd.Flags().BoolVarP(&glob.Debug_flag, "debug", "", false, "Print debug information.")
-	pbCmd.Flags().StringVarP(&glob.Debug_filename, "debugFile", "d", "file", "File to output debug information. If empty, then stdout.")
+	pbCmd.Flags().StringVarP(&glob.Debug_filename, "debugFile", "", "", "File to output debug information. If empty, then stdout.")
 	pbCmd.Flags().StringVarP(&glob.Filename_flag, "file", "f", "test.pb", "Path of to PB file.")
 	pbCmd.Flags().StringVarP(&glob.Cnf_tmp_flag, "out", "o", "", "If set: output cnf to this file.")
 	pbCmd.Flags().StringVarP(&glob.Complex_flag, "complex", "", "hybrid", "Solve complex PBs with mdd/sn/hybrid. Default is hybrid")
-	pbCmd.Flags().StringVarP(&glob.Solver_flag, "solver", "", "minisat", "Choose Solver: minisat/clasp/lingeling/glucose/CCandr/cmsat.")
+	pbCmd.Flags().StringVarP(&glob.Solver_flag, "solver", "", "clasp", "Choose Solver: minisat/clasp/lingeling/glucose/CCandr/cmsat.")
 	pbCmd.Flags().StringVarP(&glob.Search_strategy_flag, "search", "", "iterative", "Search objective iterative or binary.")
 	pbCmd.Flags().BoolVarP(&glob.Pbo_flag, "pbo", "", false, "Reformat to pbo format, output to stdout.")
 	pbCmd.Flags().BoolVarP(&glob.Gringo_flag, "gringo", "", false, "Reformat to Gringo format, output to stdout.")
