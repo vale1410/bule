@@ -55,6 +55,8 @@ Let’s do this with a slightly more interesting program in QBF:
 
 ## Basic Configuration For SAT and QBF
 
+
+
 Now you can now add SAT and QBF solvers to the configuration of bule and solve your formulas with them!
 As a start, for QBF add depqbf and caqe and for SAT kissat and cryptominisat to your path. 
 The installation instructions can be found here:  
@@ -63,8 +65,22 @@ The installation instructions can be found here:  
 * https://github.com/msoos/cryptominisat/
 * http://fmv.jku.at/kissat/
 
+### Initialising a configuration of Bule
 
-Now let's add the solvers to the configuration file (usually at `~/.bule.yaml`): 
+An initial empty configuration file can be generated via:
+
+```
+>>> bule add --newconfig
+```
+
+This will generate a `.bule.yaml.` in your current directory. If you want this
+to be used everywhere, just copy it to $HOME.  
+
+This configuration file is empty and need to be filled with life (i.e. SAT and QBF solvers). 
+
+### Adding a Solver to Bule 
+
+Let's add the solvers to the configuration file (usually at `~/.bule.yaml`): 
 
 ```
 >>> bule add depqbf @"--no-dynamic-nenofex --qdo" QBF -l default
