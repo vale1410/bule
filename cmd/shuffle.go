@@ -26,9 +26,10 @@ import (
 )
 
 var (
+	identityFlag      bool
 	polarityFlag      bool
 	clauseShuffleFlag bool
-	seedFlag int64
+	seedFlag          int64
 )
 
 // shuffleCmd represents the shuffle command
@@ -56,6 +57,12 @@ var shuffleCmd = &cobra.Command{
 		for scanner.Scan() {
 
 			s := scanner.Text()
+
+			if seedFlag < 1 || identityFlag { // dont shuffle !
+				fmt.Println(s)
+				continue
+			}
+
 			f := strings.Fields(s)
 
 			if s == "" || strings.HasPrefix(s, "%") || strings.HasPrefix(s, "c") {
@@ -68,7 +75,7 @@ var shuffleCmd = &cobra.Command{
 				perm = rand.Perm(nVars)
 				pol = make([]int, nVars)
 				for i, _ := range pol {
-					pol[i] = 1 - 2*(rand.Int() % 2)
+					pol[i] = 1 - 2*(rand.Int()%2)
 				}
 				fmt.Println(s)
 				continue
@@ -76,7 +83,7 @@ var shuffleCmd = &cobra.Command{
 
 			if strings.HasPrefix(s, "e ") || strings.HasPrefix(s, "a ") {
 				fmt.Print(f[0], " ")
-				for _, x := range f[1:len(f)-1] {
+				for _, x := range f[1 : len(f)-1] {
 					y, _ := strconv.Atoi(x)
 					fmt.Print(perm[y-1]+1, " ")
 				}
@@ -107,7 +114,8 @@ var shuffleCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(shuffleCmd)
+	shuffleCmd.PersistentFlags().BoolVarP(&identityFlag, "no", "", false, "dont shuffle and just pass identiy!")
 	shuffleCmd.PersistentFlags().BoolVarP(&polarityFlag, "polarity", "p", false, "randomly change polarity.")
 	shuffleCmd.PersistentFlags().BoolVarP(&clauseShuffleFlag, "order of clauses", "o", false, "Order sequence of clauses.")
-	shuffleCmd.PersistentFlags().Int64VarP(&seedFlag, "seed", "s", 1, "random seed initializer.")
+	shuffleCmd.PersistentFlags().Int64VarP(&seedFlag, "seed", "s", 0, "random seed initializer. All seed value < 1 is interpreted as identity function (no shuffling)")
 }
