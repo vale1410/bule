@@ -1,0 +1,6 @@
+p[black].
+p[white].
+q(black), r(black).
+q(white), r(white).
+r(black).
+
