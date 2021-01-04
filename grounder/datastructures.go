@@ -201,21 +201,26 @@ func (p *Program) OutputString(literal Literal) string {
 	s += opening
 	// See if integer should be replaced with string for pretty printing
 	for i, x := range literal.Terms {
-		id, err := strconv.Atoi(x.String())
-		if err != nil { // This is not a int
-			s += x.String()
-		} else {
-			if str, ok := p.IntId2String[id]; ok {
-				s += str
-			} else {
-				s += x.String()
-			}
-		}
+		s += p.OutputTermString(x.String())
 		if i < len(literal.Terms)-1 {
 			s += ","
 		}
 	}
 	return s + closing
+}
+
+func (p *Program) OutputTermString(term string) (s string) {
+	id, err := strconv.Atoi(term)
+	if err != nil { // This is not a int
+		s += term
+	} else {
+		if str, ok := p.IntId2String[id]; ok {
+			s += str
+		} else {
+			s += term
+		}
+	}
+	return
 }
 
 func (literal Literal) IdString() string {
@@ -292,6 +297,46 @@ func (rule *Rule) String() string {
 
 	for _, l := range rule.Literals {
 		sb.WriteString(l.IdString())
+		sb.WriteString(", ")
+	}
+	tmp := strings.TrimSuffix(sb.String(), ", ")
+	sb.Reset()
+	sb.WriteString(tmp)
+	if rule.IsQuestionMark {
+		sb.WriteString("?")
+	} else {
+		sb.WriteString(".")
+	}
+	return sb.String()
+}
+func (p *Program) OutputRuleString(rule *Rule) string {
+
+	sb := strings.Builder{}
+
+	if len(rule.Generators) > 0 || len(rule.Constraints) > 0 {
+
+		for _, l := range rule.Generators {
+			sb.WriteString(p.OutputString(l))
+			sb.WriteString(", ")
+		}
+
+		for _, c := range rule.Constraints {
+			sb.WriteString(c.String())
+			sb.WriteString(", ")
+		}
+		tmp := strings.TrimSuffix(sb.String(), ", ")
+		sb.Reset()
+		sb.WriteString(tmp)
+		sb.WriteString(" :: ")
+	}
+
+	for _, g := range rule.Iterators {
+		sb.WriteString(g.String())
+		sb.WriteString(", ")
+	}
+
+	for _, l := range rule.Literals {
+		sb.WriteString(p.OutputString(l))
 		sb.WriteString(", ")
 	}
 	tmp := strings.TrimSuffix(sb.String(), ", ")
@@ -465,7 +510,8 @@ func (p *Program) PrintRules() {
 	}
 	fmt.Println("%% Rules:")
 	for _, r := range p.Rules {
-		fmt.Print(r.String())
+		fmt.Print(p.OutputRuleString(&r))
+
 		if DebugLevel > 0 {
 			fmt.Print(" % line: ", r.LineNumber)
 		}
@@ -482,7 +528,7 @@ func (p *Program) PrintFacts() {
 				if i == 0 {
 					fmt.Print("[")
 				}
-				fmt.Print(t)
+				fmt.Print(p.OutputTermString(t))
 				if i == len(tuple)-1 {
 					fmt.Print("]")
 				} else {
