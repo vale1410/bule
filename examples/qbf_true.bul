@@ -1,4 +1,4 @@
 #forall[1] :: y?
-#exists[2] :: x?
+#exists[1] :: x?
 ~x, y. 
 x, ~y. 
