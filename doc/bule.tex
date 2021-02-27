@@ -1,32 +1,38 @@
-\documentclass[conference]{IEEEtran}
-\IEEEoverridecommandlockouts
-% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
-%%\NeedsTeXFormat{LaTeX2e}
-%%\documentclass{new_tlp}
+\documentclass[runningheads]{llncs}
 \input{header.tex}
 
-\title{ SAT Programming}
-\author{\IEEEauthorblockN{Jean Christoph Jung}
-\IEEEauthorblockA{\textit{Universit\"at Bremen} \\ Bremen, Germany} \and
-Valentin Mayer-Eichberger \\
-\IEEEauthorblockA{\textit{Technische Universit\"at Berlin} \\ Berlin, Germany} \and
-Abdallah Saffidine \\
-\IEEEauthorblockA{\textit{University of New South Wales} \\ Sydney, Australia}
-}
 
-\newcommand{\abd}[1]{\textcolor[rgb]{1.00,0.00,0.00}{(abd: #1).} }
-\newcommand{\vale}[1]{\textcolor[rgb]{1.00,0.00,0.0}{(vale: #1). } }
-\newcommand{\jean}[1]{\textcolor[rgb]{1.00,0.00,0.80}{(jean: #1). } }
+%% Contributions
+%% - SAT Programming
+%% actually, a QSAT Programming Language: PSpace 
+%% We fix the hebrand terms via (LOOK AT THIS: some problems cant be expressed nicely in BULE?)
+%% There is a working implementation, used in practice. 
+%% Formal analysis of non-ground modelling language 
+%% Much cleaner than ASP for NON-Ground modelling lanugage 
+%% ASP(ground) is sigma2P, 
+%% ASP is not intended for modelling PSPACE languages
+%% Loop formulas> https://dl.acm.org/doi/abs/10.1145/1131313.1131316 SAT vs ASP
+
+
+%% 1. Fix Format 
+%% 2. fix the Examples for a MVP(minimal viable paper).
+%% Why iterators in nice and not core? (can be expressed with extra variables)
+%% Debate: Should we allow the following: 
+%% Exponents? facts[2..2^K].
+%% Free variables?
+%% Syntax 
+
+\title{ SAT Programming with \emph{Bule}}
+
+\author{Jean Christoph Jung\inst{1} \and Valentin Mayer-Eichberger\inst{2} \and
+Abdallah Saffidine\inst{3}}
+\authorrunning{Jung Mayer-Eichberger Saffidine}
+
+\institute{Universit\"at Bremen, Germany \and Technische Universit\"at Berlin, Germany \and University of New South Wales, Sydney, Australia }
 
 \begin{document}
 
 \maketitle
-
-\newcommand{\bflat}{\ensuremath{\text{Bule}_\text{flat}}\xspace}
-\newcommand{\bcore}{\ensuremath{\text{Bule}_\text{core}}\xspace}
-\newcommand{\bfull}{\ensuremath{\text{Bule}_\text{full}}\xspace}
-\newcommand{\bnice}{\ensuremath{\text{Bule}_\text{nice}}\xspace}
-\newcommand{\bule}{\ensuremath{\text{Bule}}\xspace}
 
 \begin{abstract}
     SAT Programming extends SAT Solving by a declarative modelling language. 
@@ -36,7 +42,6 @@ Abdallah Saffidine \\
     The semantics of Bule is simpler than Answer Set Programming or First Order Logic with bounds.  
     Bule also offers techniques based on SAT Solving such as Approximate Model Counting and Quantified Boolean Formulae 
     and enriches such SAT related technologies by a uniform modelling language. 
-
 \end{abstract}
 
 \tableofcontents
@@ -46,7 +51,6 @@ Comparing Answer set programming and satisfiability solving. Key difference
 according to \cite{Lierler17} is that ASP has a modelling language and a
 grounder attached to it, whereas SAT is focused on problems stemming from
 already ground problems. We will try to change that !
-
 
 \section{Bule Syntax and Semantics}
 
@@ -141,9 +145,9 @@ $q[\;\;\cdot]$,
 respectively.
 
 
-\begin{example}
-  
-\end{example}
+%\begin{example}
+%  
+%\end{example}
 
 }
 
@@ -233,6 +237,8 @@ Given a set of edges, the following program encodes reachability in the induced 
 
 \lstinputlisting{programs/reachability.bul}
 
+\subsection{s-t Connectivity via Savitch}
+
 \subsection{Cardinality Encoding}
 
 Bule does not provide native cardinality constraints. 
@@ -277,13 +283,10 @@ For this we program a kind of meta reasoning, which demonstrates the power of QB
 
 \lstinputlisting{programs/gac.bul}
 
-
-
 \subsection{Approx Model Counting}
 
 Find a cool probability problem where we define two SAT problems. 
 One for the nominator, one for the denominator. 
-
 
 \section{Complexity}
 
@@ -338,8 +341,9 @@ semantics and loop formulas. From a logic programming point of view we treat tig
 %    \item QBF Solvers \cite{Lonsing17,Tentrup15}
     \item Lazy Clause Generation Interleaving Grounding and Search \cite{Cat15}
     \item Relationship with Effectively Propositional Logic (EPL) \cite{Moura08}? 
+    \item http://picat-lang.org/
 \end{itemize}
-
+ 
 \bibliographystyle{plain}
 \bibliography{main}
 
