@@ -1,9 +1,9 @@
 n[0..31]. d[0..4].
 p[2]. p[3]. p[5]. p[7]. p[11]. p[13]. p[17]. p[19]. p[23]. p[29].
 
-n[D], d[I] -> bit[D,I,(D/(2**I))#mod2]. 
+n[D], d[I] :: bit[D,I,(D/(2**I))#mod2]. 
 
-d[D], D#mod2 == 0 :: #exist[D], m(D)?
-d[D], D#mod2 == 1 :: #forall[D], m(D)?
+#exist[D],  d[D], D#mod2 == 0 :: m(D)?
+#forall[D], d[D], D#mod2 == 1 :: m(D)?
 
 p[P] :: ~m(I):bit[P,I,1], m(I):bit[P,I,0].
