@@ -1,0 +1,53 @@
+%%%%%% two symbols, 0 is blank symbol.  tape(L, S, T) means non-blank on that location.
+%%%%%% 0 is the accepting state. 1 is the initial state.
+%%%%%%%transition[SI, QI, SO, QO, D]. %%%%%%%% D=Direction    D=-1 left,    D=1 right
+%%%%% tape assumed initially blank
+%%%%% MACHINE resources %%%%%%%%%
+#const t=5.
+#const l=4.
+time[0..t].
+cell[-l..l]. % head initially on location 0.
+cell[L], cell[L+1] :: left[L, L+1].
+
+#exists[T], time[T], cell[L], symb[B] :: tape(L, B, T)?
+#exists[T], time[T], type[Q]    :: state(Q, T)?
+#exists[T], time[T], cell[L]    :: head(L, T)?
+#exists[T], time[T], transition[SI, QI, SO, QO, D], ~universal[QI] :: move(T, SI, QI, SO, QO, D)?
+#forall[T], time[T], transition[SI, QI, SO, QO, D],  universal[QI] :: move(T, SI, QI, SO, QO, D)?
+#exists[T], time[T], symb[S], universal[QI] :: cheat(T, S, QI)?
+
+%%%%%%%%%%%% exist choice %%%%%%%%%%%%
+time[T], type[QI], symb[SI], QI!=0, ~universal[QI] :: move(T, SI, QI, SO, QO, D) : transition[SI, QI, SO, QO, D].
+time[T], ~universal[QI], transition[SI, QI, SO, QO, D], transition[SI, QI, SE, QE, E], SO!=SE :: ~move(T, SI, QI, SO, QO, D), ~move(T, SI, QI, SE, QE, E).
+time[T], ~universal[QI], transition[SI, QI, SO, QO, D], transition[SI, QI, SE, QE, E], QO!=QE :: ~move(T, SI, QI, SO, QO, D), ~move(T, SI, QI, SE, QE, E).
+time[T], ~universal[QI], transition[SI, QI, SO, QO, D], transition[SI, QI, SE, QE, E],  D!= E :: ~move(T, SI, QI, SO, QO, D), ~move(T, SI, QI, SE, QE, E).
+
+%%%%%%%%%%%% forall choice %%%%%%%%%%%%
+time[T],  universal[QI], transition[SI, QI, SO, QO, D] :: ~cheat(T, SI, QI), ~move(T, SI, QI, SO, QO, D).
+
+%%%%%%%%%%%% initial configuration %%%%%%%%%%
+cell[L], symb[S], S!=0 :: ~tape(L, S, 0).
+cell[L] :: tape(L, 0, 0).
+head(0, 0).
+cell[L], L!=0 :: ~head(L, 0).
+state(1, 0).
+type[Q], Q!=1 :: ~state(Q, 0).
+
+%%%%%%%%% accepting condition %%%%%%%%%%%
+cheat[T1, S, Q] : time[T1] : symb[S] : universal[Q], state(0, T) : time[T].
+state(0, T) : time[T].
+
+
+%%%%%%%%%%%% dynamics %%%%%%%%%%
+transition[SI, QI, SO, QO, D], time[T], cell[LI]                       :: ~move(T, SI, QI, SO, QO, D), ~head(LI, T), ~tape(LI, SI, T), ~state(QI, T),  state(QO, T+1).
+transition[SI, QI, SO, QO, D], time[T], cell[LI], type[QE], QE!=QO     :: ~move(T, SI, QI, SO, QO, D), ~head(LI, T), ~tape(LI, SI, T), ~state(QI, T), ~state(QE, T+1).
+transition[SI, QI, SO, QO, D], time[T], cell[LI]                       :: ~move(T, SI, QI, SO, QO, D), ~head(LI, T), ~tape(LI, SI, T), ~state(QI, T),  tape(LI, SO, T+1).
+transition[SI, QI, SO, QO, D], time[T], cell[LI], symb[SE], SE!=SO     :: ~move(T, SI, QI, SO, QO, D), ~head(LI, T), ~tape(LI, SI, T), ~state(QI, T), ~tape(LI, SE, T+1).
+transition[SI, QI, SO, QO, 0], time[T], left[LO, LI]                   :: ~move(T, SI, QI, SO, QO, 0), ~head(LI, T), ~tape(LI, SI, T), ~state(QI, T),  head(LO, T+1).
+transition[SI, QI, SO, QO, 0], time[T], left[LO, LI], cell[LE], LE!=LO :: ~move(T, SI, QI, SO, QO, 0), ~head(LI, T), ~tape(LI, SI, T), ~state(QI, T), ~head(LE, T+1).
+transition[SI, QI, SO, QO, 1], time[T], left[LI, LO]                   :: ~move(T, SI, QI, SO, QO, 1), ~head(LI, T), ~tape(LI, SI, T), ~state(QI, T),  head(LO, T+1).
+transition[SI, QI, SO, QO, 1], time[T], left[LI, LO], cell[LE], LE!=LO :: ~move(T, SI, QI, SO, QO, 1), ~head(LI, T), ~tape(LI, SI, T), ~state(QI, T), ~head(LE, T+1).
+
+%%%%%% unaffected cells. / frame axioms %%%%%%%%
+time[T], cell[L], cell[LE], LE!=L, symb[S] :: ~head(L, T), ~tape(LE, S, T),  tape(LE, S, T+1).
+time[T], cell[L], cell[LE], LE!=L, symb[S] :: ~head(L, T),  tape(LE, S, T), ~tape(LE, S, T+1).
