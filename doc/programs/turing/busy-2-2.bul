@@ -1,7 +1,7 @@
 %sigma(M)=4 s(M)=6
 symb[0..1].
-type[0..2].
-transition[0, 1, 1, 2,  1]. %A0 1RB
-transition[1, 1, 1, 2, -1]. %A1 1LB
-transition[0, 2, 1, 1, -1]. %B0 1LA
-transition[1, 2, 1, 0,  1]. %B1 1RH
+state[0..2].
+trans[0, 1, 1, 2,  1]. %A0 1RB
+trans[1, 1, 1, 2, -1]. %A1 1LB
+trans[0, 2, 1, 1, -1]. %B0 1LA
+trans[1, 2, 1, 0,  1]. %B1 1RH

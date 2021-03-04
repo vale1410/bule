@@ -296,21 +296,35 @@ that each fragment of is complete for. The proof follows from the reduction of
 Turing machines into an expression in Bule using subset of constructs.
 
 \begin{table}
-    \caption{Complexity Results}
-    \centering
-    \label{tab:complexity}
-    \begin{tabular}{l|cc|cc}
-        \toprule
-        & \multicolumn{2}{c}{Horn} & \multicolumn{2}{c}{Not Horn}  \\
-        \;\; Quant. & $\exists$ & $\exists, \forall, \exists \ldots$ & $\exists$ & $\exists, \forall, \exists \ldots$ \\
-        Fragment&  &  &  &  \\
-        \midrule
-         \bflat   & \ptime & \pspace   & \np       & \pspace  \\
-         \bcore   & \exptime  & \expspace & \nexptime  & \expspace  \\
-         \bfull   & &  &   &   \\
-        \bottomrule
-    \end{tabular}
+  \caption{Complexity Results}
+  \centering
+  \label{tab:complexity}
+  %% \begin{tabular}{l|cc|cc}
+  %%   \toprule
+  %%   & \multicolumn{2}{c}{Horn} & \multicolumn{2}{c}{Not Horn}  \\
+  %%   \;\; Quant. & $\exists$ & $\exists, \forall, \exists \ldots$ & $\exists$ & $\exists, \forall, \exists \ldots$ \\
+  %%   Fragment&  &  &  &  \\
+  %%   \midrule
+  %%   \bflat   & \ptime & \pspace   & \np       & \pspace  \\
+  %%   \bcore   & \exptime  & \expspace & \nexptime  & \expspace  \\
+  %%   \bfull   & &  &   &   \\
+  %%   \bottomrule
+  %% \end{tabular}
+  \begin{tabular}{lccc}
+    \toprule
+    Clauses  & \multicolumn{1}{c}{Horn}  & \multicolumn{2}{c}{Any} \\
+    \cmidrule{3-4}
+    $\forall$ Quantifiers   & $\cmark$ & $\xmark$ & $\cmark$ \\
+    \midrule
+    \bflat   & \ptime    & \np       & \pspace  \\
+    \bcore   & \exptime & \nexptime  & \expspace  \\
+    \bfull   & &     &   \\
+    \bottomrule
+  \end{tabular}
 \end{table}
+
+\lstinputlisting{programs/turing/core.bul}
+\lstinputlisting{programs/turing/busy-2-2.bul}
 
 \section{Related Works and Citations and Ideas}
 

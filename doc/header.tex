@@ -41,6 +41,13 @@
 }
 \lstset{style=mystyle}
 
+
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+%\newcommand{\cmark}{\textcolor{green}{\ding{51}}}%
+%\newcommand{\xmark}{\textcolor{red}{\ding{55}}}%
+\newcommand{\cmark}{\textsc{Yes}}%
+\newcommand{\xmark}{\textsc{No}}%
+
 \newcommand\bigforall{\mbox{\Large $\mathsurround0pt\forall$}}
 \newcommand\bigexists{\mbox{\Large $\mathsurround0pt\exists$}}
 
@@ -50,9 +57,9 @@
 \newcommand{\ptime}{\complexityclass{P}}
 \newcommand{\np}{\complexityclass{NP}}
 \newcommand{\pspace}{\complexityclass{PSPACE}}
-%\newcommand{\exptime}{\complexityclass{EXPTIME}}
-%\newcommand{\nexptime}{\complexityclass{NEXPTIME}}
-%\newcommand{\nexpspace}{\complexityclass{EXPSPACE}}
+\renewcommand{\expspace}{\complexityclass{EXPSPACE}}
+\renewcommand{\exptime}{\complexityclass{EXPTIME}}
+\renewcommand{\nexptime}{\complexityclass{NEXPTIME}}
 
 \newcommand{\abd}[1]{\textcolor[rgb]{1.00,0.00,0.00}{(abd: #1).} }
 \newcommand{\vale}[1]{\textcolor[rgb]{1.00,0.00,0.0}{(vale: #1). } }

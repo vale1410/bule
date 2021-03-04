@@ -1,58 +1,55 @@
-%%%%%% two symbols, 0 is blank symbol.  tape(L, S, T) means non-blank on that location.
+%%%%%% two symbols, 0 is blank symbol.  tape(L, A, T) means non-blank on that location.
 %%%%%% 0 is the accepting state. 1 is the initial state.
-%%%%%%%transition[SI, QI, SO, QO, D]. %%%%%%%% D=Direction    D=-1 left,    D=1 right
-%%%%% tape assumed initially blank
+%%%%%%%transition[SI,QI,B,Q,D]. %%%%%%%% D=Direction    D=-1 left,    D=1 right
 %%%%% MACHINE resources %%%%%%%%%
-#const t=6.
+#const t=5.
 #const l=4.
 time[0..t].
-%cell[-l..l]. % head initially on location 0.
-cell[0..2*l]. % head initially on location l.
+%loc[-l..l]. % head initially on location 0.
+loc[0..2*l]. % head initially on location l.
 
-#exists[T], time[T], cell[L], symb[B] :: tape(T, L, B)?
-#exists[T], time[T], cell[L], type[Q] :: head(T, L, Q)?
-#exists[T], time[T], transition[_SI, QI, SO, QO, D], ~universal[QI] :: move(T, QI, SO, QO, D)?
-#forall[T], time[T], transition[_SI, QI, SO, QO, D],  universal[QI] :: move(T, QI, SO, QO, D)?
-#exists[T], time[T], symb[S], universal[QI] :: cheat(T, S, QI)?
-#exists[T], time[T], symb[S], universal[QI] :: cheat1(T, S, QI)? %%% didn't choose a move
-#exists[T], time[T], symb[S], universal[QI] :: cheat2(T, S, QI)? %%% choose too many moves
+#exists[T], time[T], loc[L], symb[B] :: tape(T,L,B)?
+#exists[T], time[T], loc[L], state[P] :: head(T,L,P)?
+#exists[T], time[T], trans[_,P,A,Q,D], ~univ[P] :: mv(T,P,A,Q,D)?
+#forall[T], time[T], trans[_,P,A,Q,D],  univ[P] :: mv(T,P,A,Q,D)?
+#exists[T], time[T], symb[A], univ[P] :: cheat(T,A,P)?
+#exists[T], time[T], symb[A], univ[P] :: cheat1(T,A,P)? %%% didn't choose a move
+#exists[T], time[T], symb[A], univ[P] :: cheat2(T,A,P)? %%% choose too many moves
 
-time[T], symb[S], universal[QI] :: ~cheat(T, S, QI), cheat1(T, S, QI), cheat2(T, S, QI).
+time[T], symb[A], univ[P] :: ~cheat(T,A,P), cheat1(T,A,P), cheat2(T,A,P).
 
 %%%%%%%%%%%% exist choice %%%%%%%%%%%%
-time[T], cell[L], ~universal[QI], symb[SI], type[QI], QI!=0 :: ~head(T, L, QI), move(T, QI, SO, QO, D) : transition[SI, QI, SO, QO, D]. %%% non-horn
-time[T], cell[L], ~universal[QI], transition[SI, QI, SO, QO, D], transition[SI, QI, SE, QE, E], SO!=SE :: ~head(T, L, QI), ~move(T, QI, SO, QO, D), ~move(T, QI, SE, QE, E).
-time[T], cell[L], ~universal[QI], transition[SI, QI, SO, QO, D], transition[SI, QI, SE, QE, E], QO!=QE :: ~head(T, L, QI), ~move(T, QI, SO, QO, D), ~move(T, QI, SE, QE, E).
-time[T], cell[L], ~universal[QI], transition[SI, QI, SO, QO, D], transition[SI, QI, SE, QE, E],  D!= E :: ~head(T, L, QI), ~move(T, QI, SO, QO, D), ~move(T, QI, SE, QE, E).
+time[T], loc[L], ~univ[P], symb[A], state[P], P!=0 :: ~head(T,L,P), mv(T,P,B,Q,D) : trans[A,P,B,Q,D]. %%% non-horn
+time[T], loc[L], ~univ[P], trans[A,P,B,Q,D], trans[A,P,C,R,E], B!=C :: ~head(T,L,P), ~mv(T,P,B,Q,D), ~mv(T,P,C,R,E).
+time[T], loc[L], ~univ[P], trans[A,P,B,Q,D], trans[A,P,C,R,E], Q!=R :: ~head(T,L,P), ~mv(T,P,B,Q,D), ~mv(T,P,C,R,E).
+time[T], loc[L], ~univ[P], trans[A,P,B,Q,D], trans[A,P,C,R,E], D!=E :: ~head(T,L,P), ~mv(T,P,B,Q,D), ~mv(T,P,C,R,E).
 
 %%%%%%%%%%%% forall choice %%%%%%%%%%%%
-time[T], cell[L],  universal[QI], transition[SI, QI, SO, QO, D] :: ~head(T, L, QI), ~cheat1(T, SI, QI), ~move(T, QI, SO, QO, D).
-time[T], cell[L],  universal[QI], transition[SI, QI, SO, QO, D] :: ~head(T, L, QI), ~cheat2(T, SI, QI), ~move(T, QI, SO, QO, D).
+time[T], loc[L],  univ[P], trans[A,P,B,Q,D] :: ~head(T,L,P), ~cheat1(T,SI,P), ~mv(T,P,B,Q,D).
+time[T], loc[L],  univ[P], trans[A,P,B,Q,D] :: ~head(T,L,P), ~cheat2(T,SI,P), ~mv(T,P,B,Q,D).
 
 %%%%%%%%%%%% initial configuration %%%%%%%%%%
-cell[L], symb[S], S!=0 :: ~tape(0, L, S).
-cell[L] :: tape(0, L, 0).
-%head(0, 0, 1).
-%cell[L], type[Q], L!=0 :: ~head(0, L, Q).
-head(0, l, 1).
-cell[L], type[Q], L!=l :: ~head(0, L, Q).
-cell[L], type[Q], Q!=1 :: ~head(0, L, Q).
-%time[T], type[Q] :: ~head(T, l, Q).
-%time[T], type[Q] :: ~head(T, -l, Q).
-time[T], type[Q] :: ~head(T, 0, Q).
-time[T], type[Q] :: ~head(T, 2*l, Q).
+loc[L], symb[A], A!=0 :: ~tape(0,L,A). %% tape assumed
+loc[L]                ::  tape(0,L,0). %% initially blank
+%head(0,0,1).
+%loc[L], state[P], L!=0 :: ~head(0,L,P).
+head(0,l,1).
+loc[L], state[P], L!=l :: ~head(0,L,P).
+loc[L], state[P], P!=1 :: ~head(0,L,P).
+%time[T], state[P] :: ~head(T,l,P).
+%time[T], state[P] :: ~head(T,-l,P).
+time[T], state[P] :: ~head(T,0,P).
+time[T], state[P] :: ~head(T,2*l,P).
 
-%%%%%%%%% accepting condition %%%%%%%%%%%
-cheat(T1, S, Q) : time[T1] : symb[S] : universal[Q], head(T, L, 0) : cell[L] : time[T].
-head(T, L, 0) : cell[L] : time[T].
+cheat(T1,A,P) : time[T1] : symb[A] : univ[P], head(T,L,0) : loc[L] : time[T]. %%%%%%%%% accepting condition
 
 %%%%%%%%%%%% dynamics %%%%%%%%%%
-time[T], transition[SI, QI, SO, QO, D], cell[L]                              :: ~head(T, L, QI), ~tape(T, L, SI), ~move(T, QI, SO, QO, D),  head(T+1, D+L, QO).
-time[T], transition[SI, QI, SO, QO, D], cell[L], cell[LE], type[QE], QE!=QO  :: ~head(T, L, QI), ~tape(T, L, SI), ~move(T, QI, SO, QO, D), ~head(T+1, LE,  QE).
-time[T], transition[SI, QI, SO, QO, D], cell[L], cell[LE], type[QE], LE!=D+L :: ~head(T, L, QI), ~tape(T, L, SI), ~move(T, QI, SO, QO, D), ~head(T+1, LE,  QE).
-time[T], transition[SI, QI, SO, QO, D], cell[L]                              :: ~head(T, L, QI), ~tape(T, L, SI), ~move(T, QI, SO, QO, D),  tape(T+1, L, SO).
-time[T], transition[SI, QI, SO, QO, D], cell[L], symb[SE], SE!=SO            :: ~head(T, L, QI), ~tape(T, L, SI), ~move(T, QI, SO, QO, D), ~tape(T+1, L, SE).
+time[T], trans[A,P,B,Q,D], loc[L]                           :: ~head(T,L,P), ~tape(T,L,A), ~mv(T,P,B,Q,D),  head(T+1,D+L,Q).
+time[T], trans[A,P,B,Q,D], loc[L], loc[K], state[R], R!=Q   :: ~head(T,L,P), ~tape(T,L,A), ~mv(T,P,B,Q,D), ~head(T+1,K,R).
+time[T], trans[A,P,B,Q,D], loc[L], loc[K], state[R], K!=D+L :: ~head(T,L,P), ~tape(T,L,A), ~mv(T,P,B,Q,D), ~head(T+1,K,R).
+time[T], trans[A,P,B,Q,D], loc[L]                           :: ~head(T,L,P), ~tape(T,L,A), ~mv(T,P,B,Q,D),  tape(T+1,L,B).
+time[T], trans[A,P,B,Q,D], loc[L], symb[C], C!=B            :: ~head(T,L,P), ~tape(T,L,A), ~mv(T,P,B,Q,D), ~tape(T+1,L,C).
 
-%%%%%% unaffected cells. / frame axioms %%%%%%%%
-time[T], cell[L], type[Q], cell[LE], LE!=L, symb[S] :: ~head(T, L, Q), ~tape(T, LE, S),  tape(T+1, LE, S).
-time[T], cell[L], type[Q], cell[LE], LE!=L, symb[S] :: ~head(T, L, Q),  tape(T, LE, S), ~tape(T+1, LE, S).
+%%%%%% unaffected locs. / frame axioms %%%%%%%%
+time[T], loc[L], state[P], loc[K], K!=L, symb[A] :: ~head(T,L,P), ~tape(T,K,A),  tape(T+1,K,A).
+time[T], loc[L], state[P], loc[K], K!=L, symb[A] :: ~head(T,L,P),  tape(T,K,A), ~tape(T+1,K,A).
