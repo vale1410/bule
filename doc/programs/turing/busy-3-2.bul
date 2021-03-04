@@ -1,24 +1,24 @@
 %initTape[L, S]. %initialized[L]. % must match initTape.
-%%transition[SI, QI, SO, QO, D]. %%%%%%%% D=Direction    D=0 left,    D=1 right
+%%transition[SI, QI, SO, QO, D]. %%%%%%%% D=Direction    D=-1 left,    D=1 right
 
 symb[0..1].   %%%%%%%%%% 0 is blank symbol.
 
 %A0 	A1 	B0 	B1 	C0 	C1 	sigma(M) 	s(M)
 %1BR 	1HR 	1BL 	0CR 	1CL 	1AL 	5 	21
 type[0..3]. % 0 is the accepting state. 1 is the initial state.
-transition[0, 1, 1, 2, 1].
-transition[1, 1, 1, 0, 0]. %A0 %A1
-transition[0, 2, 1, 2, 0].
-transition[1, 2, 0, 3, 1]. %B0 %B1
-transition[0, 3, 1, 3, 0].
-transition[1, 3, 1, 1, 0]. %C0 %C1
+transition[0, 1, 1, 2,  1].
+transition[1, 1, 1, 0, -1]. %A0 %A1
+transition[0, 2, 1, 2, -1].
+transition[1, 2, 0, 3,  1]. %B0 %B1
+transition[0, 3, 1, 3, -1].
+transition[1, 3, 1, 1, -1]. %C0 %C1
 
 
 
 %A0 	A1 	B0 	B1 	sigma(M) 	s(M)
 %1BR 	1BL 	1AL 	1HR 	4 	6
 %type[0..2].
-%transition[0, 1, 1, 2, 1].
-%transition[1, 1, 1, 2, 0]. %A0 %A1
-%transition[0, 2, 1, 1, 0].
-%transition[1, 2, 1, 0, 1]. %B0 %B1
+%transition[0, 1, 1, 2,  1].
+%transition[1, 1, 1, 2, -1]. %A0 %A1
+%transition[0, 2, 1, 1, -1].
+%transition[1, 2, 1, 0,  1]. %B0 %B1
