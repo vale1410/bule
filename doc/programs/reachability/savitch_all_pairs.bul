@@ -1,0 +1,18 @@
+%% set of edges: e[V1,V2] and the number of vertices n
+
+depth[0..bits].
+succ[curr]. succ[next].
+
+v[V], depth[I], 2**I <= nodes :: choose[V,I,(V/(2**I))#mod2]. 
+%%
+%%#exists[D], v[A], v[B], depth[I], depth[D]     :: savitch(A,B,I,D)? % we guess the bits
+%%#forall[D], v[A], v[B], depth[D]               :: toggle(A,B,D)?
+%%#exists[bits+1], v[A], v[B], depth[I], succ[X] :: step(A,B,I,X)?
+%%
+%%depth[D], v[A], v[B], depth[I] ::  toggle(A,B,D), ~toggle(A,B,T) : T<D : depth[T],  savitch(A,B,I,D), ~step(A,B,I,curr).
+%%depth[D], v[A], v[B], depth[I] ::  toggle(A,B,D), ~toggle(A,B,T) : T<D : depth[T], ~savitch(A,B,I,D),  step(A,B,I,curr).
+%%depth[D], v[A], v[B], depth[I] :: ~toggle(A,B,D),  toggle(A,B,T) : T<D : depth[T],  savitch(A,B,I,D), ~step(A,B,I,next).
+%%depth[D], v[A], v[B], depth[I] :: ~toggle(A,B,D),  toggle(A,B,T) : T<D : depth[T], ~savitch(A,B,I,D),  step(A,B,I,next).
+
+%~reachable(A,B), r(A,B,0).
+%reachable(A,B), ~r(A,B,0).
