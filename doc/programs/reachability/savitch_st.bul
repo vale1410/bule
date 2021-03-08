@@ -1,0 +1,15 @@
+%% set of edges: e[V1,V2] and the number of vertices n
+
+depth[0..bits].
+succ[curr]. succ[next].
+
+v[V], depth[I], 2**I <= nodes :: choose[V,I,(V/(2**I))#mod2]. 
+
+#exists[D-1], depth[I], depth[D]   :: savitch(I,D)? 
+#forall[D], depth[D]               :: toggle(D)?
+#exists[bits+1], depth[I], succ[X] :: step(I,X)?
+
+depth[D], depth[I] ::  toggle(D), ~toggle(T) : T<D : depth[T],  savitch(I,D), ~step(I,curr).
+depth[D], depth[I] ::  toggle(D), ~toggle(T) : T<D : depth[T], ~savitch(I,D),  step(I,curr).
+depth[D], depth[I] :: ~toggle(D),  toggle(T) : T<D : depth[T],  savitch(I,D), ~step(I,next).
+depth[D], depth[I] :: ~toggle(D),  toggle(T) : T<D : depth[T], ~savitch(I,D),  step(I,next).
