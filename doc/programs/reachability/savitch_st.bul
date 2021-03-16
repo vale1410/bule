@@ -15,6 +15,11 @@ depth[D], depth[I] ::  toggle(D), ~toggle(T) : T<D : depth[T], ~savitch(I,D),  s
 depth[D], depth[I] :: ~toggle(D),  toggle(T) : T<D : depth[T],  savitch(I,D), ~step(I,next).
 depth[D], depth[I] :: ~toggle(D),  toggle(T) : T<D : depth[T], ~savitch(I,D),  step(I,next).
 
-~e[A,B], map[A,A1], map[B,B1] :: 
+map[A,A1], map[B,B1], ~e[A,B] :: 
    ~step(I,curr):choose[A1,I,1], step(I,curr):choose[A1,I,0], 
    ~step(I,next):choose[B1,I,1], step(I,next):choose[B1,I,0].
+ 
+s[S], map[S,X], choose[X,I,0]  :: ~toggle(D) : depth[D], ~step(I,curr).
+s[S], map[S,X], choose[X,I,1]  :: ~toggle(D) : depth[D], step(I,curr).
+t[S], map[S,X], choose[X,I,0]  :: toggle(D) : depth[D], ~step(I,next).
+t[S], map[S,X], choose[X,I,1]  :: toggle(D) : depth[D], step(I,next).

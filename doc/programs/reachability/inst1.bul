@@ -14,6 +14,6 @@ map[f,5].
 #const nodes=5. % 0..k, k+1 vertices
 #const bits=2. % 0..l, with l+1 bits to represent vertices
 
-s[a].
-t[f].
+s[e].
+t[a].
 
