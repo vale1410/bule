@@ -34,7 +34,9 @@
 %% a[X], b[Y], c[R] : k[R] :: b[Y] : c[X] : c(X,Y) | e[X] : d(X). 
 %% 
 %% a[X], b[Y] :: b[Y], c[X] : c(X,Y) | e[X] : d(X). 
-%% 
+%%  
+%% Pseudo-Boolean: 
+%% a[X], b[Y] :: 12 { b[Y], c[X] : X^2 * c(X,Y) } 12 | e[X] : d(X). 
 %% 
 %% Call on 2021-03-13
 %% 
@@ -80,15 +82,24 @@ Abdallah Saffidine\inst{3}}
 
 \section{Introduction and Motivation}
 
-\section{The Bule Language}
+\paragraph{From SAT to QBF.}
 
 \paragraph{Running Example}
 
-\section{Examples}
+\paragraph{Study on encodings for QBF rather new.}
 
-\section{Complexity}
+\paragraph{QBF-thinking as a paradigm.} Difference between ASP and SAT, Modelling Language. Thinking in non-ground and compilation language. 
 
-\paragraph{Fragments}
+\section{The Bule Language}
+
+Brief Syntax and Semantics
+
+\subsection{Complexity}
+
+\paragraph{Fragments that lead to interesting classes.}
+
+\paragraph{Table}
+
 \abd{Analyse} and \jean{check}. 
 
 In Table \ref{tab:complexity} we give an overview of the complexity classes
@@ -112,6 +123,13 @@ Turing machines into an expression in Bule using subset of constructs.
   \end{tabular}
 \end{table}
 
+
+\section{Examples}
+
+\paragraph{Counter}
+\paragraph{SAT Reachability}
+\paragraph{QBF Reachability}
+\paragraph{Turing Machine}
 
 \section{Related Work}
  \begin{itemize}
