@@ -6,14 +6,14 @@ binary[0..bits].
 succ[curr]. 
 succ[next].
 
-map[_,V], depth[I], 2**I <= nodes :: choose[V,I,(V/(2**I))#mod2]. 
+val[0..2**bits-1].
 
+val[X], depth[I], 2**I <= nodes :: choose[X,I,(X/(2**I))#mod2]. 
 
-#exists[bits-D-1], binary[I], depth[D]   :: savitch(I,D)? 
-#forall[bits-D], depth[D]               :: toggle(D)?
-#exists[bits+1], binary[I], succ[X] :: step(I,X)?
+#exists[bits-D-1], binary[I], depth[D] :: savitch(I,D)? 
+#forall[bits-D], depth[D]              :: toggle(D)?
+#exists[bits+1], binary[I], succ[X]    :: step(I,X)?
 
-%% ~D /\ T =>  savitch <=> curr
 depth[D], binary[I] ::  ~toggle(D), toggle(T) : T<D : depth[T],  savitch(I,D), ~step(I,curr).
 depth[D], binary[I] ::  ~toggle(D), toggle(T) : T<D : depth[T], ~savitch(I,D),  step(I,curr).
 depth[D], binary[I] :: toggle(D), ~toggle(T) : T<D : depth[T],  savitch(I,D), ~step(I,next).
@@ -23,11 +23,15 @@ map[A,A1], map[B,B1], ~e[A,B], A != B ::
    ~step(I,curr):choose[A1,I,1], step(I,curr):choose[A1,I,0], 
    ~step(I,next):choose[B1,I,1], step(I,next):choose[B1,I,0].
 
-%% EXCLUDE vertices that doesnt exist
-%% we dont want 110,111
-%% MAKE THIS GENERIC
-depth[D] :: savitch(0,D), ~savitch(1,D), ~savitch(2,D).
-depth[D] :: ~savitch(0,D), ~savitch(1,D), ~savitch(2,D).
+depth[D], val[X], ~map[_,X] :: 
+   ~savitch(I,D):choose[X,I,1], savitch(I,D):choose[X,I,0].
+
+
+%% %% EXCLUDE vertices that doesnt exist
+%% %% we dont want 110,111
+%% %% MAKE THIS GENERIC
+%% depth[D] :: savitch(0,D), ~savitch(1,D), ~savitch(2,D).
+%% depth[D] :: ~savitch(0,D), ~savitch(1,D), ~savitch(2,D).
  
 %% /\ T =>  curr <=> s
 s[S], map[S,X], choose[X,I,0]  :: toggle(T) : depth[T], ~step(I,curr).
