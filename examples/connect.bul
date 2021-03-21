@@ -1,25 +1,25 @@
-%%  q=2, c=1. r=2. d=c*r. %%  > black lose!
-%%  q=2, c=1. r=4. d=c*r. %%  > black lose!
+%%  q=2, c=1. r=2. d=(c*r+1)/2. %%  > black lose!
+%%  q=2, c=1. r=4. d=(c*r+1)/2. %%  > black lose!
 
-%%  q=2, c=2. r=2. d=c*r. %%  > black win!
-%%  q=2, c=3. r=2. d=c*r. %%  > black win!
-%%  q=2, c=3. r=3. d=c*r. %%  > black win!
+%%  q=2, c=2. r=2. d=(c*r+1)/2. %%  > black win!
+%%  q=2, c=3. r=2. d=(c*r+1)/2. %%  > black win!
+%%  q=2, c=3. r=3. d=(c*r+1)/2. %%  > black win!
 
-%%  q=3, c=3. r=3. d=c*r. %%  > black win!
-%%  q=3, c=4. r=3. d=c*r. %%  > black win!
-%%  q=3, c=4. r=4. d=c*r. %%  > black win!
-%%  q=3, c=5. r=5. d=c*r. %%  > black win!
+%%  q=3, c=3. r=3. d=(c*r+1)/2. %%  > black win!
+%%  q=3, c=4. r=3. d=(c*r+1)/2. %%  > black win!
+%%  q=3, c=4. r=4. d=(c*r+1)/2. %%  > black win!
+%%  q=3, c=5. r=5. d=(c*r+1)/2. %%  > black win!
 
-%%  q=4, c=4. r=4. d=c*r. %%  > draw !
-%%  q=4, c=6. r=4. d=c*r. %%  > white win!
-%%  q=4, c=6. r=7. d=c*r. %%  > black win!
-%%  q=4, c=7. r=6. d=c*r. %%  > original! black win!
+%%  q=4, c=4. r=4. d=(c*r+1)/2. %%  > draw !
+%%  q=4, c=6. r=4. d=(c*r+1)/2. %%  > white win!
+%%  q=4, c=6. r=7. d=(c*r+1)/2. %%  > black win!
+%%  q=4, c=7. r=6. d=(c*r+1)/2. %%  > original! black win!
 
 %% easy
-#const q=2.
-#const c=2. 
-#const r=2. 
-#const d=2. 
+#const q=3.
+#const c=3. 
+#const r=3. 
+#const d=(c*r+1)/2. 
 
 %%  #const q=4.
 %%  #const c=7. 
@@ -31,6 +31,9 @@
 
 connect[0..q-1].
 
+one[1]. 
+zero[0].
+
 % direction: used in the different winning configurations.
 dir[0..1].
 
@@ -40,93 +43,74 @@ domR[1..r].
 domC[1..c].
 
 domC[C], domR[R]  ::  dom[C,R]. 
+player[black]. player[white].
 
-%time steps domain. Time starts with 1 with black. 0 represents before the games starts. 
+%% Time: 0 is intial position before moves are made
+%% Time: 1 only black moves 
+%% Time: 2+ first white then black 
+
 domT0[0..d].
 domT[1..d].
-% time 1, player white
-domT[T], T#mod2==0  ::  turn[T,black]. 
-domT[T], T#mod2==1  ::  turn[T,white]. 
 
-%% chooseC[Column,BitRepresentationOfColumn]
-domC[C], domC[I], 2**(I-1) <= c  ::  chooseC[C,I-1,((C-1)/(2**(I-1)))#mod2]. 
-chooseC[_,I,_]  ::  bitC[I]. 
+maxBit[0..10].
+domC[C], maxBit[I], 2**I <= c :: choose[C,I,(C/(2**I))#mod2]. 
+choose[_,I,_] :: bit[I]. 
 
-% game is still running ? 
-#exists(T-1), domT[T]  :: time(T)? 
-% black chooses bit of column 
-#exists(T), bitC[I], turn[T,black] :: moveL(I,T)? 
-% white chooses bit of column 
-#forall(T), bitC[I], turn[T,white] :: moveL(I,T)?
-% player chooses column 
-#exists(T), turn[T,A], domC[C]     :: move(A,C,T)?    
-% in cell C,R there is a stone
-%domC[C], domR0[R], domT0[T], R <= T   ::  #exists(T) , occupied(C,R,T)? 
+#exists[T], domT[T], domT[T+1]                  :: won(T)? 
+#exists[T], domT[T], bit[I]                     :: move(black,I,T)? 
+#forall[T], domT[T], T>1, bit[I]                :: moveL(white,I,T)? 
+#exists[T], domT[T], T>1, bit[I]                :: move(white,I,T)? 
+#exists[T], dom[C,R], domT0[T], player[A]       :: board(A,C,R,T)?
+#exists[d], dom[C,R], C+(q-1)<=c, R<=r          :: winO(C,R,1)?
+#exists[d], dom[C,R], C<=c , R+(q-1)<=r         :: winO(C,R,0)?
+#exists[d], dom[C,R], dir[Z], C+q-1<=c,R+q-1<=r :: winD(C,R,Z)?
 
-#exists[T], domC[C], domR0[R], domT0[T] :: occupied(C,R,T)?
-#exists[d], dom[C,R]                              :: board(C,R)?
-#exists[d], dom[C,R], C+(q-1)<=c, R<=r            :: winO(C,R,1)?
-#exists[d], dom[C,R], C<=c , R+(q-1)<=r           :: winO(C,R,0)?
-#exists[d], dom[C,R], dir[Z], C+q-1<=c,R+q-1<=r   :: winD(C,R,Z)?
+~won(T), won(T+1).
 
-~time(T+1), time(T).
-%% white[A], turn[T,A]  ::  ~time(T), time(T+1). %% Dont stop game at whites turn; optional
+~board(black,C,R,T), ~board(white,C,R,T).
 
-~move(_,_,T), time(T).   %% When game is over, no more moves allowed
-~time(T), move(_,C,T):domC[C].  %% game is running, make at last one move
+~board(A,C,R,T), board(A,C,R,T+1). 
 
-%%black[A],  init[A,C,R]  ::  board[C,R].
-%%white[A],  init[A,C,R]  ::  ~board[C,R].
-%%dom[C,R], ~init[_,C,R]  ::  ~occupied(C,1,0).
-%%           init[_,C,R]  ::  occupied[C,R,d].
+~won(T), board(A,C,R,T), ~board(A,C,R,T+1).
 
-%domC[C], domR[R]  ::  ~occupied(C,R,0).
-~occupied(_C,1,0).
-occupied(_C,0,0).
+~board(black,C,R+1,T+1), board(black,C,R,T), board(white,C,R,T+1).  %% gravity
+~board(white,C,R+1,T+1), board(black,C,R,T), board(white,C,R,T).    %% gravity
 
-chooseC[C,I,0]  ::  ~move(black,C,T), ~moveL(I,T).
-chooseC[C,I,1]  ::  ~move(black,C,T), moveL(I,T).
+init[A,C,R]                       ::  board(A,C,R,0).
+dom[C,R], player[A], ~init[A,C,R] :: ~board(A,C,R,0).
 
-chooseC[C,I,0]  ::  ~move(white,C,T), ~moveL(I,T). %%FIXME
-chooseC[C,I,1]  ::  ~move(white,C,T), moveL(I,T).%%FIXME
+%% FIX: white at least one  
+%% FIX: choose columns that do not exist.  
 
-white[A], domC[C]  ::  %% UNFIXME
-    occupied(C,r,T-1),    %% Column is not completely full 
-    ~time(T),           %% Game is still running 
-     moveL(I,T) : chooseC[C,I,0], 
-    ~moveL(I,T) : chooseC[C,I,1], 
-    move(A,C,T).        %% White makes a move in column C!
+domC[C], domT[T], domT[T+1], player[P], player[A] ::  
+     won(T),         
+    ~board(P,C,R-1,T), 
+     board(black,C,R,T), 
+     board(white,C,R,T), 
+     moveL(A,I,T+1) : choose[C,I,0], 
+    ~moveL(A,I,T+1) : choose[C,I,1], 
+    board(A,C,R,T+1).       
 
-~occupied(C,R,T-1),   occupied(C,R,T).  %% board positions dont change
-~occupied(C,R+1,T+1), occupied(C,R,T).  %% no jumps  (implies gravity)
-~move(_A,C,T), ~occupied(C,R-1,T-1), occupied(C,R,T). 
-move(_,C,T), occupied(C,R,T-1), ~occupied(C,R,T).  %% if board changes, then column must be played
-~move(_,C,T), ~occupied(C,r,T-1). %% No moves in a column that was full in previous T
-
-%% Whats this ? 
-%~occupied(C,R-1,T-1), occupied(C,R,T-1), ~move(_A,C,T), board(C,R,T). 
-
-occupied(C,R,d), ~board(C,R).
-turn[T,white]  ::  occupied(C,R,T-1), ~occupied(C,R,T), ~board(C,R).
-
-%% Whats this ? 
-%black[A], turn[T,A]  ::  occupied(C,R,T-1), ~occupied(C,R,T), board(C,R), debug(1).
+%% if a board position [C,R] is chosen, 
+%% then imply the corresponding bits for the move. 
+dom[C,R], choose[C,I,B], player[A] :: 
+    % board[white,C,R,T], board[black,C,R,T], 
+    board[A,C,R,T], 
+    ~board[A,C,R,T+1], 
+    move(A,I,T+1):one[B], ~move(A,I,T+1):zero[B], 
+ 
 
 %% Winning Positions
-
 % at least one winning position for black
-%time(d),  %% Add this if BlackNoLose
-winO(C,R,1) : C+(q-1)<=c : R<=r       : dom[C,R], 
-    winO(C,R,0) : C<=c       : R+(q-1)<=r : dom[C,R], 
-    winD(C,R,Z) : C+q-1<=c   : R+q-1<=r   : dom[C,R] : dir[Z].
+winO(C,R,1) : dom[C+(q-1),R]   : dom[C,R], 
+winO(C,R,0) : dom[C,R+(q-1)]   : dom[C,R], 
+winD(C,R,Z) : dom[C+q-1,R+q-1] : dom[C,R] : dir[Z].
 
 % orthogonal: horizontal (Z==0) and vertical(Z==1) winning positions (winO)
-dir[Z]              ::  board(C+Z*D,R+(1-Z)*D)       : connect[D],
-                      ~occupied(C+Z*D,R+(1-Z)*D,d) : connect[D].
-dir[Z], connect[D]  ::  board(C+Z*D,R+(1-Z)*D)  , ~winO(C,R,Z).
+dir[Z]              ::              ~board(white,C+Z*D,R+(1-Z)*D,d) : connect[D].
+dir[Z], connect[D]  :: ~winO(C,R,Z), board(black,C+Z*D,R+(1-Z)*D,d).
 
 %%% diagonal rising (Z==0) and falling (Z==1) winning positions (winD)
-dir[Z]              ::  board(C+D,R+Z*(q-1)+((-1)**Z)*D)  : connect[D],
-                      ~occupied(C+D,R+Z*(q-1)+((-1)**Z)*D,d) : connect[D]. 
-dir[Z], connect[D]  ::  board(C+D,R+Z*(q-1)+((-1)**Z)*D)  , ~winD(C,R,Z). 
+dir[Z]             ::               ~board(white, C+D,R+Z*(q-1)+((-1)**Z)*D,d) : connect[D].
+dir[Z], connect[D] :: ~winD(C,R,Z),  board(black, C+D,R+Z*(q-1)+((-1)**Z)*D,d). 
 
