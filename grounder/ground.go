@@ -960,7 +960,7 @@ func assign(term Term, assignment map[string]string) (Term, bool, error) {
 			// Must be symbol before and after that makes makes this change
 			if (index == 0 || strings.ContainsAny(xx[index-1:index], dividerSet)) &&
 				(index+len(variable) == len(xx) || strings.ContainsAny(xx[index+len(variable):index+len(variable)+1], dividerSet)) {
-				acc.WriteString(xx[:index] + val)
+				acc.WriteString(xx[:index] + "(" + val + ")")
 				xx = xx[index+len(variable):]
 			} else {
 				acc.WriteString(xx[:index+len(variable)])
