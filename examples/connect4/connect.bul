@@ -79,16 +79,16 @@ choose[_,I,_] :: bit[I].
 init[A,C,R]                       ::  board(A,C,R,0).
 dom[C,R], player[A], ~init[A,C,R] :: ~board(A,C,R,0).
 
-%% FIX: white at least one  
-%% FIX: choose columns that do not exist.  
+%% FIX: white and black at least one!
+%% FIX: dont choose columns that do not exist!
 
 domC[C], domT[T], domT[T+1], player[P], player[A] ::  
-     won(T),         
-    ~board(P,C,R-1,T), 
-     board(black,C,R,T), 
-     board(white,C,R,T), 
-     moveL(A,I,T+1) : choose[C,I,0], 
-    ~moveL(A,I,T+1) : choose[C,I,1], 
+    won(T),         
+   ~board(P,C,R-1,T), 
+    board(black,C,R,T), 
+    board(white,C,R,T), 
+    moveL(A,I,T+1) : choose[C,I,0], 
+   ~moveL(A,I,T+1) : choose[C,I,1], 
     board(A,C,R,T+1).       
 
 %% if a board position [C,R] is chosen, 
@@ -96,8 +96,9 @@ domC[C], domT[T], domT[T+1], player[P], player[A] ::
 dom[C,R], choose[C,I,B], player[A] :: 
     % board[white,C,R,T], board[black,C,R,T], 
     board[A,C,R,T], 
-    ~board[A,C,R,T+1], 
-    move(A,I,T+1):one[B], ~move(A,I,T+1):zero[B], 
+   ~board[A,C,R,T+1], 
+    move(A,I,T+1):one[B], 
+   ~move(A,I,T+1):zero[B], 
  
 
 %% Winning Positions
