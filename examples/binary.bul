@@ -1,0 +1,21 @@
+
+
+
+bit[0..10].
+
+bit[I] :: exp[I,2**I,2**(I+1)].
+%%
+%%test[4]. 
+%%
+%%test[X], exp[I,A,B], A < X, X <=B :: highest_bit[I]. 
+
+#const c=12.
+
+domC[1..c].
+
+exp[E,A,B], A<c, B >= c :: maxBit[E].
+maxBit[E]               :: domBit[0..E].
+maxBit[E]               :: domCC[c+1..(2**(E+1))].
+
+domC[C+1], domBit[I] :: choose[C ,C,I,(C/(2**I))#mod2].
+domC[C+1], domCC[c+C+1], domBit[I] :: choose[C+c,C,I,(C/(2**I))#mod2].

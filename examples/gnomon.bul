@@ -18,12 +18,10 @@ dom[Z], cor[X1,Y], cor[X2,Y], X1 < X2 :: ~q(X1,Y,Z), ~q(X2,Y,Z).
 dom[Z], cor[X1,Y1], cor[X2,Y2], X1 <= X2, Y1 < Y2 :: ~q(X1,Y1,Z), ~q(X2,Y2,Z). 
 
 %% the sum of the first 3 cells need to should not be bigger than 34
-dom[Z1], dom[Z2], dom[Z3], Z1 != Z2, Z1 != Z3, Z2 != Z3,
-start[X,Y], ~dom[34-Z1-Z2-Z3] 
-    :: ~q(X,Y,Z1), ~q(X+1,Y,Z2), ~q(X,Y+1,Z3). 
+dom[Z1], dom[Z2], dom[Z3], Z1 != Z2, Z1 != Z3, Z2 != Z3, start[X,Y], ~dom[34-Z1-Z2-Z3] :: 
+    ~q(X,Y,Z1), ~q(X+1,Y,Z2), ~q(X,Y+1,Z3). 
 
 %% the cells should sum up to 34
-dom[Z1], dom[Z2], dom[Z3], Z1 != Z2, Z1 != Z3, Z2 != Z3, 
-start[X,Y],  dom[34-Z1-Z2-Z3] 
-    :: ~q(X,Y,Z1), ~q(X+1,Y,Z2), ~q(X,Y+1,Z3), q(X+1,Y+1,34-Z1-Z2-Z3). 
+dom[Z1], dom[Z2], dom[Z3], Z1 != Z2, Z1 != Z3, Z2 != Z3, start[X,Y],  dom[34-Z1-Z2-Z3] :: 
+    ~q(X,Y,Z1), ~q(X+1,Y,Z2), ~q(X,Y+1,Z3), q(X+1,Y+1,34-Z1-Z2-Z3). 
 
