@@ -22,7 +22,7 @@ The roots lie in the syntax of Prolog and lparse (Answer Set Programming).
 
 Let’s start with a simple example: 
 ```prolog
-p, q.
+p | q.
 ```
 
 Each line is a clause and p and q are 0-arity predicates. 
@@ -213,15 +213,15 @@ Let us have  another 1-arity literal `q(Y)`
 We can then iterate over Y within a single clause to add more literals:
 
 ```prolog
-dom[X] :: p(X), ~q(Y*Y) : dom[Y] : Y < 3.
+dom[X] :: p(X) | dom[Y] , Y < 3 : ~q(Y*Y) .
 ```
 
 Gives:
 
 ```prolog
-p(1), ~q(1), ~q(4).
-p(2), ~q(1), ~q(4).
-p(3), ~q(1), ~q(4).
+p(1) | ~q(1) | ~q(4).
+p(2) | ~q(1) | ~q(4).
+p(3) | ~q(1) | ~q(4).
 ```
 
 Note that adding the rule `Y < 3` skips last iteration step `~q(9)` as `3 < 3` <=> `False`.
@@ -276,20 +276,20 @@ domCoords[X,Y] :: q(X,Y,Z) : dom[Z].
 Which will generate a grand total of 81 clauses of length 9 grouped by `X, Y`:
 
 ```prolog
-q(1,1,1), q(1,1,2), q(1,1,3), q(1,1,4), q(1,1,5), q(1,1,6), q(1,1,7), q(1,1,8), q(1,1,9).
-q(1,2,1), q(1,2,2), q(1,2,3), q(1,2,4), q(1,2,5), q(1,2,6), q(1,2,7), q(1,2,8), q(1,2,9).
-q(1,3,1), q(1,3,2), q(1,3,3), q(1,3,4), q(1,3,5), q(1,3,6), q(1,3,7), q(1,3,8), q(1,3,9).
+q(1,1,1 | q(1,1,2 | q(1,1,3 | q(1,1,4 | q(1,1,5 | q(1,1,6 | q(1,1,7 | q(1,1,8 | q(1,1,9).
+q(1,2,1 | q(1,2,2 | q(1,2,3 | q(1,2,4 | q(1,2,5 | q(1,2,6 | q(1,2,7 | q(1,2,8 | q(1,2,9).
+q(1,3,1 | q(1,3,2 | q(1,3,3 | q(1,3,4 | q(1,3,5 | q(1,3,6 | q(1,3,7 | q(1,3,8 | q(1,3,9).
 ..
 ..
-q(1,9,1), q(1,9,2), q(1,9,3), q(1,9,4), q(1,9,5), q(1,9,6), q(1,9,7), q(1,9,8), q(1,9,9).
-q(2,2,1), q(2,2,2), q(2,2,3), q(2,2,4), q(2,2,5), q(2,2,6), q(2,2,7), q(2,2,8), q(2,2,9).
+q(1,9,1 | q(1,9,2 | q(1,9,3 | q(1,9,4 | q(1,9,5 | q(1,9,6 | q(1,9,7 | q(1,9,8 | q(1,9,9).
+q(2,2,1 | q(2,2,2 | q(2,2,3 | q(2,2,4 | q(2,2,5 | q(2,2,6 | q(2,2,7 | q(2,2,8 | q(2,2,9).
 ..
 ..
-q(2,9,1), q(2,9,2), q(2,9,3), q(2,9,4), q(2,9,5), q(2,9,6), q(2,9,7), q(2,9,8), q(2,9,9).
+q(2,9,1 | q(2,9,2 | q(2,9,3 | q(2,9,4 | q(2,9,5 | q(2,9,6 | q(2,9,7 | q(2,9,8 | q(2,9,9).
 ..
 ..
-q(9,8,1), q(9,8,2), q(9,8,3), q(9,8,4), q(9,8,5), q(9,8,6), q(9,8,7), q(9,8,8), q(9,8,9).
-q(9,9,1), q(9,9,2), q(9,9,3), q(9,9,4), q(9,9,5), q(9,9,6), q(9,9,7), q(9,9,8), q(9,9,9).
+q(9,8,1 | q(9,8,2 | q(9,8,3 | q(9,8,4 | q(9,8,5 | q(9,8,6 | q(9,8,7 | q(9,8,8 | q(9,8,9).
+q(9,9,1 | q(9,9,2 | q(9,9,3 | q(9,9,4 | q(9,9,5 | q(9,9,6 | q(9,9,7 | q(9,9,8 | q(9,9,9).
 ```
 
 --- 
@@ -297,17 +297,17 @@ q(9,9,1), q(9,9,2), q(9,9,3), q(9,9,4), q(9,9,5), q(9,9,6), q(9,9,7), q(9,9,8), 
 **Rule 2**: each value from range `1..9` in at least 1 cell on board
 
 ```prolog
-dom[Z] :: q(X,Y,Z) : domCoords[X,Y].
+dom[Z] :: domCoords[X,Y] : q(X,Y,Z).
 ```
 
 Which will generate a grand total of 9 clauses of length 81 grouped by `Z`:
 
 ```prolog
-q(1,1,1), q(1,2,1), .., q(1,9,1), q(2,1,1), q(2,2,1), .., q(2,9,1), .. .., q(9,9,1).
-q(1,1,2), q(1,2,2), .., q(1,9,2), q(2,1,2), q(2,2,2), .., q(2,9,2), .. .., q(9,9,2).
+q(1,1,1 | q(1,2,1 | .., q(1,9,1 | q(2,1,1 | q(2,2,1 | .., q(2,9,1 | .. ..| q(9,9,1).
+q(1,1,2 | q(1,2,2 | .., q(1,9,2 | q(2,1,2 | q(2,2,2 | .., q(2,9,2 | .. ..| q(9,9,2).
 ..
 ..
-q(1,1,9), q(1,2,9), .., q(1,9,9), q(2,1,9), q(2,2,9), .., q(2,9,9), .. .., q(9,9,9).
+q(1,1,9 | q(1,2,9 | .., q(1,9,9 | q(2,1,9 | q(2,2,9 | .., q(2,9,9 | .. ..| q(9,9,9).
 ```
 
 ---
@@ -315,14 +315,14 @@ q(1,1,9), q(1,2,9), .., q(1,9,9), q(2,1,9), q(2,2,9), .., q(2,9,9), .. .., q(9,9
 **Rule 3**: no two same values in a column
 
 ```prolog
-dom[X1], dom[X2], X1 < X2 :: ~q(X1,Y,Z), ~q(X2,Y,Z).
+dom[X1], dom[X2], X1 < X2 :: ~q(X1,Y,Z) | ~q(X2,Y,Z).
 ```
 
 Here, we bind `X1, X2` and generate clauses for all `X1, X2` pairs, where `X1 < X2` holds.\
 Restriction `X1 != X2` is also valid, but generates redundant symmetrical literals.
 
 Knowing that `X1 < X`2, hence `X1 != X2`, `Y` is a column index and `Z` is a value,\
-`~q(X1,Y,Z), ~q(X2,Y,Z)` evaluates to False if both literals are True. \
+`~q(X1,Y,Z) | ~q(X2,Y,Z)` evaluates to False if both literals are True. \
 We can't ever satisfy this clause with two same values `Z` in different rows in the same column `Y`.
 
 ---
@@ -330,7 +330,7 @@ We can't ever satisfy this clause with two same values `Z` in different rows in 
 **Rule 4**: no two same values in a row
 
 ```prolog
-dom[Y1], dom[Y2], Y1 < Y2 :: ~q(X,Y1,Z), ~q(X,Y2,Z).
+dom[Y1], dom[Y2], Y1 < Y2 :: ~q(X,Y1,Z) | ~q(X,Y2,Z).
 ```
 
 Here, we follow the same logic as in **rule 3**, but for rows.
@@ -342,7 +342,7 @@ Here, we follow the same logic as in **rule 3**, but for rows.
 ```prolog
 boxBegin[ROOTX,ROOTY],
 boxOffset[X1,Y1], box[X2,Y2],X1 <= X2, Y1 != Y2
-		:: ~q(ROOTX + X1,ROOTY + Y1,Z), ~q(ROOTX + X2,ROOTY + Y2,Z).
+		:: ~q(ROOTX + X1,ROOTY + Y1,Z) | ~q(ROOTX + X2,ROOTY + Y2,Z).
 ```
 
 We bind `ROOTX, ROOTY` to the starting index of our inner box\

@@ -98,7 +98,6 @@ func ParseProgramFromStrings(lines []string) (p Program, err error) {
 	return p, nil
 }
 
-
 func splitBuleRule(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	if atEOF && len(data) == 0 {
 		return 0, nil, nil
@@ -225,7 +224,7 @@ func (rule *Rule) parseGeneratorAndConstraints(tokens Tokens) {
 
 func (rule *Rule) parseClauses(tokens Tokens) error {
 
-	splitRuleElementsSeparators := map[tokenKind]bool{tokenDot: true, tokenQuestionsmark: true, token2RuleComma: true}
+	splitRuleElementsSeparators := map[tokenKind]bool{tokenDot: true, tokenQuestionsmark: true, tokenPipe: true}
 	rest := splitTokens(tokens, splitRuleElementsSeparators)
 	for _, sep := range rest {
 		asserts(len(sep.tokens) > 0, "problem:", rule.String())
@@ -234,32 +233,30 @@ func (rule *Rule) parseClauses(tokens Tokens) error {
 			rule.IsQuestionMark = true
 		}
 		//parse for Iterators
-		splitIterator := map[tokenKind]bool{tokenColon: true}
-		iterator := splitTokens(sep.tokens, splitIterator)
-		if len(iterator) == 1 {
-			literal := parseLiteral(iterator[0].tokens)
-			//	if literal.Fact {
-			//		return fmt.Errorf("%s should not be fact in rule %s", literal.String(), tokens )
-			//	}
+		splitIterator := map[tokenKind]bool{tokenColon: true, token2RuleComma: true}
+		toks := splitTokens(sep.tokens, splitIterator)
+		if len(toks) == 1 { // no iterators
+			literal := parseLiteral(toks[0].tokens)
 			rule.Literals = append(rule.Literals, literal)
 		} else {
-			rule.Iterators = append(rule.Iterators, parseIterator(iterator))
+			rule.Iterators = append(rule.Iterators, parseIterator(toks))
 		}
 	}
 	return nil
 }
 
-// First element is a Literal
+// Last element is a Literal
+// <Fact[]>, .. ,  : literal
 func parseIterator(iteratorDef []SepToken) (iterator Iterator) {
 
 	for i, genElement := range iteratorDef {
-		if i == 0 {
+		if len(iteratorDef)-1 == i { // last element
 			assert(checkIfLiteral(genElement.tokens))
 			iterator.Head = parseLiteral(genElement.tokens)
 		} else {
 			if checkIfLiteral(genElement.tokens) {
 				iterator.Conditionals = append(iterator.Conditionals, parseLiteral(genElement.tokens))
-			} else {
+			} else { // must be constraint
 				iterator.Constraints = append(iterator.Constraints, parseConstraint(genElement.tokens))
 			}
 		}
@@ -441,6 +438,7 @@ const (
 	tokenAtomBracketLeft      // [
 	tokenAtomBracketRight     // ]
 	tokenNegation             // ~
+	tokenPipe                 // |
 	token2TermComma           // ,
 	token2RuleComma           // ,
 	tokenColon                // :
@@ -522,6 +520,8 @@ func printToken(kind tokenKind) (s string) {
 		s = "AtomBR"
 	case tokenNegation:
 		s = "NEGATION"
+	case tokenPipe:
+		s = "PIPE"
 	case token2TermComma:
 		s = "TERMCOMMA"
 	case token2RuleComma:
@@ -721,6 +721,9 @@ func lexRuleElement(l *lexer) (fn stateFn) {
 			l.emit(tokenError)
 			return l.errorf("%s", "This should be an equivalence!")
 		}
+	case r == '|':
+		l.emit(tokenPipe)
+		fn = lexRuleElement
 	case r == ',':
 		l.emit(token2RuleComma)
 		fn = lexRuleElement
@@ -763,7 +766,7 @@ func lexAtom(l *lexer) stateFn {
 			l.backup()
 			l.emit(token2AtomName)
 			return lexRuleElement
-		case r == '.' :
+		case r == '.':
 			l.backup()
 			l.emit(token2AtomName)
 			l.next()
@@ -774,6 +777,12 @@ func lexAtom(l *lexer) stateFn {
 			l.emit(token2AtomName)
 			l.next()
 			l.emit(tokenQuestionsmark)
+			return lexRuleElement
+		case r == '|':
+			l.backup()
+			l.emit(token2AtomName)
+			l.next()
+			l.emit(tokenPipe)
 			return lexRuleElement
 		case r == ',':
 			l.backup()
@@ -878,15 +887,15 @@ func lexConstraintRight(l *lexer) stateFn {
 		switch {
 		case r == eof:
 			return l.errorf("%s", "Constraint lexing should not end here.")
-//		case r == '-':
-//			if l.next() == '>' {
-//				l.backup()
-//				l.backup()
-//				l.emit(token2TermExpression)
-//				return lexRuleElement
-//			} else {
-//				l.backup()
-//			}
+			//		case r == '-':
+			//			if l.next() == '>' {
+			//				l.backup()
+			//				l.backup()
+			//				l.emit(token2TermExpression)
+			//				return lexRuleElement
+			//			} else {
+			//				l.backup()
+			//			}
 		case r == '.':
 			l.next()
 			rr := l.next()
