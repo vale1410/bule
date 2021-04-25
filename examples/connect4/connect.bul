@@ -45,14 +45,17 @@ domC[1..c].
 domC[C], domR[R]  ::  dom[C,R]. 
 player[black]. player[white].
 
-%% Time: 0 is intial position before moves are made
-%% Time: 1 only black moves 
-%% Time: 2+ first white then black 
+%% Time: 0 is the initial situation of the board before any moves are made
+%% Time: 1 only black makes a move
+%% Time: 2+ first white then black make moves
 
 domT0[0..d].
 domT[1..d].
 
+%% 1 estimate the number of bits needed for C columns
+
 maxBit[0..10].
+
 domC[C], maxBit[I], 2**I <= c :: choose[C,I,(C/(2**I))#mod2]. 
 choose[_,I,_] :: bit[I]. 
 
@@ -80,7 +83,9 @@ init[A,C,R]                       ::  board(A,C,R,0).
 dom[C,R], player[A], ~init[A,C,R] :: ~board(A,C,R,0).
 
 %% FIX: white and black at least one!
-%% FIX: dont choose columns that do not exist!
+%% FIX: At least one column has to be chosen 
+%% FIX: dont choose columns that are full!
+%% FIX: dont choose columns that are beyond!
 
 domC[C], domT[T], domT[T+1], player[P], player[A] ::  
     won(T) | 
@@ -94,7 +99,7 @@ domC[C], domT[T], domT[T+1], player[P], player[A] ::
 %% if a board position [C,R] is chosen, 
 %% then imply the corresponding bits for the move. 
 dom[C,R], choose[C,I,B], player[A] :: 
-    % board(white,C,R,T) | board(black,C,R,T) |
+    %board(white,C,R,T) | board(black,C,R,T) |
     board(A,C,R,T) |
    ~board(A,C,R,T+1) | 
     one[B]  :  move(A,I,T+1) | 
