@@ -65,16 +65,16 @@ choose[_,I,_] :: bit[I].
 #exists[d], dom[C,R], C<=c , R+(q-1)<=r         :: winO(C,R,0)?
 #exists[d], dom[C,R], dir[Z], C+q-1<=c,R+q-1<=r :: winD(C,R,Z)?
 
-~won(T), won(T+1).
+~won(T) | won(T+1).
 
-~board(black,C,R,T), ~board(white,C,R,T).
+~board(black,C,R,T) | ~board(white,C,R,T).
 
-~board(A,C,R,T), board(A,C,R,T+1). 
+~board(A,C,R,T) | board(A,C,R,T+1). 
 
-~won(T), board(A,C,R,T), ~board(A,C,R,T+1).
+~won(T) | board(A,C,R,T) | ~board(A,C,R,T+1).
 
-~board(black,C,R+1,T+1), board(black,C,R,T), board(white,C,R,T+1).  %% gravity
-~board(white,C,R+1,T+1), board(black,C,R,T), board(white,C,R,T).    %% gravity
+~board(black,C,R+1,T+1) | board(black,C,R,T) | board(white,C,R,T+1).  %% gravity
+~board(white,C,R+1,T+1) | board(black,C,R,T) | board(white,C,R,T).    %% gravity
 
 init[A,C,R]                       ::  board(A,C,R,0).
 dom[C,R], player[A], ~init[A,C,R] :: ~board(A,C,R,0).
@@ -83,35 +83,35 @@ dom[C,R], player[A], ~init[A,C,R] :: ~board(A,C,R,0).
 %% FIX: dont choose columns that do not exist!
 
 domC[C], domT[T], domT[T+1], player[P], player[A] ::  
-    won(T),         
-   ~board(P,C,R-1,T), 
-    board(black,C,R,T), 
-    board(white,C,R,T), 
-    moveL(A,I,T+1) : choose[C,I,0], 
-   ~moveL(A,I,T+1) : choose[C,I,1], 
+    won(T) | 
+   ~board(P,C,R-1,T) | 
+    board(black,C,R,T) | 
+    board(white,C,R,T) | 
+    choose[C,I,0] :  moveL(A,I,T+1) | 
+    choose[C,I,1] : ~moveL(A,I,T+1) | 
     board(A,C,R,T+1).       
 
 %% if a board position [C,R] is chosen, 
 %% then imply the corresponding bits for the move. 
 dom[C,R], choose[C,I,B], player[A] :: 
-    % board[white,C,R,T], board[black,C,R,T], 
-    board[A,C,R,T], 
-   ~board[A,C,R,T+1], 
-    move(A,I,T+1):one[B], 
-   ~move(A,I,T+1):zero[B], 
+    % board(white,C,R,T) | board(black,C,R,T) |
+    board(A,C,R,T) |
+   ~board(A,C,R,T+1) | 
+    one[B]  :  move(A,I,T+1) | 
+    zero[B] : ~move(A,I,T+1).
  
 
 %% Winning Positions
 % at least one winning position for black
-winO(C,R,1) : dom[C+(q-1),R]   : dom[C,R], 
-winO(C,R,0) : dom[C,R+(q-1)]   : dom[C,R], 
-winD(C,R,Z) : dom[C+q-1,R+q-1] : dom[C,R] : dir[Z].
+dom[C+(q-1),R],   dom[C,R]         : winO(C,R,1) | 
+dom[C,R+(q-1)],   dom[C,R]         : winO(C,R,0) | 
+dom[C+q-1,R+q-1], dom[C,R], dir[Z] : winD(C,R,Z) .
 
 % orthogonal: horizontal (Z==0) and vertical(Z==1) winning positions (winO)
-dir[Z]              ::              ~board(white,C+Z*D,R+(1-Z)*D,d) : connect[D].
-dir[Z], connect[D]  :: ~winO(C,R,Z), board(black,C+Z*D,R+(1-Z)*D,d).
+dir[Z]              ::  connect[D] : ~board(white,C+Z*D,R+(1-Z)*D,d).
+dir[Z], connect[D]  :: ~winO(C,R,Z) | board(black,C+Z*D,R+(1-Z)*D,d).
 
 %%% diagonal rising (Z==0) and falling (Z==1) winning positions (winD)
-dir[Z]             ::               ~board(white, C+D,R+Z*(q-1)+((-1)**Z)*D,d) : connect[D].
-dir[Z], connect[D] :: ~winD(C,R,Z),  board(black, C+D,R+Z*(q-1)+((-1)**Z)*D,d). 
+dir[Z]             :: connect[D]   : ~board(white, C+D,R+Z*(q-1)+((-1)**Z)*D,d).
+dir[Z], connect[D] :: ~winD(C,R,Z) |  board(black, C+D,R+Z*(q-1)+((-1)**Z)*D,d). 
 
