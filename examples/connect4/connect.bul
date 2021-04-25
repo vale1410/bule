@@ -40,10 +40,13 @@ dir[0..1].
 % domains for Row and Column . 
 domR0[0..r].
 domR[1..r].
+topRow[r].
 domC[1..c].
 
 domC[C], domR[R]  ::  dom[C,R]. 
-player[black]. player[white].
+
+player[black]. 
+player[white].
 
 %% Time: 0 is the initial situation of the board before any moves are made
 %% Time: 1 only black makes a move
@@ -87,19 +90,45 @@ dom[C,R], player[A], ~init[A,C,R] :: ~board(A,C,R,0).
 %% FIX: dont choose columns that are full!
 %% FIX: dont choose columns that are beyond!
 
-domC[C], domT[T], domT[T+1], player[P], player[A] ::  
+%% if the column exists and the TopRow in that column is empty
+%% then this is a legal move and it has to be done, 
+%% otherwise this clause is satisfied. 
+choose[C,J,B], topRow[Top], domT[T], domT[T+1] ::  
     won(T) | 
-   ~board(P,C,R-1,T) | 
-    board(black,C,R,T) | 
-    board(white,C,R,T) | 
-    choose[C,I,0] :  moveL(A,I,T+1) | 
-    choose[C,I,1] : ~moveL(A,I,T+1) | 
+    board(P,C,Top,T) | 
+    choose[C,I,0] :  moveL(white,I,T+1) | 
+    choose[C,I,1] : ~moveL(white,I,T+1) | 
+    one[B]  :  move(white,J,T+1) | 
+    zero[B] : ~move(white,J,T+1).
+
+%% for white 
+domC[C], row[R-1], row[R], domT[T], domT[T+1], A == white ::  
+    won(T) | 
+    ~board(black,C,R-1,T) | ~board(white,C,R-1,T) | 
+    board(black,C,R,T) | board(white,C,R,T) | 
+    choose[C,I,0] :  move(A,I,T+1) | 
+    choose[C,I,1] : ~move(A,I,T+1) | 
     board(A,C,R,T+1).       
+
+%% for black
+domC[C], row[R-1], row[R], domT[T], domT[T+1], A == black ::  
+    won(T) | 
+    ~board(black,C,R-1,T) | ~board(white,C,R-1,T) | 
+    board(black,C,R,T) | board(white,C,R,T+1) | 
+    choose[C,I,0] :  move(A,I,T+1) | 
+    choose[C,I,1] : ~move(A,I,T+1) | 
+    board(A,C,R,T+1).       
+
+%% Excluding the moves for C > c.
+domT[T], player[A], C==(c+1)..(2^Bit) ::  
+    won(T) | 
+    choose[C,I,0] :  move(A,I,T+1) | 
+    choose[C,I,1] : ~move(A,I,T+1).
+
 
 %% if a board position [C,R] is chosen, 
 %% then imply the corresponding bits for the move. 
 dom[C,R], choose[C,I,B], player[A] :: 
-    %board(white,C,R,T) | board(black,C,R,T) |
     board(A,C,R,T) |
    ~board(A,C,R,T+1) | 
     one[B]  :  move(A,I,T+1) | 
