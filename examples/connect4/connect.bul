@@ -1,5 +1,4 @@
 
-
 %%  q=2, c=1. r=2. d=(c*r+1)/2. %%  > black lose!
 %%  q=2, c=1. r=4. d=(c*r+1)/2. %%  > black lose!
 
@@ -31,20 +30,88 @@
 %#const d=c*r.
 %#const d=2*((c*r+1)/2)-1. 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% %% abd
+%%% %% BUGGY Example> Black should not be able to win
+%%% #const q=4.
+%%% #const c=5. 
+%%% #const r=5. 
+%%% 
+%%% #const d=2. % 
+%%% 
+%%% init[black,2,1].
+%%% init[white,2,2].
+%%% init[black,3,1].
+%%% init[white,3,2].
+%%% 
+%%% init[white,1,1].
+%%% %init[white,4,1].
+%%% %init[black,5,1].
+%%% 
+%%% %5       
+%%% %4      
+%%% %3      
+%%% %2 WW   
+%%% %1WBBWB
+%%% % 12345
+%%% %%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%  Should be SAT but is UNSAT
+%%%#const q=3.
+%%%#const c=4. 
+%%%#const r=1. 
+%%%
+%%%#const d=2. % 
+%%%
+%%%init[black,2,1].
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% abd
-#const q=4.
-#const c=5. 
-#const r=5. 
+#const q=3.
+#const c=3. 
+#const r=3. 
 
 #const d=2. % 
-#const maxColumn=8. % 
 
 init[black,2,1].
-init[white,2,2].
-init[black,3,1].
-init[white,3,2].
-init[white,5,1].
+init[black,4,1].
+
+
+%init[white,1,1].
+%init[black,3,1].
+
+%% init[white,1,2].
+%% init[black,2,2].
+%% init[black,3,2].
+%% init[white,4,2].
+%% init[white,5,2].
+%% 
+%% init[black,1,3].
+%% init[white,2,3].
+%% init[white,3,3].
+%% init[black,4,3].
+%% init[black,5,3].
+%% 
+%% init[white,1,4].
+%% init[black,2,4].
+%% init[black,3,4].
+%% init[white,4,4].
+%% init[white,5,4].
+%% 
+%% init[black,3,5].
+%% init[black,2,5].
+%% init[white,5,5].
+
+
+%5 BB W
+%4WBBWW       
+%3BWWBB      
+%2WBBWW       
+%1BWWBB      
+% 12345
+%%%%%%%%%%%%%
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -53,8 +120,7 @@ connect[0..q-1].
 one[1]. 
 zero[0].
 
-% direction: used in the different winning configurations.
-dir[0..1].
+final[d].
 
 % domains for Row and Column . 
 domR0[0..r].
@@ -64,6 +130,21 @@ domC[1..c].
 
 domC[C], domR[R]  ::  dom[C,R]. 
 
+% direction: used in the different winning configurations.
+dir[0..3].
+
+%% Z==0: horisontal 
+dom[C,R], connect[Q], dom[C,R+q-1] :: line[0,C,R,C,R+Q].
+%% Z==1: vertical
+dom[C,R], connect[Q], dom[C+q-1,R] :: line[1,C,R,C+Q,R].
+%% Z==2: diagonal up 
+dom[C,R], connect[Q], dom[C+q-1,R+q-1] :: line[2,C,R,C+Q,R+Q].
+%% Z==3: diagonal down
+dom[C,R], connect[Q], dom[C+q-1,R-q+1] :: line[3,C,R,C+Q,R-Q].
+
+line[Z,C,R,_,_] :: lineStart[Z,C,R].
+
+
 player[black]. 
 player[white].
 
@@ -71,13 +152,13 @@ player[white].
 %% Time: 1 only black makes a move
 %% Time: 2+ first white then black make moves
 
-domT0[0..d].
-domT[1..d].
+final[F] :: domT0[0..F].
+final[F] :: domT[1..F].
 
 domT[T], T>1 :: play[white,T].
 domT[T],     :: play[black,T].
 
-%% 1 estimate the number of bits needed for C columns
+%% estimate the number of bits needed for C columns
 availableBit[0..10].
 availableBit[I] :: exp[I,2**I,2**(I+1)]. %% assuming we have at least 2 columns
 exp[E,A,B], A<c, B >= c :: maxBit[E].
@@ -86,15 +167,13 @@ exp[E,A,B], A<c, B >= c :: maxBit[E].
 maxBit[J] :: bit[0..J].
 maxBit[J] :: allColumns[1..2**(J+1)].
 bit[I], allColumns[C] :: choose[C,I,((C-1)/(2**I))#mod2]. 
-maxBit[J] :: forbidden[c+1..2**J].
 
-#exists[T], domT0[T], domT[T+1]                 :: won(T)? 
-#forall[T], domT[T], T>1, bit[I]                :: moveU(I,T)? 
-#exists[T], play[A,T], bit[I]                   :: move(A,I,T)? 
-#exists[T], dom[C,R], domT0[T], player[A]       :: board(A,C,R,T)?
-#exists[d], dom[C,R], C+(q-1)<=c, R<=r          :: winO(C,R,1)?
-#exists[d], dom[C,R], C<=c , R+(q-1)<=r         :: winO(C,R,0)?
-#exists[d], dom[C,R], dir[Z], C+q-1<=c,R+q-1<=r :: winD(C,R,Z)?
+#exists[T], domT0[T], domT[T+1]             :: won(T)? 
+#forall[T], domT[T], T>1, bit[I]            :: moveU(I,T)? 
+%#exists[T], domT[T], T>1, bit[I]            :: moveU(I,T)? 
+#exists[T], play[A,T], bit[I]               :: move(A,I,T)? 
+#exists[T], dom[C,R], domT0[T], player[A]   :: board(A,C,R,T)?
+#exists[F], final[F], lineStart[Z,C,R]      :: winL(Z,C,R)?
 
 %~won(0). probably not needed .
 ~won(T) | won(T+1).
@@ -139,7 +218,8 @@ domC[C], domR[R-1], domR[R], player[B], play[A,T], domT[T+1] ::
     board(A,C,R,T+1).       
 
 %% Excluding the moves for C > c.
-forbidden[c+1..maxColumn].
+maxBit[J] :: forbidden[c+1..2**(J+1)].
+
 domT[T], domT[T+1], player[A], forbidden[C] ::  
     won(T) |  %% is redundant, can be removed
     choose[C,I,0] :  move(A,I,T+1) | 
@@ -165,15 +245,7 @@ dom[C,R], choose[C,I,B], A == black , T==0 ::
 
 %% Winning Positions
 % at least one winning position for black
-dom[C+(q-1),R],   dom[C,R]         : winO(C,R,1) | 
-dom[C,R+(q-1)],   dom[C,R]         : winO(C,R,0) | 
-dom[C+q-1,R+q-1], dom[C,R], dir[Z] : winD(C,R,Z) .
-
-% orthogonal: horizontal (Z==0) and vertical(Z==1) winning positions (winO)
-dir[Z]              ::  connect[D] : ~board(white,C+Z*D,R+(1-Z)*D,d).
-dir[Z], connect[D]  :: ~winO(C,R,Z) | board(black,C+Z*D,R+(1-Z)*D,d).
-
-%%% diagonal rising (Z==0) and falling (Z==1) winning positions (winD)
-dir[Z]             :: connect[D]   : ~board(white, C+D,R+Z*(q-1)+((-1)**Z)*D,d).
-dir[Z], connect[D] :: ~winD(C,R,Z) |  board(black, C+D,R+Z*(q-1)+((-1)**Z)*D,d). 
-
+lineStart[Z,C,R] : winL(Z,C,R).
+final[F], line[Z,C,R,CC,RR] :: ~winL(Z,C,R) | board(black,CC,RR,F).
+% avoid reaching a winning position of white.
+final[F], lineStart[Z,C,R]  :: line[Z,C,R,CC,RR] : ~board(white,CC,RR,F).
