@@ -347,9 +347,9 @@ func stageInfo(p *bule.Program, stage string, info string) {
 func init() {
 	rootCmd.AddCommand(groundCmd)
 	groundCmd.PersistentFlags().BoolVarP(&quantificationFlag, "quant", "q", true, "Print Quantification")
-	groundCmd.PersistentFlags().BoolVarP(&withFactsFlag, "facts", "f", false, "Output all facts.")
-	groundCmd.PersistentFlags().BoolVarP(&textualFlag, "text", "t", false, "true: print grounded textual bule format. false: print dimacs format for QBF and SAT solvers.")
+	groundCmd.PersistentFlags().BoolVarP(&withFactsFlag, "facts", "f", true, "Output all facts.")
+	groundCmd.PersistentFlags().BoolVarP(&textualFlag, "text", "t", true, "true: print grounded textual bule format. false: print dimacs format for QBF and SAT solvers.")
 	groundCmd.PersistentFlags().BoolVarP(&printInfoFlag, "info", "i", true, "Print all units as well.")
-	groundCmd.PersistentFlags().BoolVarP(&unitPropagationFlag, "up", "u", true, "Perform Unitpropagation.")
+	groundCmd.PersistentFlags().BoolVarP(&unitPropagationFlag, "up", "u", false, "Perform Unitpropagation.")
 	groundCmd.PersistentFlags().StringToIntVarP(&constStringMapFlag, "const", "c", map[string]int{}, "Comma separated list of constant instantiations: c=d.")
 }
