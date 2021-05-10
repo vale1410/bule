@@ -30,52 +30,52 @@
 %#const d=c*r.
 %#const d=2*((c*r+1)/2)-1. 
 
-%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% %% abd
-%%% %% BUGGY Example> Black should not be able to win
-%%% #const q=4.
-%%% #const c=5. 
-%%% #const r=5. 
+%%%   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   %% abd
+%%%   %% BUGGY Example> Black should not be able to win
+%%%   #const q=4.
+%%%   #const c=5. 
+%%%   #const r=5. 
+%%%   
+%%%   #const d=2. % 
+%%%   
+%%%   init[black,2,1].
+%%%   init[white,2,2].
+%%%   init[black,3,1].
+%%%   init[white,3,2].
+%%%   
+%%%   init[white,1,1].
+%%%   init[white,4,1].
+%%%   init[black,5,1].
+%%%   
+%%%   %5       
+%%%   %4      
+%%%   %3      
+%%%   %2 WW   
+%%%   %1WBBWB
+%%%   % 12345
+%%%   %%%%%%%%%%%%%
+
+%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% %%%%%  Should be SAT but is UNSAT
+%%% #const q=3.
+%%% #const c=4. 
+%%% #const r=1. 
 %%% 
 %%% #const d=2. % 
 %%% 
 %%% init[black,2,1].
-%%% init[white,2,2].
-%%% init[black,3,1].
-%%% init[white,3,2].
-%%% 
-%%% init[white,1,1].
-%%% %init[white,4,1].
-%%% %init[black,5,1].
-%%% 
-%%% %5       
-%%% %4      
-%%% %3      
-%%% %2 WW   
-%%% %1WBBWB
-%%% % 12345
-%%% %%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%  Should be SAT but is UNSAT
-%%%#const q=3.
-%%%#const c=4. 
-%%%#const r=1. 
-%%%
-%%%#const d=2. % 
-%%%
-%%%init[black,2,1].
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% abd
-#const q=3.
-#const c=3. 
-#const r=3. 
-
-#const d=2. % 
-
-init[black,2,1].
-init[black,4,1].
+%%#const q=3.
+%%#const c=3. 
+%%#const r=3. 
+%%
+%%#const d=2. % 
+%% 
+%% init[black,2,1].
+%% init[black,4,1].
 
 
 %init[white,1,1].
@@ -170,7 +170,6 @@ bit[I], allColumns[C] :: choose[C,I,((C-1)/(2**I))#mod2].
 
 #exists[T], domT0[T], domT[T+1]             :: won(T)? 
 #forall[T], domT[T], T>1, bit[I]            :: moveU(I,T)? 
-%#exists[T], domT[T], T>1, bit[I]            :: moveU(I,T)? 
 #exists[T], play[A,T], bit[I]               :: move(A,I,T)? 
 #exists[T], dom[C,R], domT0[T], player[A]   :: board(A,C,R,T)?
 #exists[F], final[F], lineStart[Z,C,R]      :: winL(Z,C,R)?
@@ -225,12 +224,13 @@ domT[T], domT[T+1], player[A], forbidden[C] ::
     choose[C,I,0] :  move(A,I,T+1) | 
     choose[C,I,1] : ~move(A,I,T+1).
 
+
 %% if a board position [C,R] is chosen, 
 %% then imply the corresponding bits for the move. 
 dom[C,R], choose[C,I,B], play[A,T], domT[T+1] :: 
     board(A,C,R,T) |
    ~board(A,C,R,T+1) | 
-    one[B]  :  move(A,I,T+1) | 
+    one[B] :  move(A,I,T+1) | 
     zero[B] : ~move(A,I,T+1).
 
 dom[C,R], A == white, T==0 :: 
@@ -243,9 +243,9 @@ dom[C,R], choose[C,I,B], A == black , T==0 ::
     one[B]  :  move(A,I,T+1) | 
     zero[B] : ~move(A,I,T+1).
 
-%% Winning Positions
+%%%%% Winning Positions
 % at least one winning position for black
 lineStart[Z,C,R] : winL(Z,C,R).
-final[F], line[Z,C,R,CC,RR] :: ~winL(Z,C,R) | board(black,CC,RR,F).
+final[F], line[Z,C,R,C2,R2] :: ~winL(Z,C,R) | board(black,C2,R2,F).
 % avoid reaching a winning position of white.
-final[F], lineStart[Z,C,R]  :: line[Z,C,R,CC,RR] : ~board(white,CC,RR,F).
+final[F], lineStart[Z,C,R]  :: line[Z,C,R,C2,R2] : ~board(white,C2,R2,F).
