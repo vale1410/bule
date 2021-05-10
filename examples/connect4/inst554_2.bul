@@ -1,0 +1,25 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% abd
+%% BUGGY Example> Black should not be able to win
+#const q=4.
+#const c=5. 
+#const r=5. 
+
+#const d=2. % 
+
+init[black,2,1].
+init[white,2,2].
+init[black,3,1].
+init[white,3,2].
+
+init[white,1,1].
+init[white,4,1].
+init[black,5,1].
+
+%5       
+%4      
+%3      
+%2 WW   
+%1WBBWB
+% 12345
+%%%%%%%%%%%%%

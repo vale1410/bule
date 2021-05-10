@@ -1,5 +1,22 @@
 #!/bin/zsh
 
+## q=2, c=1. r=2. d=(c*r+1)/2. %%  > black lose!
+## q=2, c=1. r=4. d=(c*r+1)/2. %%  > black lose!
+##
+## q=2, c=2. r=2. d=(c*r+1)/2. %%  > black win!
+## q=2, c=3. r=2. d=(c*r+1)/2. %%  > black win!
+## q=2, c=3. r=3. d=(c*r+1)/2. %%  > black win!
+##
+## q=3, c=3. r=3. d=(c*r+1)/2. %%  > black loose!
+## q=3, c=4. r=3. d=(c*r+1)/2. %%  > black win!
+## q=3, c=4. r=4. d=(c*r+1)/2. %%  > black win!
+## q=3, c=5. r=5. d=(c*r+1)/2. %%  > black win!
+##
+## q=4, c=4. r=4. d=(c*r+1)/2. %%  > draw !
+## q=4, c=6. r=4. d=(c*r+1)/2. %%  > white win!
+## q=4, c=6. r=7. d=(c*r+1)/2. %%  > black win!
+## q=4, c=7. r=6. d=(c*r+1)/2. %%  > original! black win!
+
 typeset -A input
 typeset -A output
 

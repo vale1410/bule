@@ -1,0 +1,44 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% abd
+%%#const q=3.
+%%#const c=5. 
+%%#const r=5. 
+%%
+%%#const d=2. % 
+%% 
+%% init[black,2,1].
+%% init[black,4,1].
+
+%% init[white,1,1].
+%% init[black,3,1].
+
+%% init[white,1,2].
+%% init[black,2,2].
+%% init[black,3,2].
+%% init[white,4,2].
+%% init[white,5,2].
+%% 
+%% init[black,1,3].
+%% init[white,2,3].
+%% init[white,3,3].
+%% init[black,4,3].
+%% init[black,5,3].
+%% 
+%% init[white,1,4].
+%% init[black,2,4].
+%% init[black,3,4].
+%% init[white,4,4].
+%% init[white,5,4].
+%% 
+%% init[black,3,5].
+%% init[black,2,5].
+%% init[white,5,5].
+
+
+%5 BB W
+%4WBBWW       
+%3BWWBB      
+%2WBBWW       
+%1BWWBB      
+% 12345
+%%%%%%%%%%%%%

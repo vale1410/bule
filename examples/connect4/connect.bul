@@ -1,21 +1,4 @@
 
-%%  q=2, c=1. r=2. d=(c*r+1)/2. %%  > black lose!
-%%  q=2, c=1. r=4. d=(c*r+1)/2. %%  > black lose!
-
-%%  q=2, c=2. r=2. d=(c*r+1)/2. %%  > black win!
-%%  q=2, c=3. r=2. d=(c*r+1)/2. %%  > black win!
-%%  q=2, c=3. r=3. d=(c*r+1)/2. %%  > black win!
-
-%%  q=3, c=3. r=3. d=(c*r+1)/2. %%  > black win!
-%%  q=3, c=4. r=3. d=(c*r+1)/2. %%  > black win!
-%%  q=3, c=4. r=4. d=(c*r+1)/2. %%  > black win!
-%%  q=3, c=5. r=5. d=(c*r+1)/2. %%  > black win!
-
-%%  q=4, c=4. r=4. d=(c*r+1)/2. %%  > draw !
-%%  q=4, c=6. r=4. d=(c*r+1)/2. %%  > white win!
-%%  q=4, c=6. r=7. d=(c*r+1)/2. %%  > black win!
-%%  q=4, c=7. r=6. d=(c*r+1)/2. %%  > original! black win!
-
 #const q=3.
 #const c=3. 
 #const r=3. 
@@ -27,158 +10,76 @@ init[white,3,1].
 %%init[black,1,2].
 %%init[white,1,3].
 
-
-%%%  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%  %% abd
-%%%  %% BUGGY Example> Black should not be able to win
-%%%  #const q=4.
-%%%  #const c=5. 
-%%%  #const r=5. 
-%%%  
-%%%  #const d=2. % 
-%%%  
-%%%  init[black,2,1].
-%%%  init[white,2,2].
-%%%  init[black,3,1].
-%%%  init[white,3,2].
-%%%  
-%%%  init[white,1,1].
-%%%  init[white,4,1].
-%%%  init[black,5,1].
-%%%  
-%%%  %5       
-%%%  %4      
-%%%  %3      
-%%%  %2 WW   
-%%%  %1WBBWB
-%%%  % 12345
-%%%  %%%%%%%%%%%%%
-
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% %%%%%  Should be SAT but is UNSAT
-%% #const q=3.
-%% #const c=4. 
-%% #const r=1. 
-%% 
-%% #const d=2. % 
-%% 
-%% init[black,2,1].
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% abd
-%%#const q=3.
-%%#const c=3. 
-%%#const r=3. 
-%%
-%%#const d=2. % 
-%% 
-%% init[black,2,1].
-%% init[black,4,1].
-
-
-%init[white,1,1].
-%init[black,3,1].
-
-%% init[white,1,2].
-%% init[black,2,2].
-%% init[black,3,2].
-%% init[white,4,2].
-%% init[white,5,2].
-%% 
-%% init[black,1,3].
-%% init[white,2,3].
-%% init[white,3,3].
-%% init[black,4,3].
-%% init[black,5,3].
-%% 
-%% init[white,1,4].
-%% init[black,2,4].
-%% init[black,3,4].
-%% init[white,4,4].
-%% init[white,5,4].
-%% 
-%% init[black,3,5].
-%% init[black,2,5].
-%% init[white,5,5].
-
-
-%5 BB W
-%4WBBWW       
-%3BWWBB      
-%2WBBWW       
-%1BWWBB      
-% 12345
-%%%%%%%%%%%%%
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Basic Domains  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-connect[0..q-1].
+%% columns      : c=1..
+%% rows         : r=1..
+topRow[r].
+columns[c].
+topRow[R] :: domR[1..R].
+columns[C] :: domC[1..C].
+domC[C], domR[R]  ::  dom[C,R]. 
 
 one[1]. 
 zero[0].
-
-final[d].
-
-% domains for Row and Column . 
-domR0[0..r].
-domR[1..r].
-topRow[r].
-domC[1..c].
-
-domC[C], domR[R]  ::  dom[C,R]. 
-
-% direction: used in the different winning configurations.
-dir[0..3].
-
-%% Z==0: horisontal 
-dom[C,R], connect[Q], dom[C,R+q-1] :: line[0,C,R,C,R+Q].
-%% Z==1: vertical
-dom[C,R], connect[Q], dom[C+q-1,R] :: line[1,C,R,C+Q,R].
-%% Z==2: diagonal up 
-dom[C,R], connect[Q], dom[C+q-1,R+q-1] :: line[2,C,R,C+Q,R+Q].
-%% Z==3: diagonal down
-dom[C,R], connect[Q], dom[C+q-1,R-q+1] :: line[3,C,R,C+Q,R-Q].
-
-line[Z,C,R,_,_] :: lineStart[Z,C,R].
-
-
 player[black]. 
 player[white].
 
-%% Time: 0 is the initial situation of the board before any moves are made
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Time Management  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%% Time: 0 initial situation of the board before any moves
 %% Time: 1 only black makes a move
 %% Time: 2+ first white then black make moves
 
+final[d].
 final[F] :: domT0[0..F].
 final[F] :: domT[1..F].
 
 domT[T], T>1 :: play[white,T].
 domT[T],     :: play[black,T].
 
-%%%%%%%%%%%%%%% 
-%%% FIXME: merge clauses using this new fact:  
-%%%%%%%%%%%%%%% 
-% lastMove[Player,currentTimeStep,lastBlackMove,lastWhiteMove]
-domT0[T],domT[T+1] :: lastMove[black,T+1,T,T+1]. 
-domT[T], domT[T+1] :: lastMove[white,T+1,T,T]. 
+% lastMove[Player,currentTimeStep,lastTimeBlackMove,lastTimeWhiteMove]
+domT0[T], domT[T+1] :: lastMove[black,T+1,T,T+1].  %% FIXME isnt this domT
+domT[T],  domT[T+1] :: lastMove[white,T+1,T,T  ]. 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Winning configurations 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%% connect      : q=0..
+con[0..q-1].
+
+%% Z==0: horizontal 
+%%    1: vertical
+%%    2: diagonal up 
+%%    3: diagonal down
+Z==0, dom[C,R], con[Q], dom[C    ,R+q-1] :: line[Z,C,R,C,  R+Q].
+Z==1, dom[C,R], con[Q], dom[C+q-1,R    ] :: line[Z,C,R,C+Q,R  ].
+Z==2, dom[C,R], con[Q], dom[C+q-1,R+q-1] :: line[Z,C,R,C+Q,R+Q].
+Z==3, dom[C,R], con[Q], dom[C+q-1,R-q+1] :: line[Z,C,R,C+Q,R-Q].
+
+line[Z,C,R,_,_] :: lineStart[Z,C,R].
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%% Logarithmic Encoding   
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 %% estimate the number of bits needed for C columns
-availableBit[0..10].
-availableBit[I] :: exp[I,2**I,2**(I+1)]. %% assuming we have at least 2 columns
-exp[E,A,B], A<c, B >= c :: maxBit[E].
-
-
-%% Excluding the moves for C > c.
-maxBit[J] :: forbidden[c+1..2**(J+1)].
+availableBit[0..10]. %% assuming we have less than 2^10 columns :)
+availableBit[I] :: exp[I,2**I,2**(I+1)]. 
+columns[C], exp[E,A,B], A<C, B >= C :: maxBit[E].
 
 maxBit[J] :: bit[0..J].
+
+%% Excluding the moves for C > c.
 maxBit[J] :: allColumns[1..2**(J+1)].
+maxBit[J] :: forbidden[c+1..2**(J+1)].
+
 bit[I], allColumns[C] :: choose[C,I,((C-1)/(2**I))#mod2]. 
 
 #exists[T], domT0[T], domT[T+1]             :: won(T)? 
 #forall[T], domT[T], T>1, bit[I]            :: moveU(I,T)? 
-%#exists[T], domT[T], T>1, bit[I]            :: moveU(I,T)? 
+%#exists[T], domT[T], T>1, bit[I]            :: moveU(I,T)? for debugging
 #exists[T], play[A,T], bit[I]               :: move(A,I,T)? 
 #exists[T], dom[C,R], domT0[T], player[A]   :: board(A,C,R,T)?
 #exists[F], final[F], lineStart[Z,C,R]      :: winL(Z,C,R)?
@@ -186,30 +87,32 @@ bit[I], allColumns[C] :: choose[C,I,((C-1)/(2**I))#mod2].
 %~won(0). probably not needed .
 ~won(T) | won(T+1).
 
-~board(black,C,R,T) | ~board(white,C,R,T).
+player[A] : ~board(A,C,R,T).
 
 ~board(A,C,R,T) | board(A,C,R,T+1). 
 
 ~won(T) | board(A,C,R,T) | ~board(A,C,R,T+1).
 
+%% Gravity  
 %%%%%  board(black,C,R+1,T+1) => board(black,C,R,T) | board(white,C,R,T+1)
 lastMove[A,T,BlackPrevious,WhitePrevious] :: 
     ~board(A,C,R+1,T) | 
      board(black,C,R,BlackPrevious) | 
-     board(white,C,R,WhitePrevious). %% gravity
+     board(white,C,R,WhitePrevious). 
 
 init[A,C,R]                       ::  board(A,C,R,0).
 dom[C,R], player[A], ~init[A,C,R] :: ~board(A,C,R,0).
 
 %% constraints:
-%% white and black at least one!
-%% At least one column has to be chosen 
-%% dont choose columns that are full!
-%% dont choose columns that are beyond!
+%% At least one column has to be chosen
+%% This column is not full and not beyond (>c).
+%% Full: at previous (diff for black and white) move 
+%% the top Row in that column is empty.
 
 %% if the column exists and the TopRow in that column is empty
 %% then this is a legal move and it has to be done, 
-%% otherwise this clause is satisfied. 
+%% otherwise this clause is satisfied and moveU 
+%% does not force anything on move: 
 domC[C], choose[C,J,B], topRow[Top], domT[T], domT[T+1] ::  
     won(T) | 
     player[P] : board(P,C,Top,T) | 
