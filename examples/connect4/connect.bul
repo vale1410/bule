@@ -172,14 +172,13 @@ play[A,T+1], forbidden[C] ::
     choose[C,I,0] :  move(A,I,T+1) | 
     choose[C,I,1] : ~move(A,I,T+1).
 
-
 %% if a board position [C,R] is chosen, 
 %% then imply the corresponding bits for the move. 
 %% (~board(A,C,R,T),board(A,C,R,T+1)) => set corresponding bits
-dom[C,R], choose[C,I,B], play[A,T], domT[T+1] :: 
+dom[C,R], choose[C,I,B], play[A,T+1] :: 
     board(A,C,R,T) |
    ~board(A,C,R,T+1) | 
-    one[B] :  move(A,I,T+1) | 
+    one[B]  :  move(A,I,T+1) | 
     zero[B] : ~move(A,I,T+1).
 
 dom[C,R], A == white, T==0 :: 
@@ -198,3 +197,5 @@ lineStart[Z,C,R] : winL(Z,C,R).
 final[F], line[Z,C,R,C2,R2] :: ~winL(Z,C,R) | board(black,C2,R2,F).
 % avoid reaching a winning position of white.
 final[F], lineStart[Z,C,R]  :: line[Z,C,R,C2,R2] : ~board(white,C2,R2,F).
+
+
