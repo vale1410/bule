@@ -134,7 +134,7 @@ domC[C], choose[C,J,B], topRow[Top], domT[T], domT[T+1] ::
 %%     A == black: ~board(white,C,R,T+1) % for blacks move
 %% )=> board(A,C,R,T+1).       
 
-domC[C], domR[R-1], player[B], domR[R], play[A,T+1] ::  
+domC[C], domR[R-1], domR[R],  play[A,T+1], player[B] ::  
     won(T) | 
     ~board(B,C,R-1,T) |  %% why this here ? 
     board(black,C,R,T) | 
