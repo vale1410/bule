@@ -29,11 +29,12 @@ oneOrZero[0]. oneOrZero[1].
 %% Time: 2 first black move
 %% Time: 3 first white move ...
 
-final[d+1]. %%% d has to be odd!
-final[F] :: domT[0..F].
+final[d]. %%% d odd means first player wins. d even means second player wins.
+final[F] :: domT[-1..F].
+setup[-1]. setup[0].
 
-domT[T], T #mod2 == 0 :: even[T].
-domT[T], T #mod2 == 1 :: odd[T].
+domT[T], final[F], (F-T) #mod2 == 0 :: parity[winner,T].
+domT[T], final[F], (F-T) #mod2 == 1 :: parity[loser,T].
 domT[T-2], domT[T] :: playTurn[T].
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -67,14 +68,12 @@ maxBit[J], columns[C] :: forbidden[C+1..2**(J+1)].
 bit[I], allColumns[C] :: choose[C,I,((C-1)/(2**I))#mod2].
 
 #exists[T], domT[T], ~final[T]          :: won(T)?
-#forall[T], playTurn[T], odd[T], bit[I] :: moveU(I,T)?
-%#exists[T], playTurn[T], odd[T], bit[I] :: moveU(I,T)? % for debugging
+#forall[T], playTurn[T], parity[loser,T], bit[I] :: moveU(I,T)?
+%#exists[T], playTurn[T], parity[loser,T], bit[I] :: moveU(I,T)? % for debugging
 #exists[T], playTurn[T], bit[I]         :: move(I,T)?
 #exists[T], domT[T], dom[C,R]           :: board(C,R,T)?
 #exists[F], final[F], lineStart[Z,C,R]  :: winL(Z,C,R)?
 
-%~moveU(0,3).
-%~moveU(1,3).
 playTurn[T+1] :: ~won(T) | won(T+1).
 
 playTurn[T+2], dom[C,R] ::             ~board(C,R,T) |  board(C,R,T+2).
@@ -86,10 +85,8 @@ playTurn[T+2] ::
      board(C,R,T) |
      board(C,R,T+1).
 
-           init[black,C,R] ::  board(C,R,0).
-dom[C,R], ~init[black,C,R] :: ~board(C,R,0).
-           init[white,C,R] ::  board(C,R,1).
-dom[C,R], ~init[white,C,R] :: ~board(C,R,1).
+setup[T], parity[A,T],            init[A,C,R] ::  board(C,R,T).
+setup[T], parity[A,T], dom[C,R], ~init[A,C,R] :: ~board(C,R,T).
 
 %% constraints:
 %% At least one column has to be chosen
@@ -101,7 +98,7 @@ dom[C,R], ~init[white,C,R] :: ~board(C,R,1).
 %% then this is a legal move and it has to be done,
 %% otherwise this clause is satisfied and moveU
 %% does not force anything on move:
-dom[C,R], choose[C,J,B], topRow[R], playTurn[T+2], odd[T] ::
+dom[C,R], choose[C,J,B], topRow[R], playTurn[T+2], parity[loser,T] ::
     won(T+1) |
     board(C,R,T) |
     board(C,R,T+1) |
@@ -133,13 +130,13 @@ dom[C,R], topRow[R], playTurn[T+2], oneOrZero[Z] ::
     zero[Z] : ~board(C,R,T) | one[Z] : ~board(C,R,T+1) |
     choose[C,I,0] : move(I,T+2) |
     choose[C,I,1] : ~move(I,T+2).
-%%%%% A == white : won(T+1) | A == black : won(T) |  %% REDUNDANT!
+%%%%% A == loser : won(T+1) | A == winner : won(T) |  %% REDUNDANT!
 
 %% if not yet one, then exclude moves outside the board (too large column)
 playTurn[T+2], forbidden[C] ::
     choose[C,I,0] : move(I,T+2) |
     choose[C,I,1] : ~move(I,T+2).
-%%%%% A == white : won(T+1) | A == black : won(T) |  %% REDUNDANT!
+%%%%% A == loser : won(T+1) | A == winner : won(T) |  %% REDUNDANT!
 
 %% if a board position [C,R] is chosen,
 %% then imply the corresponding bits for the move.
@@ -152,9 +149,9 @@ dom[C,R], choose[C,I,B], playTurn[T+2] ::
 dom[C,R], domT[T] ::
   ~board(C,R,T) | ~board(C,R,T+1).
 
-%%%%% Winning Positions
-%%% at least one winning position for black
+%%%%%%% Winning Positions
+%%% at least one winning position for the existential player
 lineStart[Z,C,R] : winL(Z,C,R).
 final[F], line[Z,C,R,C2,R2] :: ~winL(Z,C,R) | board(C2,R2,F).
-%%% avoid reaching a winning position of white.
+%%% avoid reaching a winning position of the opponent.
 final[F], lineStart[Z,C,R]  :: line[Z,C,R,C2,R2] : ~board(C2,R2,F-1).

@@ -1,20 +1,20 @@
 %42434653771434 9
 
-%6        
-%5   W    
-%4   W         
-%3  BB        
-%2  WB  W      
-%1BWWBBWB      
+%6
+%5   W
+%4   W
+%3  BB
+%2  WB  W
+%1BWWBBWB
 % 1234567
 %%%%%%%%%%
 
 #const q=4.
-#const c=7. 
-#const r=6. 
-#const d=7. 
+#const c=7.
+#const r=6.
+#const d=7.
 
-init[black,4,1]. 
+init[black,4,1].
 init[white,2,1].
 init[black,4,2].
 init[white,3,1].
