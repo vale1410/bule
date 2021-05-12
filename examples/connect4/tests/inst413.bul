@@ -4,7 +4,7 @@
 #const c=4. 
 #const r=1. 
 
-#const d=2. % 
+#const d=3. % 
 
 init[black,2,1].
 
