@@ -1,7 +1,7 @@
-#const q=3.
-#const c=4.
-#const r=3.
-#const d=3.
+%#const q=3.
+%#const c=4.
+%#const r=4.
+%#const d=13.
 
 %init[black,2,1].
 %init[white,2,2].
@@ -34,9 +34,7 @@ final[F] :: domT[0..F].
 
 domT[T], T #mod2 == 0 :: even[T].
 domT[T], T #mod2 == 1 :: odd[T].
-domT[T-2], even[T] :: play[black, T].
-domT[T-3], odd[T]  :: play[white, T].
-domT[T-2], domT[T]     :: playTurn[T].
+domT[T-2], domT[T] :: playTurn[T].
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Winning configurations
@@ -68,21 +66,19 @@ maxBit[J], columns[C] :: forbidden[C+1..2**(J+1)].
 
 bit[I], allColumns[C] :: choose[C,I,((C-1)/(2**I))#mod2].
 
-%#exists[T], play[black,T]              :: won(T)?
 #exists[T], domT[T], ~final[T]          :: won(T)?
-#forall[T], play[white,T], bit[I]      :: moveU(I,T)?
-%#exists[T], play[white,T], bit[I]      :: moveU(I,T)? % for debugging
-#exists[T], playTurn[T], bit[I]        :: move(I,T)?
-#exists[T], domT[T], dom[C,R]          :: board(C,R,T)?
-#exists[F], final[F], lineStart[Z,C,R] :: winL(Z,C,R)?
+#forall[T], playTurn[T], odd[T], bit[I] :: moveU(I,T)?
+%#exists[T], playTurn[T], odd[T], bit[I] :: moveU(I,T)? % for debugging
+#exists[T], playTurn[T], bit[I]         :: move(I,T)?
+#exists[T], domT[T], dom[C,R]           :: board(C,R,T)?
+#exists[F], final[F], lineStart[Z,C,R]  :: winL(Z,C,R)?
 
 %~moveU(0,3).
 %~moveU(1,3).
-%play[black,T+2] :: ~won(T) | won(T+2).
 playTurn[T+1] :: ~won(T) | won(T+1).
 
-playTurn[T+2], dom[C,R] :: ~board(C,R,T) | board(C,R,T+2).
-play[A,T+2], dom[C,R] :: A==black:~won(T) | A==white:~won(T+1) | board(C,R,T) | ~board(C,R,T+2).
+playTurn[T+2], dom[C,R] ::             ~board(C,R,T) |  board(C,R,T+2).
+playTurn[T+2], dom[C,R] :: ~won(T+1) |  board(C,R,T) | ~board(C,R,T+2).
 
 %%%% Gravity
 playTurn[T+2] ::
@@ -105,7 +101,7 @@ dom[C,R], ~init[white,C,R] :: ~board(C,R,1).
 %% then this is a legal move and it has to be done,
 %% otherwise this clause is satisfied and moveU
 %% does not force anything on move:
-dom[C,R], choose[C,J,B], topRow[R], play[white,T+2] ::
+dom[C,R], choose[C,J,B], topRow[R], playTurn[T+2], odd[T] ::
     won(T+1) |
     board(C,R,T) |
     board(C,R,T+1) |
@@ -113,20 +109,18 @@ dom[C,R], choose[C,J,B], topRow[R], play[white,T+2] ::
     choose[C,I,1] : ~moveU(I,T+2) |
     zero[B] : ~move(J,T+2) | one[B] : move(J,T+2).
 
-%%%%%%%%% When a column is chosen, make sure the next row is updated.
-%% Forces board(A,C,R,T+1) when it is correctly chosen
+%%%%%%%%% When a non-empty column is chosen, make sure the next row is updated.
 dom[C,R], dom[C,R-1], playTurn[T+2], oneOrZero[Z] ::
-%    A==black:won(T) | A==white:won(T+1) | %won(T) |
     won(T+1) |
-    zero[Z] : ~board(C,R-1,T+0) | one[Z] : ~board(C,R-1,T+1) |
+    zero[Z] : ~board(C,R-1,T) | one[Z] : ~board(C,R-1,T+1) |
     board(C,R,T) |
     board(C,R,T+1) |
-    choose[C,I,0] : move(I,T+2) |
+    choose[C,I,0] :  move(I,T+2) |
     choose[C,I,1] : ~move(I,T+2) |
     board(C,R,T+2).% | debug.
 
+%%%%%%%%% When an empty column is chosen, make sure the next row is updated.
 dom[C,R], R==1, playTurn[T+2] ::
-%    A==black:won(T) | A==white:won(T+1) | %won(T) |
     won(T+1) |
     board(C,R,T) |
     board(C,R,T+1) |
