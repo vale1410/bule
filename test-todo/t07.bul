@@ -1,2 +1,8 @@
-q(1), q(2).
-X==Y :: ~q(X) => q(Y).
+dom[1].dom[2]. 
+dom[X], dom[Y], X==Y :: 
+        ~q(X) & 
+        dom[X], dom[Y] : vale(X)  &  
+        X > Y => 
+        q(Y) |
+        r(Y). 
+

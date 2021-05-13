@@ -53,7 +53,7 @@ func (cs *ClauseSet) PrintDebug() {
 		first := true
 		for _, l := range c.Literals {
 			if !first {
-				fmt.Printf(",")
+				fmt.Printf(" | ")
 			}
 			first = false
 			fmt.Print(l.ToTxt())
