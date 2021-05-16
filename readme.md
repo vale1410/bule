@@ -270,7 +270,7 @@ Now, we can start applying Sudoku rules in Bule!
 **Rule 1**: in each cell on board at least 1 value from range `1..9`
 
 ```prolog
-domCoords[X,Y] :: q(X,Y,Z) : dom[Z].
+domCoords[X,Y] :: dom[Z] : q(X,Y,Z).
 ```
 
 Which will generate a grand total of 81 clauses of length 9 grouped by `X, Y`:
