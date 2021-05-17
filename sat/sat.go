@@ -369,7 +369,8 @@ type rawResult struct {
 	assignment  string
 }
 
-// TODO : set seed
+// TODO : set seed, unite with solve.go
+// @Sebastian: Second way to call SAT solvers
 func (g *Gen) solveProblem(clauses ClauseSet, result chan<- rawResult) {
 
 	var solver *exec.Cmd

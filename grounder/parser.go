@@ -136,7 +136,7 @@ func lexRule(text string) (ts Tokens) {
 }
 
 // <Constraint>, <Generator> :: <Fact>.
-// <Constraint>, <Generator> :: <Conditionals>?
+// <Constraint>, <Generator> :: <Iterator>?
 // <Constraint>, <Generator> :: <Conditionals>.
 
 func parseRule(text string) (rule Rule, err error) {
@@ -165,16 +165,6 @@ func parseRule(text string) (rule Rule, err error) {
 		if err != nil {
 			return rule, fmt.Errorf("decompress %v: %v", text, err)
 		}
-		//	case tokenSimpleImplication: // Generator -> fact.
-		//		rule.parseGeneratorAndConstraints(left)
-		//		if right[len(right)-1].kind != tokenDot {
-		//			return rule, fmt.Errorf("Lexing fact definitions. Last element should be a dot(.), but is %v", right)
-		//		}
-		//		literal := parseLiteral(right[:len(right)-1])
-		//		if !literal.Fact {
-		//			return rule, fmt.Errorf("Problems parsing rule %v. Should be fact as last literal.", rule.Debug())
-		//		}
-		//		rule.Literals = []Literal{literal}
 	default:
 		return rule, fmt.Errorf("Problems parsing rule %v.", rule.Debug())
 	}
@@ -200,6 +190,24 @@ func (rule *Rule) parseGeneratorAndConstraints(tokens Tokens) {
 		}
 	}
 }
+
+// Cleanup:
+// Rule = [ Quantification ',' ] [ Guard '::' ] Definition ('.' | '?' )
+// Guard = (Generator | Constraint ) ( ',' Guard | )
+// Constraint = Expression Comparison Expression
+// Generator = [ '~' ] Fact
+// Definition =  ( Fact | Implication )
+// Implication = [Conjunction '=>'] Disjunction
+// Conjunction = [Guard ':' ] Literal [ '&' Conjunction ]
+// Disjunction = [Guard ':' ] Literal [ '|' Disjunction ]
+// Predicate =
+// Term =
+// Variable =
+// Number =
+// Expression =
+// TODO FOR THE FUTURE
+// PseudoBoolean = Number '{' Linear '}' Number
+// Linear = [Guard ':' ] [Coefficient '*'] Literal [ ';' Linear ]
 
 func (rule *Rule) parseImplication(tokens Tokens) {
 

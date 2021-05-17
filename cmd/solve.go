@@ -184,6 +184,7 @@ and usage of using your command.
 
 		fmt.Fprintf(os.Stderr, "Solving. . .\n\n")
 
+		// @Sebastian: First way to call SAT solvers
 		isTrue := true
 		{
 			cmdOutput, err = exec.Command(si.Prog, append(flagsSplit, outputGroundFile)...).Output()
