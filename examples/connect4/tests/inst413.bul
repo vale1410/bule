@@ -1,0 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%  Should be SAT but is UNSAT
+#const q=3.
+#const c=4.
+#const r=1.
+
+#const d=3. %
+
+init[winner,2,1].
+

@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 Valentin Mayer-Eichberger <valentin@mayer-eichberger.de>
+Copyright © 2021 Valentin Mayer-Eichberger <valentin@mayer-eichberger.de>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,10 +23,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	bule "github.com/vale1410/bule/grounder"
 	"os"
 	"strconv"
+
+	"github.com/spf13/cobra"
+	bule "github.com/vale1410/bule/grounder"
 )
 
 var (

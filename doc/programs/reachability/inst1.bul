@@ -1,0 +1,20 @@
+e[a,b]. e[b,c]. e[c,a].
+e[c,e].
+e[d,e]. e[e,f]. e[f,d].
+
+e[A,_] :: v[A].
+e[_,B] :: v[B].
+
+map[a,0].
+map[b,1].
+map[c,2].
+map[d,3].
+map[e,4].
+map[f,5].
+
+#const nodes=5. % 0..k, k+1 vertices
+#const bits=2. % 0..l, with l+1 bits to represent vertices
+
+s[a].
+t[b].
+

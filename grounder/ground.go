@@ -2,12 +2,13 @@ package grounder
 
 import (
 	"fmt"
-	"github.com/Knetic/govaluate"
-	"github.com/scylladb/go-set/strset"
 	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/Knetic/govaluate"
+	"github.com/scylladb/go-set/strset"
 )
 
 func (p *Program) ConstraintSimplification() (bool, error) {
@@ -957,10 +958,10 @@ func assign(term Term, assignment map[string]string) (Term, bool, error) {
 				acc.WriteString(xx)
 				break
 			}
-			// Must be symbol before and after that makes makes this change
+			// Must be symbol before and after that makes this change
 			if (index == 0 || strings.ContainsAny(xx[index-1:index], dividerSet)) &&
 				(index+len(variable) == len(xx) || strings.ContainsAny(xx[index+len(variable):index+len(variable)+1], dividerSet)) {
-				acc.WriteString(xx[:index] + val)
+				acc.WriteString(xx[:index] + "(" + val + ")")
 				xx = xx[index+len(variable):]
 			} else {
 				acc.WriteString(xx[:index+len(variable)])
@@ -985,17 +986,6 @@ func groundMathExpression(s string) bool {
 	//	r, _ := regexp.MatchString("[0-9+*/%]+", s)
 	return "" == strings.Trim(s, "0123456789+*%-/()")
 }
-
-// TODO REMOVE
-//// Evaluates a ground math expression, needs to path mathExpression
-//func evaluateBoolExpression(termComparison string) bool {
-//	//	termComparison = strings.ReplaceAll(termComparison, "#mod", "%")
-//	expression, err := govaluate.NewEvaluableExpression(termComparison)
-//	assertx(err, termComparison)
-//	result, err := expression.Evaluate(nil)
-//	assertx(err, termComparison)
-//	return result.(bool)
-//}
 
 // Evaluates a ground math expression, needs to path mathExpression
 func evaluateTermExpression(termExpression string) (int, error) {

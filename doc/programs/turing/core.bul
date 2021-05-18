@@ -1,0 +1,55 @@
+%%%%%% two symbols, 0 is blank symbol.  tape(L, A, T) means non-blank on that location.
+%%%%%% 0 is the accepting state. 1 is the initial state.
+%%%%%%%transition[SI,QI,B,Q,D]. %%%%%%%% D=Direction    D=-1 left,    D=1 right
+%%%%% MACHINE resources %%%%%%%%%
+#const t=5.
+#const l=4.
+time[0..t].
+%loc[-l..l]. % head initially on location 0.
+loc[0..2*l]. % head initially on location l.
+
+#exists[T], time[T], loc[L], symb[B] :: tape(T,L,B)?
+#exists[T], time[T], loc[L], state[P] :: head(T,L,P)?
+#exists[T], time[T], trans[_,P,A,Q,D], ~univ[P] :: mv(T,P,A,Q,D)?
+#forall[T], time[T], trans[_,P,A,Q,D],  univ[P] :: mv(T,P,A,Q,D)?
+#exists[T], time[T], symb[A], univ[P] :: cheat(T,A,P)?
+#exists[T], time[T], symb[A], univ[P] :: cheat1(T,A,P)? %%% didn't choose a move
+#exists[T], time[T], symb[A], univ[P] :: cheat2(T,A,P)? %%% choose too many moves
+
+time[T], symb[A], univ[P] :: ~cheat(T,A,P), cheat1(T,A,P), cheat2(T,A,P).
+
+%%%%%%%%%%%% exist choice %%%%%%%%%%%%
+time[T], loc[L], ~univ[P], symb[A], state[P], P!=0 :: ~head(T,L,P), mv(T,P,B,Q,D) : trans[A,P,B,Q,D]. %%% non-horn
+time[T], loc[L], ~univ[P], trans[A,P,B,Q,D], trans[A,P,C,R,E], B!=C :: ~head(T,L,P), ~mv(T,P,B,Q,D), ~mv(T,P,C,R,E).
+time[T], loc[L], ~univ[P], trans[A,P,B,Q,D], trans[A,P,C,R,E], Q!=R :: ~head(T,L,P), ~mv(T,P,B,Q,D), ~mv(T,P,C,R,E).
+time[T], loc[L], ~univ[P], trans[A,P,B,Q,D], trans[A,P,C,R,E], D!=E :: ~head(T,L,P), ~mv(T,P,B,Q,D), ~mv(T,P,C,R,E).
+
+%%%%%%%%%%%% forall choice %%%%%%%%%%%%
+time[T], loc[L],  univ[P], trans[A,P,B,Q,D] :: ~head(T,L,P), ~cheat1(T,SI,P), ~mv(T,P,B,Q,D).
+time[T], loc[L],  univ[P], trans[A,P,B,Q,D] :: ~head(T,L,P), ~cheat2(T,SI,P), ~mv(T,P,B,Q,D).
+
+%%%%%%%%%%%% initial configuration %%%%%%%%%%
+loc[L], symb[A], A!=0 :: ~tape(0,L,A). %% tape assumed
+loc[L]                ::  tape(0,L,0). %% initially blank
+%head(0,0,1).
+%loc[L], state[P], L!=0 :: ~head(0,L,P).
+head(0,l,1).
+loc[L], state[P], L!=l :: ~head(0,L,P).
+loc[L], state[P], P!=1 :: ~head(0,L,P).
+%time[T], state[P] :: ~head(T,l,P).
+%time[T], state[P] :: ~head(T,-l,P).
+time[T], state[P] :: ~head(T,0,P).
+time[T], state[P] :: ~head(T,2*l,P).
+
+cheat(T1,A,P) : time[T1] : symb[A] : univ[P], head(T,L,0) : loc[L] : time[T]. %%%%%%%%% accepting condition
+
+%%%%%%%%%%%% dynamics %%%%%%%%%%
+time[T], trans[A,P,B,Q,D], loc[L]                           :: ~head(T,L,P), ~tape(T,L,A), ~mv(T,P,B,Q,D),  head(T+1,D+L,Q).
+time[T], trans[A,P,B,Q,D], loc[L], loc[K], state[R], R!=Q   :: ~head(T,L,P), ~tape(T,L,A), ~mv(T,P,B,Q,D), ~head(T+1,K,R).
+time[T], trans[A,P,B,Q,D], loc[L], loc[K], state[R], K!=D+L :: ~head(T,L,P), ~tape(T,L,A), ~mv(T,P,B,Q,D), ~head(T+1,K,R).
+time[T], trans[A,P,B,Q,D], loc[L]                           :: ~head(T,L,P), ~tape(T,L,A), ~mv(T,P,B,Q,D),  tape(T+1,L,B).
+time[T], trans[A,P,B,Q,D], loc[L], symb[C], C!=B            :: ~head(T,L,P), ~tape(T,L,A), ~mv(T,P,B,Q,D), ~tape(T+1,L,C).
+
+%%%%%% unaffected locs. / frame axioms %%%%%%%%
+time[T], loc[L], state[P], loc[K], K!=L, symb[A] :: ~head(T,L,P), ~tape(T,K,A),  tape(T+1,K,A).
+time[T], loc[L], state[P], loc[K], K!=L, symb[A] :: ~head(T,L,P),  tape(T,K,A), ~tape(T+1,K,A).

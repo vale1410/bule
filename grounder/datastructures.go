@@ -157,17 +157,20 @@ func (term Term) String() string {
 
 func (iterator Iterator) String() string {
 	sb := strings.Builder{}
-	sb.WriteString(iterator.Head.IdString())
-	sb.WriteString(":")
 	for _, c := range iterator.Constraints {
 		sb.WriteString(c.String())
-		sb.WriteString(":")
+		sb.WriteString(", ")
 	}
 	for _, l := range iterator.Conditionals {
 		sb.WriteString(l.IdString())
-		sb.WriteString(":")
+		sb.WriteString(", ")
 	}
-	return strings.TrimSuffix(sb.String(), ":")
+	tmp := strings.TrimSuffix(sb.String(), ", ")
+	sb.Reset()
+	sb.WriteString(tmp)
+	sb.WriteString(" : ")
+	sb.WriteString(iterator.Head.IdString())
+	return sb.String()
 }
 
 func (p *Program) IsSATProblem() bool {
@@ -292,14 +295,14 @@ func (rule *Rule) String() string {
 
 	for _, g := range rule.Iterators {
 		sb.WriteString(g.String())
-		sb.WriteString(", ")
+		sb.WriteString(" | ")
 	}
 
 	for _, l := range rule.Literals {
 		sb.WriteString(l.IdString())
-		sb.WriteString(", ")
+		sb.WriteString(" | ")
 	}
-	tmp := strings.TrimSuffix(sb.String(), ", ")
+	tmp := strings.TrimSuffix(sb.String(), " | ")
 	sb.Reset()
 	sb.WriteString(tmp)
 	if rule.IsQuestionMark {
@@ -332,14 +335,14 @@ func (p *Program) OutputRuleString(rule *Rule) string {
 
 	for _, g := range rule.Iterators {
 		sb.WriteString(g.String())
-		sb.WriteString(", ")
+		sb.WriteString(" | ")
 	}
 
 	for _, l := range rule.Literals {
 		sb.WriteString(p.OutputString(l))
-		sb.WriteString(", ")
+		sb.WriteString(" | ")
 	}
-	tmp := strings.TrimSuffix(sb.String(), ", ")
+	tmp := strings.TrimSuffix(sb.String(), " | ")
 	sb.Reset()
 	sb.WriteString(tmp)
 	if rule.IsQuestionMark {

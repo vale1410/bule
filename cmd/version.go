@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 Valentin Mayer-Eichberger <valentin@mayer-eichberger.de>
+Copyright © 2021 Valentin Mayer-Eichberger <valentin@mayer-eichberger.de>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Bule Version 2.11.0. Copyright Valentin Mayer-Eichberger & Sebastian Jurkowski, 20.12.2020")
+		fmt.Println("Bule Version {{{VERSION}}} Copyright Valentin Mayer-Eichberger {{{DATE}}}")
 		return
 	},
 }

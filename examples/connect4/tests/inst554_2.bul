@@ -1,0 +1,24 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% UNSAT: Not a First-player win.
+#const q=4.
+#const c=5.
+#const r=5.
+
+#const d=3. %
+
+init[winner,2,1].
+init[loser,2,2].
+init[winner,3,1].
+init[loser,3,2].
+
+init[loser,1,1].
+init[loser,4,1].
+init[winner,5,1].
+
+%5
+%4
+%3
+%2 LL
+%1LWWLW
+% 12345
+%%%%%%%%%%%%%

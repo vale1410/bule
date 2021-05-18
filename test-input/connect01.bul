@@ -3,4 +3,4 @@ dom[0..3].
 #exists[T], T#mod2==0, dom[T], dom[X] ::  move(X,T) ?
 #forall[T], T#mod2==1, dom[T], dom[X] ::  move(X,T) ?
 
-dom[T] :: move(X,T):dom[X].
+dom[T] :: dom[X] : move(X,T).
