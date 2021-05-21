@@ -30,9 +30,14 @@ type Program struct {
 	forallQ     map[int][]Literal
 }
 
+type LineNumberInfo struct {
+	fileName string
+	line     int
+}
+
 type Rule struct {
 	initialTokens  []Token
-	LineNumber     int
+	LineNumber     LineNumberInfo
 	Parent         *Rule
 	Generators     []Literal
 	Constraints    []Constraint
@@ -268,7 +273,7 @@ func (rule *Rule) Debug() string {
 		s += "  "
 		p = p.Parent
 	}
-	sb.WriteString(" %% l:" + strconv.Itoa(rule.LineNumber))
+	sb.WriteString(" %% l:" + strconv.Itoa(rule.LineNumber.line) + " file: " + rule.LineNumber.fileName)
 	return sb.String()
 }
 
@@ -516,7 +521,7 @@ func (p *Program) PrintRules() {
 		fmt.Print(p.OutputRuleString(&r))
 
 		if DebugLevel > 0 {
-			fmt.Print(" % line: ", r.LineNumber)
+			fmt.Print(" % line: ", r.LineNumber.line, " file: ", r.LineNumber.fileName)
 		}
 		fmt.Println()
 	}

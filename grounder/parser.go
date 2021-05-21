@@ -13,6 +13,8 @@ import (
 func ParseProgram(fileNames []string) (Program, error) {
 	Debug(2, "opening files:", fileNames)
 	var lines []string
+	where := make([]LineNumberInfo, 0)
+	i := 0
 	for _, fileName := range fileNames {
 		var scanner *bufio.Scanner
 		file, err := os.Open(fileName)
@@ -20,16 +22,19 @@ func ParseProgram(fileNames []string) (Program, error) {
 			return Program{}, err
 		}
 		scanner = bufio.NewScanner(file)
+		line := 1
 		for scanner.Scan() {
+			where = append(where, LineNumberInfo{fileName, line})
 			lines = append(lines, scanner.Text())
+			i++
+			line++
 		}
 		file.Close()
 	}
-
-	return ParseProgramFromStrings(lines)
+	return ParseProgramFromStrings(lines, where)
 }
 
-func ParseProgramFromStrings(lines []string) (p Program, err error) {
+func ParseProgramFromStrings(lines []string, where []LineNumberInfo) (p Program, err error) {
 
 	p.PredicateToTuples = make(map[Predicate][][]string)
 	p.FinishCollectingFacts = make(map[Predicate]bool)
@@ -90,7 +95,7 @@ func ParseProgramFromStrings(lines []string) (p Program, err error) {
 			if err != nil {
 				return p, fmt.Errorf("Parsing Error in Row %v: %w\n", row, err)
 			}
-			rule.LineNumber = row + 1
+			rule.LineNumber = where[row]
 			p.Rules = append(p.Rules, rule)
 		}
 		acc = ""
