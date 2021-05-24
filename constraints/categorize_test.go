@@ -48,7 +48,7 @@ func TestTranslate(test *testing.T) {
 
 	if pb5.TransTyp != Clause { // should be different
 		pb5.Print10()
-		test.Errorf("5: Does not classify clause", pb5)
+		test.Errorf("5: Does not classify clause %v", pb5)
 	}
 
 	pb6 := CreatePB([]int64{1, 1, 1, 1, 1}, 4)
@@ -56,7 +56,7 @@ func TestTranslate(test *testing.T) {
 	pb6.CategorizeTranslate1()
 
 	if pb6.TransTyp != EX1 {
-		test.Errorf("6: Does not classify ExactlyOne", pb6)
+		test.Errorf("6: Does not classify ExactlyOne %v", pb6)
 	}
 
 }
