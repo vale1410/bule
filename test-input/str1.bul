@@ -1,0 +1,10 @@
+
+
+p[black]. 
+p[white]. 
+
+#exists[1], p[X] :: q(X)?
+#forall[1], p[X] :: r(X)?
+
+r(black).
+p[X] :: q(X) | r(X).
