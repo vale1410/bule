@@ -93,7 +93,7 @@ func ParseProgramFromStrings(lines []string, where []LineNumberInfo) (p Program,
 		for _, tmp := range rulesString {
 			rule, err := parseRule(tmp)
 			if err != nil {
-				return p, fmt.Errorf("Parsing Error in Row %v: %w\n", row, err)
+				return p, fmt.Errorf("Parsing Error in row %v in file %v:\n %w\n in rule: %s", where[row].line, where[row].fileName, err, tmp)
 			}
 			rule.LineNumber = where[row]
 			p.Rules = append(p.Rules, rule)
@@ -161,7 +161,6 @@ func lexRule(text string) (ts Tokens) {
 // TODO FOR THE FUTURE
 // PseudoBoolean = Number '{' Linear '}' Number
 // Linear = [Guard ':' ] [Coefficient '*'] Literal [ ';' Linear ]
-
 func parseRule(text string) (rule Rule, err error) {
 
 	tokens := lexRule(text)
@@ -175,21 +174,21 @@ func parseRule(text string) (rule Rule, err error) {
 	rule.initialTokens = tokens
 
 	splitDoubleColon := map[tokenKind]bool{tokenDoubleColon: true}
-	left, sep, right := splitIntoTwo(rule.initialTokens, splitDoubleColon)
+	left, sep, right := splitIntoTwo(tokens, splitDoubleColon)
 	switch sep {
 	case tokenEmpty:
-		err := rule.parseClause(left)
+		err := rule.parseImplication(left)
 		if err != nil {
 			return rule, err
 		}
 	case tokenDoubleColon:
-		err := rule.parseGeneratorAndConstraints(left)
+		rule.Generators, rule.Constraints, err = parseGuard(left)
 		if err != nil {
 			return rule, err
 		}
-		err = rule.parseClause(right)
+		err = rule.parseImplication(right)
 		if err != nil {
-			return rule, fmt.Errorf("decompress %v: %v", text, err)
+			return rule, err
 		}
 	default:
 		return rule, fmt.Errorf("Problems parsing rule %v.", rule.Debug())
@@ -197,144 +196,137 @@ func parseRule(text string) (rule Rule, err error) {
 	return rule, err
 }
 
-func (rule *Rule) parseGeneratorAndConstraints(tokens Tokens) error {
+func parseGuard(tokens Tokens) (generators []Literal, constraints []Constraint, err error) {
 
 	splitRuleElementsSeparators := map[tokenKind]bool{token2RuleComma: true}
-	rest := splitTokens(tokens, splitRuleElementsSeparators)
-	for _, sep := range rest {
-		assert(len(sep.tokens) > 0)
-		if len(sep.tokens) == 0 || sep.separator.kind == tokenEmpty {
-			return RuleError{*rule, "Could not split Guard properly at Comma", nil}
+	elements := splitTokens(tokens, splitRuleElementsSeparators)
+	if len(elements) == 0 || len(elements[0].tokens) == 0 {
+		return generators, constraints, fmt.Errorf("Could not parse guard: %v  ", tokens.String())
+	}
+	for _, element := range elements {
+		if !(element.separator.kind == tokenEmpty || element.separator.kind == token2RuleComma) {
+			return generators, constraints, fmt.Errorf("Wrong separator %v in guard: %v  ", element.separator.value, tokens.String())
 		}
-		splitIterator := map[tokenKind]bool{tokenColon: true}
-		iterator := splitTokens(sep.tokens, splitIterator)
-		if len(iterator) != 1 {
-			return RuleError{*rule, "no iterator allowed in guards yet!", nil}
-		}
-		if checkIfLiteral(iterator[0].tokens) {
-			lit := parseLiteral(iterator[0].tokens)
-			rule.Generators = append(rule.Generators, lit)
+		if checkIfLiteral(element.tokens) {
+			lit, err := parseLiteral(element.tokens)
+			if err != nil {
+				return generators, constraints, fmt.Errorf("Could not parse literal: %v in guard: %v  ", element.tokens, tokens.String())
+			}
+			if lit.Fact == false {
+				return generators, constraints, fmt.Errorf("literal %v in guard %v is not a fact. Please use brackets [...] instead of (...)", element.tokens.String(), tokens.String())
+			}
+			generators = append(generators, lit)
 		} else {
-			rule.Constraints = append(rule.Constraints, parseConstraint(iterator[0].tokens))
+			constraint, err := parseConstraint(element.tokens)
+			if err != nil {
+				return generators, constraints, fmt.Errorf("Could not parse constraint %v in guard %v", element.tokens.String(), tokens.String())
+			}
+			constraints = append(constraints, constraint)
 		}
 	}
-	return nil
+	return generators, constraints, nil
 }
 
-func (rule *Rule) parseClause(tokens Tokens) error {
+func (rule *Rule) parseImplication(tokens Tokens) (err error) {
 
-	splitSet := map[tokenKind]bool{tokenAmpersand: true, tokenPipe: true, tokenImplication: true}
-	clauseElement := splitTokens(tokens, splitSet)
-	for i, element := range clauseElement {
-		switch element.separator.kind {
-		case tokenEmpty:
-		case tokenAmpersand:
-		case tokenPipe:
-			// Check for no Ampersands here
-			rule.parseDisjunction(left)
-		case tokenImplication:
-			// Check for no Pipes
-			rule.parseIterator(element.tokens)
-			// Invert the first part of the implication!
-			for i, iterator := range rule.Iterators {
-				rule.Iterators[i].Head = iterator.Head.createNegatedLiteral()
-			}
-			for i, literal := range rule.Literals {
-				rule.Literals[i] = literal.createNegatedLiteral()
-			}
-			// Check for no Ampersands here
-			rule.parseDisjunction(right)
+	splitDoubleColon := map[tokenKind]bool{tokenImplication: true}
+	left, sep, right := splitIntoTwo(tokens, splitDoubleColon)
+	switch sep {
+	case tokenEmpty:
+		err := rule.parseDisjunction(left)
+		if err != nil {
+			return err
 		}
+	case tokenImplication:
+		err = rule.parseConjunction(left)
+		if err != nil {
+			return err
+		}
+		err = rule.parseDisjunction(right)
+		if err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("problems parsing rule %v.", tokens)
 	}
+	return err
 }
 
-//func (rule *Rule) parseClause(tokens Tokens) error {
-//
-//	splitSet := map[tokenKind]bool{tokenAmpersand: true, tokenPipe: true, tokenImplication: true}
-//	clauseElement := splitTokens(tokens, splitSet)
-//	for _, element := range clauseElement {
-//		switch element.separator.kind {
-//		case tokenEmpty:
-//			// Check for no Ampersands here
-//			rule.parseDisjunction(left)
-//		case tokenImplication:
-//			// Check for no Pipes
-//			rule.parseConjunction(left)
-//			// Invert the first part of the implication!
-//			for i, iterator := range rule.Iterators {
-//				rule.Iterators[i].Head = iterator.Head.createNegatedLiteral()
-//			}
-//			for i, literal := range rule.Literals {
-//				rule.Literals[i] = literal.createNegatedLiteral()
-//			}
-//			// Check for no Ampersands here
-//			rule.parseDisjunction(right)
-//		}
-//	}
-//}
-//
-//func (rule *Rule) parseConjunction(tokens Tokens) error {
-//
-//	splitRuleElementsSeparators := map[tokenKind]bool{}
-//	for _, sep := range rest {
-//		if len(sep.tokens) == 0 { //|| sep.separator.kind == tokenEmpty {
-//			return RuleError{*rule, "Could not parse conjunction properly", nil}
-//		}
-//		//parse for Iterators
-//		splitIterator := map[tokenKind]bool{tokenColon: true}
-//		left, sep, right := splitIntoTwo(sep.tokens, splitIterator)
-//		switch sep {
-//		case tokenEmpty:
-//		case tokenColon:
-//			rule.Iterators = append(rule.Iterators, parseIterator(left))
-//		}
-//		if len( == 1 { // no iterators
-//			literal := parseLiteral(toks[0].tokens)
-//			rule.Literals = append(rule.Literals, literal)
-//		} else {
-//		}
-//	}
-//	return nil
-//}
-//func (rule *Rule) parseDisjunction(tokens Tokens) error {
-//
-//	splitRuleElementsSeparators := map[tokenKind]bool{tokenDot: true, tokenQuestionsmark: true, tokenPipe: true}
-//	rest := splitTokens(tokens, splitRuleElementsSeparators)
-//	for _, sep := range rest {
-//		if len(sep.tokens) == 0 || sep.separator.kind == tokenEmpty {
-//			return RuleError{*rule, "Could not split rule properly", nil}
-//		}
-//		if sep.separator.kind == tokenQuestionsmark {
-//			rule.IsQuestionMark = true
-//		}
-//		//parse for Iterators
-//		splitIterator := map[tokenKind]bool{tokenColon: true, token2RuleComma: true}
-//		toks := splitTokens(sep.tokens, splitIterator)
-//		if len(toks) == 1 { // no iterators
-//			literal := parseLiteral(toks[0].tokens)
-//			rule.Literals = append(rule.Literals, literal)
-//		} else {
-//			rule.Iterators = append(rule.Iterators, parseIterator(toks))
-//		}
-//	}
-//	return nil
-//}
+func (rule *Rule) parseConjunction(tokens Tokens) (err error) {
+
+	splitSet := map[tokenKind]bool{
+		tokenAmpersand: true,
+	}
+	elements := splitTokens(tokens, splitSet)
+	var iterator Iterator
+	for i, element := range elements {
+		if i == len(elements)-1 && element.separator.kind != tokenEmpty {
+			return fmt.Errorf("element %v: %v in left side of implication %v has problems ", i, element.tokens.String(), tokens.String())
+		} else if element.separator.kind != tokenAmpersand {
+			return fmt.Errorf("element %v: %v in left side of implication %v has wrong seperator, should be &", i, element.tokens.String(), tokens.String())
+		}
+		iterator, err = parseIterator(element.tokens)
+		if err != nil {
+			return err
+		}
+		iterator.Head = iterator.Head.createNegatedLiteral()
+		rule.Iterators = append(rule.Iterators, iterator)
+	}
+	return
+}
+
+func (rule *Rule) parseDisjunction(tokens Tokens) (err error) {
+
+	splitSet := map[tokenKind]bool{
+		tokenPipe:          true,
+		tokenQuestionsmark: true,
+		tokenDot:           true,
+	}
+	elements := splitTokens(tokens, splitSet)
+	var iterator Iterator
+	for i, element := range elements {
+		if i == len(elements)-1 {
+			if !(element.separator.kind == tokenQuestionsmark || element.separator.kind == tokenDot) {
+				return fmt.Errorf("rule should end with either dot or questions mark but ended with %+v", printToken(element.separator.kind))
+			}
+		} else if element.separator.kind != tokenPipe {
+			return fmt.Errorf("element %v: %v has wrong seperator, should be | in disjunction %v", i, element.tokens.String(), tokens.String())
+		}
+		iterator, err = parseIterator(element.tokens)
+		if err != nil {
+			return err
+		}
+		if element.separator.kind == tokenQuestionsmark {
+			rule.IsQuestionMark = true
+		}
+		rule.Iterators = append(rule.Iterators, iterator)
+	}
+	return
+}
 
 // Last element is a Literal
 // <Fact[]>, .. ,  : literal
-func parseIterator(tokens Tokens) (iterator Iterator) {
+func parseIterator(tokens Tokens) (iterator Iterator, err error) {
 
-	for i, genElement := range tokens {
-		if len(tokens)-1 == i { // last element
-			assert(checkIfLiteral(tokens))
-			iterator.Head = parseLiteral(tokens)
-		} else {
-			if checkIfLiteral(tokens) {
-				iterator.Conditionals = append(iterator.Conditionals, parseLiteral(tokens))
-			} else { // must be constraint
-				iterator.Constraints = append(iterator.Constraints, parseConstraint(tokens))
-			}
+	splitColon := map[tokenKind]bool{tokenColon: true}
+	left, sep, right := splitIntoTwo(tokens, splitColon)
+	switch sep {
+	case tokenEmpty:
+		iterator.Head, err = parseLiteral(left)
+		if err != nil {
+			return
 		}
+	case tokenColon:
+		iterator.Conditionals, iterator.Constraints, err = parseGuard(left)
+		if err != nil {
+			return
+		}
+		iterator.Head, err = parseLiteral(right)
+		if err != nil {
+			return
+		}
+	default:
+		return iterator, fmt.Errorf("cannot parse iterator %v", tokens.String())
 	}
 	return
 }
@@ -346,10 +338,9 @@ func checkIfLiteral(tokens Tokens) bool {
 
 // assuming it is not a constraint
 // ~a4gDH[123,a*b,432-43#mod2,(123*32)-#lg(123)]
-func parseLiteral(tokens Tokens) (literal Literal) {
-	//fmt.Println("DEBUG", tokens.String())
+func parseLiteral(tokens Tokens) (literal Literal, err error) {
 	if len(tokens) == 0 {
-		return
+		return literal, fmt.Errorf("Literal definition is empty")
 	}
 
 	if tokens[0].kind == tokenNegation {
@@ -357,16 +348,15 @@ func parseLiteral(tokens Tokens) (literal Literal) {
 		tokens = tokens[1:]
 	}
 
-	asserts(tokens[0].kind == token2AtomName, "Atom Structure", tokens.Debug())
+	if tokens[0].kind != token2AtomName {
+		return literal, fmt.Errorf("predicate %v in literal %v definition is incorrect: ", tokens[0], tokens)
+	}
+
 	literal.Name = Predicate(tokens[0].value)
 
 	terms := make([]Term, 0, len(tokens))
 	var acc string
 	for _, tok := range tokens[1:] {
-		//if tokenTermMap[tok.kind] {
-		//	terms = append(terms, acc)
-		//	continue
-		//}
 		switch tok.kind {
 		case token2TermExpression, tokenDoubleDot:
 			acc += tok.value
@@ -374,17 +364,21 @@ func parseLiteral(tokens Tokens) (literal Literal) {
 			terms = append(terms, Term(acc))
 			acc = ""
 		case tokenAtomParanthesisRight:
-			asserts(!literal.Fact, "Should not be a fact atom")
+			if literal.Fact {
+				return literal, fmt.Errorf("closing paranthesis does not match fact type: %v", tokens)
+			}
 			terms = append(terms, Term(acc))
 		case tokenAtomBracketRight:
-			asserts(literal.Fact, "Should not be a search atom")
+			if !literal.Fact {
+				return literal, fmt.Errorf("closing brackets does not match search literal: %v", tokens)
+			}
 			terms = append(terms, Term(acc))
 		case tokenAtomBracketLeft:
 			literal.Fact = true
 		case tokenAtomParanthesisLeft:
 			literal.Fact = false
 		default:
-			asserts(false, "Atom Structure:", tok.value, " ", tokens.Debug())
+			return literal, fmt.Errorf("problem parsing literal: %v", tokens)
 		}
 	}
 	literal.Terms = terms
@@ -392,11 +386,14 @@ func parseLiteral(tokens Tokens) (literal Literal) {
 }
 
 // z.B.: A*3v<=v5-2*R/7#mod3.
-func parseConstraint(tokens Tokens) (constraint Constraint) {
-	asserts(len(tokens) > 0, "tokens not empty!")
+func parseConstraint(tokens Tokens) (constraint Constraint, err error) {
+	if len(tokens) == 0 {
+		return constraint, fmt.Errorf("constraint definition is empty")
+	}
 	left, sep, right := splitIntoTwo(tokens, tokenComparisonMap())
-	asserts(len(left) > 0, "must contain left and right side")
-	asserts(len(right) > 0, "must contain left and right side")
+	if len(left) == 0 || len(right) == 0 {
+		return constraint, fmt.Errorf("constraint definition is not formed correctly %v", tokens.String())
+	}
 	constraint.Comparison = sep
 	constraint.LeftTerm = Term(left.String())
 	constraint.RightTerm = Term(right.String())
@@ -480,12 +477,11 @@ func splitIntoTwo(tokens []Token, kinds map[tokenKind]bool) (left Tokens, sep to
 	return left, sep, right
 }
 
-// Splits into:
+// Splits token slice into:
 // t0,t0,t0, sep, t1,t1,.. sep,sep tntntn sep
 // into [[t0,t0,t0], sep], [[t1,t1,.. ],sep],[[],sep], [[tntntn], sep]
-// tokens might be empty slice
-// sep might be tokenEmpty (in case of last sep is empty)
-
+// - tokens are empty slice if first element is sep, or two sep in sequence
+// - sep is tokenEmpty when last sep is not existing
 func splitTokens(tokens []Token, separator map[tokenKind]bool) (res []SepToken) {
 	var acc []Token
 	for _, token := range tokens {
