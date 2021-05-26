@@ -176,6 +176,7 @@ func stage1GeneratorsAndFacts(p *bule.Program) {
 		"Because they have empty domains, e.g. \n edge[_,_,V] => vertex[V]. %% there are no edges!")
 }
 
+// Unroll all iterators.
 func stage2Iterators(p *bule.Program) {
 	round := 0
 	changed := true

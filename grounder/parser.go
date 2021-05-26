@@ -229,7 +229,7 @@ func parseGuard(tokens Tokens) (generators []Literal, constraints []Constraint, 
 
 func (rule *Rule) parseImplication(tokens Tokens) (err error) {
 
-	splitDoubleColon := map[tokenKind]bool{tokenImplication: true}
+	splitDoubleColon := map[tokenKind]bool{tokenSimpleImplication: true}
 	left, sep, right := splitIntoTwo(tokens, splitDoubleColon)
 	switch sep {
 	case tokenEmpty:
@@ -237,7 +237,7 @@ func (rule *Rule) parseImplication(tokens Tokens) (err error) {
 		if err != nil {
 			return err
 		}
-	case tokenImplication:
+	case tokenSimpleImplication:
 		err = rule.parseConjunction(left)
 		if err != nil {
 			return err
@@ -260,8 +260,10 @@ func (rule *Rule) parseConjunction(tokens Tokens) (err error) {
 	elements := splitTokens(tokens, splitSet)
 	var iterator Iterator
 	for i, element := range elements {
-		if i == len(elements)-1 && element.separator.kind != tokenEmpty {
-			return fmt.Errorf("element %v: %v in left side of implication %v has problems ", i, element.tokens.String(), tokens.String())
+		if i == len(elements)-1 {
+			if element.separator.kind != tokenEmpty {
+				return fmt.Errorf("Last element %v: %v in left side of implication %v should be empty but is %v ", i, element.tokens.String(), tokens.String(), element.separator)
+			}
 		} else if element.separator.kind != tokenAmpersand {
 			return fmt.Errorf("element %v: %v in left side of implication %v has wrong seperator, should be &", i, element.tokens.String(), tokens.String())
 		}
@@ -270,7 +272,12 @@ func (rule *Rule) parseConjunction(tokens Tokens) (err error) {
 			return err
 		}
 		iterator.Head = iterator.Head.createNegatedLiteral()
-		rule.Iterators = append(rule.Iterators, iterator)
+		// TODO : clean up and do not distinguish between iterator and single literal
+		if len(iterator.Conditionals) == 0 && len(iterator.Constraints) == 0 {
+			rule.Literals = append(rule.Literals, iterator.Head)
+		} else {
+			rule.Iterators = append(rule.Iterators, iterator)
+		}
 	}
 	return
 }
@@ -299,7 +306,11 @@ func (rule *Rule) parseDisjunction(tokens Tokens) (err error) {
 		if element.separator.kind == tokenQuestionsmark {
 			rule.IsQuestionMark = true
 		}
-		rule.Iterators = append(rule.Iterators, iterator)
+		if len(iterator.Conditionals) == 0 && len(iterator.Constraints) == 0 {
+			rule.Literals = append(rule.Literals, iterator.Head)
+		} else {
+			rule.Iterators = append(rule.Iterators, iterator)
+		}
 	}
 	return
 }
@@ -471,7 +482,7 @@ func splitIntoTwo(tokens []Token, kinds map[tokenKind]bool) (left Tokens, sep to
 		right = res[1].tokens
 	default:
 		fmt.Println(res)
-		asserts(false, fmt.Sprintf("More than 2 occurences Seperators. "+
+		asserts(false, fmt.Sprintf("More than 2 occurences of seperators. "+
 			"Parsing problem with rule tokens %v with kinds %v \n ", tokens, kinds))
 	}
 	return left, sep, right
