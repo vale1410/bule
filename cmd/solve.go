@@ -263,6 +263,8 @@ func init() {
 	rootCmd.AddCommand(solveCmd)
 	solveCmd.Flags().StringVarP(&withInstance, "with", "w", defaultInstance, "solve problem with particular solver instance")
 	solveCmd.RegisterFlagCompletionFunc("with", autoCompleteSolverInstance)
+	unitPropagationFlag = false
+	textualFlag = false
 }
 
 // Utils
