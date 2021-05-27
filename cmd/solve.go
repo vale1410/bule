@@ -66,6 +66,9 @@ and usage of using your command.
 	ValidArgsFunction: autoCompleteBuleFiles,
 	Run: func(cmd *cobra.Command, args []string) {
 
+		unitPropagationFlag = false
+		textualFlag = false
+
 		if len(args) == 0 {
 			return
 		}
@@ -263,8 +266,6 @@ func init() {
 	rootCmd.AddCommand(solveCmd)
 	solveCmd.Flags().StringVarP(&withInstance, "with", "w", defaultInstance, "solve problem with particular solver instance")
 	solveCmd.RegisterFlagCompletionFunc("with", autoCompleteSolverInstance)
-	unitPropagationFlag = false
-	textualFlag = false
 }
 
 // Utils

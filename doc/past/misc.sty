@@ -1,0 +1,517 @@
+
+\newcommand{\ol}{\overline}
+\newcommand{\auf}{\langle}
+\newcommand{\zu}{\rangle}
+\newcommand{\vp}{\varphi}
+
+%
+% Uli stuff
+%
+
+\newcommand{\ca}{\textsf{(Ca)}\xspace}
+\newcommand{\cb}{\textsf{(Cb)}\xspace}
+\newcommand{\cc}{\textsf{(Cc)}\xspace}
+\newcommand{\cd}{\textsf{(Cd)}\xspace}
+\newcommand{\ce}{\textsf{(Ce)}\xspace}
+
+\newcommand{\simc}{\sim_{\mathsf c}}
+\newcommand{\approxcm}[1]{\approx^{#1}_{\mathsf c}}
+\newcommand{\approxc}{\approx_{\mathsf c}}
+\newcommand{\approxa}{\approx_{\mathsf a}}
+\newcommand{\approxam}[1]{\approx^{#1}_{\mathsf a}}
+
+\newcommand{\Inv}{\mn{Inv}}
+\newcommand{\Tr}{\mn{Trans}}
+\newcommand{\sss}{{\mathrel{\kern.25em{\sqsubseteq}\kern-.5em \mbox{{\scriptsize *}}\kern.25em}}}
+\newcommand{\smallsss}{{\mathrel{\kern.25em{\sqsubseteq}\kern-.4em \mbox{{\scriptsize *}}\kern.25em}}}
+\newcommand{\qnrleq}[3]{\ensuremath{(\leqslant #1 \, #2 \, #3)}}
+\newcommand{\qnrgeq}[3]{\ensuremath{(\geqslant #1 \, #2 \, #3)}}
+\newcommand{\qnrbt}[3]{\ensuremath{(\bowtie #1 \; #2 \; #3)}}
+\newcommand{\nrleq}[2]{\ensuremath{(\leqslant #1 \; #2)}}
+\newcommand{\nrgeq}[2]{\ensuremath{(\geqslant #1 \; #2)}}
+\newcommand{\hset}[1]{\mbox{\textbf{(S#1)}}}
+\newcommand{\hnode}[1]{\mbox{\textbf{(N#1)}}}
+\newcommand{\hmatch}[1]{\mbox{\textbf{(M#1)}}}
+\newcommand{\htree}[1]{\mbox{\textbf{(T#1)}}}
+\newcommand{\htg}[1]{\mbox{\textbf{(G#1)}}}
+
+\newcommand{\Inds}{\ensuremath{\mathsf{N_N}}}
+
+\newcommand{\ndoteq}{\mathop{\not\doteq}}
+\newcommand{\nneg}{\mathop{\dot\neg}}
+\newcommand{\keyfor}{\text{ keyfor }}
+
+\newcommand{\Et}{\ensuremath{E}\xspace}
+\newcommand{\Etc}{\ensuremath{\mathop e}\xspace}
+
+\newcommand{\Efa}{\ensuremath{\mathop{E_r}}\xspace}
+\newcommand{\Efv}{\ensuremath{\mathop{E_v}}\xspace}
+\newcommand{\Efc}{\ensuremath{\mathop e}\xspace}
+
+\newcommand{\T}{\ensuremath{\mathbf T}\xspace}
+\newcommand{\R}{\ensuremath{\mathcal R}\xspace}
+\renewcommand{\S}{\ensuremath{\mathbf S}\xspace}
+\newcommand{\tuple}[2]{(#1,#2)}
+
+\newcommand{\some}[2]{\exists #1.#2}
+\newcommand{\all}[2]{\forall #1.#2}
+\newcommand{\atleastq}[3]{\ensuremath{(\geqslant #1 \; #2 \; #3)}}
+\newcommand{\atmostq}[3]{\ensuremath{(\leqslant #1 \; #2 \; #3)}}
+
+\newcommand{\tabl}[1]{\mbox{\textbf{(T#1)}}}
+\newcommand{\clash}[1]{\mbox{\textbf{(C#1)}}}
+
+\newcommand{\I}{\ensuremath{\mathcal{I}}\xspace}
+\newcommand{\ifunc}{\ensuremath{^{\mathcal{I}}}}
+
+\newcommand{\gt}[2]{{#1}\!{\rightarrow}\!#2}
+\newcommand{\Etilde}{\ensuremath{\tilde{E}}}
+\newcommand{\Ltilde}{\ensuremath{\tilde{\Lmc}}}
+\newcommand{\dotsim}{\ensuremath{\mathrel{\dot\sim}}}
+\newcommand{\node}{\ensuremath{\mathop{\mathsf{node}}}}
+
+
+%
+% Index stuff
+%
+\newcommand{\emphindex}[1]{\emph{#1}\index{#1}}
+\newcommand{\indextext}[1]{\index{#1}#1}
+
+%
+% DL Names
+%
+\newcommand{\EL}{\ensuremath{{\cal EL}}\xspace}
+\newcommand{\ELI}{\ensuremath{{\cal ELI}}\xspace}
+\newcommand{\ALC}{\ensuremath{{\cal ALC}}\xspace}
+\newcommand{\SDL}{\ensuremath{{\cal S}}\xspace}
+\newcommand{\ALCD}{\ensuremath{{\cal ALC(D)}}\xspace}
+\newcommand{\ALCO}{\ensuremath{{\cal ALCO}}\xspace}
+\newcommand{\ALCK}{\ensuremath{{\cal ALCK}}\xspace}
+\newcommand{\ALCI}{\ensuremath{{\cal ALCI}}\xspace}
+\newcommand{\ALCIO}{\ensuremath{{\cal ALCIO}}\xspace}
+\newcommand{\ALCQO}{\ensuremath{{\cal ALCQO}}\xspace}
+\newcommand{\ALCQI}{\ensuremath{{\cal ALCQI}}\xspace}
+\newcommand{\ALCOD}{\ensuremath{{\cal ALCO(D)}}\xspace}
+\newcommand{\ALCKD}{\ensuremath{{\cal ALCK(D)}}\xspace}
+\newcommand{\ALCOKD}{\ensuremath{{\cal ALCOK(D)}}\xspace}
+\newcommand{\ALCID}{\ensuremath{{\cal ALC}^-(\Dmc)}\xspace}
+\newcommand{\ALCDmin}{\ensuremath{{\cal ALC}f(\Dmc)}\xspace}
+\newcommand{\ALCFD}{\ensuremath{{\cal ALCF(D)}}\xspace}
+\newcommand{\ALCPD}{\ensuremath{{\cal ALCP(D)}}\xspace}
+\newcommand{\ALCRPD}{\ensuremath{{\cal ALC}^{rp}({\cal D})}\xspace}
+\newcommand{\ALCRPID}{\ensuremath{{\cal ALC}^{rp,-}({\cal D})}\xspace}
+\newcommand{\BIGL}{\ensuremath{{\cal ALCP}^{rp,-,\sqcap}({\cal D})}\xspace}
+\newcommand{\ALCF}{\ensuremath{{\cal ALCF}}\xspace}
+\newcommand{\ALCFI}{\ensuremath{{\cal ALCFI}}\xspace}
+\newcommand{\ALCFIO}{\ensuremath{{\cal ALCFIO}}\xspace}
+\newcommand{\ALCNR}{\ensuremath{{\cal ALCNR}}\xspace}
+\newcommand{\ALCQ}{\ensuremath{{\cal ALCQ}}\xspace}
+\newcommand{\HS}{\ensuremath{{\sf HS}}\xspace}
+\newcommand{\shiq}{\ensuremath{{\cal SHIQ}}\xspace}
+\newcommand{\shq}{\ensuremath{{\cal SHQ}}\xspace}
+\newcommand{\shiqo}{\ensuremath{{\cal SHIQO}}\xspace}
+\newcommand{\shiqcap}{\ensuremath{{\cal SHIQ}^{\cap}}\xspace}
+\newcommand{\shiqocap}{\ensuremath{{\cal SHIQO}^{\cap}}\xspace}
+\newcommand{\ourel}{\ensuremath{{\cal ELIO}^{\cap}}\xspace}
+\newcommand{\siq}{\ensuremath{{\cal SIQ}}\xspace}
+\newcommand{\shoq}{\ensuremath{{\cal SHOQ}}\xspace}
+\newcommand{\TDL}{\ensuremath{{\cal TDL}}\xspace}
+\newcommand{\OIL}{\ensuremath{{\sf OIL}}\xspace}
+\newcommand{\DAMLOIL}{\ensuremath{{\sf DAML{+}OIL}}\xspace}
+\newcommand{\shiqt}{\ensuremath{\mathbbm{Q}\text{-}{\cal SHIQ}}\xspace}
+\newcommand{\shiqtva}{\ensuremath{\shiqt^\ast}\xspace}
+\newcommand{\shiqtvb}{\ensuremath{\shiqt^{\ast\ast}}\xspace}
+\newcommand{\SHIQ}{\ensuremath{{\cal SHIQ}}\xspace}
+\newcommand{\SIQ}{\ensuremath{{\cal SIQ}}\xspace}
+\newcommand{\SHIQO}{\ensuremath{{\cal SHIQO}}\xspace}
+\newcommand{\SHOQ}{\ensuremath{{\cal SHOQ}}\xspace}
+\newcommand{\SHOQD}{\ensuremath{{\cal SHOQ(D)}}\xspace}
+\newcommand{\SHOQKD}{\ensuremath{{\cal SHOQK(D)}}\xspace}
+\newcommand{\roles}{\ensuremath{\mn{ROL}}\xspace}
+\newcommand{\concepts}{\ensuremath{\mn{CON}}\xspace}
+
+%
+% System Names
+%
+\newcommand{\KRIS}{\ensuremath{{\cal KRIS}}\xspace}
+\newcommand{\FaCT}{\ensuremath{{\sf FaCT}}\xspace}
+\newcommand{\RACER}{\ensuremath{{\sf RACER}}\xspace}
+\newcommand{\Meson}{\textnormal{{\textsc{meson}}}\xspace}
+\newcommand{\Classic}{\textnormal{{\textsc{classic}}}\xspace}
+
+%
+% Numbers
+%
+\newcommand{\naturals}{\ensuremath{\mathbb{N}}\xspace}
+\newcommand{\naturalswz}{\ensuremath{\mathbb{N}_0}\xspace}
+\newcommand{\integers}{\ensuremath{\mathbb{Z}}\xspace}
+\newcommand{\rationals}{\ensuremath{\mathbb{Q}}\xspace}
+\newcommand{\reals}{\ensuremath{\mathbb{R}}\xspace}
+
+%
+% Sets, functions, operators, etc.
+%
+\newcommand{\Qbbm}{\ensuremath{\mathbbm{Q}}}
+\newcommand{\Rbbm}{\ensuremath{\mathbbm{R}}}
+\newcommand{\Nbbm}{\ensuremath{\mathbbm{N}}}
+\newcommand{\Zbbm}{\ensuremath{\mathbbm{Z}}}
+\newcommand{\mn}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\bigo}{\ensuremath{\mathcal{O}}}
+\newcommand{\con}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\impl}{\rightarrow}
+\newcommand{\ineq}{\not\sim}
+
+\newcommand{\NC}{\ensuremath{{\sf N_C}}\xspace}
+\newcommand{\NP}{\ensuremath{{\sf N_P}}\xspace}
+\newcommand{\NI}{\ensuremath{{\sf N_I}}\xspace}
+\newcommand{\NO}{\ensuremath{{\sf N_O}}\xspace}
+\newcommand{\NV}{\ensuremath{{\sf N_V}}\xspace}
+\newcommand{\NaF}{\ensuremath{{\sf N_{aF}}}\xspace}
+\newcommand{\NcF}{\ensuremath{{\sf N_{cF}}}\xspace}
+\newcommand{\NcFDK}{\ensuremath{{\sf N}_{\sf cF}^{D,\Kmc}}\xspace}
+\newcommand{\NRDRK}{\ensuremath{{\sf N}_{\sf R}^{D,\Rmc,\Kmc}}\xspace}
+\newcommand{\NcFD}{\ensuremath{{\sf N}_{\sf cF}^{D}}\xspace}
+\newcommand{\NRDR}{\ensuremath{{\sf N}_{\sf R}^{D,\Rmc}}\xspace}
+\newcommand{\NR}{\ensuremath{{\sf N_R}}\xspace}
+\newcommand{\NtR}{\ensuremath{{\sf N_{tR}}}\xspace}
+\newcommand{\NrR}{\ensuremath{{\sf N_{rR}}}\xspace}
+
+\newcommand{\OA}{\ensuremath{{\sf O}_{\sf a}}\xspace}
+\newcommand{\OC}{\ensuremath{{\sf O}_{\sf c}}\xspace}
+
+\newcommand{\V}{\ensuremath{{\sf V}}\xspace}
+
+\newcommand{\sub}{\ensuremath{{\sf sub}}\xspace}
+\newcommand{\dom}{\ensuremath{{\sf dom}}\xspace}
+\newcommand{\ran}{\ensuremath{{\sf ran}}\xspace}
+
+\newcommand{\my}{\ensuremath{\mathop{\rule[-.05em]{0.33pt}{7.5pt}\rule[.25em]{3ex}{.33pt}}}}
+\newcommand{\mys}{\ensuremath{\mathop{\rule[-.05em]{0.33pt}{7.5pt}\overset{*}{\rule[.25em]{3ex}{.33pt}}}}}
+
+\newcommand{\nnf}{\ensuremath{\mathsf{nnf}}\xspace}
+\newcommand{\cl}{\mathop{\mathsf{cl}}}
+
+%
+% Other abbreviations
+%
+\newcommand{\bauts}{looping automata\xspace}
+\newcommand{\baut}{looping automaton\xspace}
+\newcommand{\hint}[1]{\mbox{\textbf{(H#1)}}}
+\newcommand{\pcpl}[1]{\mbox{\textbf{(P#1)}}}
+\newcommand{\cand}[1]{\mbox{\textbf{(C#1)}}}
+\newcommand{\zip}[1]{\mbox{\textbf{(Z#1)}}}
+
+%
+% For the layout of algorithms
+%
+\newlength{\indxlength}
+\setlength{\indxlength}{4mm}
+\newcommand{\ind}[1]{\hspace*{#1\indxlength}}
+
+%
+% Complexity classes
+%
+\newcommand{\cclass}{\textnormal{\sc C}\xspace}
+\newcommand{\PTime}{\textnormal{\sc PTime}\xspace}
+\newcommand{\NPclass}{\textnormal{\sc NP}\xspace}
+\newcommand{\coNP}{\textnormal{\sc coNP}\xspace}
+\newcommand{\NCclass}{\textnormal{\sc NC}\xspace}
+\newcommand{\PSpace}{\textnormal{\sc PSpace}\xspace}
+\newcommand{\NPSpace}{\textnormal{\sc NPSpace}\xspace}
+\newcommand{\ExpTime}{\textnormal{\sc ExpTime}\xspace}
+\newcommand{\NExpTime}{\textnormal{\sc NExpTime}\xspace}
+\newcommand{\TwoExpTime}{\textnormal{\sc 2-ExpTime}\xspace}
+\newcommand{\coNExpTime}{\textnormal{\sc coNExpTime}\xspace}
+\newcommand{\TwoNExpTime}{\textnormal{\sc 2-NExpTime}\xspace}
+\newcommand{\exptime}{\textnormal{\sc exptime}\xspace}
+\newcommand{\nexptime}{\textnormal{\sc nexptime}\xspace}
+\newcommand{\ExpSpace}{\textnormal{\sc ExpSpace}\xspace}
+\newcommand{\TwoExpSpace}{\textnormal{\sc 2-ExpSpace}\xspace}
+\newcommand{\expspace}{\textnormal{\sc expspace}\xspace}
+\newcommand{\NExpSpace}{\textnormal{\sc NExpSpace}\xspace}
+\newcommand{\TwoNExpSpace}{\textnormal{\sc 2-NExpSpace}\xspace}
+
+%
+% Completion rules
+%
+\newcommand{\Rand}{\ensuremath{\Rsf\sqcap}\xspace}
+\newcommand{\Ror}{\ensuremath{\Rsf\sqcup}\xspace}
+\newcommand{\Rex}{\ensuremath{\Rsf\exists}\xspace}
+\newcommand{\Rnom}{\ensuremath{\mathsf{Rnom}}\xspace}
+\newcommand{\Rexco}{\ensuremath{\Rsf\exists\mathsf{c}}\xspace}
+\newcommand{\Rall}{\ensuremath{\Rsf\forall}\xspace}
+\newcommand{\Rallplus}{\ensuremath{\Rsf\forall_+}\xspace}
+
+\newcommand{\Rsima}{\ensuremath{\Rsf{\approxa}}\xspace}
+\newcommand{\Rsimc}{\ensuremath{\Rsf{\sim}_c}\xspace}
+\newcommand{\Rgeq}{\ensuremath{\Rsf{\geqslant}}\xspace}
+\newcommand{\Rleq}{\ensuremath{\Rsf{\leqslant}}\xspace}
+
+\newcommand{\Rfex}{\ensuremath{\Rsf\exists\fsf}\xspace}
+\newcommand{\Rfall}{\ensuremath{\Rsf\forall\fsf}\xspace}
+\newcommand{\Rrex}{\ensuremath{\Rsf\exists\rsf}\xspace}
+\newcommand{\Rrall}{\ensuremath{\Rsf\forall\rsf}\xspace}
+\newcommand{\Rch}{\ensuremath{\Rsf\mn{ch}}\xspace}
+\newcommand{\Rc}{\ensuremath{\Rsf\csf}\xspace}
+\newcommand{\Rca}{\ensuremath{\Rsf\csf1}\xspace}
+\newcommand{\Rcb}{\ensuremath{\Rsf\csf2}\xspace}
+\newcommand{\Rcc}{\ensuremath{\Rsf\csf3}\xspace}
+\newcommand{\Rexc}{\ensuremath{\Rsf\exists\csf}\xspace}
+\newcommand{\Rallc}{\ensuremath{\Rsf\forall\csf}\xspace}
+\newcommand{\Rrc}{\ensuremath{\Rsf\psf\rsf}\xspace}
+\newcommand{\Ragr}{\ensuremath{\Rsf{\downarrow}}\xspace}
+\newcommand{\Rdagr}{\ensuremath{\Rsf{\uparrow}}\xspace}
+\newcommand{\Rfe}{\ensuremath{\Rsf\mn{fe}}\xspace}
+\newcommand{\Rtb}{\ensuremath{\Rsf{\doteq}}\xspace}
+\newcommand{\Rp}{\ensuremath{\Rsf\mn{p}}\xspace}
+\newcommand{\Rsim}{\ensuremath{\Rsf\!{\sim}}\xspace}
+\newcommand{\RN}{\ensuremath{\Rsf{N}}\xspace}
+
+%
+% Allen relations
+%
+\newcommand{\equals}{\ensuremath{\mathsf{equals}}\xspace} 
+\newcommand{\before}{\ensuremath{\mathsf{before}}\xspace} 
+\newcommand{\after}{\ensuremath{\mathsf{after}}\xspace} 
+\newcommand{\meets}{\ensuremath{\mathsf{meets}}\xspace} 
+\newcommand{\mby}{\ensuremath{\mathsf{met\text{-}by}}\xspace} 
+\newcommand{\overlaps}{\ensuremath{\mathsf{overlaps}}\xspace} 
+\newcommand{\oby}{\ensuremath{\mathsf{overlapped\text{-}by}}\xspace} 
+\newcommand{\during}{\ensuremath{\mathsf{during}}\xspace} 
+\newcommand{\contains}{\ensuremath{\mathsf{contains}}\xspace} 
+\newcommand{\starts}{\ensuremath{\mathsf{starts}}\xspace} 
+\newcommand{\sby}{\ensuremath{\mathsf{started\text{-}by}}\xspace} 
+\newcommand{\finishes}{\ensuremath{\mathsf{finishes}}\xspace} 
+\newcommand{\fby}{\ensuremath{\mathsf{finished\text{-}by}}\xspace} 
+%
+% (negated)
+%
+\newcommand{\nequals}{\ensuremath{\mathsf{nequals}}\xspace} 
+\newcommand{\nbefore}{\ensuremath{\mathsf{nbefore}}\xspace} 
+\newcommand{\nafter}{\ensuremath{\mathsf{nafter}}\xspace} 
+\newcommand{\nmeets}{\ensuremath{\mathsf{nmeets}}\xspace} 
+\newcommand{\nmby}{\ensuremath{\mathsf{nmet\text{-}by}}\xspace} 
+\newcommand{\noverlaps}{\ensuremath{\mathsf{noverlaps}}\xspace} 
+\newcommand{\noby}{\ensuremath{\mathsf{noverlapped\text{-}by}}\xspace} 
+\newcommand{\nduring}{\ensuremath{\mathsf{nduring}}\xspace} 
+\newcommand{\ncontains}{\ensuremath{\mathsf{ncontains}}\xspace} 
+\newcommand{\nstarts}{\ensuremath{\mathsf{nstarts}}\xspace} 
+\newcommand{\nsby}{\ensuremath{\mathsf{nstarted\text{-}by}}\xspace} 
+\newcommand{\nfinishes}{\ensuremath{\mathsf{nfinishes}}\xspace} 
+\newcommand{\nfby}{\ensuremath{\mathsf{nfinished\text{-}by}}\xspace} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% ABBREVIATIONS FOR LETTERS
+%
+
+%
+% Calligraphic letters
+%
+\newcommand{\Amc}{\ensuremath{\mathcal{A}}\xspace}
+\newcommand{\Bmc}{\ensuremath{\mathcal{B}}\xspace}
+\newcommand{\Cmc}{\ensuremath{\mathcal{C}}\xspace}
+\newcommand{\Dmc}{\ensuremath{\mathcal{D}}\xspace}
+\newcommand{\Emc}{\ensuremath{\mathcal{E}}\xspace}
+\newcommand{\Fmc}{\ensuremath{\mathcal{F}}\xspace}
+\newcommand{\Gmc}{\ensuremath{\mathcal{G}}\xspace}
+\newcommand{\Hmc}{\ensuremath{\mathcal{H}}\xspace}
+\newcommand{\Imc}{\ensuremath{\mathcal{I}}\xspace}
+\newcommand{\Jmc}{\ensuremath{\mathcal{J}}\xspace}
+\newcommand{\Kmc}{\ensuremath{\mathcal{K}}\xspace}
+\newcommand{\Lmc}{\ensuremath{\mathcal{L}}\xspace}
+\newcommand{\Mmc}{\ensuremath{\mathcal{M}}\xspace}
+\newcommand{\Nmc}{\ensuremath{\mathcal{N}}\xspace}
+\newcommand{\Omc}{\ensuremath{\mathcal{O}}\xspace}
+\newcommand{\Pmc}{\ensuremath{\mathcal{P}}\xspace}
+\newcommand{\Qmc}{\ensuremath{\mathcal{Q}}\xspace}
+\newcommand{\Rmc}{\ensuremath{\mathcal{R}}\xspace}
+\newcommand{\Smc}{\ensuremath{\mathcal{S}}\xspace}
+\newcommand{\Tmc}{\ensuremath{\mathcal{T}}\xspace}
+\newcommand{\Umc}{\ensuremath{\mathcal{U}}\xspace}
+\newcommand{\Vmc}{\ensuremath{\mathcal{V}}\xspace}
+\newcommand{\Wmc}{\ensuremath{\mathcal{W}}\xspace}
+\newcommand{\Xmc}{\ensuremath{\mathcal{X}}\xspace}
+\newcommand{\Ymc}{\ensuremath{\mathcal{Y}}\xspace}
+\newcommand{\Zmc}{\ensuremath{\mathcal{Z}}\xspace}
+
+%
+% Fraktur letters
+%
+\newcommand{\Amf}{\ensuremath{\mathfrak{A}}\xspace}
+\newcommand{\Bmf}{\ensuremath{\mathfrak{B}}\xspace}
+\newcommand{\Cmf}{\ensuremath{\mathfrak{C}}\xspace}
+\newcommand{\Dmf}{\ensuremath{\mathfrak{D}}\xspace}
+\newcommand{\Emf}{\ensuremath{\mathfrak{E}}\xspace}
+\newcommand{\Fmf}{\ensuremath{\mathfrak{F}}\xspace}
+\newcommand{\Gmf}{\ensuremath{\mathfrak{G}}\xspace}
+\newcommand{\Hmf}{\ensuremath{\mathfrak{H}}\xspace}
+\newcommand{\Imf}{\ensuremath{\mathfrak{I}}\xspace}
+\newcommand{\Jmf}{\ensuremath{\mathfrak{J}}\xspace}
+\newcommand{\Kmf}{\ensuremath{\mathfrak{K}}\xspace}
+\newcommand{\Lmf}{\ensuremath{\mathfrak{L}}\xspace}
+\newcommand{\Mmf}{\ensuremath{\mathfrak{M}}\xspace}
+\newcommand{\Nmf}{\ensuremath{\mathfrak{N}}\xspace}
+\newcommand{\Omf}{\ensuremath{\mathfrak{O}}\xspace}
+\newcommand{\Pmf}{\ensuremath{\mathfrak{P}}\xspace}
+\newcommand{\Qmf}{\ensuremath{\mathfrak{Q}}\xspace}
+\newcommand{\Rmf}{\ensuremath{\mathfrak{R}}\xspace}
+\newcommand{\Smf}{\ensuremath{\mathfrak{S}}\xspace}
+\newcommand{\Tmf}{\ensuremath{\mathfrak{T}}\xspace}
+\newcommand{\Umf}{\ensuremath{\mathfrak{U}}\xspace}
+\newcommand{\Vmf}{\ensuremath{\mathfrak{V}}\xspace}
+\newcommand{\Wmf}{\ensuremath{\mathfrak{W}}\xspace}
+\newcommand{\Xmf}{\ensuremath{\mathfrak{X}}\xspace}
+\newcommand{\Ymf}{\ensuremath{\mathfrak{Y}}\xspace}
+\newcommand{\Zmf}{\ensuremath{\mathfrak{Z}}\xspace}
+
+%
+% Boldface letters
+%
+\newcommand{\Abf}{\ensuremath{\mathbf{A}}\xspace}
+\newcommand{\Bbf}{\ensuremath{\mathbf{B}}\xspace}
+\newcommand{\Cbf}{\ensuremath{\mathbf{C}}\xspace}
+\newcommand{\Dbf}{\ensuremath{\mathbf{D}}\xspace}
+\newcommand{\Ebf}{\ensuremath{\mathbf{E}}\xspace}
+\newcommand{\Fbf}{\ensuremath{\mathbf{F}}\xspace}
+\newcommand{\Gbf}{\ensuremath{\mathbf{G}}\xspace}
+\newcommand{\Hbf}{\ensuremath{\mathbf{H}}\xspace}
+\newcommand{\Ibf}{\ensuremath{\mathbf{I}}\xspace}
+\newcommand{\Jbf}{\ensuremath{\mathbf{J}}\xspace}
+\newcommand{\Kbf}{\ensuremath{\mathbf{K}}\xspace}
+\newcommand{\Lbf}{\ensuremath{\mathbf{L}}\xspace}
+\newcommand{\Mbf}{\ensuremath{\mathbf{M}}\xspace}
+\newcommand{\Nbf}{\ensuremath{\mathbf{N}}\xspace}
+\newcommand{\Obf}{\ensuremath{\mathbf{O}}\xspace}
+\newcommand{\Pbf}{\ensuremath{\mathbf{P}}\xspace}
+\newcommand{\Qbf}{\ensuremath{\mathbf{Q}}\xspace}
+\newcommand{\Rbf}{\ensuremath{\mathbf{R}}\xspace}
+\newcommand{\Sbf}{\ensuremath{\mathbf{S}}\xspace}
+\newcommand{\Tbf}{\ensuremath{\mathbf{T}}\xspace}
+\newcommand{\Ubf}{\ensuremath{\mathbf{U}}\xspace}
+\newcommand{\Vbf}{\ensuremath{\mathbf{V}}\xspace}
+\newcommand{\Wbf}{\ensuremath{\mathbf{W}}\xspace}
+\newcommand{\Xbf}{\ensuremath{\mathbf{X}}\xspace}
+\newcommand{\Ybf}{\ensuremath{\mathbf{Y}}\xspace}
+\newcommand{\Zbf}{\ensuremath{\mathbf{Z}}\xspace}
+\newcommand{\abf}{\ensuremath{\mathbf{a}}\xspace}
+\newcommand{\bbf}{\ensuremath{\mathbf{b}}\xspace}
+\newcommand{\cbf}{\ensuremath{\mathbf{c}}\xspace}
+\newcommand{\dbf}{\ensuremath{\mathbf{d}}\xspace}
+\newcommand{\ebf}{\ensuremath{\mathbf{e}}\xspace}
+\newcommand{\fbf}{\ensuremath{\mathbf{f}}\xspace}
+\newcommand{\gbf}{\ensuremath{\mathbf{g}}\xspace}
+\newcommand{\hbf}{\ensuremath{\mathbf{h}}\xspace}
+\newcommand{\ibf}{\ensuremath{\mathbf{i}}\xspace}
+\newcommand{\jbf}{\ensuremath{\mathbf{j}}\xspace}
+\newcommand{\kbf}{\ensuremath{\mathbf{k}}\xspace}
+\newcommand{\lbf}{\ensuremath{\mathbf{l}}\xspace}
+\newcommand{\mbf}{\ensuremath{\mathbf{m}}\xspace}
+\newcommand{\nbf}{\ensuremath{\mathbf{n}}\xspace}
+\newcommand{\obf}{\ensuremath{\mathbf{o}}\xspace}
+\newcommand{\pbf}{\ensuremath{\mathbf{p}}\xspace}
+\newcommand{\qbf}{\ensuremath{\mathbf{q}}\xspace}
+\newcommand{\rbf}{\ensuremath{\mathbf{r}}\xspace}
+\newcommand{\sbf}{\ensuremath{\mathbf{s}}\xspace}
+\newcommand{\tbf}{\ensuremath{\mathbf{t}}\xspace}
+\newcommand{\ubf}{\ensuremath{\mathbf{u}}\xspace}
+\newcommand{\vbf}{\ensuremath{\mathbf{v}}\xspace}
+\newcommand{\wbf}{\ensuremath{\mathbf{w}}\xspace}
+\newcommand{\xbf}{\ensuremath{\mathbf{x}}\xspace}
+\newcommand{\ybf}{\ensuremath{\mathbf{y}}\xspace}
+\newcommand{\zbf}{\ensuremath{\mathbf{z}}\xspace}
+
+%
+% Sans Serife Letter
+%
+\newcommand{\Asf}{\ensuremath{\mathsf{A}}\xspace}
+\newcommand{\Bsf}{\ensuremath{\mathsf{B}}\xspace}
+\newcommand{\Csf}{\ensuremath{\mathsf{C}}\xspace}
+\newcommand{\Dsf}{\ensuremath{\mathsf{D}}\xspace}
+\newcommand{\Esf}{\ensuremath{\mathsf{E}}\xspace}
+\newcommand{\Fsf}{\ensuremath{\mathsf{F}}\xspace}
+\newcommand{\Gsf}{\ensuremath{\mathsf{G}}\xspace}
+\newcommand{\Hsf}{\ensuremath{\mathsf{H}}\xspace}
+\newcommand{\Isf}{\textnormal{I}\xspace}
+\newcommand{\Jsf}{\ensuremath{\mathsf{J}}\xspace}
+\newcommand{\Ksf}{\ensuremath{\mathsf{K}}\xspace}
+\newcommand{\Lsf}{\ensuremath{\mathsf{L}}\xspace}
+\newcommand{\Msf}{\ensuremath{\mathsf{M}}\xspace}
+\newcommand{\Nsf}{\ensuremath{\mathsf{N}}\xspace}
+\newcommand{\Osf}{\ensuremath{\mathsf{O}}\xspace}
+\newcommand{\Psf}{\ensuremath{\mathsf{P}}\xspace}
+\newcommand{\Qsf}{\ensuremath{\mathsf{Q}}\xspace}
+\newcommand{\Rsf}{\ensuremath{\mathsf{R}}\xspace}
+\newcommand{\Ssf}{\ensuremath{\mathsf{S}}\xspace}
+\newcommand{\Tsf}{\ensuremath{\mathsf{T}}\xspace}
+\newcommand{\Usf}{\ensuremath{\mathsf{U}}\xspace}
+\newcommand{\Vsf}{\ensuremath{\mathsf{V}}\xspace}
+\newcommand{\Wsf}{\ensuremath{\mathsf{W}}\xspace}
+\newcommand{\Xsf}{\ensuremath{\mathsf{X}}\xspace}
+\newcommand{\Ysf}{\ensuremath{\mathsf{Y}}\xspace}
+\newcommand{\Zsf}{\ensuremath{\mathsf{Z}}\xspace}
+%
+% small
+%
+\newcommand{\asf}{\ensuremath{\mathsf{a}}\xspace}
+%\newcommand{\bsf}{\ensuremath{\mathsf{b}}\xspace}
+\newcommand{\csf}{\ensuremath{\mathsf{c}}\xspace}
+\newcommand{\dsf}{\ensuremath{\mathsf{d}}\xspace}
+\newcommand{\esf}{\ensuremath{\mathsf{e}}\xspace}
+\newcommand{\fsf}{\ensuremath{\mathsf{f}}\xspace}
+\newcommand{\gsf}{\ensuremath{\mathsf{g}}\xspace}
+\newcommand{\hsf}{\ensuremath{\mathsf{h}}\xspace}
+\newcommand{\isf}{\ensuremath{\mathsf{i}}\xspace}
+\newcommand{\jsf}{\ensuremath{\mathsf{j}}\xspace}
+\newcommand{\ksf}{\ensuremath{\mathsf{k}}\xspace}
+\newcommand{\lsf}{\ensuremath{\mathsf{l}}\xspace}
+\newcommand{\msf}{\ensuremath{\mathsf{m}}\xspace}
+\newcommand{\nsf}{\ensuremath{\mathsf{n}}\xspace}
+\newcommand{\osf}{\ensuremath{\mathsf{o}}\xspace}
+\newcommand{\psf}{\ensuremath{\mathsf{p}}\xspace}
+\newcommand{\qsf}{\ensuremath{\mathsf{q}}\xspace}
+\newcommand{\rsf}{\ensuremath{\mathsf{r}}\xspace}
+\newcommand{\ssf}{\ensuremath{\mathsf{s}}\xspace}
+\newcommand{\tsf}{\ensuremath{\mathsf{t}}\xspace}
+\newcommand{\usf}{\ensuremath{\mathsf{u}}\xspace}
+\newcommand{\vsf}{\ensuremath{\mathsf{v}}\xspace}
+\newcommand{\wsf}{\ensuremath{\mathsf{w}}\xspace}
+\newcommand{\xsf}{\ensuremath{\mathsf{x}}\xspace}
+\newcommand{\ysf}{\ensuremath{\mathsf{y}}\xspace}
+\newcommand{\zsf}{\ensuremath{\mathsf{z}}\xspace}
+
+%
+% for big sqcaps and sqcups
+%
+\newfont{\midmathxx}{cmsy10 scaled 1440}
+\newfont{\bigmathxx}{cmsy10 scaled 1440}
+%\newfont{\bigmathxx}{cmsy10 scaled 2200}
+\newfont{\smallmathxx}{cmsy10 scaled 720}
+\newcommand{\bigsqcap}{\mathop{\mathop{\mbox{\bigmathxx\symbol{117}}}}\limits}
+\newcommand{\midsqcap}{\mathop{\mathop{\mbox{\midmathxx\symbol{117}}}}\limits}
+\renewcommand{\bigsqcup}{\mathop{\mathop{\mbox{\bigmathxx\symbol{116}}}}\limits}
+
+%
+% proof environment (needs pifont package)
+%
+
+%% ph: Commented out!
+%\makeatletter
+%\@ifundefined{ignorespacesafterend}{%
+%  \def\ignorespacesafterend{\global\@ignoretrue}%
+%}{}
+%%
+%\def\proof{{\bf Proof.}}
+%%\def\proof{\trivlist \item[\hskip \labelsep{\bf Proof\ }]}
+%\def\endproof{\unskip\nobreak\hfil\penalty50
+%   \hskip2em\hbox{}\nobreak\hfil
+%   \ding{111}%
+%   \parfillskip=0pt \finalhyphendemerits=0
+%    \medskip\goodbreak\noindent\ignorespacesafterend} 
+%
+%%
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "incons_det"
+%%% End: 

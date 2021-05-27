@@ -1,0 +1,72 @@
+\usepackage{misc}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{xspace}
+\usepackage{color}
+\usepackage{multirow}
+\usepackage{textcomp}
+\usepackage{booktabs}
+\newcommand{\nn}{\raisebox{0.5ex}{\texttildelow}}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\usepackage{listings}
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    literate={~}{\nn}{1}
+    %literate={~}{\raise.17ex\hbox{$\scriptstyle\sim$}}{1},
+    %literate={~} {$\sim$}{1}
+%    literate={~}{\textasciitilde}{1},
+%    literate={~}{$\neg$}{1},
+}
+\lstset{style=mystyle}
+
+
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+%\newcommand{\cmark}{\textcolor{green}{\ding{51}}}%
+%\newcommand{\xmark}{\textcolor{red}{\ding{55}}}%
+\newcommand{\cmark}{\textsc{Yes}}%
+\newcommand{\xmark}{\textsc{No}}%
+
+\newcommand\bigforall{\mbox{\Large $\mathsurround0pt\forall$}}
+\newcommand\bigexists{\mbox{\Large $\mathsurround0pt\exists$}}
+
+%\newtheorem{example}{Example}
+
+\newcommand{\complexityclass}[1]{\textsf{\footnotesize #1}\xspace}
+\newcommand{\ptime}{\complexityclass{P}}
+\newcommand{\np}{\complexityclass{NP}}
+\newcommand{\pspace}{\complexityclass{PSPACE}}
+\renewcommand{\expspace}{\complexityclass{EXPSPACE}}
+\renewcommand{\exptime}{\complexityclass{EXPTIME}}
+\renewcommand{\nexptime}{\complexityclass{NEXPTIME}}
+
+\newcommand{\abd}[1]{\textcolor[rgb]{1.00,0.00,0.00}{(abd: #1).} }
+\newcommand{\vale}[1]{\textcolor[rgb]{1.00,0.00,0.0}{(vale: #1). } }
+\newcommand{\jean}[1]{\textcolor[rgb]{1.00,0.00,0.80}{(jean: #1). } }
+
+\newcommand{\bflat}{\ensuremath{\text{Bule}_\text{flat}}\xspace}
+\newcommand{\bcore}{\ensuremath{\text{Bule}_\text{core}}\xspace}
+\newcommand{\bfull}{\ensuremath{\text{Bule}_\text{full}}\xspace}
+\newcommand{\bnice}{\ensuremath{\text{Bule}_\text{nice}}\xspace}
+\newcommand{\bule}{\ensuremath{\text{Bule}}\xspace}

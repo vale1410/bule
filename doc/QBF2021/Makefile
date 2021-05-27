@@ -14,6 +14,9 @@ show: compile
 	evince $(OUTPUT) 2>/dev/null &
 
 clean: 
+	rm -fr $(NAME).fdb_latexmk
+	rm -fr $(NAME).fls
+	rm -fr $(NAME).toc
 	rm -fr $(NAME).pdf
 	rm -fr $(NAME).blg
 	rm -fr $(NAME).bbl
