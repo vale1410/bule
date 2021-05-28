@@ -1,18 +1,31 @@
 \documentclass[runningheads]{llncs}
 \input{header.tex}
 
-%% Call on 2021-03-13
-%% 
-%% 
+\title{ QBF Programming with \emph{Bule}}
+
+\author{Jean Christoph Jung\inst{1} \and Valentin Mayer-Eichberger\inst{2} \and
+Abdallah Saffidine\inst{3}}
+\authorrunning{Jung et.al.}
+
+\institute{Universit\"at Bremen, Germany \and Technische Universit\"at Berlin, Germany \and University of New South Wales, Sydney, Australia }
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    Bule introduces the concept of QBF Programming - a paradigm that complements QBF solving with an intuitive modelling language. 
+    The language is easy to learn and has a transparent grounding process that unrolls firt order term variables to a ground CNF formula with a quantifier prefix. 
+%    Bule separates domain predicates for the grounding process and search variables syntactically. 
+    The semantics of the language is strict and well-behaved and we complexity classes for both ground and non-ground programs. 
+%    Our implementation can connect to any QBF solver and in case of only existential variables SAT solver. 
+    Finally, Bule is a tool to learn QBF and SAT Programming due to its easy format and flexible integration with any QBF and SAT solvers. 
+\end{abstract}
+
 %% Motivation: 
 %% 
 %% simpler and more strict, yet expressive enough. So it's more well-behaved and defined. 
 %% This could lead solver developers to go for the actual non-ground specification of the problem. 
-%% 
-%% * flat
-%% * variables,but no arithmetic 
-%% * everything
-%% 
 %% Orthogonal to this hierarchy is the hierarchy of quantifier levels. 
 %% And a problem can be horn (max 1 positive literal per clause) or not. 
 %% 
@@ -24,21 +37,6 @@
 %%     * Because we make this distinction, we can rule out recursion. 
 %% * no functional terms
 %%  
-%% Comment to Abdallahs Ideas
-%% 
-%% #A[T], a[X], b[Y] :: a(X)?
-%% #E[T], a[X], b[Y] :: b(X)?
-%% 
-%% a[X], b[Y] :: c(X,Y) | d(X). 
-%% 
-%% a[X], b[Y], c[R] : k[R] :: b[Y] : c[X] : c(X,Y) | e[X] : d(X). 
-%% 
-%% a[X], b[Y] :: b[Y], c[X] : c(X,Y) | e[X] : d(X). 
-%%  
-%% Pseudo-Boolean: 
-%% a[X], b[Y] :: 12 { b[Y], c[X] : X^2 * c(X,Y) } 12 | e[X] : d(X). 
-%% 
-%% Call on 2021-03-13
 %% 
 %% Contributions
 %% - SAT Programming
@@ -58,27 +56,6 @@
 %% Free variables?
 %% Syntax 
 
-
-\title{ QBF Programming with \emph{Bule}}
-
-\author{Jean Christoph Jung\inst{1} \and Valentin Mayer-Eichberger\inst{2} \and
-Abdallah Saffidine\inst{3}}
-\authorrunning{Jung et.al.}
-
-\institute{Universit\"at Bremen, Germany \and Technische Universit\"at Berlin, Germany \and University of New South Wales, Sydney, Australia }
-
-\begin{document}
-
-\maketitle
-
-\begin{abstract}
-    Bule introduces the concept of QBF Programming - a paradigm that complements QBF solving with an intuitive modelling language. 
-    The language is easy to learn and has a transparent grounding process that rolls out term variables to a CNF formula with a quantifier prefix. 
-%    Bule separates domain predicates for the grounding process and search variables syntactically. 
-    The semantics is strict and well-behaved such that we can show complexity classes for both ground and non-ground programs. 
-%    Our implementation can connect to any QBF solver and in case of only existential variables SAT solver. 
-    Finally, Bule is a tool to learn QBF and SAT Programming due to its easy format and smooth integration with any QBF and SAT solvers. 
-\end{abstract}
 
 \section{Introduction and Motivation}
 
