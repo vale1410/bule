@@ -1,5 +1,6 @@
 bule.pdf
 *.aux
+*.dvi
 *.bbl
 *.blg
 *.fdb_latexmk
