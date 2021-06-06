@@ -1,36 +1,11 @@
-/*
-Copyright © 2021 Valentin Mayer-Eichberger <valentin@mayer-eichberger.de>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
-
 package cmd
 
 import (
 	"bufio"
 	"fmt"
+	"github.com/vale1410/bule/grounder"
 	"os"
 	"strings"
-
-	"github.com/vale1410/bule/grounder"
-
-	"github.com/spf13/cobra"
 )
 
 type ClauseProgram struct {
@@ -39,36 +14,6 @@ type ClauseProgram struct {
 	units       map[string]bool
 	conflict    bool
 	idMap       map[string]int
-}
-
-var (
-	printInfoFlag       bool
-	unitPropagationFlag bool
-)
-
-// dimacsCmd represents the dimacs command
-var dimacsCmd = &cobra.Command{
-	Use:   "dimacs",
-	Short: "Grounds to dimacs completely.",
-	Long: `This is a copy from the old grounder that.
-
-		usage: bule dimacs <filename> <units>,
-
-		unit is a sequence of literals, e.g. -3 2 5 -4
-		where minus meaning negated literal.
-	`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("c dimacs grounding called.")
-		if len(args) == 0 {
-			fmt.Println("usage: bule dimacs <filename> [units]")
-			os.Exit(1)
-		}
-		units := convertArgsToUnits(args[1:])
-		fmt.Println("prepare with args")
-		p := parseFromFile(args[0])
-		sb := p.prepare(units)
-		fmt.Println(sb.String())
-	},
 }
 
 func convertArgsToUnits(args []string) map[string]bool {
@@ -81,23 +26,6 @@ func convertArgsToUnits(args []string) map[string]bool {
 		units[s] = true
 	}
 	return units
-}
-
-func init() {
-	rootCmd.AddCommand(dimacsCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// dimacsCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only prepare when this command
-	// is called directly, e.g.:
-	//dimacsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
-	//	groundCmd.PersistentFlags().StringVarP(&progFlag, "file", "f", "", "Path to File")
-	dimacsCmd.PersistentFlags().BoolVarP(&printInfoFlag, "info", "i", true, "Print information about units as well.")
 }
 
 // This translate from a grounded Bule program to clause representation

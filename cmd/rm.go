@@ -19,6 +19,10 @@ var (
 	rmqbf bool
 )
 
+func init() {
+	// nothing
+}
+
 // rmCmd represents the list command
 var rmCmd = &cobra.Command{
 	Use:               "rm",

@@ -32,9 +32,8 @@ import (
 )
 
 var (
-	debugFlag   int
-	cfgFile     string
-	versionFlag bool
+	debugFlag int
+	cfgFile   string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -46,8 +45,8 @@ The SAT Programming System Bule
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-
 	},
+	Version: "{{{VERSION}}} Copyright Valentin Mayer-Eichberger {{{DATE}}}",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -67,7 +66,6 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.bule.yaml)")
 	rootCmd.PersistentFlags().IntVarP(&debugFlag, "debug", "d", 0, "Debug level")
-	rootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", false, "Version Information")
 
 	// Cobra also supports local flags, which will only prepare
 	// when this action is called directly.
