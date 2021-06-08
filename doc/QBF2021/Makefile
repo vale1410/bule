@@ -5,7 +5,7 @@ OUTPUT=$(NAME).pdf
 all: compile
 
 compile:
-	latexmk $(NAME).tex 
+	latexmk -pdf $(NAME).tex 
 #	bibtex $(NAME)
 #	pdflatex $(NAME).tex 
 #	pdflatex $(NAME).tex 

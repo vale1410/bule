@@ -59,21 +59,28 @@ Abdallah Saffidine\inst{3}}
 
 \section{Introduction and Motivation}
 
-\paragraph{Introduction}
+%\paragraph{Introduction}
 
-Creating CNF formulas is a difficult and errorprone process. 
-The DIMACS format used by SAT solvers is difficult to read and debugg.  
-To the best of our knowlede, formal non-ground model languages are rare for SAT solving and not existing in QBF. 
-For SAT there are modelling frameworks like PySAT \cite{PySAT2018}.
-The modelling and solving framework \emph{Answer Set Programming} ASP (\vale{CITE}) ASP provides a non-ground modelling language GRINGO (cite), but the semantical issues of non-monotonic logics is difficult and for many NP-Complete problems not needed - and for QBF not established (CITE QASP). 
-
-We propose a modelling language for SAT and QBF community with simpler syntax and semnatics than ASP. In this abstract we introduce the syntax, give examples and discuss the complexity classes of variants of syntactical elements. 
+Creating correct formulas for SAT and QBF solvers is difficult not just for beginners. 
+The advantages to the low level input format DIMACS, such as uniformity and simple semantics, is also its drawback.  
+DIMACS format is hard to read and debug, and the original meaning of the formula is lost. 
+To the best of our knowlede, non-ground model languages for SAT are rare and in the case of QBF they do not exist. 
+There are frameworks that wrap SAT solvers and help with programming encodings such as PySAT \cite{PySAT2018} but they do not provide a formal modelling language. 
+The modelling and solving framework \emph{Answer Set Programming} ASP provides non-ground modelling languages such as LParse \cite{Lparse} or Gringo \cite{Gebser15}. 
+However, the semantics of non-monotonic logics is complicated and not needed for many NP-Complete problems. 
+ 
+We propose a modelling language for SAT and QBF community with simpler syntax and semnatics than ASP. 
+In this extended abstract, we introduce the syntax of the language and provide examples. We also discuss syntactical variants of the language that lead to different complexity classes. 
 
 \paragraph{Running Example}
 
+We start with an example: 
+Given a graph compute all connections. 
+Bule follows the fashion of logic programming to write term variable starting capital letters, and predicates and terms starting with lower case letters. 
 Reachability Code Cybic. 
 
 \section{The Bule Language}
+
 
 \begin{align*}
     & \bigwedge_{\text{Generator}} \bigvee_{\text{Iterator}} \text{Literal} \\ 

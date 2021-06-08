@@ -46,6 +46,13 @@ func init() {
 	groundCmd.PersistentFlags().BoolVarP(&printInfoFlag, "info", "i", false, "Print all units as well.")
 	groundCmd.PersistentFlags().BoolVarP(&unitPropagationFlag, "up", "u", false, "Perform Unitpropagation.")
 	groundCmd.PersistentFlags().StringToIntVarP(&constStringMapFlag, "const", "c", map[string]int{}, "Comma separated list of constant instantiations: c=d.")
+
+	dimacsCmd.PersistentFlags().BoolVarP(&quantificationFlag, "quant", "q", true, "Print Quantification")
+	dimacsCmd.PersistentFlags().BoolVarP(&withFactsFlag, "facts", "f", true, "Output all facts.")
+	dimacsCmd.PersistentFlags().BoolVarP(&textualFlag, "text", "t", false, "true: print grounded textual bule format. false: print dimacs format for QBF and SAT solvers.")
+	dimacsCmd.PersistentFlags().BoolVarP(&printInfoFlag, "info", "i", false, "Print all units as well.")
+	dimacsCmd.PersistentFlags().BoolVarP(&unitPropagationFlag, "up", "u", false, "Perform Unitpropagation.")
+	dimacsCmd.PersistentFlags().StringToIntVarP(&constStringMapFlag, "const", "c", map[string]int{}, "Comma separated list of constant instantiations: c=d.")
 }
 
 // groundCmd represents the ground command
