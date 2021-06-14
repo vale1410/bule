@@ -1,0 +1,10 @@
+dom[a].
+dom[b].
+dom[c]. 
+mom[d].
+mom[e].
+dom[X] :: all[X].
+mom[X] :: all[X].
+#exists [0], all[X], all[Y], dom[Z] :: q(X,Y,Z)?
+dom[X], mom[Y] :: dom[Z] : q(X,Y,Z).
+dom[X], dom[Y] :: q(X,Y,c) | q(Y,X,b).
