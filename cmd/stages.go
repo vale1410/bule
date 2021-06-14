@@ -229,22 +229,14 @@ func stage3Clauses(p *bule.Program) {
 
 func stage4Printing(p *bule.Program, args []string) {
 
-	debug(1, "Output")
-
 	if textualFlag && withFactsFlag {
 		p.PrintFacts()
 	}
 
-	if unitPropagationFlag || !textualFlag {
-		//unitSlice := args[1:] \\TODO FIXME, currently turned off
-		unitSlice := []string{}
-		units := convertArgsToUnits(unitSlice)
-		clauseProgram := translateFromRuleProgram(*p, units)
-		sb := clauseProgram.StringBuilder()
-		fmt.Println(sb.String())
-	} else {
-		p.Print()
-	}
+	clauseProgram := translateFromRuleProgram(*p)
+	sb := clauseProgram.StringBuilder()
+	fmt.Println(sb.String())
+
 }
 
 func stage(p *bule.Program, change *bool, f func() (bool, error), stage string, info string) {

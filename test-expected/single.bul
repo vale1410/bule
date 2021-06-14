@@ -1,0 +1,26 @@
+all[a].
+all[b].
+all[c].
+all[d].
+all[e].
+dom[a].
+dom[b].
+dom[c].
+mom[d].
+mom[e].
+q(a,a,c) | q(a,a,b).
+q(a,b,c) | q(b,a,b).
+q(a,c,c) | q(c,a,b).
+q(a,d,a) | q(a,d,b) | q(a,d,c).
+q(a,e,a) | q(a,e,b) | q(a,e,c).
+q(b,a,c) | q(a,b,b).
+q(b,b,c) | q(b,b,b).
+q(b,c,c) | q(c,b,b).
+q(b,d,a) | q(b,d,b) | q(b,d,c).
+q(b,e,a) | q(b,e,b) | q(b,e,c).
+q(c,a,c) | q(a,c,b).
+q(c,b,c) | q(b,c,b).
+q(c,c,c) | q(c,c,b).
+q(c,d,a) | q(c,d,b) | q(c,d,c).
+q(c,e,a) | q(c,e,b) | q(c,e,c).
+q(c,e,c).

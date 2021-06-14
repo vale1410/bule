@@ -52,9 +52,8 @@ var (
 // solveCmd represents the solve command
 var solveCmd = &cobra.Command{
 	Use:   "solve",
-	Short: "Grounds the bule formula and passes it to a solver instance, then it outputs a model if it exists.",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command.
+	Short: "Grounds the bule formula and passes it to a solver instance. Then it outputs a model if it exists.",
+	Long: `Grounds the bule formula and passes it to a solver instance. Then it outputs a model if it exists.
 `,
 	// ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	// 	if len(args) != 0 {
@@ -66,7 +65,6 @@ and usage of using your command.
 	ValidArgsFunction: autoCompleteBuleFiles,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		unitPropagationFlag = false
 		textualFlag = false
 
 		if len(args) == 0 {
@@ -91,9 +89,7 @@ and usage of using your command.
 		stage2Iterators(&p)
 		stage3Clauses(&p)
 
-		unitSlice := []string{}
-		units := convertArgsToUnits(unitSlice)
-		clauseProgram := translateFromRuleProgram(p, units)
+		clauseProgram := translateFromRuleProgram(p)
 		tmpFolder := os.TempDir()
 		timestamp := time.Now().Format("2006_01_02T15_04_05")
 		outputGroundFile := filepath.Join(tmpFolder, "tmp_"+timestamp+".bul")

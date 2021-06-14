@@ -29,30 +29,19 @@ import (
 )
 
 var (
-	quantificationFlag  bool
-	withFactsFlag       bool
-	textualFlag         bool
-	constStringMapFlag  map[string]int
-	printInfoFlag       bool
-	unitPropagationFlag bool
+	quantificationFlag bool
+	withFactsFlag      bool
+	textualFlag        bool
+	constStringMapFlag map[string]int
+	printInfoFlag      bool
 )
 
 func init() {
 	rootCmd.AddCommand(groundCmd)
-	rootCmd.AddCommand(dimacsCmd)
 	groundCmd.PersistentFlags().BoolVarP(&quantificationFlag, "quant", "q", true, "Print Quantification")
 	groundCmd.PersistentFlags().BoolVarP(&withFactsFlag, "facts", "f", true, "Output all facts.")
 	groundCmd.PersistentFlags().BoolVarP(&textualFlag, "text", "t", true, "true: print grounded textual bule format. false: print dimacs format for QBF and SAT solvers.")
-	groundCmd.PersistentFlags().BoolVarP(&printInfoFlag, "info", "i", false, "Print all units as well.")
-	groundCmd.PersistentFlags().BoolVarP(&unitPropagationFlag, "up", "u", false, "Perform Unitpropagation.")
 	groundCmd.PersistentFlags().StringToIntVarP(&constStringMapFlag, "const", "c", map[string]int{}, "Comma separated list of constant instantiations: c=d.")
-
-	dimacsCmd.PersistentFlags().BoolVarP(&quantificationFlag, "quant", "q", true, "Print Quantification")
-	dimacsCmd.PersistentFlags().BoolVarP(&withFactsFlag, "facts", "f", true, "Output all facts.")
-	dimacsCmd.PersistentFlags().BoolVarP(&textualFlag, "text", "t", false, "true: print grounded textual bule format. false: print dimacs format for QBF and SAT solvers.")
-	dimacsCmd.PersistentFlags().BoolVarP(&printInfoFlag, "info", "i", false, "Print all units as well.")
-	dimacsCmd.PersistentFlags().BoolVarP(&unitPropagationFlag, "up", "u", false, "Perform Unitpropagation.")
-	dimacsCmd.PersistentFlags().StringToIntVarP(&constStringMapFlag, "const", "c", map[string]int{}, "Comma separated list of constant instantiations: c=d.")
 }
 
 // groundCmd represents the ground command
@@ -65,37 +54,6 @@ bule ground <program> [options].
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if len(args) == 0 {
-			return
-		}
-
-		bule.DebugLevel = debugFlag
-
-		p, err := bule.ParseProgram(args)
-		if err != nil {
-			fmt.Println("Error parsing program")
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		stage0Prerequisites(&p)
-		stage1GeneratorsAndFacts(&p)
-		stage2Iterators(&p)
-		stage3Clauses(&p)
-		stage4Printing(&p, args)
-	},
-}
-
-// dimacsCmd represents the dimacs command
-var dimacsCmd = &cobra.Command{
-	Use:   "dimacs",
-	Short: "Grounds to dimacs completely.",
-	Long: `Grounds to DIMACS CNF from a program written in Bule format
-	bule dimacs <program> [options].
-	`,
-	Args: cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		textualFlag = false
 		if len(args) == 0 {
 			return
 		}
