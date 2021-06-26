@@ -2,10 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
-	"time"
 
 	bule "github.com/vale1410/bule/grounder"
 )
@@ -244,7 +242,7 @@ func stage4Printing(p *bule.Program, args []string) {
 }
 
 func stage(p *bule.Program, change *bool, f func() (bool, error), stage string, info string) {
-	start := time.Now()
+	//start := time.Now()
 	stageInfo(p, stage, info)
 	tmp, err := f()
 	if err != nil {
@@ -257,8 +255,8 @@ func stage(p *bule.Program, change *bool, f func() (bool, error), stage string, 
 	}
 	*change = *change || tmp
 
-	elapsed := time.Since(start)
-	log.Printf("DEBUGTIME %6.2f %v %v", elapsed.Seconds(), stage, len(p.Rules))
+	//elapsed := time.Since(start)
+	//log.Printf("DEBUGTIME %6.2f %v %v", elapsed.Seconds(), stage, len(p.Rules))
 }
 
 func runFixpoint(f func() (bool, error)) func() (bool, error) {
