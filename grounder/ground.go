@@ -14,6 +14,7 @@ import (
 func (p *Program) ConstraintSimplification() (bool, error) {
 
 	finalChanged := true
+	//start := time.Now()
 
 	i := 0
 	for {
@@ -22,6 +23,9 @@ func (p *Program) ConstraintSimplification() (bool, error) {
 		if err != nil {
 			return true, fmt.Errorf("Constraint simplification, iteration %v. \n %w", i, err)
 		}
+		//elapsed := time.Since(start)
+		//start = time.Now()
+		//log.Printf("X-DEBUGTIME %6.2f %v %v Constraints->Instantiation", elapsed.Seconds(), i, len(p.Rules))
 		if !changed {
 			//Debug(2, "Remove clauses with contradictions, e.g.  (1==2) or (1!=1),  and remove true constraints, e.g.  (1>2, 1==1).")
 			finalChanged, err = p.CleanRulesFromGroundBoolExpression()
@@ -30,6 +34,9 @@ func (p *Program) ConstraintSimplification() (bool, error) {
 			}
 			break
 		}
+		//elapsed = time.Since(start)
+		//start = time.Now()
+		//log.Printf("X-DEBUGTIME %6.2f %v %v CleanRules", elapsed.Seconds(), i, len(p.Rules))
 	}
 	return finalChanged || i > 1, nil
 }
@@ -153,6 +160,7 @@ func (p *Program) findFilteredTuples(literal Literal) [][]string {
 			filteredTuples = append(filteredTuples, tuple)
 		}
 	}
+	//	fmt.Println("DEBUG", literal, filteredTuples)
 	return filteredTuples
 }
 
@@ -421,6 +429,11 @@ func (p *Program) CleanRulesFromGroundBoolExpression() (bool, error) {
 				return true
 			}
 		}
+		for _, lit := range r.Generators {
+			if p.FinishCollectingFacts[lit.Name] && lit.IsGround() {
+				return true
+			}
+		}
 		return false
 	}
 
@@ -435,6 +448,22 @@ func (p *Program) CleanRulesFromGroundBoolExpression() (bool, error) {
 				}
 			} else {
 				newRule.Constraints = append(newRule.Constraints, cons)
+			}
+		}
+		newRule.Generators = []Literal{}
+		for _, lit := range rule.Generators {
+			if p.FinishCollectingFacts[lit.Name] && lit.IsGround() {
+				//				fmt.Println("DEBUG", lit.IdString(), "\n", p.FinishCollectingFacts, "\n", p.PredicateTupleMap)
+				if lit.Neg && p.PredicateTupleMap[lit.createNegatedLiteral().IdString()] {
+					//					fmt.Println("DEBUG REMOVE", rule.String())
+					return []Rule{}, nil
+				} else if !lit.Neg && p.PredicateTupleMap[lit.IdString()] {
+					//					fmt.Println("DEBUG DO NOT REMOVE", rule.String())
+				} else {
+					newRule.Generators = append(newRule.Generators, lit)
+				}
+			} else {
+				newRule.Generators = append(newRule.Generators, lit)
 			}
 		}
 		return []Rule{newRule}, nil

@@ -2,6 +2,7 @@ package grounder
 
 import (
 	"fmt"
+
 	"github.com/scylladb/go-set/strset"
 )
 
@@ -142,30 +143,6 @@ func TermTranslation(termIterator TermIterator, transform func(Term) (Term, bool
 	}
 	return
 }
-
-//func (iterator *Iterator) TermTranslation(transform func(Term) (Term, bool, error)) (changed bool, err error) {
-//	var ok bool
-//	for _, term := range iterator.AllTerms() {
-//		*term, ok, err = transform(*term)
-//		changed = ok || changed
-//		if err != nil {
-//			return changed, err
-//		}
-//	}
-//	return
-//}
-//
-//func (rule *Rule) TermTranslation(transform func(Term) (Term, bool, error)) (changed bool, err error) {
-//	var ok bool
-//	for _, term := range rule.AllTerms() {
-//		*term, ok, err = transform(*term)
-//		changed = ok || changed
-//		if err != nil {
-//			return changed, err
-//		}
-//	}
-//	return
-//}
 
 func (iterator Iterator) AllTerms() (terms []*Term) {
 

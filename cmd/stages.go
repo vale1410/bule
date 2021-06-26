@@ -2,9 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	bule "github.com/vale1410/bule/grounder"
+	"log"
 	"os"
 	"strconv"
+	"time"
+
+	bule "github.com/vale1410/bule/grounder"
 )
 
 func stage0Prerequisites(p *bule.Program) {
@@ -67,9 +70,10 @@ func stage1GeneratorsAndFacts(p *bule.Program) {
 			runFixpoint(p.ExpandGroundRanges),
 			"ExpandGroundRanges",
 			"p[1..2]. and also X==1..2, but not Y==A..B.")
+
 		stage(p, &changed,
 			p.ConstraintSimplification,
-			"Do Fixpoint of TransformConstraintsToInstantiation.",
+			"ConstraintSimplification.",
 			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
 
 		stage(p, &changed,
@@ -89,7 +93,7 @@ func stage1GeneratorsAndFacts(p *bule.Program) {
 
 		stage(p, &changed,
 			p.ConstraintSimplification,
-			"Do Fixpoint of TransformConstraintsToInstantiation.",
+			"ConstraintSimplification.",
 			"For each constraint (X==v) rewrite clause with (X<-v) and remove constraint.")
 
 		stage(p, &changed,
@@ -111,7 +115,7 @@ func stage1GeneratorsAndFacts(p *bule.Program) {
 	stage(p, &changed,
 		p.RemoveRulesWithGenerators,
 		"RemoveRulesWithGeneratorsBecauseTheyHaveEmptyDomains",
-		"Because they have empty domains, e.g. \n edge[_,_,V] => vertex[V]. %% there are no edges!")
+		"Because they have empty domains, e.g. \n edge[_,_,V] :: vertex[V]. %% there are no edges!")
 }
 
 // Unroll all iterators.
@@ -240,6 +244,7 @@ func stage4Printing(p *bule.Program, args []string) {
 }
 
 func stage(p *bule.Program, change *bool, f func() (bool, error), stage string, info string) {
+	start := time.Now()
 	stageInfo(p, stage, info)
 	tmp, err := f()
 	if err != nil {
@@ -251,6 +256,9 @@ func stage(p *bule.Program, change *bool, f func() (bool, error), stage string, 
 		debug(2, "Stage changed Program!")
 	}
 	*change = *change || tmp
+
+	elapsed := time.Since(start)
+	log.Printf("DEBUGTIME %6.2f %v %v", elapsed.Seconds(), stage, len(p.Rules))
 }
 
 func runFixpoint(f func() (bool, error)) func() (bool, error) {
