@@ -483,7 +483,7 @@ func (p *Program) CheckArityOfLiterals() error {
 				if n != len(l.Terms) {
 					return LiteralError{*l, r,
 						fmt.Sprintf("Literal with arity %d already occurs in program with arity %d. \n "+
-							"Bule predicat to arity has to be unique.", len(l.Terms), n)}
+							"Bule predicate to arity has to be unique.", len(l.Terms), n)}
 				}
 			} else {
 				p.PredicateToArity[l.Name] = len(l.Terms)
@@ -502,7 +502,7 @@ func (p *Program) CheckSearch() error {
 				if n != len(l.Terms) {
 					return LiteralError{l, r,
 						fmt.Sprintf("Literal with arity %d already occurs in program with arity %d. \n "+
-							"Bule predicat to arity has to be unique.", len(l.Terms), n)}
+							"Predicats cannot be reused with different arity.", len(l.Terms), n)}
 				}
 			} else {
 				p.PredicateToArity[l.Name] = len(l.Terms)
