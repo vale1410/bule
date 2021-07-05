@@ -1,0 +1,4 @@
+* To compile run
+* `opam install dune menhir tsort`
+* `make`
+* `make install`
