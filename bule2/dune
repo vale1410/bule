@@ -1,0 +1,3 @@
+(cram
+ (deps bin/Bule2.exe)
+)

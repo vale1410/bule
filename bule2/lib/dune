@@ -1,0 +1,22 @@
+(ocamllex Lexer)
+(menhir
+ (flags --table --explain)
+ (modules Parser))
+
+(rule
+ (targets ParserMessages.ml)
+ (deps Parser.messages Parser.mly)
+ (action  (with-stdout-to %{targets} (run menhir --compile-errors %{deps}))))
+
+(library
+  (name bule2)
+  (public_name bule2)
+  (synopsis "A library for parsing and solving BULE programs")
+  (libraries menhirLib tsort)
+  (flags :standard -color always -safe-string -warn-error -a+8 -w -50))
+
+;(rule
+; (targets Parser.messages)
+; (deps Parser.mly)
+; (action  (with-stdout-to %{targets} (run menhir --list-errors %{deps}))))
+
