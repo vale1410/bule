@@ -68,6 +68,7 @@ let perform_eq_op rop v1 v2 = match rop with
 exception UnboundVar of Ast.T.vname
 
 let int_of_string_opt s = try Some (int_of_string s) with Failure "int_of_string" -> None
+
 let rec expr vmap : Ast.T.expr -> int = function
   | Ast.T.VarE n -> (match SMap.find_opt n vmap with
                     | None -> raise (UnboundVar n)
@@ -99,16 +100,30 @@ let term vmap t =
                                                    | None -> raise (UnboundVar v) in
   try aux t with
   | UnboundVar v -> failwith (sprintf "Unbound variable %s in term %s" v (Ast.Print.term t))
+(*let atom gmap vmap (cname, terms) =
+  let instances = match SMap.find_opt cname gmap with
+    | None -> GTermSet.empty
+    | Some set -> set in
+  let f m t gt = Option.bind m (match_term t gt) in
+  let aux ts gts =
+    if List.length ts <> List.length gts then failwith (sprintf "Error: term list %s incompatible with %s" (P.list Ast.Print.term ts) (P.list Print.ground_term gts));
+    List.fold_left2 f (Some vmap) ts gts in
+  try List.filter_map (aux terms) (GTermSet.elements instances) with
+  | UnboundVar n -> failwith (sprintf "Error: variable %s is unbound in an arithmetical expression when grounding %s." n (Ast.Print.atom (cname, terms)))*)
+
 let atom gmap vmap (cname, terms) =
   let instances = match SMap.find_opt cname gmap with
     | None -> GTermSet.empty
     | Some set -> set in
-  let aux ts gts =
-    let f m t gt = Option.bind m (match_term t gt) in
-    if List.length ts <> List.length gts then failwith (sprintf "Error: term list %s incompatible with %s" (P.list Ast.Print.term ts) (P.list Print.ground_term gts));
-    List.fold_left2 f (Some vmap) ts gts in
-  try List.filter_map (aux terms) (GTermSet.elements instances) with
-  | UnboundVar n -> failwith (sprintf "Error: variable %s is unbound in an arithmetical expression when grounding %s." n (Ast.Print.atom (cname, terms)))
+  try let ts = List.map (term vmap) terms in
+      if GTermSet.mem ts instances then [vmap] else []
+  with _ ->
+        let f m t gt = Option.bind m (match_term t gt) in
+        let aux ts gts =
+          if List.length ts <> List.length gts then failwith (sprintf "Error: term list %s incompatible with %s" (P.list Ast.Print.term ts) (P.list Print.ground_term gts));
+          List.fold_left2 f (Some vmap) ts gts in
+        try List.filter_map (aux terms) (GTermSet.elements instances) with
+        | UnboundVar n -> failwith (sprintf "Error: variable %s is unbound in an arithmetical expression when grounding %s." n (Ast.Print.atom (cname, terms)))
 
 let ground_literal gmap vmap = function
   | Ast.T.In ga -> atom gmap vmap ga
