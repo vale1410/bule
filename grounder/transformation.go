@@ -200,24 +200,3 @@ func (rule Rule) AllLiterals() (literals []*Literal) {
 	}
 	return
 }
-
-/// IDEA to unify treatment of Iterator and Rule
-type Groundable interface {
-	Terms() []*Term
-	Literals() *[]Literal
-	Constraints() *[]Constraint
-	Generators() *[]Literal
-	Copy() Groundable
-}
-
-func Expansion(func(Groundable) (changed bool, result []Groundable, err error)) (bool, error) {
-	return false, nil
-}
-
-///func Simplify(g *Groundable) error  {
-///	return nil
-///}
-///
-///func Instantiate(g *Groundable) error  {
-///	return nil
-///}

@@ -1008,7 +1008,8 @@ func assign(term Term, assignment map[string]string) (Term, bool, error) {
 		}
 		output = strconv.Itoa(val)
 	}
-	return Term(output), term.String() != output, nil
+	return Te
+	rm(output), term.String() != output, nil
 }
 
 func groundMathExpression(s string) bool {
