@@ -14,8 +14,8 @@ let get () =
      ("--asp",            Arg.Bool (update asp), "Output ASP instead of FOL.", sprintf "%B" !asp);
     ] in*)
   let input_names = ref [] in
-  let ground = ref false in
-  let speclist = [("--ground", Arg.Bool (update ground), "Ground rather than Solve.");
+  let dimacs = ref false in
+  let speclist = [("--dimacs", Arg.Bool (update dimacs), "Output DIMACS format rather than BULE.");
                   ("-",        Arg.Unit (fun () -> update input_names ("-" :: !input_names)), "Read the BULE code from the standard input.");
 ] in
 (*  let speclist = [] in*)
@@ -25,8 +25,8 @@ let get () =
   let files = List.rev !input_names in
   (*eprintf "files=%s\n%!" (Bule2.Print.list Print.string files);*)
   match files with
-  | [] -> failwith "Wrong number of arguments. Usage: dlpag file"
-  | _ :: _ -> (!ground, files)
+  | [] -> failwith "Wrong number of arguments. Usage: bule2 file"
+  | _ :: _ -> (!dimacs, files)
 
 
 (*let convert g =
@@ -55,12 +55,14 @@ let ground_d g =
 *)
 
 let start () =
-  let _gr, fs = get () in
+  let dimacs, fs = get () in
   let ps = List.map (Parse.from_file ()) fs in
   let p = List.flatten ps in
   (*printf "%s\n\n" (Ast.Print.file p);*)
   let g = Circuit.file p in
-  printf "%s\n\n" (Circuit.Print.file g)
+  let d = Dimacs.file g in
+  let output = if dimacs then Dimacs.Print.file d else Circuit.Print.file g in
+  printf "%s\n" output
   (*if gr then ground g else solve g*)
   (*if gr then convert g else solve g*)
 

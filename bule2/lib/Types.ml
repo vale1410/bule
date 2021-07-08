@@ -26,8 +26,16 @@ end end
 module CIRCUIT = struct module T = struct
 type ground_term = Fun of (AST.T.cname * ground_term list)
 type search_var = AST.T.cname * ground_term list
+type quantifier_block = bool * search_var list
 type literal = bool * search_var
 type clause = literal list * literal list
-type quantifier_block = bool * search_var list
 type file = quantifier_block list * clause list
+end end
+
+module DIMACS = struct module T = struct
+type search_var = int
+type quantifier_block = bool * search_var list
+type literal = bool * search_var
+type clause = literal list
+type file = int * int * quantifier_block list * clause list
 end end
