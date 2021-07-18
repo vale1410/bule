@@ -35,6 +35,9 @@ end
 module SMap = Map.Make (String)
 module IMap = Map.Make (Int)
 module GTermSet = Set.Make (struct type t = ground_term list let compare = compare end)
+let find_default key map d = match SMap.find_opt key map with
+  | None -> d
+  | Some v -> v
 
 let print_smap pr map =
   let binds = SMap.bindings map in
@@ -112,9 +115,7 @@ let term vmap t =
   | UnboundVar n -> failwith (sprintf "Error: variable %s is unbound in an arithmetical expression when grounding %s." n (Ast.Print.atom (cname, terms)))*)
 
 let atom gmap vmap (cname, terms) =
-  let instances = match SMap.find_opt cname gmap with
-    | None -> GTermSet.empty
-    | Some set -> set in
+  let instances = find_default cname gmap GTermSet.empty in
   try let ts = List.map (term vmap) terms in
       if GTermSet.mem ts instances then [vmap] else []
   with _ ->
@@ -154,7 +155,7 @@ let tuple_list vmap l = Misc.cross_products (List.map (tuple vmap) l)
 
 let ground_decl gmap (gls, n, ts) =
   let maps = glits gmap SMap.empty gls in
-  let g = match SMap.find_opt n gmap with Some g -> g | None -> GTermSet.empty in
+  let g = find_default n gmap GTermSet.empty in
   let aux gm m =
     let l = tuple_list m ts in
     GTermSet.union gm (GTermSet.of_list l) in
@@ -162,7 +163,53 @@ let ground_decl gmap (gls, n, ts) =
   (*eprintf "gmap=%s\nname=%s\nset=%s\n%!" (print_smap print_gtset gmap) n (print_gtset set);*)
   SMap.add n set gmap
 
-let all_ground decls = List.fold_left ground_decl SMap.empty decls
+let rec ground_decl_component gmap comp =
+  let map = List.fold_left ground_decl gmap comp in
+  (*eprintf "%s.%!" (print_smap print_gtset gmap);*)
+  if map <> gmap then ground_decl_component map comp else map
+
+let find_deps_glit = function
+  | Ast.T.In (n, _) -> Some (Either.Right n)
+  | Ast.T.Notin (n, _) -> Some (Either.Left n)
+  | Ast.T.Sorted _ | Ast.T.Equal _ -> None
+let with_neg_cycle negdeps sccs =
+  let test_component comp =
+    let test_element e =
+      assert (SMap.mem e negdeps);
+      let deps = SMap.find e negdeps in
+      List.exists (fun x -> List.mem x comp) deps in
+    if List.exists test_element comp then Some comp else None in
+  List.filter_map test_component sccs
+
+let compute_recursive_components decls =
+  let add_dep map (gls, n, _) =
+    let ds = List.filter_map find_deps_glit gls in
+    let negs, poss = List.partition_map Fun.id ds in
+    let nl, l = find_default n map ([], []) in
+    SMap.add n (negs @ nl, poss @ negs @ l) map in
+  let dep_map = List.fold_left add_dep SMap.empty decls in
+  let negdeps = SMap.map fst dep_map in
+  let alldeps = SMap.map snd dep_map in
+  let deps = SMap.bindings alldeps in
+  let self_deps = List.filter_map (fun (key, ds) -> if List.mem key ds then Some key else None) deps in
+  let sccs = Tsort.sort_strongly_connected_components deps in
+  let neg_cycles = with_neg_cycle negdeps sccs in
+  if neg_cycles <> [] then failwith (sprintf "Recursion cycle through negation: %s" (P.list (P.unspaces Ast.Print.cname) neg_cycles));
+  let is_rec = function
+    | [] -> assert false
+    | a :: [] -> if List.mem a self_deps then Either.Left [a] else Either.Right a
+    | _ :: _ :: _ as comp -> Either.Left comp in
+  List.map is_rec sccs
+
+let all_ground decls =
+  let sccs = compute_recursive_components decls in
+  let left comp = List.filter (fun (_, n, _) -> List.mem n comp) decls
+  and right name = List.filter (fun (_, n, _) -> n = name) decls in
+  let grouped_decls = List.map (Either.map ~left ~right) sccs in
+  let aux gmap = function
+    | Either.Left recurs -> ground_decl_component gmap recurs
+    | Either.Right simple -> List.fold_left ground_decl gmap simple in
+  List.fold_left aux SMap.empty grouped_decls
 
 let search_var vmap ((cname, terms) : Ast.T.atom) = (cname, List.map (term vmap) terms)
 

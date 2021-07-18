@@ -1,0 +1,11 @@
+dom[0].
+:: dom[X], X < 5 :: dom[X+1].
+:: dom[X] :: #exists[0] vard(X).
+:: dom[X] :: vard(X).
+
+even[0].
+:: even[X], dom[X+1] :: odd[X+1].
+:: odd[X], dom[X+1] :: even[X+1].
+
+:: even[X] :: #exists[0] vare(X).
+:: even[X] :: vare(X).
