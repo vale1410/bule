@@ -14,11 +14,9 @@ struct
 end
 
 
-module SVMap = Map.Make (struct type t = Circuit.T.search_var let compare = compare end)
-
-let search_var (map, g) v = match SVMap.find_opt v map with
-  | Some i -> ((map, g), i)
-  | None -> let i = g+1 in ((SVMap.add v i map, i), i)
+let search_var (map1, map2, g) v = match T.VMap.find_opt v map1 with
+  | Some i -> ((map1, map2, g), i)
+  | None -> let i = g+1 in ((T.VMap.add v i map1, T.IMap.add i v map2, i), i)
 
 let quantifier_block accu (exis, vars) =
   let (accu, vars) = List.fold_left_map search_var accu vars in
@@ -30,14 +28,17 @@ let clause (accu, nbcls) (hyps, ccls) =
   let (naccu, cls) = List.fold_left_map literal accu lits in
   ((naccu, nbcls+1), cls)
 
-let compute_new_vars (_, nb) (cl_map, _) =
-  let vars = SVMap.bindings cl_map in
+let compute_new_vars (_, _, nb) cl_map =
+  let vars = T.VMap.bindings cl_map in
   let filter (f, i) = if i > nb then Some f else None in
   List.filter_map filter vars
-let file (qbs, cls) =
-  let accu = (SVMap.empty, 0) in
+let ground (qbs, cls) =
+  let accu = (T.VMap.empty, T.IMap.empty, 0) in
   let (naccu, qbs) = List.fold_left_map quantifier_block accu qbs in
-  let ((nnaccu, nbcls), cls) = List.fold_left_map clause (naccu, 0) cls in
-  let nvars = compute_new_vars naccu nnaccu in
+  let (((vmap, imap, nvar), nbcls), cls) = List.fold_left_map clause (naccu, 0) cls in
+  let nvars = compute_new_vars naccu vmap in
   if nvars <> [] then eprintf "Warning: undeclared vars:\n%s\n%!" (P.unspaces Circuit.Print.search_var nvars);
-  (snd nnaccu, nbcls, qbs, cls)
+  ((nvar, nbcls, qbs, cls), vmap, imap)
+let file args =
+  let (dimacs, _, _) = ground args in
+  dimacs

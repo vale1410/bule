@@ -2,14 +2,19 @@
 %token <string> CNAME
 %token <int> INT
 %token NOT
-%token FORALL EXISTS QMARK
+%token FORALL EXISTS (*QMARK*)
 %token CONJ DISJ
 %token LPAREN RPAREN LBRACKET RBRACKET
 %token DEFINE COLON IMPLIES COMMA DOT RANGE
-%token PLUS MULT MINUS (*eop*)
+%token DIV PLUS MULT LOG MOD POW MINUS (*eop*)
 %token EQ NEQ LEQ GEQ LT GT
 (*%token MAX MIN beop*)
 %token EOF
+
+%left MOD
+%left PLUS MINUS
+%left MULT DIV
+%right POW LOG
 
 %{
 (*module Ast = Ast.T*)
@@ -38,32 +43,19 @@ separated_many_slist(Sep, Sub):
 %inline br_list(X):
 | LBRACKET l = separated_list(COMMA, X) RBRACKET { l }
 
-eoperator: | PLUS { Ast.T.Add } | MULT { Ast.T.Mult }
-ord_operator: | LT { Ast.T.Lt } | GT { Ast.T.Gt } | LEQ { Ast.T.Leq } | GEQ { Ast.T.Geq }
-eq_operator: | EQ { Ast.T.Eq } | NEQ { Ast.T.Neq }
+%inline eoperator: | DIV { Ast.T.Div } | LOG { Ast.T.Log } | MOD { Ast.T.Mod } | MULT { Ast.T.Mult } | POW { Ast.T.Pow } | PLUS { Ast.T.Add } | MINUS { Ast.T.Sub }
+%inline coperator: | LT { Ast.T.Lt } | GT { Ast.T.Gt } | LEQ { Ast.T.Leq } | GEQ { Ast.T.Geq } | EQ { Ast.T.Eq } | NEQ { Ast.T.Neq }
 
-cexpr:
-| l = separated_many_slist(eoperator, inner_expr) { Ast.T.ListE l }
-| l = separated_many_slist(MINUS, inner_expr) { let ((), h, r) = l in Ast.T.Subtract (h, r) }
-| LPAREN e = expr RPAREN { e }
-| i = INT { Ast.T.Int i }
-| MINUS i = INT { Ast.T.Int (-i) }
 expr:
-| l = separated_many_slist(eoperator, inner_expr) { Ast.T.ListE l }
-| l = separated_many_slist(MINUS, inner_expr) { let ((), h, r) = l in Ast.T.Subtract (h, r) }
-| e = inner_expr { e }
-
-inner_expr:
+| e1 = expr bo = eoperator e2 = expr { Ast.T.BinE (e1, bo, e2) }
 | LPAREN e = expr RPAREN { e }
 | n = VNAME { Ast.T.VarE n }
 | i = INT { Ast.T.Int i }
-| MINUS i = INT { Ast.T.Int (-i) }
+| MINUS e = expr { Ast.T.BinE (Ast.T.Int 0, Ast.T.Sub, e) }
 
 term:
 | name = CNAME ts = pr_list(term) { Ast.T.Fun (name, ts)  }
-(*| name = CNAME { Ast.T.Fun (name, [])  }*)
-| v = VNAME { Ast.T.Var v }
-| e = cexpr { Ast.T.Exp e }
+| e = expr { Ast.T.Exp e }
 
 %inline tuple:
 | t = term { Ast.T.Term t }
@@ -78,8 +70,7 @@ term:
 %inline ground_literal:
 | ga = ground_atom { Ast.T.In ga }
 | NOT ga = ground_atom { Ast.T.Notin ga }
-| e1 = expr o = ord_operator e2 = expr { Ast.T.Sorted (e1, o, e2) }
-| e1 = term o = eq_operator e2 = term { Ast.T.Equal (e1, o, e2) }
+| e1 = term o = coperator e2 = term { Ast.T.Comparison (e1, o, e2) }
 
 %inline quantifier: | EXISTS { true } | FORALL { false }
 %inline search_decl:

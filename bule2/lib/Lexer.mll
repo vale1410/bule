@@ -36,11 +36,11 @@ rule line_comment = parse
 and token = parse
   | '(' { P.LPAREN   } | ')' { P.RPAREN   } | '[' { P.LBRACKET } | ']' { P.RBRACKET }
   | '<' { P.LT } | '>' { P.GT } | "<=" { P.LEQ } | ">=" { P.GEQ }
-  | '=' { P.EQ } | "!=" { P.NEQ }
+  | "==" { P.EQ } | "!=" { P.NEQ }
   | ".." { P.RANGE }
-  | '+' { P.PLUS } | '-' { P.MINUS } | "*" { P.MULT }
+  | '/' { P.DIV } | '+' { P.PLUS } | '-' { P.MINUS } | "*" { P.MULT } | "//" { P.LOG } | "#mod" { P.MOD } | "**" { P.POW }
   | "~" { P.NOT } | "->" { P.IMPLIES }
-  | ',' { P.COMMA } | "::" { P.DEFINE } | ':' { P.COLON } | '.' { P.DOT } | "?" { P.QMARK }
+  | ',' { P.COMMA } | "::" { P.DEFINE } | ':' { P.COLON } | '.' { P.DOT } (*| "?" { P.QMARK }*)
   | [' ' '\t'] { token lexbuf }
   | linefeed   { incr_linenum lexbuf; token lexbuf }
   | vname as n { P.VNAME n }

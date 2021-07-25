@@ -49,39 +49,53 @@ let print_gtset s =
 
 let unions ls = List.fold_left GTermSet.union GTermSet.empty ls
 
-let subtract_strings i1 is =
-  let i2 = Misc.sum is in
-  (i1 - i2)
+let rec pow a = function
+  | 0 -> 1
+  | 1 -> a
+  | n ->
+    let b = pow a (n / 2) in
+    b * b * (if n mod 2 = 0 then 1 else a)
 
-let perform_eop eop is = match eop with
-  | Ast.T.Add -> Misc.sum is
-  | Ast.T.Mult -> Misc.product is
-  | Ast.T.Max -> List.fold_left max min_int is
-  | Ast.T.Min -> List.fold_left min max_int is
+let rec log a = function
+  | 0 -> assert false
+  | n -> if n < a then 0 else 1 + log a (n / a)
 
-let perform_ord_op rop v1 v2 = match rop with
+let perform_eop v1 v2 = function
+  | Ast.T.Add -> v1 + v2
+  | Ast.T.Div -> v1 / v2
+  | Ast.T.Mult -> v1 * v2
+  | Ast.T.Max -> max v1 v2
+  | Ast.T.Min -> min v1 v2
+  | Ast.T.Log -> log v1 v2
+  | Ast.T.Mod -> v1 mod v2
+  | Ast.T.Pow -> pow v1 v2
+  | Ast.T.Sub -> v1 - v2
+
+let perform_cop v1 v2 = function
   | Ast.T.Lt -> compare v1 v2 < 0
   | Ast.T.Gt -> compare v1 v2 > 0
   | Ast.T.Leq -> compare v1 v2 <= 0
   | Ast.T.Geq -> compare v1 v2 >= 0
-let perform_eq_op rop v1 v2 = match rop with
   | Ast.T.Eq -> compare v1 v2 = 0
   | Ast.T.Neq -> compare v1 v2 <> 0
 
 exception UnboundVar of Ast.T.vname
+exception NonInt of (Ast.T.vname * ground_term)
 
 let int_of_string_opt s = try Some (int_of_string s) with Failure "int_of_string" -> None
 
+let find_gt v map = match SMap.find_opt v map with
+  | None -> raise (UnboundVar v)
+  | Some g -> g
+
 let rec expr vmap : Ast.T.expr -> int = function
-  | Ast.T.VarE n -> (match SMap.find_opt n vmap with
-                    | None -> raise (UnboundVar n)
-                    | Some (Fun (si, args) as g) -> match args, int_of_string_opt si with
-                                               | [], Some i -> i
-                                               | _ :: _ , _
-                                               | _, None -> failwith (sprintf "Variable %s ground to a non-int %s" n (Print.ground_term g)))
+  | Ast.T.VarE n -> (match find_gt n vmap with
+                    | Fun (si, args) as g -> match args, int_of_string_opt si with
+                                             | [], Some i -> i
+                                             | _ :: _ , _
+                                             | _, None -> raise (NonInt (n, g)))
   | Int i -> i
-  | ListE (eop, e, es) -> perform_eop eop (List.map (expr vmap) (e :: es))
-  | Subtract (e, es) -> subtract_strings (expr vmap e) (List.map (expr vmap) es)
+  | BinE (e1, bo, e2) -> perform_eop (expr vmap e1) (expr vmap e2) bo
 
 let match_term pterm gterm vmap =
   let map = ref vmap in
@@ -89,18 +103,18 @@ let match_term pterm gterm vmap =
     let (c', gts) = match gt with Fun g -> g in
     match t with
     | Ast.T.Fun (c, ts) -> if c <> c' || List.length ts <> List.length gts then raise Exit else List.iter2 aux ts gts
-    | Ast.T.Exp e -> let c = string_of_int (expr !map e) in if c <> c' || gts <> [] then raise Exit
-    | Ast.T.Var v -> match SMap.find_opt v !map with | Some gt -> if gt <> gterm then raise Exit
-                                                     | None -> map := SMap.add v gt !map in
+    | Ast.T.Exp (Ast.T.VarE v) -> (match SMap.find_opt v !map with | Some gt -> if gt <> gterm then raise Exit
+                                                      | None -> map := SMap.add v gt !map)
+    | Ast.T.Exp e -> let c = string_of_int (expr !map e) in if c <> c' || gts <> [] then raise Exit in
   try aux pterm gterm; Some !map with
   | Exit -> None
 
 let term vmap t =
   let rec aux = function
   | Ast.T.Fun (c, ts) -> Fun (c, List.map aux ts)
-  | Ast.T.Exp e -> let c = string_of_int (expr vmap e) in Fun (c, [])
-  | Ast.T.Var v -> match SMap.find_opt v vmap with | Some gt -> gt
-                                                   | None -> raise (UnboundVar v) in
+  | Ast.T.Exp (Ast.T.VarE v) -> find_gt v vmap
+  | Ast.T.Exp e -> let c = string_of_int (expr vmap e) in Fun (c, []) in
+(*  | Ast.T.Var v -> find_gt v vmap in*)
   try aux t with
   | UnboundVar v -> failwith (sprintf "Unbound variable %s in term %s" v (Ast.Print.term t))
 (*let atom gmap vmap (cname, terms) =
@@ -131,14 +145,10 @@ let ground_literal gmap vmap = function
   | Ast.T.Notin ga ->
      let maps = atom gmap vmap ga in
      if maps = [] then [vmap] else []
-  | Ast.T.Sorted (t1, r, t2) ->
-     let t1 = expr vmap t1
-     and t2 = expr vmap t2 in
-     if perform_ord_op r t1 t2 then [vmap] else []
-  | Ast.T.Equal (t1, r, t2) ->
+  | Ast.T.Comparison (t1, c, t2) ->
      let t1 = term vmap t1
      and t2 = term vmap t2 in
-     if perform_eq_op r t1 t2 then [vmap] else []
+     if perform_cop t1 t2 c then [vmap] else []
 
 let glits gmap vmap l =
   let aux vmaps lit = List.concat_map (fun m -> ground_literal gmap m lit) vmaps in
@@ -153,7 +163,7 @@ let tuple vmap : Ast.T.tuple -> ground_term list  = function
 
 let tuple_list vmap l = Misc.cross_products (List.map (tuple vmap) l)
 
-let ground_decl gmap (gls, n, ts) =
+let ground_decl_aux gmap (gls, n, ts) =
   let maps = glits gmap SMap.empty gls in
   let g = find_default n gmap GTermSet.empty in
   let aux gm m =
@@ -163,6 +173,10 @@ let ground_decl gmap (gls, n, ts) =
   (*eprintf "gmap=%s\nname=%s\nset=%s\n%!" (print_smap print_gtset gmap) n (print_gtset set);*)
   SMap.add n set gmap
 
+let ground_decl gmap decl =
+  try ground_decl_aux gmap decl with
+  | NonInt (n, g) -> failwith (sprintf "Variable %s ground to a non-int %s in declaration \"%s\"" n (Print.ground_term g) (Ast.Print.decl (Ast.T.G decl)))
+
 let rec ground_decl_component gmap comp =
   let map = List.fold_left ground_decl gmap comp in
   (*eprintf "%s.%!" (print_smap print_gtset gmap);*)
@@ -171,13 +185,16 @@ let rec ground_decl_component gmap comp =
 let find_deps_glit = function
   | Ast.T.In (n, _) -> Some (Either.Right n)
   | Ast.T.Notin (n, _) -> Some (Either.Left n)
-  | Ast.T.Sorted _ | Ast.T.Equal _ -> None
+  | Ast.T.Comparison _ -> None
+
+(** Filters strongly connected components that contains a negative dependency *)
 let with_neg_cycle negdeps sccs =
   let test_component comp =
     let test_element e =
-      assert (SMap.mem e negdeps);
-      let deps = SMap.find e negdeps in
-      List.exists (fun x -> List.mem x comp) deps in
+      match SMap.find_opt e negdeps with
+      | None -> eprintf "Warning: grounding predicate %s used in a rule without being defined anywhere.\n" e; false
+      | Some deps ->
+         List.exists (fun x -> List.mem x comp) deps in
     if List.exists test_element comp then Some comp else None in
   List.filter_map test_component sccs
 

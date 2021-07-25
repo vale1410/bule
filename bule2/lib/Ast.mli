@@ -6,5 +6,6 @@ sig
   val term : T.term -> string
   val atom : T.atom -> string
   val eoperator : T.eoperator -> string
+  val decl : T.decl -> string
   val file : T.file -> string
 end

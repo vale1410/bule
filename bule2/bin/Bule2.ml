@@ -1,4 +1,3 @@
-open Printf
 open Bule2
 
 let update reference value = reference := value
@@ -15,18 +14,22 @@ let get () =
     ] in*)
   let input_names = ref [] in
   let dimacs = ref false in
-  let speclist = [("--dimacs", Arg.Bool (update dimacs), "Output DIMACS format rather than BULE.");
+  let models = ref 1 in
+  let solver = ref "none" in
+  let speclist = [("--dimacs", Arg.Bool (update dimacs), "Output DIMACS format rather than BULE. Default false.");
                   ("-",        Arg.Unit (fun () -> update input_names ("-" :: !input_names)), "Read the BULE code from the standard input.");
+                  ("--models", Arg.Set_int models, "Number of models to generate. Default: 1.");
+                  ("--solver", Arg.Set_string solver, "Set the solver to be used. If \"none\" then no solving takes place. Example \"depqbf --no-dynamic-nenofex --qdo\". Default: \"none\"")
 ] in
 (*  let speclist = [] in*)
   let usage_msg = "BULE Grounder. Options available:" in
   let add_name s = input_names := s :: !input_names in
   Arg.parse speclist add_name usage_msg;
-  let files = List.rev !input_names in
-  (*eprintf "files=%s\n%!" (Bule2.Print.list Print.string files);*)
-  match files with
+  let files = match List.rev !input_names with
   | [] -> failwith "Wrong number of arguments. Usage: bule2 file"
-  | _ :: _ -> (!dimacs, files)
+  | _ :: _ as names -> names in
+  let command = if !solver = "none" then None else Some !solver in
+  (command, !dimacs, !models, files)
 
 
 (*let convert g =
@@ -54,15 +57,21 @@ let ground_d g =
   ()
 *)
 
+(*let solve dim = Solve.solve "depqbf --no-dynamic-nenofex --qdo" dim*)
+let solve models dim command = Solve.solve_all command models dim
+
 let start () =
-  let dimacs, fs = get () in
+  let command, dimacs, models, fs = get () in
   let ps = List.map (Parse.from_file ()) fs in
   let p = List.flatten ps in
   (*printf "%s\n\n" (Ast.Print.file p);*)
   let g = Circuit.file p in
-  let d = Dimacs.file g in
-  let output = if dimacs then Dimacs.Print.file d else Circuit.Print.file g in
-  printf "%s\n" output
+  let (d, vm, im) = Dimacs.ground g in
+  Option.iter (solve models (d, vm, im)) command; ignore dimacs
+  (*let output = if dimacs then Dimacs.Print.file d else Circuit.Print.file g in
+  printf "%s\n" output*)
+
+
   (*if gr then ground g else solve g*)
   (*if gr then convert g else solve g*)
 

@@ -2,14 +2,13 @@ module AST = struct module T = struct
 type cname = string
 type vname = string
 
-type eoperator = Add | Mult | Max | Min
-type ord_operator = Lt | Gt | Leq | Geq
-type eq_operator = Eq | Neq
+type eoperator = Add | Div | Log | Max | Min | Mod | Mult | Pow | Sub
+type comparison_operator = Lt | Gt | Leq | Geq | Eq | Neq
 
-type expr = VarE of vname | Int of int | ListE of (eoperator * expr * expr list) | Subtract of (expr * expr list)
-type term = Exp of expr | Fun of (cname * term list) | Var of vname
+type expr = VarE of vname | Int of int | BinE of (expr * eoperator * expr)
+type term = Exp of expr | Fun of (cname * term list)
 type atom = cname * term list
-type ground_literal = In of atom | Notin of atom | Sorted of (expr * ord_operator * expr) | Equal of (term * eq_operator * term)
+type ground_literal = In of atom | Notin of atom | Comparison of (term * comparison_operator * term)
 type tuple = Term of term | Range of (expr * expr)
 
 type glits = ground_literal list
@@ -33,9 +32,12 @@ type file = quantifier_block list * clause list
 end end
 
 module DIMACS = struct module T = struct
+module IMap = Map.Make (Int)
+module VMap = Map.Make (struct type t = CIRCUIT.T.search_var let compare = compare end)
 type search_var = int
 type quantifier_block = bool * search_var list
 type literal = bool * search_var
 type clause = literal list
 type file = int * int * quantifier_block list * clause list
 end end
+

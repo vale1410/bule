@@ -10,39 +10,40 @@ struct
 
   let eoperator_aux = function
     | Add -> "+"
+    | Div -> "/"
     | Mult -> "*"
     | Max -> "\\max"
     | Min -> "\\min"
-  let ord_operator = function
+    | Log -> "//"
+    | Mod -> "#mod"
+    | Pow -> "**"
+    | Sub -> "-"
+  let comparison_operator = function
     | Lt -> "<"
     | Gt -> ">"
     | Leq -> "<="
     | Geq -> ">="
-  let eq_operator = function
-    | Eq -> "="
+    | Eq -> "=="
     | Neq -> "!="
   let eoperator o = "\\" ^ eoperator_aux o
 
   let list_tuple f = Print.list' "(" ", " ")" f
 
   let rec expr = function
-    | ListE (a, e, es) -> Print.list' "" (sprintf " %s " (eoperator a)) "" inner_expr (e :: es)
-    | Subtract (v, vs) -> Print.list' "" " - " "" inner_expr (v :: vs)
+    | BinE (e1, bo, e2) -> sprintf "%s %s %s" (inner_expr e1) (eoperator bo) (inner_expr e2)
     | VarE _ | Int _ as e -> inner_expr e
   and inner_expr = function
     | VarE n -> n
     | Int i -> Print.int i
-    | ListE _ | Subtract _ as e -> sprintf "(%s)" (expr e)
+    | BinE _ as e -> sprintf "(%s)" (expr e)
   let rec atom (name, terms) = sprintf "%s[%s]" name (Print.list' "" ", " "" term terms)
   and ground_literal = function
     | In ga -> atom ga
     | Notin ga -> sprintf "~%s" (atom ga)
-    | Sorted (t1, r, t2) -> sprintf "%s %s %s" (expr t1) (ord_operator r) (expr t2)
-    | Equal (t1, r, t2) -> sprintf "%s %s %s" (term t1) (eq_operator r) (term t2)
+    | Comparison (t1, c, t2) -> sprintf "%s %s %s" (term t1) (comparison_operator c) (term t2)
   and term : term -> string = function
     | Exp e -> expr e
     | Fun (c, ts) -> sprintf "%s%s" c (list_tuple term ts)
-    | Var n -> n
   let tuple = function
     | Term t -> term t
     | Range (e1, e2) -> sprintf "%s..%s" (expr e1) (expr e2)
