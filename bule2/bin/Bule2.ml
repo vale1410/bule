@@ -1,3 +1,4 @@
+open Printf
 open Bule2
 
 let update reference value = reference := value
@@ -67,9 +68,11 @@ let start () =
   (*printf "%s\n\n" (Ast.Print.file p);*)
   let g = Circuit.file p in
   let (d, vm, im) = Dimacs.ground g in
-  Option.iter (solve models (d, vm, im)) command; ignore dimacs
-  (*let output = if dimacs then Dimacs.Print.file d else Circuit.Print.file g in
-  printf "%s\n" output*)
+  match command with
+  | Some comm -> solve models (d, vm, im) comm
+  | None ->
+     let output = if dimacs then Dimacs.Print.file d else Circuit.Print.file g in
+     printf "%s\n" output
 
 
   (*if gr then ground g else solve g*)

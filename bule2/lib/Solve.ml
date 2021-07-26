@@ -28,22 +28,38 @@ let run_process cmd dimacs =
   close_in inp;
   r
 
-let run_solver cmd dimacs =
+module IntSet = Set.Make (Int)
+
+let run_solver cmd keys dimacs =
   let lines = run_process cmd dimacs in
-  parse_output lines
+  match parse_output lines with
+  | None -> None
+  | Some model ->
+     let assigned = List.fold_left (fun accu (_, x) -> IntSet.add x accu) IntSet.empty model in
+     let missing = IntSet.diff keys assigned in
+     let actual_model = IntSet.fold (fun x l -> (false, x) :: l) missing model in
+     Some actual_model
 
-let print_model imap model =
-  let pr_one (pol, var) =
-    let tilde = if pol then "" else "~" in
-    let sv = match Dimacs.T.IMap.find_opt var imap with None -> assert false | Some sv -> sv in
-    sprintf "%s%s" tilde (Circuit.Print.search_var sv) in
-  Print.unlines pr_one model
+let print_literal imap (pol, var) =
+  let tilde = if pol then "" else "~" in
+  let sv = match Dimacs.T.IMap.find_opt var imap with None -> assert false | Some sv -> sv in
+    sprintf "%s%s" tilde (Circuit.Print.search_var sv)
 
+let print_one_model imap model =
+  Print.unlines (print_literal imap) (List.sort compare model)
+
+let print_all_models imap model =
+  Print.unspaces (print_literal imap) (List.sort compare model)
+
+let map_keys map =
+  let add k _ set = IntSet.add k set in
+  Dimacs.T.IMap.fold add map IntSet.empty
 let solve_one cmd (dimacs, _, imap) =
-  match run_solver cmd dimacs with
+  let keys = map_keys imap in
+  match run_solver cmd keys dimacs with
   | None -> printf "UNSAT\n"
   | Some model -> printf "SAT\n";
-                  eprintf "%s\n" (print_model imap model)
+                  eprintf "%s\n" (print_one_model imap model)
 
 let next_instance (nbvar, nbcls, blocks, cls) model =
   let flip_literal (pol, var) = (not pol, var) in
@@ -51,15 +67,16 @@ let next_instance (nbvar, nbcls, blocks, cls) model =
   (nbvar, nbcls + 1, blocks, nmodel :: cls)
 
 let solve_all cmd bound (dimacs, _, imap) =
+  let keys = map_keys imap in
   let rec aux i dm =
     if i >= bound && bound > 0 then ()
     else
-      match run_solver cmd dm with
+      match run_solver cmd keys dm with
       | None ->
          if i = 0 then printf "UNSAT\n%!";
          eprintf "No more models. Total: %d.\n%!" i
       | Some model ->
          if i = 0 then printf "SAT\n%!";
-         eprintf "Model %d:\n%s\n%!" (i+1) (print_model imap model);
+         eprintf "Model %d:\n%s\n%!" (i+1) (print_all_models imap model);
          aux (i+1) (next_instance dm model) in
   aux 0 dimacs

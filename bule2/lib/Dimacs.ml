@@ -37,7 +37,7 @@ let ground (qbs, cls) =
   let (naccu, qbs) = List.fold_left_map quantifier_block accu qbs in
   let (((vmap, imap, nvar), nbcls), cls) = List.fold_left_map clause (naccu, 0) cls in
   let nvars = compute_new_vars naccu vmap in
-  if nvars <> [] then eprintf "Warning: undeclared vars:\n%s\n%!" (P.unspaces Circuit.Print.search_var nvars);
+  if nvars <> [] then eprintf "Warning. Undeclared variables: %s\n%!" (P.unspaces Circuit.Print.search_var nvars);
   ((nvar, nbcls, qbs, cls), vmap, imap)
 let file args =
   let (dimacs, _, _) = ground args in
