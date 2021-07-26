@@ -72,13 +72,19 @@ let perform_eop v1 v2 = function
   | Ast.T.Pow -> pow v1 v2
   | Ast.T.Sub -> v1 - v2
 
-let perform_cop v1 v2 = function
+let int_of_gt = function
+  | T.Fun (name, []) as gt -> (try Either.Right (int_of_string name) with Failure "int_of_string" -> Either.Left gt)
+  | T.Fun (_, _ :: _) as gt -> Either.Left gt
+
+let perform_cop_aux v1 v2 = function
   | Ast.T.Lt -> compare v1 v2 < 0
   | Ast.T.Gt -> compare v1 v2 > 0
   | Ast.T.Leq -> compare v1 v2 <= 0
   | Ast.T.Geq -> compare v1 v2 >= 0
   | Ast.T.Eq -> compare v1 v2 = 0
   | Ast.T.Neq -> compare v1 v2 <> 0
+
+let perform_cop v1 v2 cop = perform_cop_aux (int_of_gt v1) (int_of_gt v2) cop
 
 exception UnboundVar of Ast.T.vname
 exception NonInt of (Ast.T.vname * ground_term)
