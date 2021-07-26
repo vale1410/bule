@@ -16,9 +16,10 @@ type glits = ground_literal list
 type literals = glits * bool * atom
 type ground_decl = glits * cname * tuple list
 type search_decl = glits * bool * expr * atom
-type clause_decl  = glits * literals list * literals list
+type clause_decl = glits * literals list * literals list
+type hide_decl = glits * atom
 
-type decl = G of ground_decl | S of search_decl | C of clause_decl
+type decl = G of ground_decl | S of search_decl | C of clause_decl | H of hide_decl
 type file = decl list
 end end
 
@@ -28,11 +29,12 @@ type search_var = AST.T.cname * ground_term list
 type quantifier_block = bool * search_var list
 type literal = bool * search_var
 type clause = literal list * literal list
-type file = quantifier_block list * clause list
+type file = quantifier_block list * clause list * search_var list
 end end
 
 module DIMACS = struct module T = struct
 module IMap = Map.Make (Int)
+module ISet = Set.Make (Int)
 module VMap = Map.Make (struct type t = CIRCUIT.T.search_var let compare = compare end)
 type search_var = int
 type quantifier_block = bool * search_var list

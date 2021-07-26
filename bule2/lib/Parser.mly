@@ -2,7 +2,7 @@
 %token <string> CNAME
 %token <int> INT
 %token NOT
-%token FORALL EXISTS (*QMARK*)
+%token FORALL EXISTS HIDE (*QMARK*)
 %token CONJ DISJ
 %token LPAREN RPAREN LBRACKET RBRACKET
 %token DEFINE COLON IMPLIES COMMA DOT RANGE
@@ -22,6 +22,7 @@ let add_list l = function
   | Ast.T.G (l', c, ts) -> Ast.T.G (l @ l', c, ts)
   | Ast.T.S (l', b, e, a) -> Ast.T.S (l @ l', b, e, a)
   | Ast.T.C (l', hyps, ccls) -> Ast.T.C (l @ l', hyps, ccls)
+  | Ast.T.H (l', a) -> Ast.T.H (l @ l', a)
 %}
 (*%type <(Ast.keyword, Ast.free) Ast.atomic> keyword_atomic*)
 %type <Ast.T.ground_literal> ground_literal
@@ -81,10 +82,13 @@ term:
 %inline clause_part:
 | hyps = separated_list(CONJ, literals) IMPLIES ccls = separated_list(DISJ, literals) { ([], hyps, ccls) }
 | ccls = separated_list(DISJ, literals) { ([], [], ccls) }
+%inline hide_decl:
+| HIDE n = CNAME ts = pr_list(term) { ([], (n, ts)) }
 %inline pre_decl:
 | gd = ground_head { Ast.T.G gd }
 | sd = search_decl { Ast.T.S sd }
 | cd = clause_part { Ast.T.C cd }
+| hd = hide_decl { Ast.T.H hd }
 
 decl:
 | DEFINE gls = separated_list(COMMA, ground_literal) DEFINE d = pre_decl DOT { add_list gls d }

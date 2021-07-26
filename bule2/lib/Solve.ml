@@ -45,28 +45,30 @@ let print_literal imap (pol, var) =
   let sv = match Dimacs.T.IMap.find_opt var imap with None -> assert false | Some sv -> sv in
     sprintf "%s%s" tilde (Circuit.Print.search_var sv)
 
-let print_one_model imap model =
+let print_one_model imap model hide =
+  let model = List.filter (fun (_, x) -> not (Dimacs.T.ISet.mem x hide)) model in
   Print.unlines (print_literal imap) (List.sort compare model)
 
-let print_all_models imap model =
+let print_all_models imap model hide =
+  let model = List.filter (fun (_, x) -> not (Dimacs.T.ISet.mem x hide)) model in
   Print.unspaces (print_literal imap) (List.sort compare model)
 
 let map_keys map =
   let add k _ set = IntSet.add k set in
   Dimacs.T.IMap.fold add map IntSet.empty
-let solve_one cmd (dimacs, _, imap) =
+let solve_one cmd (dimacs, _, imap, hide) =
   let keys = map_keys imap in
   match run_solver cmd keys dimacs with
   | None -> printf "UNSAT\n"
   | Some model -> printf "SAT\n";
-                  eprintf "%s\n" (print_one_model imap model)
+                  eprintf "%s\n" (print_one_model imap model hide)
 
 let next_instance (nbvar, nbcls, blocks, cls) model =
   let flip_literal (pol, var) = (not pol, var) in
   let nmodel = List.map flip_literal model in
   (nbvar, nbcls + 1, blocks, nmodel :: cls)
 
-let solve_all cmd bound (dimacs, _, imap) =
+let solve_all cmd bound (dimacs, _, imap, hide) =
   let keys = map_keys imap in
   let rec aux i dm =
     if i >= bound && bound > 0 then ()
@@ -77,6 +79,6 @@ let solve_all cmd bound (dimacs, _, imap) =
          eprintf "No more models. Total: %d.\n%!" i
       | Some model ->
          if i = 0 then printf "SAT\n%!";
-         eprintf "Model %d:\n%s\n%!" (i+1) (print_all_models imap model);
+         eprintf "Model %d:\n%s\n%!" (i+1) (print_all_models imap model hide);
          aux (i+1) (next_instance dm model) in
   aux 0 dimacs

@@ -64,10 +64,14 @@ struct
     let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in
     quant ^ gls ^ " :: " ^ search_var var ^ "?"
   let clause_decl (gls, hyps, ccls) = sprintf "%s :: %s -> %s." (glits gls) (Print.list' "" " & " "" literals hyps) (Print.list' "" " | " "" literals ccls)
+  let hide_decl (gls, var) =
+    let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in
+    sprintf "%%#hide %s :: %s." gls (search_var var)
   let decl = function
     | G gd -> ground_decl gd
     | S sd -> search_decl sd
     | C cd -> clause_decl cd
+    | H hd -> hide_decl hd
 
   let file = Print.unlines decl
 end

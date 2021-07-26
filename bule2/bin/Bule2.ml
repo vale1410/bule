@@ -67,9 +67,9 @@ let start () =
   let p = List.flatten ps in
   (*printf "%s\n\n" (Ast.Print.file p);*)
   let g = Circuit.file p in
-  let (d, vm, im) = Dimacs.ground g in
+  let (d, vm, im, hs) = Dimacs.ground g in
   match command with
-  | Some comm -> solve models (d, vm, im) comm
+  | Some comm -> solve models (d, vm, im, hs) comm
   | None ->
      let output = if dimacs then Dimacs.Print.file d else Circuit.Print.file g in
      printf "%s\n" output
