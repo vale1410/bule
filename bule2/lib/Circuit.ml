@@ -187,7 +187,7 @@ let ground_decl gmap decl =
 let rec ground_decl_component gmap comp =
   let map = List.fold_left ground_decl gmap comp in
   (*eprintf "%s.%!" (print_smap print_gtset gmap);*)
-  if map <> gmap then ground_decl_component map comp else map
+  if SMap.equal (GTermSet.equal) map gmap then map else ground_decl_component map comp
 
 let find_deps_glit = function
   | Ast.T.In (n, _) -> Some (Either.Right n)
@@ -206,15 +206,12 @@ let with_neg_cycle negdeps sccs =
   List.filter_map test_component sccs
 
 let compute_recursive_components decls =
-  let add_dep map (gls, n, _) =
+  let add_dep (nmap, all) (gls, n, _) =
     let ds = List.filter_map find_deps_glit gls in
     let negs, poss = List.partition_map Fun.id ds in
-    let nl, l = find_default n map ([], []) in
-    SMap.add n (negs @ nl, poss @ negs @ l) map in
-  let dep_map = List.fold_left add_dep SMap.empty decls in
-  let negdeps = SMap.map fst dep_map in
-  let alldeps = SMap.map snd dep_map in
-  let deps = SMap.bindings alldeps in
+    let nl = find_default n nmap [] in
+    (SMap.add n (negs @ nl) nmap, (n, poss) :: (n, negs) :: all) in
+  let negdeps, deps = List.fold_left add_dep (SMap.empty, []) decls in
   let self_deps = List.filter_map (fun (key, ds) -> if List.mem key ds then Some key else None) deps in
   let sccs = Tsort.sort_strongly_connected_components deps in
   let neg_cycles = with_neg_cycle negdeps sccs in
