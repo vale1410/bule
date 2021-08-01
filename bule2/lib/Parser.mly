@@ -18,6 +18,11 @@
 
 %{
 (*module Ast = Ast.T*)
+let unroll_comparion_chain t l =
+  let aux (accu_l, accu_t) (op, t) =
+    (Ast.T.Comparison (accu_t, op, t) :: accu_l, t) in
+  fst (List.fold_left aux ([], t) l)
+
 let add_list l = function
   | Ast.T.G (l', c, ts) -> Ast.T.G (l @ l', c, ts)
   | Ast.T.S (l', b, e, a) -> Ast.T.S (l @ l', b, e, a)
@@ -25,7 +30,7 @@ let add_list l = function
   | Ast.T.H (l', a) -> Ast.T.H (l @ l', a)
 %}
 (*%type <(Ast.keyword, Ast.free) Ast.atomic> keyword_atomic*)
-%type <Ast.T.ground_literal> ground_literal
+%type <Ast.T.ground_literal list> ground_literal
 %type <Ast.T.search_decl> search_decl
 %type <Ast.T.file> file
 %start file
@@ -45,7 +50,9 @@ separated_many_slist(Sep, Sub):
 | LBRACKET l = separated_list(COMMA, X) RBRACKET { l }
 
 %inline eoperator: | DIV { Ast.T.Div } | LOG { Ast.T.Log } | MOD { Ast.T.Mod } | MULT { Ast.T.Mult } | POW { Ast.T.Pow } | PLUS { Ast.T.Add } | MINUS { Ast.T.Sub }
-%inline coperator: | LT { Ast.T.Lt } | GT { Ast.T.Gt } | LEQ { Ast.T.Leq } | GEQ { Ast.T.Geq } | EQ { Ast.T.Eq } | NEQ { Ast.T.Neq }
+%inline loperator: | LT { Ast.T.Lt } | LEQ { Ast.T.Leq }
+%inline goperator: | GT { Ast.T.Gt } | GEQ { Ast.T.Geq }
+%inline qoperator: | EQ { Ast.T.Eq } | NEQ { Ast.T.Neq }
 
 expr:
 | e1 = expr bo = eoperator e2 = expr { Ast.T.BinE (e1, bo, e2) }
@@ -68,30 +75,46 @@ term:
 | n = CNAME ts = br_list(term) { (n, ts) }
 %inline ground_head:
 | n = CNAME ts = br_list(tuple) { ([], n, ts) }
-%inline ground_literal:
-| ga = ground_atom { Ast.T.In ga }
-| NOT ga = ground_atom { Ast.T.Notin ga }
-| e1 = term o = coperator e2 = term { Ast.T.Comparison (e1, o, e2) }
+ground_literal:
+| ga = ground_atom { [Ast.T.In ga] }
+| NOT ga = ground_atom { [Ast.T.Notin ga] }
+| ch = chain { ch }
+| e1 = term o = qoperator e2 = term { [Ast.T.Comparison (e1, o, e2)] }
+chain:
+| t = term l = nonempty_list(pair(loperator,term)) { unroll_comparion_chain t l }
+| t = term l = nonempty_list(pair(goperator,term)) { unroll_comparion_chain t l }
+(*| t = term comparison_chain(loperator) { [] }
+| t = term comparison_chain(goperator) { [] }
+comparison_chain(coptype):
+| t1 = term co = coptype t2 = term { ([Ast.T.Comparison (t1, co, t2)], t2) }
+| ch = comparison_chain(coptype) co = coptype t = term { let (l, last) = ch in (Ast.T.Comparison (last, co, t) :: l, t) }*)
+
+grounding_prefix:
+gls = separated_nonempty_list(COMMA, ground_literal) { List.flatten gls }
 
 %inline quantifier: | EXISTS { true } | FORALL { false }
 %inline search_decl:
 | b = quantifier LBRACKET e = expr RBRACKET n = CNAME ts = pr_list(term) { ([], b, e, (n, ts)) }
 %inline literals:
-| COLON gls = separated_nonempty_list(COMMA, ground_literal) COLON pa = search_atom { let (pol, a) = pa in (gls, pol, a) }
+| COLON gp = grounding_prefix COLON pa = search_atom { let (pol, a) = pa in (gp, pol, a) }
 | pa = search_atom { let (pol, a) = pa in ([], pol, a) }
-%inline clause_part:
-| hyps = separated_list(CONJ, literals) IMPLIES ccls = separated_list(DISJ, literals) { ([], hyps, ccls) }
-| ccls = separated_list(DISJ, literals) { ([], [], ccls) }
-%inline hide_decl:
+clause_body:
+hyps = separated_list(CONJ, literals) { hyps }
+clause_head:
+ccls = separated_list(DISJ, literals) { ccls }
+clause_part:
+| hyps = clause_body IMPLIES ccls = clause_head { ([], hyps, ccls) }
+| ccls = clause_head { ([], [], ccls) }
+hide_decl:
 | HIDE n = CNAME ts = pr_list(term) { ([], (n, ts)) }
-%inline pre_decl:
+pre_decl:
 | gd = ground_head { Ast.T.G gd }
 | sd = search_decl { Ast.T.S sd }
 | cd = clause_part { Ast.T.C cd }
 | hd = hide_decl { Ast.T.H hd }
 
 decl:
-| DEFINE gls = separated_list(COMMA, ground_literal) DEFINE d = pre_decl DOT { add_list gls d }
+| DEFINE gp = grounding_prefix DEFINE d = pre_decl DOT { add_list gp d }
 | d = pre_decl DOT { d }
 
 file:
