@@ -5,7 +5,7 @@
 %token FORALL EXISTS HIDE (*QMARK*)
 %token CONJ DISJ
 %token LPAREN RPAREN LBRACKET RBRACKET
-%token DEFINE DCOLON COLON IMPLIES COMMA DOT RANGE
+%token DEFINE DCOLON COLON IMPLIED IMPLIES COMMA DOT RANGE
 %token DIV PLUS MULT LOG MOD POW MINUS (*eop*)
 %token EQ NEQ LEQ GEQ LT GT
 (*%token MAX MIN beop*)
@@ -84,11 +84,6 @@ ground_literal:
 chain:
 | t = term l = nonempty_list(pair(loperator,term)) { unroll_comparion_chain t l }
 | t = term l = nonempty_list(pair(goperator,term)) { unroll_comparion_chain t l }
-(*| t = term comparison_chain(loperator) { [] }
-| t = term comparison_chain(goperator) { [] }
-comparison_chain(coptype):
-| t1 = term co = coptype t2 = term { ([Ast.T.Comparison (t1, co, t2)], t2) }
-| ch = comparison_chain(coptype) co = coptype t = term { let (l, last) = ch in (Ast.T.Comparison (last, co, t) :: l, t) }*)
 
 grounding_prefix:
 gls = separated_nonempty_list(COMMA, ground_literal) { List.flatten gls }
@@ -105,6 +100,7 @@ clause_head:
 ccls = separated_list(DISJ, literals) { ccls }
 clause_part:
 | hyps = clause_body IMPLIES ccls = clause_head { ([], hyps, ccls) }
+| ccls = clause_head IMPLIED hyps = clause_body { ([], hyps, ccls) }
 | ccls = clause_head { ([], [], ccls) }
 hide_decl:
 | HIDE n = CNAME ts = pr_list(term) { ([], (n, ts)) }

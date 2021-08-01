@@ -39,7 +39,7 @@ and token = parse
   | "==" { P.EQ } | "!=" { P.NEQ }
   | ".." { P.RANGE }
   | '/' { P.DIV } | '+' { P.PLUS } | '-' { P.MINUS } | "*" { P.MULT } | "//" { P.LOG } | "#mod" { P.MOD } | "**" { P.POW }
-  | "~" { P.NOT } | "->" { P.IMPLIES }
+  | "~" { P.NOT } | "<-" { P.IMPLIED } | "->" { P.IMPLIES }
   | ',' { P.COMMA } | ":=" { P.DEFINE } | "::" { P.DCOLON } | ':' { P.COLON } | '.' { P.DOT } (*| "?" { P.QMARK }*)
   | [' ' '\t'] { token lexbuf }
   | linefeed   { incr_linenum lexbuf; token lexbuf }
