@@ -8,7 +8,7 @@ type comparison_operator = Lt | Gt | Leq | Geq | Eq | Neq
 type expr = VarE of vname | Int of int | BinE of (expr * eoperator * expr)
 type term = Exp of expr | Fun of (cname * term list)
 type atom = cname * term list
-type ground_literal = In of atom | Notin of atom | Comparison of (term * comparison_operator * term)
+type ground_literal = In of atom | Notin of atom | Comparison of (term * comparison_operator * term) | Set of (vname * term)
 type tuple = Term of term | Range of (expr * expr)
 
 type glits = ground_literal list

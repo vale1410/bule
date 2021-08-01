@@ -156,6 +156,10 @@ let ground_literal gmap vmap = function
      let t1 = term vmap t1
      and t2 = term vmap t2 in
      if perform_cop t1 t2 c then [vmap] else []
+  | Ast.T.Set (v, t) ->
+     if SMap.mem v vmap then failwith (sprintf "Error: variable %s is already bound and cannot be assign %s." v (Ast.Print.term t));
+     let t = term vmap t in
+     [SMap.add v t vmap]
 
 let glits gmap vmap l =
   let aux vmaps lit = List.concat_map (fun m -> ground_literal gmap m lit) vmaps in
@@ -192,7 +196,7 @@ let rec ground_decl_component gmap comp =
 let find_deps_glit = function
   | Ast.T.In (n, _) -> Some (Either.Right n)
   | Ast.T.Notin (n, _) -> Some (Either.Left n)
-  | Ast.T.Comparison _ -> None
+  | Ast.T.Comparison _ | Ast.T.Set _ -> None
 
 (** Filters strongly connected components that contains a negative dependency *)
 let with_neg_cycle negdeps sccs =

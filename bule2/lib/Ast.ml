@@ -41,6 +41,7 @@ struct
     | In ga -> atom ga
     | Notin ga -> sprintf "~%s" (atom ga)
     | Comparison (t1, c, t2) -> sprintf "%s %s %s" (term t1) (comparison_operator c) (term t2)
+    | Set (v, t) -> sprintf "%s := %s" v (term t)
   and term : term -> string = function
     | Exp e -> expr e
     | Fun (c, ts) -> sprintf "%s%s" c (list_tuple term ts)

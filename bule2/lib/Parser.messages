@@ -1,6 +1,6 @@
 file: CNAME CONJ CNAME LPAREN RBRACKET
 ##
-## Ends in an error in state: 123.
+## Ends in an error in state: 126.
 ##
 ## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -13,7 +13,7 @@ file: CNAME CONJ CNAME LPAREN RBRACKET
 
 file: CNAME CONJ CNAME LPAREN RPAREN VNAME
 ##
-## Ends in an error in state: 125.
+## Ends in an error in state: 128.
 ##
 ## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -26,7 +26,7 @@ file: CNAME CONJ CNAME LPAREN RPAREN VNAME
 
 file: CNAME CONJ CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 124.
+## Ends in an error in state: 127.
 ##
 ## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -47,7 +47,7 @@ file: CNAME CONJ CNAME LPAREN VNAME RBRACKET
 
 file: CNAME CONJ CNAME VNAME
 ##
-## Ends in an error in state: 122.
+## Ends in an error in state: 125.
 ##
 ## separated_nonempty_list(CONJ,literals) -> CNAME . [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -62,7 +62,7 @@ file: CNAME CONJ CNAME VNAME
 
 file: CNAME CONJ COLON RPAREN
 ##
-## Ends in an error in state: 113.
+## Ends in an error in state: 116.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON CNAME [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -81,7 +81,7 @@ file: CNAME CONJ COLON RPAREN
 
 file: CNAME CONJ COLON VNAME LT VNAME COLON CNAME LPAREN RBRACKET
 ##
-## Ends in an error in state: 134.
+## Ends in an error in state: 137.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -94,7 +94,7 @@ file: CNAME CONJ COLON VNAME LT VNAME COLON CNAME LPAREN RBRACKET
 
 file: CNAME CONJ COLON VNAME LT VNAME COLON CNAME LPAREN RPAREN VNAME
 ##
-## Ends in an error in state: 136.
+## Ends in an error in state: 139.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -107,7 +107,7 @@ file: CNAME CONJ COLON VNAME LT VNAME COLON CNAME LPAREN RPAREN VNAME
 
 file: CNAME CONJ COLON VNAME LT VNAME COLON CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 135.
+## Ends in an error in state: 138.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -128,7 +128,7 @@ file: CNAME CONJ COLON VNAME LT VNAME COLON CNAME LPAREN VNAME RBRACKET
 
 file: CNAME CONJ COLON VNAME LT VNAME COLON CNAME VNAME
 ##
-## Ends in an error in state: 133.
+## Ends in an error in state: 136.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME . [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -143,7 +143,7 @@ file: CNAME CONJ COLON VNAME LT VNAME COLON CNAME VNAME
 
 file: CNAME CONJ COLON VNAME LT VNAME COLON NOT CNAME LPAREN RBRACKET
 ##
-## Ends in an error in state: 118.
+## Ends in an error in state: 121.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -156,7 +156,7 @@ file: CNAME CONJ COLON VNAME LT VNAME COLON NOT CNAME LPAREN RBRACKET
 
 file: CNAME CONJ COLON VNAME LT VNAME COLON NOT CNAME LPAREN RPAREN VNAME
 ##
-## Ends in an error in state: 120.
+## Ends in an error in state: 123.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -169,7 +169,7 @@ file: CNAME CONJ COLON VNAME LT VNAME COLON NOT CNAME LPAREN RPAREN VNAME
 
 file: CNAME CONJ COLON VNAME LT VNAME COLON NOT CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 119.
+## Ends in an error in state: 122.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -190,7 +190,7 @@ file: CNAME CONJ COLON VNAME LT VNAME COLON NOT CNAME LPAREN VNAME RBRACKET
 
 file: CNAME CONJ COLON VNAME LT VNAME COLON NOT CNAME VNAME
 ##
-## Ends in an error in state: 117.
+## Ends in an error in state: 120.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME . [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -205,7 +205,7 @@ file: CNAME CONJ COLON VNAME LT VNAME COLON NOT CNAME VNAME
 
 file: CNAME CONJ COLON VNAME LT VNAME COLON NOT VNAME
 ##
-## Ends in an error in state: 116.
+## Ends in an error in state: 119.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . CNAME [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -220,7 +220,7 @@ file: CNAME CONJ COLON VNAME LT VNAME COLON NOT VNAME
 
 file: CNAME CONJ COLON VNAME LT VNAME COLON VNAME
 ##
-## Ends in an error in state: 115.
+## Ends in an error in state: 118.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . CNAME [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -237,9 +237,9 @@ file: CNAME CONJ COLON VNAME LT VNAME COLON VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: CNAME CONJ COLON VNAME LT VNAME DEFINE
+file: CNAME CONJ COLON VNAME LT VNAME DCOLON
 ##
-## Ends in an error in state: 114.
+## Ends in an error in state: 117.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON CNAME [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -258,18 +258,18 @@ file: CNAME CONJ COLON VNAME LT VNAME DEFINE
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 30, spurious reduction of production term -> expr
-## In state 57, spurious reduction of production nonempty_list(pair(loperator,term)) -> LT term
-## In state 70, spurious reduction of production chain -> term nonempty_list(pair(loperator,term))
-## In state 103, spurious reduction of production ground_literal -> chain
-## In state 100, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
-## In state 72, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
+## In state 60, spurious reduction of production nonempty_list(pair(loperator,term)) -> LT term
+## In state 73, spurious reduction of production chain -> term nonempty_list(pair(loperator,term))
+## In state 106, spurious reduction of production ground_literal -> chain
+## In state 103, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
+## In state 75, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: CNAME CONJ NOT CNAME LPAREN RBRACKET
 ##
-## Ends in an error in state: 109.
+## Ends in an error in state: 112.
 ##
 ## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -282,7 +282,7 @@ file: CNAME CONJ NOT CNAME LPAREN RBRACKET
 
 file: CNAME CONJ NOT CNAME LPAREN RPAREN VNAME
 ##
-## Ends in an error in state: 111.
+## Ends in an error in state: 114.
 ##
 ## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -295,7 +295,7 @@ file: CNAME CONJ NOT CNAME LPAREN RPAREN VNAME
 
 file: CNAME CONJ NOT CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 110.
+## Ends in an error in state: 113.
 ##
 ## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -316,7 +316,7 @@ file: CNAME CONJ NOT CNAME LPAREN VNAME RBRACKET
 
 file: CNAME CONJ NOT CNAME VNAME
 ##
-## Ends in an error in state: 108.
+## Ends in an error in state: 111.
 ##
 ## separated_nonempty_list(CONJ,literals) -> NOT CNAME . [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -331,7 +331,7 @@ file: CNAME CONJ NOT CNAME VNAME
 
 file: CNAME CONJ NOT VNAME
 ##
-## Ends in an error in state: 107.
+## Ends in an error in state: 110.
 ##
 ## separated_nonempty_list(CONJ,literals) -> NOT . CNAME [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -346,7 +346,7 @@ file: CNAME CONJ NOT VNAME
 
 file: CNAME CONJ VNAME
 ##
-## Ends in an error in state: 128.
+## Ends in an error in state: 131.
 ##
 ## separated_nonempty_list(CONJ,literals) -> CNAME CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
 ##
@@ -358,7 +358,7 @@ file: CNAME CONJ VNAME
 
 file: CNAME DISJ VNAME
 ##
-## Ends in an error in state: 87.
+## Ends in an error in state: 90.
 ##
 ## separated_nonempty_list(DISJ,literals) -> CNAME DISJ . separated_nonempty_list(DISJ,literals) [ DOT ]
 ##
@@ -370,7 +370,7 @@ file: CNAME DISJ VNAME
 
 file: CNAME LBRACKET CNAME RPAREN
 ##
-## Ends in an error in state: 184.
+## Ends in an error in state: 187.
 ##
 ## separated_nonempty_list(COMMA,tuple) -> term . [ RBRACKET ]
 ## separated_nonempty_list(COMMA,tuple) -> term . COMMA separated_nonempty_list(COMMA,tuple) [ RBRACKET ]
@@ -389,9 +389,9 @@ file: CNAME LBRACKET CNAME RPAREN
 
 file: CNAME LBRACKET RBRACKET VNAME
 ##
-## Ends in an error in state: 207.
+## Ends in an error in state: 210.
 ##
-## decl -> pre_decl . DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DEFINE COLON CNAME ]
+## decl -> pre_decl . DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
 ##
 ## The known suffix of the stack is as follows:
 ## pre_decl
@@ -401,7 +401,7 @@ file: CNAME LBRACKET RBRACKET VNAME
 
 file: CNAME LBRACKET RPAREN
 ##
-## Ends in an error in state: 183.
+## Ends in an error in state: 186.
 ##
 ## pre_decl -> CNAME LBRACKET . loption(separated_nonempty_list(COMMA,tuple)) RBRACKET [ DOT ]
 ##
@@ -413,7 +413,7 @@ file: CNAME LBRACKET RPAREN
 
 file: CNAME LBRACKET VNAME COMMA RPAREN
 ##
-## Ends in an error in state: 185.
+## Ends in an error in state: 188.
 ##
 ## separated_nonempty_list(COMMA,tuple) -> term COMMA . separated_nonempty_list(COMMA,tuple) [ RBRACKET ]
 ##
@@ -425,7 +425,7 @@ file: CNAME LBRACKET VNAME COMMA RPAREN
 
 file: CNAME LBRACKET VNAME RANGE RPAREN
 ##
-## Ends in an error in state: 188.
+## Ends in an error in state: 191.
 ##
 ## separated_nonempty_list(COMMA,tuple) -> expr RANGE . expr [ RBRACKET ]
 ## separated_nonempty_list(COMMA,tuple) -> expr RANGE . expr COMMA separated_nonempty_list(COMMA,tuple) [ RBRACKET ]
@@ -438,7 +438,7 @@ file: CNAME LBRACKET VNAME RANGE RPAREN
 
 file: CNAME LBRACKET VNAME RANGE VNAME COMMA RPAREN
 ##
-## Ends in an error in state: 190.
+## Ends in an error in state: 193.
 ##
 ## separated_nonempty_list(COMMA,tuple) -> expr RANGE expr COMMA . separated_nonempty_list(COMMA,tuple) [ RBRACKET ]
 ##
@@ -450,7 +450,7 @@ file: CNAME LBRACKET VNAME RANGE VNAME COMMA RPAREN
 
 file: CNAME LBRACKET VNAME RANGE VNAME VNAME
 ##
-## Ends in an error in state: 189.
+## Ends in an error in state: 192.
 ##
 ## expr -> expr . DIV expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV COMMA ]
 ## expr -> expr . LOG expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV COMMA ]
@@ -470,7 +470,7 @@ file: CNAME LBRACKET VNAME RANGE VNAME VNAME
 
 file: CNAME LBRACKET VNAME VNAME
 ##
-## Ends in an error in state: 187.
+## Ends in an error in state: 190.
 ##
 ## expr -> expr . DIV expr [ RBRACKET RANGE POW PLUS MULT MOD MINUS LOG DIV COMMA ]
 ## expr -> expr . LOG expr [ RBRACKET RANGE POW PLUS MULT MOD MINUS LOG DIV COMMA ]
@@ -493,8 +493,8 @@ file: CNAME LPAREN CNAME VNAME
 ##
 ## Ends in an error in state: 25.
 ##
-## term -> CNAME . [ RPAREN RBRACKET LT LEQ GT GEQ DEFINE COMMA COLON ]
-## term -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ RPAREN RBRACKET LT LEQ GT GEQ DEFINE COMMA COLON ]
+## term -> CNAME . [ RPAREN RBRACKET LT LEQ GT GEQ DCOLON COMMA COLON ]
+## term -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ RPAREN RBRACKET LT LEQ GT GEQ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME
@@ -504,7 +504,7 @@ file: CNAME LPAREN CNAME VNAME
 
 file: CNAME LPAREN RBRACKET
 ##
-## Ends in an error in state: 180.
+## Ends in an error in state: 183.
 ##
 ## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -519,7 +519,7 @@ file: CNAME LPAREN RBRACKET
 
 file: CNAME LPAREN RPAREN CONJ VNAME
 ##
-## Ends in an error in state: 126.
+## Ends in an error in state: 129.
 ##
 ## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
 ##
@@ -531,7 +531,7 @@ file: CNAME LPAREN RPAREN CONJ VNAME
 
 file: CNAME LPAREN RPAREN DISJ VNAME
 ##
-## Ends in an error in state: 85.
+## Ends in an error in state: 88.
 ##
 ## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ . separated_nonempty_list(DISJ,literals) [ DOT ]
 ##
@@ -543,7 +543,7 @@ file: CNAME LPAREN RPAREN DISJ VNAME
 
 file: CNAME LPAREN RPAREN VNAME
 ##
-## Ends in an error in state: 182.
+## Ends in an error in state: 185.
 ##
 ## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -589,7 +589,7 @@ file: CNAME LPAREN VNAME NEQ
 
 file: CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 181.
+## Ends in an error in state: 184.
 ##
 ## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -612,7 +612,7 @@ file: CNAME LPAREN VNAME RBRACKET
 
 file: CNAME VNAME
 ##
-## Ends in an error in state: 179.
+## Ends in an error in state: 182.
 ##
 ## pre_decl -> CNAME . LBRACKET loption(separated_nonempty_list(COMMA,tuple)) RBRACKET [ DOT ]
 ## separated_nonempty_list(CONJ,literals) -> CNAME . [ IMPLIES ]
@@ -632,7 +632,7 @@ file: CNAME VNAME
 
 file: COLON RPAREN
 ##
-## Ends in an error in state: 167.
+## Ends in an error in state: 170.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON CNAME [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -659,7 +659,7 @@ file: COLON RPAREN
 
 file: COLON VNAME LT VNAME COLON CNAME CONJ VNAME
 ##
-## Ends in an error in state: 139.
+## Ends in an error in state: 142.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
 ##
@@ -671,7 +671,7 @@ file: COLON VNAME LT VNAME COLON CNAME CONJ VNAME
 
 file: COLON VNAME LT VNAME COLON CNAME DISJ VNAME
 ##
-## Ends in an error in state: 98.
+## Ends in an error in state: 101.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME DISJ . separated_nonempty_list(DISJ,literals) [ DOT ]
 ##
@@ -683,7 +683,7 @@ file: COLON VNAME LT VNAME COLON CNAME DISJ VNAME
 
 file: COLON VNAME LT VNAME COLON CNAME LPAREN RBRACKET
 ##
-## Ends in an error in state: 176.
+## Ends in an error in state: 179.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -698,7 +698,7 @@ file: COLON VNAME LT VNAME COLON CNAME LPAREN RBRACKET
 
 file: COLON VNAME LT VNAME COLON CNAME LPAREN RPAREN CONJ VNAME
 ##
-## Ends in an error in state: 137.
+## Ends in an error in state: 140.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
 ##
@@ -710,7 +710,7 @@ file: COLON VNAME LT VNAME COLON CNAME LPAREN RPAREN CONJ VNAME
 
 file: COLON VNAME LT VNAME COLON CNAME LPAREN RPAREN DISJ VNAME
 ##
-## Ends in an error in state: 96.
+## Ends in an error in state: 99.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ . separated_nonempty_list(DISJ,literals) [ DOT ]
 ##
@@ -722,7 +722,7 @@ file: COLON VNAME LT VNAME COLON CNAME LPAREN RPAREN DISJ VNAME
 
 file: COLON VNAME LT VNAME COLON CNAME LPAREN RPAREN VNAME
 ##
-## Ends in an error in state: 178.
+## Ends in an error in state: 181.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -737,7 +737,7 @@ file: COLON VNAME LT VNAME COLON CNAME LPAREN RPAREN VNAME
 
 file: COLON VNAME LT VNAME COLON CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 177.
+## Ends in an error in state: 180.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -760,7 +760,7 @@ file: COLON VNAME LT VNAME COLON CNAME LPAREN VNAME RBRACKET
 
 file: COLON VNAME LT VNAME COLON CNAME VNAME
 ##
-## Ends in an error in state: 175.
+## Ends in an error in state: 178.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME . [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -779,7 +779,7 @@ file: COLON VNAME LT VNAME COLON CNAME VNAME
 
 file: COLON VNAME LT VNAME COLON NOT CNAME CONJ VNAME
 ##
-## Ends in an error in state: 131.
+## Ends in an error in state: 134.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
 ##
@@ -791,7 +791,7 @@ file: COLON VNAME LT VNAME COLON NOT CNAME CONJ VNAME
 
 file: COLON VNAME LT VNAME COLON NOT CNAME DISJ VNAME
 ##
-## Ends in an error in state: 90.
+## Ends in an error in state: 93.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME DISJ . separated_nonempty_list(DISJ,literals) [ DOT ]
 ##
@@ -803,7 +803,7 @@ file: COLON VNAME LT VNAME COLON NOT CNAME DISJ VNAME
 
 file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN RBRACKET
 ##
-## Ends in an error in state: 172.
+## Ends in an error in state: 175.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -818,7 +818,7 @@ file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN RBRACKET
 
 file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN RPAREN CONJ VNAME
 ##
-## Ends in an error in state: 121.
+## Ends in an error in state: 124.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
 ##
@@ -830,7 +830,7 @@ file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN RPAREN CONJ VNAME
 
 file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN RPAREN DISJ VNAME
 ##
-## Ends in an error in state: 80.
+## Ends in an error in state: 83.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ . separated_nonempty_list(DISJ,literals) [ DOT ]
 ##
@@ -842,7 +842,7 @@ file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN RPAREN DISJ VNAME
 
 file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN RPAREN VNAME
 ##
-## Ends in an error in state: 174.
+## Ends in an error in state: 177.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -857,7 +857,7 @@ file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN RPAREN VNAME
 
 file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 173.
+## Ends in an error in state: 176.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
@@ -880,7 +880,7 @@ file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN VNAME RBRACKET
 
 file: COLON VNAME LT VNAME COLON NOT CNAME VNAME
 ##
-## Ends in an error in state: 171.
+## Ends in an error in state: 174.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME . [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -899,7 +899,7 @@ file: COLON VNAME LT VNAME COLON NOT CNAME VNAME
 
 file: COLON VNAME LT VNAME COLON NOT VNAME
 ##
-## Ends in an error in state: 170.
+## Ends in an error in state: 173.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . CNAME [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -918,7 +918,7 @@ file: COLON VNAME LT VNAME COLON NOT VNAME
 
 file: COLON VNAME LT VNAME COLON VNAME
 ##
-## Ends in an error in state: 169.
+## Ends in an error in state: 172.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . CNAME [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -943,9 +943,9 @@ file: COLON VNAME LT VNAME COLON VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: COLON VNAME LT VNAME DEFINE
+file: COLON VNAME LT VNAME DCOLON
 ##
-## Ends in an error in state: 168.
+## Ends in an error in state: 171.
 ##
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON CNAME [ IMPLIES ]
 ## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
@@ -972,20 +972,20 @@ file: COLON VNAME LT VNAME DEFINE
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 30, spurious reduction of production term -> expr
-## In state 57, spurious reduction of production nonempty_list(pair(loperator,term)) -> LT term
-## In state 70, spurious reduction of production chain -> term nonempty_list(pair(loperator,term))
-## In state 103, spurious reduction of production ground_literal -> chain
-## In state 100, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
-## In state 72, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
+## In state 60, spurious reduction of production nonempty_list(pair(loperator,term)) -> LT term
+## In state 73, spurious reduction of production chain -> term nonempty_list(pair(loperator,term))
+## In state 106, spurious reduction of production ground_literal -> chain
+## In state 103, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
+## In state 75, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE CNAME LBRACKET RPAREN
+file: DCOLON CNAME LBRACKET RPAREN
 ##
-## Ends in an error in state: 50.
+## Ends in an error in state: 53.
 ##
-## ground_literal -> CNAME LBRACKET . loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DEFINE COMMA COLON ]
+## ground_literal -> CNAME LBRACKET . loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME LBRACKET
@@ -993,11 +993,11 @@ file: DEFINE CNAME LBRACKET RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE CNAME LBRACKET VNAME RPAREN
+file: DCOLON CNAME LBRACKET VNAME RPAREN
 ##
-## Ends in an error in state: 51.
+## Ends in an error in state: 54.
 ##
-## ground_literal -> CNAME LBRACKET loption(separated_nonempty_list(COMMA,term)) . RBRACKET [ DEFINE COMMA COLON ]
+## ground_literal -> CNAME LBRACKET loption(separated_nonempty_list(COMMA,term)) . RBRACKET [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME LBRACKET loption(separated_nonempty_list(COMMA,term))
@@ -1013,11 +1013,11 @@ file: DEFINE CNAME LBRACKET VNAME RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE CNAME LPAREN RBRACKET
+file: DCOLON CNAME LPAREN RBRACKET
 ##
 ## Ends in an error in state: 26.
 ##
-## term -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ RPAREN RBRACKET NEQ LT LEQ GT GEQ EQ DEFINE COMMA COLON ]
+## term -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ RPAREN RBRACKET NEQ LT LEQ GT GEQ EQ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME LPAREN
@@ -1025,11 +1025,11 @@ file: DEFINE CNAME LPAREN RBRACKET
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE CNAME LPAREN VNAME RBRACKET
+file: DCOLON CNAME LPAREN VNAME RBRACKET
 ##
 ## Ends in an error in state: 32.
 ##
-## term -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ RPAREN RBRACKET NEQ LT LEQ GT GEQ EQ DEFINE COMMA COLON ]
+## term -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ RPAREN RBRACKET NEQ LT LEQ GT GEQ EQ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
@@ -1045,11 +1045,11 @@ file: DEFINE CNAME LPAREN VNAME RBRACKET
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE CNAME VNAME
+file: DCOLON CNAME VNAME
 ##
-## Ends in an error in state: 49.
+## Ends in an error in state: 52.
 ##
-## ground_literal -> CNAME . LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DEFINE COMMA COLON ]
+## ground_literal -> CNAME . LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ## term -> CNAME . [ NEQ LT LEQ GT GEQ EQ ]
 ## term -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ NEQ LT LEQ GT GEQ EQ ]
 ##
@@ -1059,11 +1059,51 @@ file: DEFINE CNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE LPAREN RPAREN
+file: DCOLON INT RPAREN
+##
+## Ends in an error in state: 56.
+##
+## chain -> term . nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
+## chain -> term . nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
+## ground_literal -> term . EQ term [ DCOLON COMMA COLON ]
+## ground_literal -> term . NEQ term [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 30, spurious reduction of production term -> expr
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: DCOLON INT VNAME
+##
+## Ends in an error in state: 30.
+##
+## expr -> expr . DIV expr [ RPAREN RBRACKET POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . LOG expr [ RPAREN RBRACKET POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MOD expr [ RPAREN RBRACKET POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MULT expr [ RPAREN RBRACKET POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . POW expr [ RPAREN RBRACKET POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . PLUS expr [ RPAREN RBRACKET POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MINUS expr [ RPAREN RBRACKET POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## term -> expr . [ RPAREN RBRACKET NEQ LT LEQ GT GEQ EQ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## expr
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: DCOLON LPAREN RPAREN
 ##
 ## Ends in an error in state: 6.
 ##
-## expr -> LPAREN . expr RPAREN [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> LPAREN . expr RPAREN [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAREN
@@ -1071,7 +1111,7 @@ file: DEFINE LPAREN RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE LPAREN VNAME VNAME
+file: DCOLON LPAREN VNAME VNAME
 ##
 ## Ends in an error in state: 8.
 ##
@@ -1082,7 +1122,7 @@ file: DEFINE LPAREN VNAME VNAME
 ## expr -> expr . POW expr [ RPAREN POW PLUS MULT MOD MINUS LOG DIV ]
 ## expr -> expr . PLUS expr [ RPAREN POW PLUS MULT MOD MINUS LOG DIV ]
 ## expr -> expr . MINUS expr [ RPAREN POW PLUS MULT MOD MINUS LOG DIV ]
-## expr -> LPAREN expr . RPAREN [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> LPAREN expr . RPAREN [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## LPAREN expr
@@ -1090,11 +1130,11 @@ file: DEFINE LPAREN VNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE MINUS RPAREN
+file: DCOLON MINUS RPAREN
 ##
 ## Ends in an error in state: 5.
 ##
-## expr -> MINUS . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> MINUS . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## MINUS
@@ -1102,18 +1142,18 @@ file: DEFINE MINUS RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE MINUS VNAME VNAME
+file: DCOLON MINUS VNAME VNAME
 ##
 ## Ends in an error in state: 24.
 ##
-## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> MINUS expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> MINUS expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## MINUS expr
@@ -1121,11 +1161,11 @@ file: DEFINE MINUS VNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE NOT CNAME LBRACKET RPAREN
+file: DCOLON NOT CNAME LBRACKET RPAREN
 ##
-## Ends in an error in state: 46.
+## Ends in an error in state: 49.
 ##
-## ground_literal -> NOT CNAME LBRACKET . loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DEFINE COMMA COLON ]
+## ground_literal -> NOT CNAME LBRACKET . loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## NOT CNAME LBRACKET
@@ -1133,11 +1173,11 @@ file: DEFINE NOT CNAME LBRACKET RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE NOT CNAME LBRACKET VNAME RPAREN
+file: DCOLON NOT CNAME LBRACKET VNAME RPAREN
 ##
-## Ends in an error in state: 47.
+## Ends in an error in state: 50.
 ##
-## ground_literal -> NOT CNAME LBRACKET loption(separated_nonempty_list(COMMA,term)) . RBRACKET [ DEFINE COMMA COLON ]
+## ground_literal -> NOT CNAME LBRACKET loption(separated_nonempty_list(COMMA,term)) . RBRACKET [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## NOT CNAME LBRACKET loption(separated_nonempty_list(COMMA,term))
@@ -1153,11 +1193,11 @@ file: DEFINE NOT CNAME LBRACKET VNAME RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE NOT CNAME VNAME
+file: DCOLON NOT CNAME VNAME
 ##
-## Ends in an error in state: 45.
+## Ends in an error in state: 48.
 ##
-## ground_literal -> NOT CNAME . LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DEFINE COMMA COLON ]
+## ground_literal -> NOT CNAME . LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## NOT CNAME
@@ -1165,11 +1205,11 @@ file: DEFINE NOT CNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE NOT VNAME
+file: DCOLON NOT VNAME
 ##
-## Ends in an error in state: 44.
+## Ends in an error in state: 47.
 ##
-## ground_literal -> NOT . CNAME LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DEFINE COMMA COLON ]
+## ground_literal -> NOT . CNAME LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## NOT
@@ -1177,55 +1217,24 @@ file: DEFINE NOT VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE RPAREN
+file: DCOLON RPAREN
 ##
-## Ends in an error in state: 164.
+## Ends in an error in state: 167.
 ##
-## decl -> DEFINE . grounding_prefix DEFINE pre_decl DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DEFINE COLON CNAME ]
+## decl -> DCOLON . grounding_prefix DCOLON pre_decl DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
 ##
 ## The known suffix of the stack is as follows:
-## DEFINE
+## DCOLON
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME DIV RPAREN
+file: DCOLON VNAME DEFINE CNAME RPAREN
 ##
-## Ends in an error in state: 18.
+## Ends in an error in state: 103.
 ##
-## expr -> expr DIV . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-##
-## The known suffix of the stack is as follows:
-## expr DIV
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: DEFINE VNAME DIV VNAME VNAME
-##
-## Ends in an error in state: 19.
-##
-## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr DIV expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-##
-## The known suffix of the stack is as follows:
-## expr DIV expr
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: DEFINE VNAME EQ CNAME RPAREN
-##
-## Ends in an error in state: 100.
-##
-## separated_nonempty_list(COMMA,ground_literal) -> ground_literal . [ DEFINE COLON ]
-## separated_nonempty_list(COMMA,ground_literal) -> ground_literal . COMMA separated_nonempty_list(COMMA,ground_literal) [ DEFINE COLON ]
+## separated_nonempty_list(COMMA,ground_literal) -> ground_literal . [ DCOLON COLON ]
+## separated_nonempty_list(COMMA,ground_literal) -> ground_literal . COMMA separated_nonempty_list(COMMA,ground_literal) [ DCOLON COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## ground_literal
@@ -1235,16 +1244,59 @@ file: DEFINE VNAME EQ CNAME RPAREN
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 25, spurious reduction of production term -> CNAME
-## In state 69, spurious reduction of production ground_literal -> term EQ term
+## In state 46, spurious reduction of production ground_literal -> VNAME DEFINE term
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME EQ RPAREN
+file: DCOLON VNAME DEFINE RPAREN
 ##
-## Ends in an error in state: 68.
+## Ends in an error in state: 45.
 ##
-## ground_literal -> term EQ . term [ DEFINE COMMA COLON ]
+## ground_literal -> VNAME DEFINE . term [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## VNAME DEFINE
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: DCOLON VNAME DIV RPAREN
+##
+## Ends in an error in state: 18.
+##
+## expr -> expr DIV . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## expr DIV
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: DCOLON VNAME DIV VNAME VNAME
+##
+## Ends in an error in state: 19.
+##
+## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr DIV expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## expr DIV expr
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: DCOLON VNAME EQ RPAREN
+##
+## Ends in an error in state: 71.
+##
+## ground_literal -> term EQ . term [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## term EQ
@@ -1252,12 +1304,12 @@ file: DEFINE VNAME EQ RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME GEQ RPAREN
+file: DCOLON VNAME GEQ RPAREN
 ##
-## Ends in an error in state: 64.
+## Ends in an error in state: 67.
 ##
-## nonempty_list(pair(goperator,term)) -> GEQ . term [ DEFINE COMMA COLON ]
-## nonempty_list(pair(goperator,term)) -> GEQ . term nonempty_list(pair(goperator,term)) [ DEFINE COMMA COLON ]
+## nonempty_list(pair(goperator,term)) -> GEQ . term [ DCOLON COMMA COLON ]
+## nonempty_list(pair(goperator,term)) -> GEQ . term nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## GEQ
@@ -1265,12 +1317,12 @@ file: DEFINE VNAME GEQ RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME GEQ VNAME RPAREN
+file: DCOLON VNAME GEQ VNAME RPAREN
 ##
-## Ends in an error in state: 65.
+## Ends in an error in state: 68.
 ##
-## nonempty_list(pair(goperator,term)) -> GEQ term . [ DEFINE COMMA COLON ]
-## nonempty_list(pair(goperator,term)) -> GEQ term . nonempty_list(pair(goperator,term)) [ DEFINE COMMA COLON ]
+## nonempty_list(pair(goperator,term)) -> GEQ term . [ DCOLON COMMA COLON ]
+## nonempty_list(pair(goperator,term)) -> GEQ term . nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## GEQ term
@@ -1284,12 +1336,12 @@ file: DEFINE VNAME GEQ VNAME RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME GT RPAREN
+file: DCOLON VNAME GT RPAREN
 ##
-## Ends in an error in state: 62.
+## Ends in an error in state: 65.
 ##
-## nonempty_list(pair(goperator,term)) -> GT . term [ DEFINE COMMA COLON ]
-## nonempty_list(pair(goperator,term)) -> GT . term nonempty_list(pair(goperator,term)) [ DEFINE COMMA COLON ]
+## nonempty_list(pair(goperator,term)) -> GT . term [ DCOLON COMMA COLON ]
+## nonempty_list(pair(goperator,term)) -> GT . term nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## GT
@@ -1297,12 +1349,12 @@ file: DEFINE VNAME GT RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME GT VNAME RPAREN
+file: DCOLON VNAME GT VNAME RPAREN
 ##
-## Ends in an error in state: 63.
+## Ends in an error in state: 66.
 ##
-## nonempty_list(pair(goperator,term)) -> GT term . [ DEFINE COMMA COLON ]
-## nonempty_list(pair(goperator,term)) -> GT term . nonempty_list(pair(goperator,term)) [ DEFINE COMMA COLON ]
+## nonempty_list(pair(goperator,term)) -> GT term . [ DCOLON COMMA COLON ]
+## nonempty_list(pair(goperator,term)) -> GT term . nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## GT term
@@ -1316,12 +1368,12 @@ file: DEFINE VNAME GT VNAME RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME LEQ RPAREN
+file: DCOLON VNAME LEQ RPAREN
 ##
-## Ends in an error in state: 58.
+## Ends in an error in state: 61.
 ##
-## nonempty_list(pair(loperator,term)) -> LEQ . term [ DEFINE COMMA COLON ]
-## nonempty_list(pair(loperator,term)) -> LEQ . term nonempty_list(pair(loperator,term)) [ DEFINE COMMA COLON ]
+## nonempty_list(pair(loperator,term)) -> LEQ . term [ DCOLON COMMA COLON ]
+## nonempty_list(pair(loperator,term)) -> LEQ . term nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## LEQ
@@ -1329,12 +1381,12 @@ file: DEFINE VNAME LEQ RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME LEQ VNAME RPAREN
+file: DCOLON VNAME LEQ VNAME RPAREN
 ##
-## Ends in an error in state: 59.
+## Ends in an error in state: 62.
 ##
-## nonempty_list(pair(loperator,term)) -> LEQ term . [ DEFINE COMMA COLON ]
-## nonempty_list(pair(loperator,term)) -> LEQ term . nonempty_list(pair(loperator,term)) [ DEFINE COMMA COLON ]
+## nonempty_list(pair(loperator,term)) -> LEQ term . [ DCOLON COMMA COLON ]
+## nonempty_list(pair(loperator,term)) -> LEQ term . nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## LEQ term
@@ -1348,11 +1400,11 @@ file: DEFINE VNAME LEQ VNAME RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME LOG RPAREN
+file: DCOLON VNAME LOG RPAREN
 ##
 ## Ends in an error in state: 12.
 ##
-## expr -> expr LOG . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> expr LOG . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## expr LOG
@@ -1360,18 +1412,18 @@ file: DEFINE VNAME LOG RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME LOG VNAME VNAME
+file: DCOLON VNAME LOG VNAME VNAME
 ##
 ## Ends in an error in state: 13.
 ##
-## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr LOG expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr LOG expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## expr LOG expr
@@ -1379,12 +1431,12 @@ file: DEFINE VNAME LOG VNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME LT RPAREN
+file: DCOLON VNAME LT RPAREN
 ##
-## Ends in an error in state: 56.
+## Ends in an error in state: 59.
 ##
-## nonempty_list(pair(loperator,term)) -> LT . term [ DEFINE COMMA COLON ]
-## nonempty_list(pair(loperator,term)) -> LT . term nonempty_list(pair(loperator,term)) [ DEFINE COMMA COLON ]
+## nonempty_list(pair(loperator,term)) -> LT . term [ DCOLON COMMA COLON ]
+## nonempty_list(pair(loperator,term)) -> LT . term nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## LT
@@ -1392,34 +1444,34 @@ file: DEFINE VNAME LT RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME LT VNAME COLON
+file: DCOLON VNAME LT VNAME COLON
 ##
-## Ends in an error in state: 165.
+## Ends in an error in state: 168.
 ##
-## decl -> DEFINE grounding_prefix . DEFINE pre_decl DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DEFINE COLON CNAME ]
+## decl -> DCOLON grounding_prefix . DCOLON pre_decl DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
 ##
 ## The known suffix of the stack is as follows:
-## DEFINE grounding_prefix
+## DCOLON grounding_prefix
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 30, spurious reduction of production term -> expr
-## In state 57, spurious reduction of production nonempty_list(pair(loperator,term)) -> LT term
-## In state 70, spurious reduction of production chain -> term nonempty_list(pair(loperator,term))
-## In state 103, spurious reduction of production ground_literal -> chain
-## In state 100, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
-## In state 72, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
+## In state 60, spurious reduction of production nonempty_list(pair(loperator,term)) -> LT term
+## In state 73, spurious reduction of production chain -> term nonempty_list(pair(loperator,term))
+## In state 106, spurious reduction of production ground_literal -> chain
+## In state 103, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
+## In state 75, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME LT VNAME COMMA RPAREN
+file: DCOLON VNAME LT VNAME COMMA RPAREN
 ##
-## Ends in an error in state: 101.
+## Ends in an error in state: 104.
 ##
-## separated_nonempty_list(COMMA,ground_literal) -> ground_literal COMMA . separated_nonempty_list(COMMA,ground_literal) [ DEFINE COLON ]
+## separated_nonempty_list(COMMA,ground_literal) -> ground_literal COMMA . separated_nonempty_list(COMMA,ground_literal) [ DCOLON COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## ground_literal COMMA
@@ -1427,36 +1479,36 @@ file: DEFINE VNAME LT VNAME COMMA RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME LT VNAME DEFINE CNAME LBRACKET RBRACKET VNAME
+file: DCOLON VNAME LT VNAME DCOLON CNAME LBRACKET RBRACKET VNAME
 ##
-## Ends in an error in state: 197.
+## Ends in an error in state: 200.
 ##
-## decl -> DEFINE grounding_prefix DEFINE pre_decl . DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DEFINE COLON CNAME ]
+## decl -> DCOLON grounding_prefix DCOLON pre_decl . DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
 ##
 ## The known suffix of the stack is as follows:
-## DEFINE grounding_prefix DEFINE pre_decl
+## DCOLON grounding_prefix DCOLON pre_decl
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME LT VNAME DEFINE VNAME
+file: DCOLON VNAME LT VNAME DCOLON VNAME
 ##
-## Ends in an error in state: 166.
+## Ends in an error in state: 169.
 ##
-## decl -> DEFINE grounding_prefix DEFINE . pre_decl DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DEFINE COLON CNAME ]
+## decl -> DCOLON grounding_prefix DCOLON . pre_decl DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
 ##
 ## The known suffix of the stack is as follows:
-## DEFINE grounding_prefix DEFINE
+## DCOLON grounding_prefix DCOLON
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME LT VNAME RPAREN
+file: DCOLON VNAME LT VNAME RPAREN
 ##
-## Ends in an error in state: 57.
+## Ends in an error in state: 60.
 ##
-## nonempty_list(pair(loperator,term)) -> LT term . [ DEFINE COMMA COLON ]
-## nonempty_list(pair(loperator,term)) -> LT term . nonempty_list(pair(loperator,term)) [ DEFINE COMMA COLON ]
+## nonempty_list(pair(loperator,term)) -> LT term . [ DCOLON COMMA COLON ]
+## nonempty_list(pair(loperator,term)) -> LT term . nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## LT term
@@ -1470,11 +1522,11 @@ file: DEFINE VNAME LT VNAME RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME MINUS RPAREN
+file: DCOLON VNAME MINUS RPAREN
 ##
 ## Ends in an error in state: 22.
 ##
-## expr -> expr MINUS . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> expr MINUS . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## expr MINUS
@@ -1482,18 +1534,18 @@ file: DEFINE VNAME MINUS RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME MINUS VNAME VNAME
+file: DCOLON VNAME MINUS VNAME VNAME
 ##
 ## Ends in an error in state: 23.
 ##
-## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr MINUS expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr MINUS expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## expr MINUS expr
@@ -1501,11 +1553,11 @@ file: DEFINE VNAME MINUS VNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME MOD RPAREN
+file: DCOLON VNAME MOD RPAREN
 ##
 ## Ends in an error in state: 20.
 ##
-## expr -> expr MOD . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> expr MOD . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## expr MOD
@@ -1513,18 +1565,18 @@ file: DEFINE VNAME MOD RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME MOD VNAME VNAME
+file: DCOLON VNAME MOD VNAME VNAME
 ##
 ## Ends in an error in state: 21.
 ##
-## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr MOD expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr MOD expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## expr MOD expr
@@ -1532,11 +1584,11 @@ file: DEFINE VNAME MOD VNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME MULT RPAREN
+file: DCOLON VNAME MULT RPAREN
 ##
 ## Ends in an error in state: 16.
 ##
-## expr -> expr MULT . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> expr MULT . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## expr MULT
@@ -1544,18 +1596,18 @@ file: DEFINE VNAME MULT RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME MULT VNAME VNAME
+file: DCOLON VNAME MULT VNAME VNAME
 ##
 ## Ends in an error in state: 17.
 ##
-## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr MULT expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr MULT expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## expr MULT expr
@@ -1563,11 +1615,11 @@ file: DEFINE VNAME MULT VNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME NEQ RPAREN
+file: DCOLON VNAME NEQ RPAREN
 ##
-## Ends in an error in state: 54.
+## Ends in an error in state: 57.
 ##
-## ground_literal -> term NEQ . term [ DEFINE COMMA COLON ]
+## ground_literal -> term NEQ . term [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## term NEQ
@@ -1575,11 +1627,11 @@ file: DEFINE VNAME NEQ RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME PLUS RPAREN
+file: DCOLON VNAME PLUS RPAREN
 ##
 ## Ends in an error in state: 14.
 ##
-## expr -> expr PLUS . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> expr PLUS . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## expr PLUS
@@ -1587,18 +1639,18 @@ file: DEFINE VNAME PLUS RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME PLUS VNAME VNAME
+file: DCOLON VNAME PLUS VNAME VNAME
 ##
 ## Ends in an error in state: 15.
 ##
-## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr PLUS expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr PLUS expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## expr PLUS expr
@@ -1606,11 +1658,11 @@ file: DEFINE VNAME PLUS VNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME POW RPAREN
+file: DCOLON VNAME POW RPAREN
 ##
 ## Ends in an error in state: 10.
 ##
-## expr -> expr POW . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> expr POW . expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## expr POW
@@ -1618,18 +1670,18 @@ file: DEFINE VNAME POW RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME POW VNAME VNAME
+file: DCOLON VNAME POW VNAME VNAME
 ##
 ## Ends in an error in state: 11.
 ##
-## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr POW expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
+## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MOD expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MULT expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . POW expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr POW expr . [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . PLUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
+## expr -> expr . MINUS expr [ RPAREN RBRACKET RANGE POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## expr POW expr
@@ -1637,49 +1689,22 @@ file: DEFINE VNAME POW VNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DEFINE VNAME RPAREN
+file: DCOLON VNAME VNAME
 ##
-## Ends in an error in state: 53.
+## Ends in an error in state: 44.
 ##
-## chain -> term . nonempty_list(pair(loperator,term)) [ DEFINE COMMA COLON ]
-## chain -> term . nonempty_list(pair(goperator,term)) [ DEFINE COMMA COLON ]
-## ground_literal -> term . EQ term [ DEFINE COMMA COLON ]
-## ground_literal -> term . NEQ term [ DEFINE COMMA COLON ]
+## expr -> VNAME . [ POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV ]
+## ground_literal -> VNAME . DEFINE term [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
-## term
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: DEFINE VNAME VNAME
-##
-## Ends in an error in state: 30.
-##
-## expr -> expr . DIV expr [ RPAREN RBRACKET POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . LOG expr [ RPAREN RBRACKET POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MOD expr [ RPAREN RBRACKET POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MULT expr [ RPAREN RBRACKET POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . POW expr [ RPAREN RBRACKET POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . PLUS expr [ RPAREN RBRACKET POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## expr -> expr . MINUS expr [ RPAREN RBRACKET POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV DEFINE COMMA COLON ]
-## term -> expr . [ RPAREN RBRACKET NEQ LT LEQ GT GEQ EQ DEFINE COMMA COLON ]
-##
-## The known suffix of the stack is as follows:
-## expr
+## VNAME
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: DOT VNAME
 ##
-## Ends in an error in state: 212.
+## Ends in an error in state: 215.
 ##
 ## list(decl) -> decl . list(decl) [ EOF ]
 ##
@@ -1691,7 +1716,7 @@ file: DOT VNAME
 
 file: EXISTS LBRACKET RPAREN
 ##
-## Ends in an error in state: 157.
+## Ends in an error in state: 160.
 ##
 ## pre_decl -> EXISTS LBRACKET . expr RBRACKET CNAME [ DOT ]
 ## pre_decl -> EXISTS LBRACKET . expr RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -1704,7 +1729,7 @@ file: EXISTS LBRACKET RPAREN
 
 file: EXISTS LBRACKET VNAME RBRACKET CNAME LPAREN RBRACKET
 ##
-## Ends in an error in state: 161.
+## Ends in an error in state: 164.
 ##
 ## pre_decl -> EXISTS LBRACKET expr RBRACKET CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
 ##
@@ -1716,7 +1741,7 @@ file: EXISTS LBRACKET VNAME RBRACKET CNAME LPAREN RBRACKET
 
 file: EXISTS LBRACKET VNAME RBRACKET CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 162.
+## Ends in an error in state: 165.
 ##
 ## pre_decl -> EXISTS LBRACKET expr RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
 ##
@@ -1736,7 +1761,7 @@ file: EXISTS LBRACKET VNAME RBRACKET CNAME LPAREN VNAME RBRACKET
 
 file: EXISTS LBRACKET VNAME RBRACKET CNAME VNAME
 ##
-## Ends in an error in state: 160.
+## Ends in an error in state: 163.
 ##
 ## pre_decl -> EXISTS LBRACKET expr RBRACKET CNAME . [ DOT ]
 ## pre_decl -> EXISTS LBRACKET expr RBRACKET CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -1749,7 +1774,7 @@ file: EXISTS LBRACKET VNAME RBRACKET CNAME VNAME
 
 file: EXISTS LBRACKET VNAME RBRACKET VNAME
 ##
-## Ends in an error in state: 159.
+## Ends in an error in state: 162.
 ##
 ## pre_decl -> EXISTS LBRACKET expr RBRACKET . CNAME [ DOT ]
 ## pre_decl -> EXISTS LBRACKET expr RBRACKET . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -1762,7 +1787,7 @@ file: EXISTS LBRACKET VNAME RBRACKET VNAME
 
 file: EXISTS LBRACKET VNAME VNAME
 ##
-## Ends in an error in state: 158.
+## Ends in an error in state: 161.
 ##
 ## expr -> expr . DIV expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
 ## expr -> expr . LOG expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
@@ -1782,7 +1807,7 @@ file: EXISTS LBRACKET VNAME VNAME
 
 file: EXISTS VNAME
 ##
-## Ends in an error in state: 156.
+## Ends in an error in state: 159.
 ##
 ## pre_decl -> EXISTS . LBRACKET expr RBRACKET CNAME [ DOT ]
 ## pre_decl -> EXISTS . LBRACKET expr RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -1795,7 +1820,7 @@ file: EXISTS VNAME
 
 file: FORALL LBRACKET RPAREN
 ##
-## Ends in an error in state: 149.
+## Ends in an error in state: 152.
 ##
 ## pre_decl -> FORALL LBRACKET . expr RBRACKET CNAME [ DOT ]
 ## pre_decl -> FORALL LBRACKET . expr RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -1808,7 +1833,7 @@ file: FORALL LBRACKET RPAREN
 
 file: FORALL LBRACKET VNAME RBRACKET CNAME LPAREN RBRACKET
 ##
-## Ends in an error in state: 153.
+## Ends in an error in state: 156.
 ##
 ## pre_decl -> FORALL LBRACKET expr RBRACKET CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
 ##
@@ -1820,7 +1845,7 @@ file: FORALL LBRACKET VNAME RBRACKET CNAME LPAREN RBRACKET
 
 file: FORALL LBRACKET VNAME RBRACKET CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 154.
+## Ends in an error in state: 157.
 ##
 ## pre_decl -> FORALL LBRACKET expr RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
 ##
@@ -1840,7 +1865,7 @@ file: FORALL LBRACKET VNAME RBRACKET CNAME LPAREN VNAME RBRACKET
 
 file: FORALL LBRACKET VNAME RBRACKET CNAME VNAME
 ##
-## Ends in an error in state: 152.
+## Ends in an error in state: 155.
 ##
 ## pre_decl -> FORALL LBRACKET expr RBRACKET CNAME . [ DOT ]
 ## pre_decl -> FORALL LBRACKET expr RBRACKET CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -1853,7 +1878,7 @@ file: FORALL LBRACKET VNAME RBRACKET CNAME VNAME
 
 file: FORALL LBRACKET VNAME RBRACKET VNAME
 ##
-## Ends in an error in state: 151.
+## Ends in an error in state: 154.
 ##
 ## pre_decl -> FORALL LBRACKET expr RBRACKET . CNAME [ DOT ]
 ## pre_decl -> FORALL LBRACKET expr RBRACKET . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -1866,7 +1891,7 @@ file: FORALL LBRACKET VNAME RBRACKET VNAME
 
 file: FORALL LBRACKET VNAME VNAME
 ##
-## Ends in an error in state: 150.
+## Ends in an error in state: 153.
 ##
 ## expr -> expr . DIV expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
 ## expr -> expr . LOG expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
@@ -1886,7 +1911,7 @@ file: FORALL LBRACKET VNAME VNAME
 
 file: FORALL VNAME
 ##
-## Ends in an error in state: 148.
+## Ends in an error in state: 151.
 ##
 ## pre_decl -> FORALL . LBRACKET expr RBRACKET CNAME [ DOT ]
 ## pre_decl -> FORALL . LBRACKET expr RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -1899,7 +1924,7 @@ file: FORALL VNAME
 
 file: HIDE CNAME LPAREN RBRACKET
 ##
-## Ends in an error in state: 145.
+## Ends in an error in state: 148.
 ##
 ## hide_decl -> HIDE CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
 ##
@@ -1911,7 +1936,7 @@ file: HIDE CNAME LPAREN RBRACKET
 
 file: HIDE CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 146.
+## Ends in an error in state: 149.
 ##
 ## hide_decl -> HIDE CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
 ##
@@ -1931,7 +1956,7 @@ file: HIDE CNAME LPAREN VNAME RBRACKET
 
 file: HIDE CNAME VNAME
 ##
-## Ends in an error in state: 144.
+## Ends in an error in state: 147.
 ##
 ## hide_decl -> HIDE CNAME . [ DOT ]
 ## hide_decl -> HIDE CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -1944,7 +1969,7 @@ file: HIDE CNAME VNAME
 
 file: HIDE VNAME
 ##
-## Ends in an error in state: 143.
+## Ends in an error in state: 146.
 ##
 ## hide_decl -> HIDE . CNAME [ DOT ]
 ## hide_decl -> HIDE . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -1957,7 +1982,7 @@ file: HIDE VNAME
 
 file: IMPLIES CNAME LPAREN RBRACKET
 ##
-## Ends in an error in state: 82.
+## Ends in an error in state: 85.
 ##
 ## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
@@ -1970,7 +1995,7 @@ file: IMPLIES CNAME LPAREN RBRACKET
 
 file: IMPLIES CNAME LPAREN RPAREN VNAME
 ##
-## Ends in an error in state: 84.
+## Ends in an error in state: 87.
 ##
 ## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
@@ -1983,7 +2008,7 @@ file: IMPLIES CNAME LPAREN RPAREN VNAME
 
 file: IMPLIES CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 83.
+## Ends in an error in state: 86.
 ##
 ## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
@@ -2004,7 +2029,7 @@ file: IMPLIES CNAME LPAREN VNAME RBRACKET
 
 file: IMPLIES CNAME VNAME
 ##
-## Ends in an error in state: 81.
+## Ends in an error in state: 84.
 ##
 ## separated_nonempty_list(DISJ,literals) -> CNAME . [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -2036,9 +2061,9 @@ file: IMPLIES COLON RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME EQ CNAME COLON CNAME LPAREN RBRACKET
+file: IMPLIES COLON VNAME DEFINE CNAME COLON CNAME LPAREN RBRACKET
 ##
-## Ends in an error in state: 93.
+## Ends in an error in state: 96.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
@@ -2049,9 +2074,9 @@ file: IMPLIES COLON VNAME EQ CNAME COLON CNAME LPAREN RBRACKET
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME EQ CNAME COLON CNAME LPAREN RPAREN VNAME
+file: IMPLIES COLON VNAME DEFINE CNAME COLON CNAME LPAREN RPAREN VNAME
 ##
-## Ends in an error in state: 95.
+## Ends in an error in state: 98.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
@@ -2062,9 +2087,9 @@ file: IMPLIES COLON VNAME EQ CNAME COLON CNAME LPAREN RPAREN VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME EQ CNAME COLON CNAME LPAREN VNAME RBRACKET
+file: IMPLIES COLON VNAME DEFINE CNAME COLON CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 94.
+## Ends in an error in state: 97.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
@@ -2083,9 +2108,9 @@ file: IMPLIES COLON VNAME EQ CNAME COLON CNAME LPAREN VNAME RBRACKET
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME EQ CNAME COLON CNAME VNAME
+file: IMPLIES COLON VNAME DEFINE CNAME COLON CNAME VNAME
 ##
-## Ends in an error in state: 92.
+## Ends in an error in state: 95.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME . [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -2098,9 +2123,9 @@ file: IMPLIES COLON VNAME EQ CNAME COLON CNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME EQ CNAME COLON NOT CNAME LPAREN RBRACKET
+file: IMPLIES COLON VNAME DEFINE CNAME COLON NOT CNAME LPAREN RBRACKET
 ##
-## Ends in an error in state: 77.
+## Ends in an error in state: 80.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
@@ -2111,9 +2136,9 @@ file: IMPLIES COLON VNAME EQ CNAME COLON NOT CNAME LPAREN RBRACKET
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME EQ CNAME COLON NOT CNAME LPAREN RPAREN VNAME
+file: IMPLIES COLON VNAME DEFINE CNAME COLON NOT CNAME LPAREN RPAREN VNAME
 ##
-## Ends in an error in state: 79.
+## Ends in an error in state: 82.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
@@ -2124,9 +2149,9 @@ file: IMPLIES COLON VNAME EQ CNAME COLON NOT CNAME LPAREN RPAREN VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME EQ CNAME COLON NOT CNAME LPAREN VNAME RBRACKET
+file: IMPLIES COLON VNAME DEFINE CNAME COLON NOT CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 78.
+## Ends in an error in state: 81.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
@@ -2145,9 +2170,9 @@ file: IMPLIES COLON VNAME EQ CNAME COLON NOT CNAME LPAREN VNAME RBRACKET
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME EQ CNAME COLON NOT CNAME VNAME
+file: IMPLIES COLON VNAME DEFINE CNAME COLON NOT CNAME VNAME
 ##
-## Ends in an error in state: 76.
+## Ends in an error in state: 79.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME . [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -2160,9 +2185,9 @@ file: IMPLIES COLON VNAME EQ CNAME COLON NOT CNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME EQ CNAME COLON NOT VNAME
+file: IMPLIES COLON VNAME DEFINE CNAME COLON NOT VNAME
 ##
-## Ends in an error in state: 75.
+## Ends in an error in state: 78.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT . CNAME [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -2175,9 +2200,9 @@ file: IMPLIES COLON VNAME EQ CNAME COLON NOT VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME EQ CNAME COLON VNAME
+file: IMPLIES COLON VNAME DEFINE CNAME COLON VNAME
 ##
-## Ends in an error in state: 74.
+## Ends in an error in state: 77.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . CNAME [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -2194,9 +2219,9 @@ file: IMPLIES COLON VNAME EQ CNAME COLON VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME EQ CNAME DEFINE
+file: IMPLIES COLON VNAME DEFINE CNAME DCOLON
 ##
-## Ends in an error in state: 73.
+## Ends in an error in state: 76.
 ##
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON CNAME [ DOT ]
 ## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
@@ -2215,9 +2240,9 @@ file: IMPLIES COLON VNAME EQ CNAME DEFINE
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 25, spurious reduction of production term -> CNAME
-## In state 69, spurious reduction of production ground_literal -> term EQ term
-## In state 100, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
-## In state 72, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
+## In state 46, spurious reduction of production ground_literal -> VNAME DEFINE term
+## In state 103, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
+## In state 75, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
@@ -2301,7 +2326,7 @@ file: IMPLIES NOT VNAME
 
 file: IMPLIES VNAME
 ##
-## Ends in an error in state: 205.
+## Ends in an error in state: 208.
 ##
 ## clause_part -> clause_body IMPLIES . clause_head [ DOT ]
 ##
@@ -2313,7 +2338,7 @@ file: IMPLIES VNAME
 
 file: NOT CNAME CONJ VNAME
 ##
-## Ends in an error in state: 112.
+## Ends in an error in state: 115.
 ##
 ## separated_nonempty_list(CONJ,literals) -> NOT CNAME CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
 ##
@@ -2352,7 +2377,7 @@ file: NOT CNAME LPAREN RBRACKET
 
 file: NOT CNAME LPAREN RPAREN CONJ VNAME
 ##
-## Ends in an error in state: 106.
+## Ends in an error in state: 109.
 ##
 ## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
 ##

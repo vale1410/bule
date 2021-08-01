@@ -5,7 +5,7 @@
 %token FORALL EXISTS HIDE (*QMARK*)
 %token CONJ DISJ
 %token LPAREN RPAREN LBRACKET RBRACKET
-%token DEFINE COLON IMPLIES COMMA DOT RANGE
+%token DEFINE DCOLON COLON IMPLIES COMMA DOT RANGE
 %token DIV PLUS MULT LOG MOD POW MINUS (*eop*)
 %token EQ NEQ LEQ GEQ LT GT
 (*%token MAX MIN beop*)
@@ -80,6 +80,7 @@ ground_literal:
 | NOT ga = ground_atom { [Ast.T.Notin ga] }
 | ch = chain { ch }
 | e1 = term o = qoperator e2 = term { [Ast.T.Comparison (e1, o, e2)] }
+| v = VNAME DEFINE t = term { [Ast.T.Set (v, t)] }
 chain:
 | t = term l = nonempty_list(pair(loperator,term)) { unroll_comparion_chain t l }
 | t = term l = nonempty_list(pair(goperator,term)) { unroll_comparion_chain t l }
@@ -114,7 +115,7 @@ pre_decl:
 | hd = hide_decl { Ast.T.H hd }
 
 decl:
-| DEFINE gp = grounding_prefix DEFINE d = pre_decl DOT { add_list gp d }
+| DCOLON gp = grounding_prefix DCOLON d = pre_decl DOT { add_list gp d }
 | d = pre_decl DOT { d }
 
 file:
