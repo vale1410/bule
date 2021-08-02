@@ -68,8 +68,7 @@ end
 
 let run_solver keys dimacs = function
   | None -> MS.run_solver keys dimacs
-  | Some _ -> MS.run_solver keys dimacs
-(*  | Some cmd -> CL.run_solver keys dimacs cmd*)
+  | Some cmd -> CL.run_solver keys dimacs cmd
 
 let print_literal imap (pol, var) =
   let tilde = if pol then " " else "~" in
