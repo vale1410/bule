@@ -1,4 +1,3 @@
 * To compile run
-* `opam install dune menhir tsort`
-* `make`
+* `opam install dune menhir minisat tsort`
 * `make install`

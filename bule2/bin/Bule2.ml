@@ -17,10 +17,12 @@ let get () =
   let dimacs = ref false in
   let models = ref 1 in
   let solver = ref "none" in
+  let solve = ref false in
   let speclist = [("--dimacs", Arg.Bool (update dimacs), "Output DIMACS format rather than BULE. Default false.");
                   ("-",        Arg.Unit (fun () -> update input_names ("-" :: !input_names)), "Read the BULE code from the standard input.");
                   ("--models", Arg.Set_int models, "Number of models to generate. Default: 1.");
-                  ("--solver", Arg.Set_string solver, "Set the solver to be used. If \"none\" then no solving takes place. Example \"depqbf --no-dynamic-nenofex --qdo\". Default: \"none\"")
+                  ("--solve",  Arg.Set solve, "Enable solving. If \"none\" then no solving takes place. Default: \"false\"");
+                  ("--solver", Arg.Set_string solver, "Set the solver to be used. If \"none\" then Minisat 1.14 is used. Example \"depqbf --no-dynamic-nenofex --qdo\". The option has no effect if \"solve\" is set to \"false\". Default: \"none\"")
 ] in
 (*  let speclist = [] in*)
   let usage_msg = "BULE Grounder. Options available:" in
@@ -29,7 +31,7 @@ let get () =
   let files = match List.rev !input_names with
   | [] -> failwith "Wrong number of arguments. Usage: bule2 file"
   | _ :: _ as names -> names in
-  let command = if !solver = "none" then None else Some !solver in
+  let command = if !solve then (if !solver = "none" then Some None else Some (Some !solver)) else None in
   (command, !dimacs, !models, files)
 
 

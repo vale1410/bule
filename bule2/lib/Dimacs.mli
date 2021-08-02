@@ -1,6 +1,7 @@
 include module type of Types.DIMACS with module T = Types.DIMACS.T
 
 module Print : sig
+  val quantifier_block : T.quantifier_block -> string
   val file : T.file -> string
 end
 
