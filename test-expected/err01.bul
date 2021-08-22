@@ -1,4 +1,4 @@
- Bule predicat to arity has to be unique.:
+ Bule predicate to arity has to be unique.:
 Literal p[1,2]
 Literal with arity 2 already occurs in program with arity 1.
 Rule p[1,2].
