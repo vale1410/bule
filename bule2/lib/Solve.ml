@@ -1,6 +1,7 @@
 open Printf
 
 module IntSet = Set.Make (Int)
+module ModelSet = Set.Make (IntSet)
 
 module CL = struct
   let parse_status line =
@@ -51,12 +52,14 @@ module MS = struct
         Minisat.solve solver;
         Some solver
     with Minisat.Unsat -> None
+
   let extract_model keys solver =
     let extract_var var =
       let lit = Minisat.Lit.make var in
       let polarity = match Minisat.value solver lit with | Minisat.V_true -> true | Minisat.V_false -> false | Minisat.V_undef -> false in
       (polarity, var) in
     IntSet.fold (fun var l -> extract_var var :: l) keys []
+
   let run_solver keys (_, _, blocks, cls) =
     match blocks with
     | [] -> failwith "no blocks"
@@ -76,14 +79,15 @@ let print_literal imap (pol, var) =
     sprintf "%s%s" tilde (Circuit.Print.search_var sv)
 let compare_literals (px, x) (py, y) = -(compare (x, px) (y, py))
 
-let printable_model imap model hide =
+let filtered_model model hide =
   let printed_lit (px, x) = let l = if px then x else -x in not (Dimacs.T.ISet.mem l hide) in
-  let model = List.filter printed_lit model in
-  List.map (print_literal imap) (List.sort compare_literals model)
-let print_one_model imap model hide =
-  Print.unlines Fun.id (printable_model imap model hide)
-let print_all_models imap model hide =
-  Print.unspaces Fun.id (printable_model imap model hide)
+  List.filter printed_lit model
+let print_one_model imap hide model =
+  let model = List.sort compare_literals (filtered_model model hide) in
+  Print.unlines (print_literal imap) model
+let print_all_models imap hide model =
+  let model = List.sort compare_literals (filtered_model model hide) in
+  Print.unspaces (print_literal imap) model
 
 let map_keys map =
   let add k _ set = IntSet.add k set in
@@ -93,7 +97,7 @@ let solve_one cmd (dimacs, _, imap, hide) =
   match CL.run_solver keys dimacs cmd with
   | None -> printf "UNSAT\n"
   | Some model -> printf "SAT\n";
-                  eprintf "%s\n" (print_one_model imap model hide)
+                  eprintf "%s\n" (print_one_model imap hide model)
 
 let next_instance (nbvar, nbcls, blocks, cls) model =
   let flip_literal (pol, var) = (not pol, var) in
@@ -112,6 +116,6 @@ let solve_all cmd bound (dimacs, _, imap, hide) =
          eprintf "No more models. Total: %d.\n%!" i
       | Some model ->
          if i = 0 then printf "SAT\n%!";
-         eprintf "Model %d: %s\n%!" (i+1) (print_all_models imap model hide);
+         eprintf "Model %d: %s\n%!" (i+1) (print_all_models imap hide model);
          aux (i+1) (next_instance dm model) in
   aux 0 dimacs

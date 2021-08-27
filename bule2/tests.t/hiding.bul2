@@ -7,6 +7,7 @@ dom[a]. dom[b].
 x | y | : dom[A] : z(A).
 :: dom[B] :: ~x | ~y | ~z(B).
 
-#hide ~y.
+#hide x.
+#hide ~y, z(b).
 #hide z(b).
 :: dom[A] :: #hide ~z(A).

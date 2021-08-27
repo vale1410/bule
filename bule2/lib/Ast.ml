@@ -68,9 +68,9 @@ struct
     let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in
     quant ^ gls ^ " :: " ^ search_var var ^ "?"
   let clause_decl (gls, hyps, ccls) = sprintf "%s :: %s -> %s." (glits gls) (Print.list' "" " & " "" literals hyps) (Print.list' "" " | " "" literals ccls)
-  let hide_decl (gls, lit) =
+  let hide_decl (gls, lits) =
     let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in
-    sprintf "%%#hide %s :: %s." gls (literal lit)
+    sprintf "%%#hide %s :: %s." gls (Print.list' "" ", " "" literal lits)
   let decl = function
     | G gd -> ground_decl gd
     | S sd -> search_decl sd

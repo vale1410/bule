@@ -43,6 +43,8 @@ let add_list l = function
 separated_many_slist(Sep, Sub):
 | a = Sub s = Sep r = separated_nonempty_list(Sep, Sub) { (s, a, r) }
 
+%inline co_list(X):
+| l = separated_nonempty_list(COMMA, X) { l }
 %inline pr_list(X):
 | { [] }
 | LPAREN l = separated_list(COMMA, X) RPAREN { l }
@@ -103,7 +105,7 @@ clause_part:
 | ccls = clause_head IMPLIED hyps = clause_body { ([], hyps, ccls) }
 | ccls = clause_head { ([], [], ccls) }
 hide_decl:
-| HIDE a = search_atom { ([], a) }
+| HIDE l = co_list(search_atom) { ([], l) }
 pre_decl:
 | gd = ground_head { Ast.T.G gd }
 | sd = search_decl { Ast.T.S sd }

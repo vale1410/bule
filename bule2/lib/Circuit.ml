@@ -237,8 +237,8 @@ let all_ground decls =
   List.fold_left aux SMap.empty grouped_decls
 
 let search_var ((cname, terms) : Ast.T.atom) vmap = (cname, List.map (term vmap) terms)
-let search_lit ((pol, var) : Ast.T.literal) vmap = (pol, search_var var vmap)
-
+let search_lit vmap ((pol, var) : Ast.T.literal) = (pol, search_var var vmap)
+let search_lits lits vmap = List.map (search_lit vmap) lits
 let search_decl gmap qmap ((gls, b, e, a) : Ast.T.search_decl) =
   let maps = glits gmap SMap.empty gls in
   let parity = if b then 1 else 0 in
@@ -260,9 +260,9 @@ let all_search gmap (decls : Ast.T.search_decl list) =
     List.map f blocks
 
 let all_hide gmap (decls : Ast.T.hide_decl list) : T.literal list =
-  let hide_decl ((gls, a) : Ast.T.hide_decl) =
+  let hide_decl ((gls, lits) : Ast.T.hide_decl) =
     let maps = glits gmap SMap.empty gls in
-    List.map (search_lit a) maps in
+    List.concat_map (search_lits lits) maps in
   List.concat_map hide_decl decls
 
 let literals gmap vmap (gls, pol, ga) =

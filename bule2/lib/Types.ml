@@ -18,7 +18,7 @@ type literals = glits * bool * atom
 type ground_decl = glits * cname * tuple list
 type search_decl = glits * bool * expr * atom
 type clause_decl = glits * literals list * literals list
-type hide_decl = glits * literal
+type hide_decl = glits * literal list
 
 type decl = G of ground_decl | S of search_decl | C of clause_decl | H of hide_decl
 type file = decl list
