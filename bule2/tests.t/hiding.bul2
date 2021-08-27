@@ -1,0 +1,12 @@
+dom[a]. dom[b].
+
+#exists[0] x.
+#exists[0] y.
+:: dom[A] :: #exists[0] z(A).
+
+x | y | : dom[A] : z(A).
+:: dom[B] :: ~x | ~y | ~z(B).
+
+#hide ~y.
+#hide z(b).
+:: dom[A] :: #hide ~z(A).
