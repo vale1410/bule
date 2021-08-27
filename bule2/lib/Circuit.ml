@@ -29,7 +29,7 @@ struct
       let s' = Print.unlines pr_one vars in
       (i+1, s ^ "\n" ^ s') in
     snd (List.fold_left f (0, "") l)
-  let hide sv = sprintf "%%#hide %s." (search_var sv)
+  let hide lit = sprintf "%%#hide %s." (literal lit)
   let file (bl, cl, hs) = sprintf "%s\n%s\n%s" (blocks bl) (Print.unlines clause cl) (Print.unlines hide hs)
 end
 
@@ -237,6 +237,7 @@ let all_ground decls =
   List.fold_left aux SMap.empty grouped_decls
 
 let search_var ((cname, terms) : Ast.T.atom) vmap = (cname, List.map (term vmap) terms)
+let search_lit ((pol, var) : Ast.T.literal) vmap = (pol, search_var var vmap)
 
 let search_decl gmap qmap ((gls, b, e, a) : Ast.T.search_decl) =
   let maps = glits gmap SMap.empty gls in
@@ -258,10 +259,10 @@ let all_search gmap (decls : Ast.T.search_decl list) =
     let f (i, l) = (i mod 2 = 1, l) in
     List.map f blocks
 
-let all_hide gmap (decls : Ast.T.hide_decl list) : T.search_var list =
+let all_hide gmap (decls : Ast.T.hide_decl list) : T.literal list =
   let hide_decl ((gls, a) : Ast.T.hide_decl) =
     let maps = glits gmap SMap.empty gls in
-    List.map (search_var a) maps in
+    List.map (search_lit a) maps in
   List.concat_map hide_decl decls
 
 let literals gmap vmap (gls, pol, ga) =
@@ -288,7 +289,7 @@ let all_clause gmap decls = List.concat_map (clause_decl gmap) decls
 
 let all_clause gmap decls = List.fold_left (clause_decl gmap) [] decls*)
 
-let file decls =
+let file (decls : Ast.T.file) : T.file =
   let aux (gs, ss, cs, hs) = function
     | Ast.T.G gd -> (gd :: gs, ss, cs, hs)
     | S sd -> (gs, sd :: ss, cs, hs)

@@ -13,11 +13,12 @@ type tuple = Term of term | Range of (expr * expr)
 
 type glits = ground_literal list
 
+type literal = bool * atom
 type literals = glits * bool * atom
 type ground_decl = glits * cname * tuple list
 type search_decl = glits * bool * expr * atom
 type clause_decl = glits * literals list * literals list
-type hide_decl = glits * atom
+type hide_decl = glits * literal
 
 type decl = G of ground_decl | S of search_decl | C of clause_decl | H of hide_decl
 type file = decl list
@@ -29,7 +30,7 @@ type search_var = AST.T.cname * ground_term list
 type quantifier_block = bool * search_var list
 type literal = bool * search_var
 type clause = literal list * literal list
-type file = quantifier_block list * clause list * search_var list
+type file = quantifier_block list * clause list * literal list
 end end
 
 module DIMACS = struct module T = struct

@@ -103,7 +103,7 @@ clause_part:
 | ccls = clause_head IMPLIED hyps = clause_body { ([], hyps, ccls) }
 | ccls = clause_head { ([], [], ccls) }
 hide_decl:
-| HIDE n = CNAME ts = pr_list(term) { ([], (n, ts)) }
+| HIDE a = search_atom { ([], a) }
 pre_decl:
 | gd = ground_head { Ast.T.G gd }
 | sd = search_decl { Ast.T.S sd }

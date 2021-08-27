@@ -75,13 +75,15 @@ let print_literal imap (pol, var) =
   let sv = match Dimacs.T.IMap.find_opt var imap with None -> assert false | Some sv -> sv in
     sprintf "%s%s" tilde (Circuit.Print.search_var sv)
 let compare_literals (px, x) (py, y) = -(compare (x, px) (y, py))
-let print_one_model imap model hide =
-  let model = List.filter (fun (_, x) -> not (Dimacs.T.ISet.mem x hide)) model in
-  Print.unlines (print_literal imap) (List.sort compare_literals model)
 
+let printable_model imap model hide =
+  let printed_lit (px, x) = let l = if px then x else -x in not (Dimacs.T.ISet.mem l hide) in
+  let model = List.filter printed_lit model in
+  List.map (print_literal imap) (List.sort compare_literals model)
+let print_one_model imap model hide =
+  Print.unlines Fun.id (printable_model imap model hide)
 let print_all_models imap model hide =
-  let model = List.filter (fun (_, x) -> not (Dimacs.T.ISet.mem x hide)) model in
-  Print.unspaces (print_literal imap) (List.sort compare_literals model)
+  Print.unspaces Fun.id (printable_model imap model hide)
 
 let map_keys map =
   let add k _ set = IntSet.add k set in

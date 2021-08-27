@@ -29,18 +29,18 @@ let clause (accu, nbcls) (hyps, ccls) =
   ((naccu, nbcls+1), cls)
 
 let hide_vars vmap hide =
-  let hide_one sv = match T.VMap.find_opt sv vmap with
-    | None -> Either.Left sv
-    | Some i -> Either.Right i in
+  let hide_one (pol, sv) = match T.VMap.find_opt sv vmap with
+    | None -> Either.Left (pol, sv)
+    | Some i -> Either.Right (if pol then i else -i) in
   let (undeclared, hide) = List.partition_map hide_one hide in
-  if undeclared <> [] then eprintf "Warning. Hiding undeclared variables: %s\n" (P.unspaces Circuit.Print.search_var undeclared);
+  if undeclared <> [] then eprintf "Warning. Hiding undeclared variables: %s\n" (P.unspaces Circuit.Print.literal undeclared);
   T.ISet.of_list hide
 
 let compute_new_vars (_, _, nb) cl_map =
   let vars = T.VMap.bindings cl_map in
   let filter (f, i) = if i > nb then Some f else None in
   List.filter_map filter vars
-let ground (qbs, cls, hide) :  T.file * int T.VMap.t * Circuit.T.search_var T.IMap.t * T.ISet.t =
+let ground (qbs, cls, hide) : T.file * int T.VMap.t * Circuit.T.search_var T.IMap.t * T.ISet.t =
   let accu = (T.VMap.empty, T.IMap.empty, 0) in
   let (naccu, qbs) = List.fold_left_map quantifier_block accu qbs in
   let (((vmap, imap, nvar), nbcls), cls) = List.fold_left_map clause (naccu, 0) cls in
@@ -48,6 +48,6 @@ let ground (qbs, cls, hide) :  T.file * int T.VMap.t * Circuit.T.search_var T.IM
   if nvars <> [] then eprintf "Warning. Undeclared variables: %s\n%!" (P.unspaces Circuit.Print.search_var nvars);
   let hide = hide_vars vmap hide in
   ((nvar, nbcls, qbs, cls), vmap, imap, hide)
-let file args =
+let file (args : Circuit.T.file) : T.file =
   let (dimacs, _, _, _) = ground args in
   dimacs

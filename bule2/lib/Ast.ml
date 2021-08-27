@@ -51,13 +51,16 @@ struct
 
   let glits gls = Print.list' "" ", " "" ground_literal gls
   let search_var (name, terms) = sprintf "%s(%s)" name (Print.list' "" ", " "" term terms)
+  let literal (pol, var) =
+    let pol = if pol then "" else "~" in
+    let var = search_var var in
+    pol ^ var
+
   let literals (gls, pol, var) =
     let gls = match gls with
     | [] -> ""
     | _ :: _ -> glits gls ^ " : " in
-    let pol = if pol then "" else "~" in
-    let var = search_var var in
-    gls ^ pol ^ var
+    gls ^ literal (pol, var)
 
   let ground_decl (gls, name, tuples) = sprintf "%s :: %s[%s]" (glits gls) name (Print.list' "" ", " "" tuple tuples)
   let search_decl (gls, exi, depth, var) =
@@ -65,9 +68,9 @@ struct
     let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in
     quant ^ gls ^ " :: " ^ search_var var ^ "?"
   let clause_decl (gls, hyps, ccls) = sprintf "%s :: %s -> %s." (glits gls) (Print.list' "" " & " "" literals hyps) (Print.list' "" " | " "" literals ccls)
-  let hide_decl (gls, var) =
+  let hide_decl (gls, lit) =
     let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in
-    sprintf "%%#hide %s :: %s." gls (search_var var)
+    sprintf "%%#hide %s :: %s." gls (literal lit)
   let decl = function
     | G gd -> ground_decl gd
     | S sd -> search_decl sd
