@@ -16,7 +16,7 @@ type glits = ground_literal list
 type literal = bool * atom
 type literals = glits * bool * atom
 type ground_decl = glits * cname * tuple list
-type search_decl = glits * bool * expr * atom
+type search_decl = glits * bool * expr * atom list
 type clause_decl = glits * literals list * literals list
 type hide_decl = glits * literal list
 

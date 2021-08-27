@@ -1,376 +1,52 @@
-file: CNAME CONJ CNAME LPAREN RBRACKET
+file: CNAME CONJ CNAME DOT
 ##
-## Ends in an error in state: 126.
+## Ends in an error in state: 162.
 ##
-## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## CNAME LPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ CNAME LPAREN RPAREN VNAME
-##
-## Ends in an error in state: 128.
-##
-## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## clause_part -> clause_body . IMPLIES clause_head [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ CNAME LPAREN VNAME RBRACKET
-##
-## Ends in an error in state: 127.
-##
-## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
+## clause_body
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ CNAME VNAME
-##
-## Ends in an error in state: 125.
-##
-## separated_nonempty_list(CONJ,literals) -> CNAME . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> CNAME . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## CNAME
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ COLON RPAREN
-##
-## Ends in an error in state: 116.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON NOT CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON NOT CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## COLON
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ COLON VNAME LT VNAME COLON CNAME LPAREN RBRACKET
-##
-## Ends in an error in state: 137.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME LPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ COLON VNAME LT VNAME COLON CNAME LPAREN RPAREN VNAME
-##
-## Ends in an error in state: 139.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ COLON VNAME LT VNAME COLON CNAME LPAREN VNAME RBRACKET
-##
-## Ends in an error in state: 138.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ COLON VNAME LT VNAME COLON CNAME VNAME
-##
-## Ends in an error in state: 136.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ COLON VNAME LT VNAME COLON NOT CNAME LPAREN RBRACKET
-##
-## Ends in an error in state: 121.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME LPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ COLON VNAME LT VNAME COLON NOT CNAME LPAREN RPAREN VNAME
-##
-## Ends in an error in state: 123.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ COLON VNAME LT VNAME COLON NOT CNAME LPAREN VNAME RBRACKET
-##
-## Ends in an error in state: 122.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ COLON VNAME LT VNAME COLON NOT CNAME VNAME
-##
-## Ends in an error in state: 120.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ COLON VNAME LT VNAME COLON NOT VNAME
-##
-## Ends in an error in state: 119.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ COLON VNAME LT VNAME COLON VNAME
-##
-## Ends in an error in state: 118.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . NOT CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . NOT CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ COLON VNAME LT VNAME DCOLON
-##
-## Ends in an error in state: 117.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON NOT CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON NOT CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 60, spurious reduction of production nonempty_list(pair(loperator,term)) -> LT term
-## In state 73, spurious reduction of production chain -> term nonempty_list(pair(loperator,term))
-## In state 106, spurious reduction of production ground_literal -> chain
-## In state 103, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
-## In state 75, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ NOT CNAME LPAREN RBRACKET
-##
-## Ends in an error in state: 112.
-##
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME LPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ NOT CNAME LPAREN RPAREN VNAME
-##
-## Ends in an error in state: 114.
-##
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ NOT CNAME LPAREN VNAME RBRACKET
-##
-## Ends in an error in state: 113.
-##
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ NOT CNAME VNAME
-##
-## Ends in an error in state: 111.
-##
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME CONJ NOT VNAME
-##
-## Ends in an error in state: 110.
-##
-## separated_nonempty_list(CONJ,literals) -> NOT . CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT . CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## NOT
+## In state 2, spurious reduction of production atom -> CNAME
+## In state 100, spurious reduction of production separated_nonempty_list(CONJ,literals) -> atom
+## In state 102, spurious reduction of production separated_nonempty_list(CONJ,literals) -> atom CONJ separated_nonempty_list(CONJ,literals)
+## In state 152, spurious reduction of production loption(separated_nonempty_list(CONJ,literals)) -> separated_nonempty_list(CONJ,literals)
+## In state 156, spurious reduction of production clause_body -> loption(separated_nonempty_list(CONJ,literals))
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: CNAME CONJ VNAME
 ##
-## Ends in an error in state: 131.
+## Ends in an error in state: 101.
 ##
-## separated_nonempty_list(CONJ,literals) -> CNAME CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> atom CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## CNAME CONJ
+## atom CONJ
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: CNAME DISJ VNAME
 ##
-## Ends in an error in state: 90.
+## Ends in an error in state: 80.
 ##
-## separated_nonempty_list(DISJ,literals) -> CNAME DISJ . separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(DISJ,literals) -> atom DISJ . separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## CNAME DISJ
+## atom DISJ
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: CNAME LBRACKET CNAME RPAREN
 ##
-## Ends in an error in state: 187.
+## Ends in an error in state: 140.
 ##
 ## separated_nonempty_list(COMMA,tuple) -> term . [ RBRACKET ]
 ## separated_nonempty_list(COMMA,tuple) -> term . COMMA separated_nonempty_list(COMMA,tuple) [ RBRACKET ]
@@ -387,21 +63,9 @@ file: CNAME LBRACKET CNAME RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: CNAME LBRACKET RBRACKET VNAME
-##
-## Ends in an error in state: 210.
-##
-## decl -> pre_decl . DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
-##
-## The known suffix of the stack is as follows:
-## pre_decl
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
 file: CNAME LBRACKET RPAREN
 ##
-## Ends in an error in state: 186.
+## Ends in an error in state: 139.
 ##
 ## pre_decl -> CNAME LBRACKET . loption(separated_nonempty_list(COMMA,tuple)) RBRACKET [ DOT ]
 ##
@@ -413,7 +77,7 @@ file: CNAME LBRACKET RPAREN
 
 file: CNAME LBRACKET VNAME COMMA RPAREN
 ##
-## Ends in an error in state: 188.
+## Ends in an error in state: 141.
 ##
 ## separated_nonempty_list(COMMA,tuple) -> term COMMA . separated_nonempty_list(COMMA,tuple) [ RBRACKET ]
 ##
@@ -425,7 +89,7 @@ file: CNAME LBRACKET VNAME COMMA RPAREN
 
 file: CNAME LBRACKET VNAME RANGE RPAREN
 ##
-## Ends in an error in state: 191.
+## Ends in an error in state: 144.
 ##
 ## separated_nonempty_list(COMMA,tuple) -> expr RANGE . expr [ RBRACKET ]
 ## separated_nonempty_list(COMMA,tuple) -> expr RANGE . expr COMMA separated_nonempty_list(COMMA,tuple) [ RBRACKET ]
@@ -438,7 +102,7 @@ file: CNAME LBRACKET VNAME RANGE RPAREN
 
 file: CNAME LBRACKET VNAME RANGE VNAME COMMA RPAREN
 ##
-## Ends in an error in state: 193.
+## Ends in an error in state: 146.
 ##
 ## separated_nonempty_list(COMMA,tuple) -> expr RANGE expr COMMA . separated_nonempty_list(COMMA,tuple) [ RBRACKET ]
 ##
@@ -450,7 +114,7 @@ file: CNAME LBRACKET VNAME RANGE VNAME COMMA RPAREN
 
 file: CNAME LBRACKET VNAME RANGE VNAME VNAME
 ##
-## Ends in an error in state: 192.
+## Ends in an error in state: 145.
 ##
 ## expr -> expr . DIV expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV COMMA ]
 ## expr -> expr . LOG expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV COMMA ]
@@ -470,7 +134,7 @@ file: CNAME LBRACKET VNAME RANGE VNAME VNAME
 
 file: CNAME LBRACKET VNAME VNAME
 ##
-## Ends in an error in state: 190.
+## Ends in an error in state: 143.
 ##
 ## expr -> expr . DIV expr [ RBRACKET RANGE POW PLUS MULT MOD MINUS LOG DIV COMMA ]
 ## expr -> expr . LOG expr [ RBRACKET RANGE POW PLUS MULT MOD MINUS LOG DIV COMMA ]
@@ -504,12 +168,9 @@ file: CNAME LPAREN CNAME VNAME
 
 file: CNAME LPAREN RBRACKET
 ##
-## Ends in an error in state: 183.
+## Ends in an error in state: 3.
 ##
-## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## atom -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES IMPLIED DOT DISJ CONJ COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME LPAREN
@@ -517,41 +178,17 @@ file: CNAME LPAREN RBRACKET
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: CNAME LPAREN RPAREN CONJ VNAME
-##
-## Ends in an error in state: 129.
-##
-## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: CNAME LPAREN RPAREN DISJ VNAME
-##
-## Ends in an error in state: 88.
-##
-## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ . separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
 file: CNAME LPAREN RPAREN VNAME
 ##
-## Ends in an error in state: 185.
+## Ends in an error in state: 165.
 ##
-## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(CONJ,literals) -> atom . [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> atom . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(DISJ,literals) -> atom . [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> atom . DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN
+## atom
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
@@ -589,12 +226,9 @@ file: CNAME LPAREN VNAME NEQ
 
 file: CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 184.
+## Ends in an error in state: 34.
 ##
-## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## atom -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES IMPLIED DOT DISJ CONJ COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
@@ -612,17 +246,11 @@ file: CNAME LPAREN VNAME RBRACKET
 
 file: CNAME VNAME
 ##
-## Ends in an error in state: 182.
+## Ends in an error in state: 138.
 ##
+## atom -> CNAME . [ IMPLIES IMPLIED DOT DISJ CONJ ]
+## atom -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES IMPLIED DOT DISJ CONJ ]
 ## pre_decl -> CNAME . LBRACKET loption(separated_nonempty_list(COMMA,tuple)) RBRACKET [ DOT ]
-## separated_nonempty_list(CONJ,literals) -> CNAME . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> CNAME . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> CNAME . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> CNAME . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME
@@ -632,24 +260,16 @@ file: CNAME VNAME
 
 file: COLON RPAREN
 ##
-## Ends in an error in state: 170.
+## Ends in an error in state: 132.
 ##
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON NOT CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON NOT CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON NOT CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON NOT CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON atom [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON NOT atom [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON NOT atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON NOT atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON NOT atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## COLON
@@ -657,258 +277,104 @@ file: COLON RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: COLON VNAME LT VNAME COLON CNAME CONJ VNAME
+file: COLON VNAME LT VNAME COLON CNAME COMMA
 ##
-## Ends in an error in state: 142.
+## Ends in an error in state: 137.
 ##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON atom . [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON atom . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON atom . [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON atom . DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME CONJ
+## COLON grounding_prefix COLON atom
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 2, spurious reduction of production atom -> CNAME
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: COLON VNAME LT VNAME COLON CNAME CONJ VNAME
+##
+## Ends in an error in state: 104.
+##
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON atom CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
+##
+## The known suffix of the stack is as follows:
+## COLON grounding_prefix COLON atom CONJ
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: COLON VNAME LT VNAME COLON CNAME DISJ VNAME
 ##
-## Ends in an error in state: 101.
+## Ends in an error in state: 83.
 ##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME DISJ . separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON atom DISJ . separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME DISJ
+## COLON grounding_prefix COLON atom DISJ
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: COLON VNAME LT VNAME COLON CNAME LPAREN RBRACKET
+file: COLON VNAME LT VNAME COLON NOT CNAME COMMA
 ##
-## Ends in an error in state: 179.
+## Ends in an error in state: 136.
 ##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME LPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: COLON VNAME LT VNAME COLON CNAME LPAREN RPAREN CONJ VNAME
-##
-## Ends in an error in state: 140.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT atom . [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT atom . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT atom . [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT atom . DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: COLON VNAME LT VNAME COLON CNAME LPAREN RPAREN DISJ VNAME
-##
-## Ends in an error in state: 99.
-##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ . separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: COLON VNAME LT VNAME COLON CNAME LPAREN RPAREN VNAME
-##
-## Ends in an error in state: 181.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: COLON VNAME LT VNAME COLON CNAME LPAREN VNAME RBRACKET
-##
-## Ends in an error in state: 180.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
+## COLON grounding_prefix COLON NOT atom
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: COLON VNAME LT VNAME COLON CNAME VNAME
-##
-## Ends in an error in state: 178.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME
+## In state 2, spurious reduction of production atom -> CNAME
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: COLON VNAME LT VNAME COLON NOT CNAME CONJ VNAME
 ##
-## Ends in an error in state: 134.
+## Ends in an error in state: 98.
 ##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT atom CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME CONJ
+## COLON grounding_prefix COLON NOT atom CONJ
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: COLON VNAME LT VNAME COLON NOT CNAME DISJ VNAME
 ##
-## Ends in an error in state: 93.
+## Ends in an error in state: 77.
 ##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME DISJ . separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME DISJ
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN RBRACKET
-##
-## Ends in an error in state: 175.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT atom DISJ . separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME LPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN RPAREN CONJ VNAME
-##
-## Ends in an error in state: 124.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN RPAREN DISJ VNAME
-##
-## Ends in an error in state: 83.
-##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ . separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN RPAREN VNAME
-##
-## Ends in an error in state: 177.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: COLON VNAME LT VNAME COLON NOT CNAME LPAREN VNAME RBRACKET
-##
-## Ends in an error in state: 176.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: COLON VNAME LT VNAME COLON NOT CNAME VNAME
-##
-## Ends in an error in state: 174.
-##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME
+## COLON grounding_prefix COLON NOT atom DISJ
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: COLON VNAME LT VNAME COLON NOT VNAME
 ##
-## Ends in an error in state: 173.
+## Ends in an error in state: 135.
 ##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT . CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT . CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . atom [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT . atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT . atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## COLON grounding_prefix COLON NOT
@@ -918,24 +384,16 @@ file: COLON VNAME LT VNAME COLON NOT VNAME
 
 file: COLON VNAME LT VNAME COLON VNAME
 ##
-## Ends in an error in state: 172.
+## Ends in an error in state: 134.
 ##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . NOT CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . NOT CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . NOT CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . NOT CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . atom [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . NOT atom [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . NOT atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . NOT atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . NOT atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## COLON grounding_prefix COLON
@@ -945,24 +403,16 @@ file: COLON VNAME LT VNAME COLON VNAME
 
 file: COLON VNAME LT VNAME DCOLON
 ##
-## Ends in an error in state: 171.
+## Ends in an error in state: 133.
 ##
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON NOT CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON NOT CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON NOT CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON NOT CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON atom [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON NOT atom [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON NOT atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON NOT atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON NOT atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## COLON grounding_prefix
@@ -972,18 +422,18 @@ file: COLON VNAME LT VNAME DCOLON
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 30, spurious reduction of production term -> expr
-## In state 60, spurious reduction of production nonempty_list(pair(loperator,term)) -> LT term
-## In state 73, spurious reduction of production chain -> term nonempty_list(pair(loperator,term))
-## In state 106, spurious reduction of production ground_literal -> chain
-## In state 103, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
-## In state 75, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
+## In state 57, spurious reduction of production nonempty_list(pair(loperator,term)) -> LT term
+## In state 70, spurious reduction of production chain -> term nonempty_list(pair(loperator,term))
+## In state 88, spurious reduction of production ground_literal -> chain
+## In state 85, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
+## In state 72, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: DCOLON CNAME LBRACKET RPAREN
 ##
-## Ends in an error in state: 53.
+## Ends in an error in state: 50.
 ##
 ## ground_literal -> CNAME LBRACKET . loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ##
@@ -995,7 +445,7 @@ file: DCOLON CNAME LBRACKET RPAREN
 
 file: DCOLON CNAME LBRACKET VNAME RPAREN
 ##
-## Ends in an error in state: 54.
+## Ends in an error in state: 51.
 ##
 ## ground_literal -> CNAME LBRACKET loption(separated_nonempty_list(COMMA,term)) . RBRACKET [ DCOLON COMMA COLON ]
 ##
@@ -1047,7 +497,7 @@ file: DCOLON CNAME LPAREN VNAME RBRACKET
 
 file: DCOLON CNAME VNAME
 ##
-## Ends in an error in state: 52.
+## Ends in an error in state: 49.
 ##
 ## ground_literal -> CNAME . LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ## term -> CNAME . [ NEQ LT LEQ GT GEQ EQ ]
@@ -1061,7 +511,7 @@ file: DCOLON CNAME VNAME
 
 file: DCOLON INT RPAREN
 ##
-## Ends in an error in state: 56.
+## Ends in an error in state: 53.
 ##
 ## chain -> term . nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
 ## chain -> term . nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
@@ -1163,7 +613,7 @@ file: DCOLON MINUS VNAME VNAME
 
 file: DCOLON NOT CNAME LBRACKET RPAREN
 ##
-## Ends in an error in state: 49.
+## Ends in an error in state: 46.
 ##
 ## ground_literal -> NOT CNAME LBRACKET . loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ##
@@ -1175,7 +625,7 @@ file: DCOLON NOT CNAME LBRACKET RPAREN
 
 file: DCOLON NOT CNAME LBRACKET VNAME RPAREN
 ##
-## Ends in an error in state: 50.
+## Ends in an error in state: 47.
 ##
 ## ground_literal -> NOT CNAME LBRACKET loption(separated_nonempty_list(COMMA,term)) . RBRACKET [ DCOLON COMMA COLON ]
 ##
@@ -1195,7 +645,7 @@ file: DCOLON NOT CNAME LBRACKET VNAME RPAREN
 
 file: DCOLON NOT CNAME VNAME
 ##
-## Ends in an error in state: 48.
+## Ends in an error in state: 45.
 ##
 ## ground_literal -> NOT CNAME . LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ##
@@ -1207,7 +657,7 @@ file: DCOLON NOT CNAME VNAME
 
 file: DCOLON NOT VNAME
 ##
-## Ends in an error in state: 47.
+## Ends in an error in state: 44.
 ##
 ## ground_literal -> NOT . CNAME LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ##
@@ -1219,9 +669,9 @@ file: DCOLON NOT VNAME
 
 file: DCOLON RPAREN
 ##
-## Ends in an error in state: 167.
+## Ends in an error in state: 129.
 ##
-## decl -> DCOLON . grounding_prefix DCOLON pre_decl DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
+## decl -> DCOLON . grounding_prefix DCOLON pre_decl DOT [ NOT IMPLIES IMPLIED HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
 ##
 ## The known suffix of the stack is as follows:
 ## DCOLON
@@ -1231,7 +681,7 @@ file: DCOLON RPAREN
 
 file: DCOLON VNAME DEFINE CNAME RPAREN
 ##
-## Ends in an error in state: 103.
+## Ends in an error in state: 85.
 ##
 ## separated_nonempty_list(COMMA,ground_literal) -> ground_literal . [ DCOLON COLON ]
 ## separated_nonempty_list(COMMA,ground_literal) -> ground_literal . COMMA separated_nonempty_list(COMMA,ground_literal) [ DCOLON COLON ]
@@ -1244,14 +694,14 @@ file: DCOLON VNAME DEFINE CNAME RPAREN
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 25, spurious reduction of production term -> CNAME
-## In state 46, spurious reduction of production ground_literal -> VNAME DEFINE term
+## In state 43, spurious reduction of production ground_literal -> VNAME DEFINE term
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: DCOLON VNAME DEFINE RPAREN
 ##
-## Ends in an error in state: 45.
+## Ends in an error in state: 42.
 ##
 ## ground_literal -> VNAME DEFINE . term [ DCOLON COMMA COLON ]
 ##
@@ -1294,7 +744,7 @@ file: DCOLON VNAME DIV VNAME VNAME
 
 file: DCOLON VNAME EQ RPAREN
 ##
-## Ends in an error in state: 71.
+## Ends in an error in state: 68.
 ##
 ## ground_literal -> term EQ . term [ DCOLON COMMA COLON ]
 ##
@@ -1306,7 +756,7 @@ file: DCOLON VNAME EQ RPAREN
 
 file: DCOLON VNAME GEQ RPAREN
 ##
-## Ends in an error in state: 67.
+## Ends in an error in state: 64.
 ##
 ## nonempty_list(pair(goperator,term)) -> GEQ . term [ DCOLON COMMA COLON ]
 ## nonempty_list(pair(goperator,term)) -> GEQ . term nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
@@ -1319,7 +769,7 @@ file: DCOLON VNAME GEQ RPAREN
 
 file: DCOLON VNAME GEQ VNAME RPAREN
 ##
-## Ends in an error in state: 68.
+## Ends in an error in state: 65.
 ##
 ## nonempty_list(pair(goperator,term)) -> GEQ term . [ DCOLON COMMA COLON ]
 ## nonempty_list(pair(goperator,term)) -> GEQ term . nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
@@ -1338,7 +788,7 @@ file: DCOLON VNAME GEQ VNAME RPAREN
 
 file: DCOLON VNAME GT RPAREN
 ##
-## Ends in an error in state: 65.
+## Ends in an error in state: 62.
 ##
 ## nonempty_list(pair(goperator,term)) -> GT . term [ DCOLON COMMA COLON ]
 ## nonempty_list(pair(goperator,term)) -> GT . term nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
@@ -1351,7 +801,7 @@ file: DCOLON VNAME GT RPAREN
 
 file: DCOLON VNAME GT VNAME RPAREN
 ##
-## Ends in an error in state: 66.
+## Ends in an error in state: 63.
 ##
 ## nonempty_list(pair(goperator,term)) -> GT term . [ DCOLON COMMA COLON ]
 ## nonempty_list(pair(goperator,term)) -> GT term . nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
@@ -1370,7 +820,7 @@ file: DCOLON VNAME GT VNAME RPAREN
 
 file: DCOLON VNAME LEQ RPAREN
 ##
-## Ends in an error in state: 61.
+## Ends in an error in state: 58.
 ##
 ## nonempty_list(pair(loperator,term)) -> LEQ . term [ DCOLON COMMA COLON ]
 ## nonempty_list(pair(loperator,term)) -> LEQ . term nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
@@ -1383,7 +833,7 @@ file: DCOLON VNAME LEQ RPAREN
 
 file: DCOLON VNAME LEQ VNAME RPAREN
 ##
-## Ends in an error in state: 62.
+## Ends in an error in state: 59.
 ##
 ## nonempty_list(pair(loperator,term)) -> LEQ term . [ DCOLON COMMA COLON ]
 ## nonempty_list(pair(loperator,term)) -> LEQ term . nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
@@ -1433,7 +883,7 @@ file: DCOLON VNAME LOG VNAME VNAME
 
 file: DCOLON VNAME LT RPAREN
 ##
-## Ends in an error in state: 59.
+## Ends in an error in state: 56.
 ##
 ## nonempty_list(pair(loperator,term)) -> LT . term [ DCOLON COMMA COLON ]
 ## nonempty_list(pair(loperator,term)) -> LT . term nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
@@ -1446,9 +896,9 @@ file: DCOLON VNAME LT RPAREN
 
 file: DCOLON VNAME LT VNAME COLON
 ##
-## Ends in an error in state: 168.
+## Ends in an error in state: 130.
 ##
-## decl -> DCOLON grounding_prefix . DCOLON pre_decl DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
+## decl -> DCOLON grounding_prefix . DCOLON pre_decl DOT [ NOT IMPLIES IMPLIED HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
 ##
 ## The known suffix of the stack is as follows:
 ## DCOLON grounding_prefix
@@ -1458,18 +908,18 @@ file: DCOLON VNAME LT VNAME COLON
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 30, spurious reduction of production term -> expr
-## In state 60, spurious reduction of production nonempty_list(pair(loperator,term)) -> LT term
-## In state 73, spurious reduction of production chain -> term nonempty_list(pair(loperator,term))
-## In state 106, spurious reduction of production ground_literal -> chain
-## In state 103, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
-## In state 75, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
+## In state 57, spurious reduction of production nonempty_list(pair(loperator,term)) -> LT term
+## In state 70, spurious reduction of production chain -> term nonempty_list(pair(loperator,term))
+## In state 88, spurious reduction of production ground_literal -> chain
+## In state 85, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
+## In state 72, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: DCOLON VNAME LT VNAME COMMA RPAREN
 ##
-## Ends in an error in state: 104.
+## Ends in an error in state: 86.
 ##
 ## separated_nonempty_list(COMMA,ground_literal) -> ground_literal COMMA . separated_nonempty_list(COMMA,ground_literal) [ DCOLON COLON ]
 ##
@@ -1479,23 +929,34 @@ file: DCOLON VNAME LT VNAME COMMA RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: DCOLON VNAME LT VNAME DCOLON CNAME LBRACKET RBRACKET VNAME
+file: DCOLON VNAME LT VNAME DCOLON IMPLIES CNAME IMPLIED
 ##
-## Ends in an error in state: 200.
+## Ends in an error in state: 153.
 ##
-## decl -> DCOLON grounding_prefix DCOLON pre_decl . DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
+## decl -> DCOLON grounding_prefix DCOLON pre_decl . DOT [ NOT IMPLIES IMPLIED HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
 ##
 ## The known suffix of the stack is as follows:
 ## DCOLON grounding_prefix DCOLON pre_decl
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 2, spurious reduction of production atom -> CNAME
+## In state 79, spurious reduction of production separated_nonempty_list(DISJ,literals) -> atom
+## In state 151, spurious reduction of production loption(separated_nonempty_list(DISJ,literals)) -> separated_nonempty_list(DISJ,literals)
+## In state 155, spurious reduction of production clause_head -> loption(separated_nonempty_list(DISJ,literals))
+## In state 164, spurious reduction of production clause_part -> clause_body IMPLIES clause_head
+## In state 158, spurious reduction of production pre_decl -> clause_part
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: DCOLON VNAME LT VNAME DCOLON VNAME
 ##
-## Ends in an error in state: 169.
+## Ends in an error in state: 131.
 ##
-## decl -> DCOLON grounding_prefix DCOLON . pre_decl DOT [ NOT IMPLIES HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
+## decl -> DCOLON grounding_prefix DCOLON . pre_decl DOT [ NOT IMPLIES IMPLIED HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
 ##
 ## The known suffix of the stack is as follows:
 ## DCOLON grounding_prefix DCOLON
@@ -1505,7 +966,7 @@ file: DCOLON VNAME LT VNAME DCOLON VNAME
 
 file: DCOLON VNAME LT VNAME RPAREN
 ##
-## Ends in an error in state: 60.
+## Ends in an error in state: 57.
 ##
 ## nonempty_list(pair(loperator,term)) -> LT term . [ DCOLON COMMA COLON ]
 ## nonempty_list(pair(loperator,term)) -> LT term . nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
@@ -1617,7 +1078,7 @@ file: DCOLON VNAME MULT VNAME VNAME
 
 file: DCOLON VNAME NEQ RPAREN
 ##
-## Ends in an error in state: 57.
+## Ends in an error in state: 54.
 ##
 ## ground_literal -> term NEQ . term [ DCOLON COMMA COLON ]
 ##
@@ -1691,7 +1152,7 @@ file: DCOLON VNAME POW VNAME VNAME
 
 file: DCOLON VNAME VNAME
 ##
-## Ends in an error in state: 44.
+## Ends in an error in state: 41.
 ##
 ## expr -> VNAME . [ POW PLUS NEQ MULT MOD MINUS LT LOG LEQ GT GEQ EQ DIV ]
 ## ground_literal -> VNAME . DEFINE term [ DCOLON COMMA COLON ]
@@ -1704,7 +1165,7 @@ file: DCOLON VNAME VNAME
 
 file: DOT VNAME
 ##
-## Ends in an error in state: 215.
+## Ends in an error in state: 171.
 ##
 ## list(decl) -> decl . list(decl) [ EOF ]
 ##
@@ -1716,10 +1177,9 @@ file: DOT VNAME
 
 file: EXISTS LBRACKET RPAREN
 ##
-## Ends in an error in state: 160.
+## Ends in an error in state: 125.
 ##
-## pre_decl -> EXISTS LBRACKET . expr RBRACKET CNAME [ DOT ]
-## pre_decl -> EXISTS LBRACKET . expr RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
+## pre_decl -> EXISTS LBRACKET . expr RBRACKET separated_nonempty_list(COMMA,atom) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## EXISTS LBRACKET
@@ -1727,57 +1187,11 @@ file: EXISTS LBRACKET RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: EXISTS LBRACKET VNAME RBRACKET CNAME LPAREN RBRACKET
-##
-## Ends in an error in state: 164.
-##
-## pre_decl -> EXISTS LBRACKET expr RBRACKET CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## EXISTS LBRACKET expr RBRACKET CNAME LPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: EXISTS LBRACKET VNAME RBRACKET CNAME LPAREN VNAME RBRACKET
-##
-## Ends in an error in state: 165.
-##
-## pre_decl -> EXISTS LBRACKET expr RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## EXISTS LBRACKET expr RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: EXISTS LBRACKET VNAME RBRACKET CNAME VNAME
-##
-## Ends in an error in state: 163.
-##
-## pre_decl -> EXISTS LBRACKET expr RBRACKET CNAME . [ DOT ]
-## pre_decl -> EXISTS LBRACKET expr RBRACKET CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## EXISTS LBRACKET expr RBRACKET CNAME
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
 file: EXISTS LBRACKET VNAME RBRACKET VNAME
 ##
-## Ends in an error in state: 162.
+## Ends in an error in state: 127.
 ##
-## pre_decl -> EXISTS LBRACKET expr RBRACKET . CNAME [ DOT ]
-## pre_decl -> EXISTS LBRACKET expr RBRACKET . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
+## pre_decl -> EXISTS LBRACKET expr RBRACKET . separated_nonempty_list(COMMA,atom) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## EXISTS LBRACKET expr RBRACKET
@@ -1787,7 +1201,7 @@ file: EXISTS LBRACKET VNAME RBRACKET VNAME
 
 file: EXISTS LBRACKET VNAME VNAME
 ##
-## Ends in an error in state: 161.
+## Ends in an error in state: 126.
 ##
 ## expr -> expr . DIV expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
 ## expr -> expr . LOG expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
@@ -1796,8 +1210,7 @@ file: EXISTS LBRACKET VNAME VNAME
 ## expr -> expr . POW expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
 ## expr -> expr . PLUS expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
 ## expr -> expr . MINUS expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
-## pre_decl -> EXISTS LBRACKET expr . RBRACKET CNAME [ DOT ]
-## pre_decl -> EXISTS LBRACKET expr . RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
+## pre_decl -> EXISTS LBRACKET expr . RBRACKET separated_nonempty_list(COMMA,atom) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## EXISTS LBRACKET expr
@@ -1807,10 +1220,9 @@ file: EXISTS LBRACKET VNAME VNAME
 
 file: EXISTS VNAME
 ##
-## Ends in an error in state: 159.
+## Ends in an error in state: 124.
 ##
-## pre_decl -> EXISTS . LBRACKET expr RBRACKET CNAME [ DOT ]
-## pre_decl -> EXISTS . LBRACKET expr RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
+## pre_decl -> EXISTS . LBRACKET expr RBRACKET separated_nonempty_list(COMMA,atom) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## EXISTS
@@ -1820,10 +1232,9 @@ file: EXISTS VNAME
 
 file: FORALL LBRACKET RPAREN
 ##
-## Ends in an error in state: 152.
+## Ends in an error in state: 117.
 ##
-## pre_decl -> FORALL LBRACKET . expr RBRACKET CNAME [ DOT ]
-## pre_decl -> FORALL LBRACKET . expr RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
+## pre_decl -> FORALL LBRACKET . expr RBRACKET separated_nonempty_list(COMMA,atom) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## FORALL LBRACKET
@@ -1831,57 +1242,42 @@ file: FORALL LBRACKET RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: FORALL LBRACKET VNAME RBRACKET CNAME LPAREN RBRACKET
+file: FORALL LBRACKET VNAME RBRACKET CNAME COMMA VNAME
 ##
-## Ends in an error in state: 156.
+## Ends in an error in state: 122.
 ##
-## pre_decl -> FORALL LBRACKET expr RBRACKET CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
+## separated_nonempty_list(COMMA,atom) -> atom COMMA . separated_nonempty_list(COMMA,atom) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## FORALL LBRACKET expr RBRACKET CNAME LPAREN
+## atom COMMA
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: FORALL LBRACKET VNAME RBRACKET CNAME LPAREN VNAME RBRACKET
+file: FORALL LBRACKET VNAME RBRACKET CNAME IMPLIES
 ##
-## Ends in an error in state: 157.
+## Ends in an error in state: 121.
 ##
-## pre_decl -> FORALL LBRACKET expr RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
+## separated_nonempty_list(COMMA,atom) -> atom . [ DOT ]
+## separated_nonempty_list(COMMA,atom) -> atom . COMMA separated_nonempty_list(COMMA,atom) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## FORALL LBRACKET expr RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
+## atom
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: FORALL LBRACKET VNAME RBRACKET CNAME VNAME
-##
-## Ends in an error in state: 155.
-##
-## pre_decl -> FORALL LBRACKET expr RBRACKET CNAME . [ DOT ]
-## pre_decl -> FORALL LBRACKET expr RBRACKET CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## FORALL LBRACKET expr RBRACKET CNAME
+## In state 2, spurious reduction of production atom -> CNAME
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: FORALL LBRACKET VNAME RBRACKET VNAME
 ##
-## Ends in an error in state: 154.
+## Ends in an error in state: 119.
 ##
-## pre_decl -> FORALL LBRACKET expr RBRACKET . CNAME [ DOT ]
-## pre_decl -> FORALL LBRACKET expr RBRACKET . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
+## pre_decl -> FORALL LBRACKET expr RBRACKET . separated_nonempty_list(COMMA,atom) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## FORALL LBRACKET expr RBRACKET
@@ -1891,7 +1287,7 @@ file: FORALL LBRACKET VNAME RBRACKET VNAME
 
 file: FORALL LBRACKET VNAME VNAME
 ##
-## Ends in an error in state: 153.
+## Ends in an error in state: 118.
 ##
 ## expr -> expr . DIV expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
 ## expr -> expr . LOG expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
@@ -1900,8 +1296,7 @@ file: FORALL LBRACKET VNAME VNAME
 ## expr -> expr . POW expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
 ## expr -> expr . PLUS expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
 ## expr -> expr . MINUS expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
-## pre_decl -> FORALL LBRACKET expr . RBRACKET CNAME [ DOT ]
-## pre_decl -> FORALL LBRACKET expr . RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
+## pre_decl -> FORALL LBRACKET expr . RBRACKET separated_nonempty_list(COMMA,atom) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## FORALL LBRACKET expr
@@ -1911,10 +1306,9 @@ file: FORALL LBRACKET VNAME VNAME
 
 file: FORALL VNAME
 ##
-## Ends in an error in state: 151.
+## Ends in an error in state: 116.
 ##
-## pre_decl -> FORALL . LBRACKET expr RBRACKET CNAME [ DOT ]
-## pre_decl -> FORALL . LBRACKET expr RBRACKET CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
+## pre_decl -> FORALL . LBRACKET expr RBRACKET separated_nonempty_list(COMMA,atom) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## FORALL
@@ -1922,119 +1316,43 @@ file: FORALL VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: HIDE CNAME LPAREN RBRACKET
+file: HIDE CNAME COMMA VNAME
 ##
-## Ends in an error in state: 148.
+## Ends in an error in state: 113.
 ##
-## hide_decl -> HIDE CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
+## separated_nonempty_list(COMMA,literal) -> atom COMMA . separated_nonempty_list(COMMA,literal) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## HIDE CNAME LPAREN
+## atom COMMA
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: HIDE CNAME LPAREN VNAME RBRACKET
+file: HIDE CNAME IMPLIES
 ##
-## Ends in an error in state: 149.
+## Ends in an error in state: 112.
 ##
-## hide_decl -> HIDE CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
+## separated_nonempty_list(COMMA,literal) -> atom . [ DOT ]
+## separated_nonempty_list(COMMA,literal) -> atom . COMMA separated_nonempty_list(COMMA,literal) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## HIDE CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
+## atom
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
+## In state 2, spurious reduction of production atom -> CNAME
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: HIDE CNAME VNAME
 ##
-## Ends in an error in state: 147.
+## Ends in an error in state: 2.
 ##
-## hide_decl -> HIDE CNAME . [ DOT ]
-## hide_decl -> HIDE CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## HIDE CNAME
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: HIDE VNAME
-##
-## Ends in an error in state: 146.
-##
-## hide_decl -> HIDE . CNAME [ DOT ]
-## hide_decl -> HIDE . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## HIDE
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: IMPLIES CNAME LPAREN RBRACKET
-##
-## Ends in an error in state: 85.
-##
-## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## CNAME LPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: IMPLIES CNAME LPAREN RPAREN VNAME
-##
-## Ends in an error in state: 87.
-##
-## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: IMPLIES CNAME LPAREN VNAME RBRACKET
-##
-## Ends in an error in state: 86.
-##
-## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: IMPLIES CNAME VNAME
-##
-## Ends in an error in state: 84.
-##
-## separated_nonempty_list(DISJ,literals) -> CNAME . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> CNAME . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## atom -> CNAME . [ IMPLIES IMPLIED DOT DISJ CONJ COMMA ]
+## atom -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES IMPLIED DOT DISJ CONJ COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME
@@ -2042,18 +1360,112 @@ file: IMPLIES CNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON RPAREN
+file: HIDE NOT CNAME COMMA VNAME
 ##
-## Ends in an error in state: 43.
+## Ends in an error in state: 110.
 ##
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON NOT CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON NOT CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(COMMA,literal) -> NOT atom COMMA . separated_nonempty_list(COMMA,literal) [ DOT ]
+##
+## The known suffix of the stack is as follows:
+## NOT atom COMMA
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: HIDE NOT CNAME IMPLIES
+##
+## Ends in an error in state: 109.
+##
+## separated_nonempty_list(COMMA,literal) -> NOT atom . [ DOT ]
+## separated_nonempty_list(COMMA,literal) -> NOT atom . COMMA separated_nonempty_list(COMMA,literal) [ DOT ]
+##
+## The known suffix of the stack is as follows:
+## NOT atom
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 2, spurious reduction of production atom -> CNAME
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: HIDE NOT VNAME
+##
+## Ends in an error in state: 108.
+##
+## separated_nonempty_list(COMMA,literal) -> NOT . atom [ DOT ]
+## separated_nonempty_list(COMMA,literal) -> NOT . atom COMMA separated_nonempty_list(COMMA,literal) [ DOT ]
+##
+## The known suffix of the stack is as follows:
+## NOT
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: HIDE VNAME
+##
+## Ends in an error in state: 107.
+##
+## hide_decl -> HIDE . separated_nonempty_list(COMMA,literal) [ DOT ]
+##
+## The known suffix of the stack is as follows:
+## HIDE
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: IMPLIED CNAME IMPLIED
+##
+## Ends in an error in state: 100.
+##
+## separated_nonempty_list(CONJ,literals) -> atom . [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> atom . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
+##
+## The known suffix of the stack is as follows:
+## atom
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 2, spurious reduction of production atom -> CNAME
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: IMPLIED CNAME IMPLIES
+##
+## Ends in an error in state: 166.
+##
+## decl -> pre_decl . DOT [ NOT IMPLIES IMPLIED HIDE FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
+##
+## The known suffix of the stack is as follows:
+## pre_decl
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 2, spurious reduction of production atom -> CNAME
+## In state 100, spurious reduction of production separated_nonempty_list(CONJ,literals) -> atom
+## In state 152, spurious reduction of production loption(separated_nonempty_list(CONJ,literals)) -> separated_nonempty_list(CONJ,literals)
+## In state 156, spurious reduction of production clause_body -> loption(separated_nonempty_list(CONJ,literals))
+## In state 161, spurious reduction of production clause_part -> clause_head IMPLIED clause_body
+## In state 158, spurious reduction of production pre_decl -> clause_part
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: IMPLIED COLON RPAREN
+##
+## Ends in an error in state: 93.
+##
+## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON atom [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON NOT atom [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON . grounding_prefix COLON NOT atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## COLON
@@ -2061,138 +1473,220 @@ file: IMPLIES COLON RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME DEFINE CNAME COLON CNAME LPAREN RBRACKET
+file: IMPLIED COLON VNAME LT VNAME COLON CNAME IMPLIED
 ##
-## Ends in an error in state: 96.
+## Ends in an error in state: 103.
 ##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON atom . [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON atom . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME LPAREN
+## COLON grounding_prefix COLON atom
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 2, spurious reduction of production atom -> CNAME
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME DEFINE CNAME COLON CNAME LPAREN RPAREN VNAME
-##
-## Ends in an error in state: 98.
-##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: IMPLIES COLON VNAME DEFINE CNAME COLON CNAME LPAREN VNAME RBRACKET
+file: IMPLIED COLON VNAME LT VNAME COLON NOT CNAME IMPLIED
 ##
 ## Ends in an error in state: 97.
 ##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT atom . [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT atom . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
+## COLON grounding_prefix COLON NOT atom
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
+## In state 2, spurious reduction of production atom -> CNAME
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME DEFINE CNAME COLON CNAME VNAME
+file: IMPLIED COLON VNAME LT VNAME COLON NOT VNAME
+##
+## Ends in an error in state: 96.
+##
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . atom [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON NOT . atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
+##
+## The known suffix of the stack is as follows:
+## COLON grounding_prefix COLON NOT
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: IMPLIED COLON VNAME LT VNAME COLON VNAME
 ##
 ## Ends in an error in state: 95.
 ##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . atom [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . NOT atom [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix COLON . NOT atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON CNAME
+## COLON grounding_prefix COLON
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME DEFINE CNAME COLON NOT CNAME LPAREN RBRACKET
+file: IMPLIED COLON VNAME LT VNAME DCOLON
 ##
-## Ends in an error in state: 80.
+## Ends in an error in state: 94.
 ##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME LPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: IMPLIES COLON VNAME DEFINE CNAME COLON NOT CNAME LPAREN RPAREN VNAME
-##
-## Ends in an error in state: 82.
-##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON atom [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON NOT atom [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> COLON grounding_prefix . COLON NOT atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: IMPLIES COLON VNAME DEFINE CNAME COLON NOT CNAME LPAREN VNAME RBRACKET
-##
-## Ends in an error in state: 81.
-##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
+## COLON grounding_prefix
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
+## In state 57, spurious reduction of production nonempty_list(pair(loperator,term)) -> LT term
+## In state 70, spurious reduction of production chain -> term nonempty_list(pair(loperator,term))
+## In state 88, spurious reduction of production ground_literal -> chain
+## In state 85, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
+## In state 72, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES COLON VNAME DEFINE CNAME COLON NOT CNAME VNAME
+file: IMPLIED NOT CNAME IMPLIED
+##
+## Ends in an error in state: 92.
+##
+## separated_nonempty_list(CONJ,literals) -> NOT atom . [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> NOT atom . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
+##
+## The known suffix of the stack is as follows:
+## NOT atom
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 2, spurious reduction of production atom -> CNAME
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: IMPLIED NOT VNAME
+##
+## Ends in an error in state: 91.
+##
+## separated_nonempty_list(CONJ,literals) -> NOT . atom [ IMPLIES DOT ]
+## separated_nonempty_list(CONJ,literals) -> NOT . atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
+##
+## The known suffix of the stack is as follows:
+## NOT
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: IMPLIED VNAME
+##
+## Ends in an error in state: 160.
+##
+## clause_part -> clause_head IMPLIED . clause_body [ DOT ]
+##
+## The known suffix of the stack is as follows:
+## clause_head IMPLIED
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: IMPLIES CNAME IMPLIES
 ##
 ## Ends in an error in state: 79.
 ##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(DISJ,literals) -> atom . [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> atom . DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## COLON grounding_prefix COLON NOT CNAME
+## atom
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 2, spurious reduction of production atom -> CNAME
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: IMPLIES COLON RPAREN
+##
+## Ends in an error in state: 40.
+##
+## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON NOT atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON . grounding_prefix COLON NOT atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
+##
+## The known suffix of the stack is as follows:
+## COLON
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: IMPLIES COLON VNAME DEFINE CNAME COLON CNAME IMPLIES
+##
+## Ends in an error in state: 82.
+##
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON atom . [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON atom . DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
+##
+## The known suffix of the stack is as follows:
+## COLON grounding_prefix COLON atom
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 2, spurious reduction of production atom -> CNAME
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: IMPLIES COLON VNAME DEFINE CNAME COLON NOT CNAME IMPLIES
+##
+## Ends in an error in state: 76.
+##
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT atom . [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT atom . DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
+##
+## The known suffix of the stack is as follows:
+## COLON grounding_prefix COLON NOT atom
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 2, spurious reduction of production atom -> CNAME
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: IMPLIES COLON VNAME DEFINE CNAME COLON NOT VNAME
 ##
-## Ends in an error in state: 78.
+## Ends in an error in state: 75.
 ##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT . CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT . CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT . atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON NOT . atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## COLON grounding_prefix COLON NOT
@@ -2202,16 +1696,12 @@ file: IMPLIES COLON VNAME DEFINE CNAME COLON NOT VNAME
 
 file: IMPLIES COLON VNAME DEFINE CNAME COLON VNAME
 ##
-## Ends in an error in state: 77.
+## Ends in an error in state: 74.
 ##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . NOT CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . NOT CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . NOT atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix COLON . NOT atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## COLON grounding_prefix COLON
@@ -2221,16 +1711,12 @@ file: IMPLIES COLON VNAME DEFINE CNAME COLON VNAME
 
 file: IMPLIES COLON VNAME DEFINE CNAME DCOLON
 ##
-## Ends in an error in state: 76.
+## Ends in an error in state: 73.
 ##
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON NOT CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON NOT CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON NOT atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> COLON grounding_prefix . COLON NOT atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## COLON grounding_prefix
@@ -2240,83 +1726,38 @@ file: IMPLIES COLON VNAME DEFINE CNAME DCOLON
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 25, spurious reduction of production term -> CNAME
-## In state 46, spurious reduction of production ground_literal -> VNAME DEFINE term
-## In state 103, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
-## In state 75, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
+## In state 43, spurious reduction of production ground_literal -> VNAME DEFINE term
+## In state 85, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
+## In state 72, spurious reduction of production grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES NOT CNAME LPAREN RBRACKET
+file: IMPLIES NOT CNAME IMPLIES
 ##
 ## Ends in an error in state: 39.
 ##
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(DISJ,literals) -> NOT atom . [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> NOT atom . DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## NOT CNAME LPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: IMPLIES NOT CNAME LPAREN RPAREN VNAME
-##
-## Ends in an error in state: 41.
-##
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: IMPLIES NOT CNAME LPAREN VNAME RBRACKET
-##
-## Ends in an error in state: 40.
-##
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
+## NOT atom
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: IMPLIES NOT CNAME VNAME
-##
-## Ends in an error in state: 38.
-##
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME
+## In state 2, spurious reduction of production atom -> CNAME
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: IMPLIES NOT VNAME
 ##
-## Ends in an error in state: 37.
+## Ends in an error in state: 38.
 ##
-## separated_nonempty_list(DISJ,literals) -> NOT . CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT . CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(DISJ,literals) -> NOT . atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> NOT . atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## NOT
@@ -2326,7 +1767,7 @@ file: IMPLIES NOT VNAME
 
 file: IMPLIES VNAME
 ##
-## Ends in an error in state: 208.
+## Ends in an error in state: 163.
 ##
 ## clause_part -> clause_body IMPLIES . clause_head [ DOT ]
 ##
@@ -2336,122 +1777,47 @@ file: IMPLIES VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: NOT CNAME CONJ VNAME
+file: NOT CNAME COMMA
 ##
-## Ends in an error in state: 115.
+## Ends in an error in state: 36.
 ##
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> NOT atom . [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> NOT atom . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(DISJ,literals) -> NOT atom . [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> NOT atom . DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## NOT CNAME CONJ
+## NOT atom
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 2, spurious reduction of production atom -> CNAME
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: NOT CNAME CONJ VNAME
+##
+## Ends in an error in state: 90.
+##
+## separated_nonempty_list(CONJ,literals) -> NOT atom CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
+##
+## The known suffix of the stack is as follows:
+## NOT atom CONJ
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: NOT CNAME DISJ VNAME
 ##
-## Ends in an error in state: 42.
+## Ends in an error in state: 37.
 ##
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME DISJ . separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME DISJ
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: NOT CNAME LPAREN RBRACKET
-##
-## Ends in an error in state: 3.
-##
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(DISJ,literals) -> NOT atom DISJ . separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## NOT CNAME LPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: NOT CNAME LPAREN RPAREN CONJ VNAME
-##
-## Ends in an error in state: 109.
-##
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: NOT CNAME LPAREN RPAREN DISJ VNAME
-##
-## Ends in an error in state: 36.
-##
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ . separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: NOT CNAME LPAREN RPAREN VNAME
-##
-## Ends in an error in state: 35.
-##
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: NOT CNAME LPAREN VNAME RBRACKET
-##
-## Ends in an error in state: 34.
-##
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME LPAREN loption(separated_nonempty_list(COMMA,term))
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: NOT CNAME VNAME
-##
-## Ends in an error in state: 2.
-##
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME . [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME . DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME
+## NOT atom DISJ
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
@@ -2460,14 +1826,10 @@ file: NOT VNAME
 ##
 ## Ends in an error in state: 1.
 ##
-## separated_nonempty_list(CONJ,literals) -> NOT . CNAME [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT . CNAME CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> NOT . CNAME [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT . CNAME DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
-## separated_nonempty_list(DISJ,literals) -> NOT . CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN DISJ separated_nonempty_list(DISJ,literals) [ DOT ]
+## separated_nonempty_list(CONJ,literals) -> NOT . atom [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> NOT . atom CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(DISJ,literals) -> NOT . atom [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> NOT . atom DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## NOT

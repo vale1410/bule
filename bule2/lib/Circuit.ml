@@ -239,16 +239,18 @@ let all_ground decls =
 let search_var ((cname, terms) : Ast.T.atom) vmap = (cname, List.map (term vmap) terms)
 let search_lit vmap ((pol, var) : Ast.T.literal) = (pol, search_var var vmap)
 let search_lits lits vmap = List.map (search_lit vmap) lits
-let search_decl gmap qmap ((gls, b, e, a) : Ast.T.search_decl) =
+let search_decl gmap qmap ((gls, b, e, vars) : Ast.T.search_decl) =
   let maps = glits gmap SMap.empty gls in
   let parity = if b then 1 else 0 in
   let update qm i var =
     let f = function | None -> Some [var] | Some l -> Some (var :: l) in
     IMap.update (2 * i + parity) f qm in
-  let treat_one qm vmap =
+  let treat_one_var vmap qm v =
     let i = expr vmap e in
-    let var = search_var a vmap in
+    let var = search_var v vmap in
     update qm i var in
+  let treat_one qm vmap =
+    List.fold_left (treat_one_var vmap) qm vars in
   List.fold_left treat_one qmap maps
 
 let all_search gmap (decls : Ast.T.search_decl list) =

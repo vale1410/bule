@@ -63,10 +63,11 @@ struct
     gls ^ literal (pol, var)
 
   let ground_decl (gls, name, tuples) = sprintf "%s :: %s[%s]" (glits gls) name (Print.list' "" ", " "" tuple tuples)
-  let search_decl (gls, exi, depth, var) =
-    let quant = sprintf "#%s[%s]" (if exi then "exists" else "forall") (expr depth) in
+  let search_decl (gls, exi, depth, vars) =
+    let quant = if exi then "exists" else "forall" in
     let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in
-    quant ^ gls ^ " :: " ^ search_var var ^ "?"
+    let svs = Print.list' "" ", " "" search_var vars in
+    sprintf "#%s[%s]%s :: %s?" quant (expr depth) gls svs
   let clause_decl (gls, hyps, ccls) = sprintf "%s :: %s -> %s." (glits gls) (Print.list' "" " & " "" literals hyps) (Print.list' "" " | " "" literals ccls)
   let hide_decl (gls, lits) =
     let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in

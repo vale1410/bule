@@ -71,8 +71,10 @@ term:
 | t = term { Ast.T.Term t }
 | e1 = expr RANGE e2 = expr { Ast.T.Range (e1, e2) }
 
-%inline search_atom:
-| pol = iboption(NOT) n = CNAME ts = pr_list(term) { (not pol, (n, ts)) }
+atom:
+| n = CNAME ts = pr_list(term) { (n, ts) }
+%inline literal:
+| pol = iboption(NOT) a = atom { (not pol, a) }
 %inline ground_atom:
 | n = CNAME ts = br_list(term) { (n, ts) }
 %inline ground_head:
@@ -92,10 +94,10 @@ gls = separated_nonempty_list(COMMA, ground_literal) { List.flatten gls }
 
 %inline quantifier: | EXISTS { true } | FORALL { false }
 %inline search_decl:
-| b = quantifier LBRACKET e = expr RBRACKET n = CNAME ts = pr_list(term) { ([], b, e, (n, ts)) }
+| b = quantifier LBRACKET e = expr RBRACKET vars = co_list(atom) { ([], b, e, vars) }
 %inline literals:
-| COLON gp = grounding_prefix COLON pa = search_atom { let (pol, a) = pa in (gp, pol, a) }
-| pa = search_atom { let (pol, a) = pa in ([], pol, a) }
+| COLON gp = grounding_prefix COLON pa = literal { let (pol, a) = pa in (gp, pol, a) }
+| pa = literal { let (pol, a) = pa in ([], pol, a) }
 clause_body:
 hyps = separated_list(CONJ, literals) { hyps }
 clause_head:
@@ -105,7 +107,7 @@ clause_part:
 | ccls = clause_head IMPLIED hyps = clause_body { ([], hyps, ccls) }
 | ccls = clause_head { ([], [], ccls) }
 hide_decl:
-| HIDE l = co_list(search_atom) { ([], l) }
+| HIDE l = co_list(literal) { ([], l) }
 pre_decl:
 | gd = ground_head { Ast.T.G gd }
 | sd = search_decl { Ast.T.S sd }
