@@ -18,11 +18,13 @@ let get () =
   let models = ref 1 in
   let solver = ref "none" in
   let solve = ref false in
-  let speclist = [("--dimacs", Arg.Bool (update dimacs), "Output DIMACS format rather than BULE. Default false.");
-                  ("-",        Arg.Unit (fun () -> update input_names ("-" :: !input_names)), "Read the BULE code from the standard input.");
-                  ("--models", Arg.Set_int models, "Number of models to generate. Default: 1.");
-                  ("--solve",  Arg.Set solve, "Enable solving. If \"none\" then no solving takes place. Default: \"false\"");
-                  ("--solver", Arg.Set_string solver, "Set the solver to be used. If \"none\" then Minisat 1.14 is used. Example \"depqbf --no-dynamic-nenofex --qdo\". The option has no effect if \"solve\" is set to \"false\". Default: \"none\"")
+  let facts = ref false in
+  let speclist = [("-",        Arg.Unit (fun () -> update input_names ("-" :: !input_names)), "Read the BULE code from the standard input.");
+                  ("--solve",  Arg.Set solve, "Enable solving. Default: \"false\"");
+                  ("--models", Arg.Set_int models, "Number of models to generate. The option has no effect if \"solve\" is set to \"false\". Default: 1.");
+                  ("--solver", Arg.Set_string solver, "Set the solver to be used. If \"none\" then Minisat 1.14 is used. Example \"depqbf --no-dynamic-nenofex --qdo\". The option has no effect if \"solve\" is set to \"false\". Default: \"none\"");
+                  ("--dimacs", Arg.Bool (update dimacs), "Output DIMACS format rather than BULE. The option has no effect if \"solve\" is set to \"true\". Default \"false\".");
+                  ("--facts",  Arg.Set facts, "Enable printing of grounded facts. The option has no effect if \"solve\" is set to \"true\". Default: \"false\".");
 ] in
 (*  let speclist = [] in*)
   let usage_msg = "BULE Grounder. Options available:" in
@@ -31,8 +33,9 @@ let get () =
   let files = match List.rev !input_names with
   | [] -> failwith "Wrong number of arguments. Usage: bule2 file"
   | _ :: _ as names -> names in
-  let command = if !solve then (if !solver = "none" then Some None else Some (Some !solver)) else None in
-  (command, !dimacs, !models, files)
+  let solver = if !solver = "none" then None else Some !solver in
+  let mode = if !solve then Either.Right (solver, !models) else Either.Left (!facts, !dimacs) in
+  (mode, files)
 
 
 (*let convert g =
@@ -60,25 +63,26 @@ let ground_d g =
   ()
 *)
 
-(*let solve dim = Solve.solve "depqbf --no-dynamic-nenofex --qdo" dim*)
 let solve models dim command = Solve.solve_all command models dim
 
+let solve_mode file (solver, models) =
+  let circuit = Circuit.file false file in
+  let file = Dimacs.ground circuit in
+  Solve.solve_all solver models file
+let ground_mode file (facts, dimacs) =
+  let circuit = Circuit.file facts file in
+  let (d, _, _, _) = Dimacs.ground circuit in
+  let output = if dimacs then Dimacs.Print.file d else Circuit.Print.file circuit in
+  printf "%s\n" output
+
 let start () =
-  let command, dimacs, models, fs = get () in
+  let mode, fs = get () in
   let ps = List.map (Parse.from_file ()) fs in
-  let p = List.flatten ps in
+  let file = List.flatten ps in
   (*printf "%s\n\n" (Ast.Print.file p);*)
-  let g = Circuit.file p in
-  let (d, vm, im, hs) = Dimacs.ground g in
-  match command with
-  | Some comm -> solve models (d, vm, im, hs) comm
-  | None ->
-     let output = if dimacs then Dimacs.Print.file d else Circuit.Print.file g in
-     printf "%s\n" output
-
-
-  (*if gr then ground g else solve g*)
-  (*if gr then convert g else solve g*)
+  match mode with
+  | Either.Right comm -> solve_mode file comm(*solve models (d, vm, im, hs) comm*)
+  | Either.Left comm -> ground_mode file comm
 
 let _ = start ()
 

@@ -6,4 +6,4 @@ module Print : sig
   val file : T.file -> string
 end
 
-val file : Ast.T.file -> T.file
+val file : bool -> Ast.T.file -> T.file

@@ -11,6 +11,9 @@ struct
   let rec ground_term = function
     | Fun (c, []) -> sprintf "%s" c
     | Fun (c, (_ :: _ as ts)) -> sprintf "%s(%s)" c (Print.list' "" "," "" ground_term ts)
+  let ground_fact (n, cs) = match cs with
+    | [] -> Ast.Print.cname n
+    | _ :: _ -> sprintf "%s[%s]" (Ast.Print.cname n) (Print.list' "" "," "" ground_term cs)
   let search_var (n, cs) = match cs with
     | [] -> Ast.Print.cname n
     | _ :: _ -> sprintf "%s(%s)" (Ast.Print.cname n) (Print.list' "" "," "" ground_term cs)
@@ -291,7 +294,15 @@ let all_clause gmap decls = List.concat_map (clause_decl gmap) decls
 
 let all_clause gmap decls = List.fold_left (clause_decl gmap) [] decls*)
 
-let file (decls : Ast.T.file) : T.file =
+let print_facts facts gmap =
+  let pr_one (key, set) =
+    let pr_tuple tuple = Print.ground_fact (key, tuple) ^ "." in
+    let elements = GTermSet.elements set in
+    if elements = [] then sprintf "%s no fact of the form `%s[...]` was generated." "%%%" key
+    else P.unspaces pr_tuple elements in
+  if facts then eprintf "%s\n%!" (P.unlines pr_one (SMap.bindings gmap))
+
+let file facts (decls : Ast.T.file) : T.file =
   let aux (gs, ss, cs, hs) = function
     | Ast.T.G gd -> (gd :: gs, ss, cs, hs)
     | S sd -> (gs, sd :: ss, cs, hs)
@@ -300,7 +311,7 @@ let file (decls : Ast.T.file) : T.file =
   let gs, ss, cs, hs = List.fold_left aux ([], [], [], []) decls in
   let gs, ss, cs, hs = List.rev gs, List.rev ss, List.rev cs, List.rev hs in
   let gmap = all_ground gs in
-  (*eprintf "%s\n%!" (print_smap print_gtset gmap);*)
+  print_facts facts gmap;
   let bloc = all_search gmap ss in
   let clau = all_clause gmap cs in
   let hide = all_hide gmap hs in
