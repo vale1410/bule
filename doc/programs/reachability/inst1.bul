@@ -16,5 +16,5 @@ map[f,5].
 #const bits=2. % 0..l, with l+1 bits to represent vertices
 
 s[a].
-t[b].
+t[f].
 
