@@ -19,7 +19,7 @@ type literals = glits * bool * atom
 type ground_decl = glits * atomd list
 type search_decl = glits * bool * expr * atomd list
 type clause_decl = glits * literals list * literals list
-type hide_decl = glits * literal list
+type hide_decl = glits * bool * literal list
 
 type decl = G of ground_decl | S of search_decl | C of clause_decl | H of hide_decl
 type file = decl list
@@ -31,7 +31,11 @@ type search_var = AST.T.cname * ground_term list
 type quantifier_block = bool * search_var list
 type literal = bool * search_var
 type clause = literal list * literal list
-type file = quantifier_block list * clause list * literal list
+type file =
+  { prefix: quantifier_block list;
+    matrix: clause list;
+    hide: literal list;
+    show: literal list }
 end end
 
 module DIMACS = struct module T = struct

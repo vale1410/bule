@@ -32,8 +32,10 @@ struct
       let s' = Print.unlines pr_one vars in
       (i+1, s ^ "\n" ^ s') in
     snd (List.fold_left f (0, "") l)
-  let hide lit = sprintf "%%#hide %s." (literal lit)
-  let file (bl, cl, hs) = sprintf "%s\n%s\n%s" (blocks bl) (Print.unlines clause cl) (Print.unlines hide hs)
+  let file { prefix; matrix; hide; show } =
+    let h = if hide <> [] then sprintf "\n%%#hide %s." (Print.list' "" ", " "" literal hide) else ""
+    and s = if show <> [] then sprintf "\n%%#show %s." (Print.list' "" ", " "" literal show) else "" in
+    sprintf "%s\n%s%s%s" (blocks prefix) (Print.unlines clause matrix) h s
 end
 
 module SMap = Map.Make (String)
@@ -234,7 +236,7 @@ let with_neg_cycle negdeps sccs =
   let test_component comp =
     let test_element e =
       match SMap.find_opt e negdeps with
-      | None -> eprintf "Warning: grounding predicate %s used in a rule without being defined anywhere.\n" e; false
+      | None -> eprintf "Warning. Grounding predicate %s used in a rule without being defined anywhere.\n%!" e; false
       | Some deps ->
          List.exists (fun x -> List.mem x comp) deps in
     if List.exists test_element comp then Some comp else None in
@@ -293,10 +295,11 @@ let all_search gmap (decls : Ast.T.search_decl list) =
     let f (i, l) = (i mod 2 = 1, l) in
     List.map f blocks
 
-let all_hide gmap (decls : Ast.T.hide_decl list) : T.literal list =
-  let hide_decl ((gls, lits) : Ast.T.hide_decl) =
+let all_hide gmap (decls : Ast.T.hide_decl list) : (bool * T.literal) list =
+  let hide_decl ((gls, hide, lits) : Ast.T.hide_decl) =
     let maps = glits gmap SMap.empty gls in
-    List.concat_map (search_lits lits) maps in
+    let all_lits = List.concat_map (search_lits lits) maps in
+    List.map (fun lit -> hide, lit) all_lits in
   List.concat_map hide_decl decls
 
 let literals gmap vmap (gls, pol, ga) =
@@ -341,7 +344,11 @@ let file facts (decls : Ast.T.file) : T.file =
   let gs, ss, cs, hs = List.rev gs, List.rev ss, List.rev cs, List.rev hs in
   let gmap = all_ground gs in
   print_facts facts gmap;
-  let bloc = all_search gmap ss in
-  let clau = all_clause gmap cs in
-  let hide = all_hide gmap hs in
-  (bloc, clau, hide)
+  let prefix = all_search gmap ss in
+  let matrix = all_clause gmap cs in
+  let hide_st = all_hide gmap hs in
+  let hide, show = List.partition_map (fun (h, lit) -> if h then Either.Right lit else Either.Left lit) hide_st in
+  { prefix;
+    matrix;
+    hide;
+    show }

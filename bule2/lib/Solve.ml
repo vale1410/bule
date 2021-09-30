@@ -82,8 +82,12 @@ let print_literal imap (pol, var) =
   let sv = match Dimacs.T.IMap.find_opt var imap with None -> assert false | Some sv -> sv in
     sprintf "%s%s" tilde (Circuit.Print.search_var sv)
 
-let filtered_model model hide =
-  let printed_lit (px, x) = let l = if px then x else -x in not (Dimacs.T.ISet.mem l hide) in
+let filtered_model show_default model hide show =
+  let printed_lit (px, x) =
+    let l = if px then x else -x in
+    let hidden = Dimacs.T.ISet.mem l hide
+    and force_shown = Dimacs.T.ISet.mem l show in
+    (show_default && not hidden) || (not show_default && force_shown) in
   List.filter printed_lit model
 let print_one_model imap = Print.unlines (print_literal imap)
 let print_all_models imap = Print.unspaces (print_literal imap)
@@ -91,13 +95,13 @@ let print_all_models imap = Print.unspaces (print_literal imap)
 let map_keys map =
   let add k _ set = IntSet.add k set in
   Dimacs.T.IMap.fold add map IntSet.empty
-let solve_one cmd (dimacs, _, imap, hide) =
+let solve_one cmd show_default (dimacs, _, imap, hide, show) =
   let keys = map_keys imap in
   match CL.run_solver keys dimacs cmd with
   | None -> printf "UNSAT\n"
   | Some model ->
      printf "SAT\n";
-     let fmodel = filtered_model model hide in
+     let fmodel = filtered_model show_default model hide show in
      eprintf "%s\n" (print_one_model imap fmodel)
 
 let next_instance (nbvar, nbcls, blocks, cls) model =
@@ -105,7 +109,7 @@ let next_instance (nbvar, nbcls, blocks, cls) model =
   let nmodel = List.map flip_literal model in
   (nbvar, nbcls + 1, blocks, nmodel :: cls)
 
-let solve_all cmd bound (dimacs, _, imap, hide) =
+let solve_all (cmd, show_default, bound) (dimacs, _, imap, hide, show) =
   eprintf "Instance ground. Starts solving\n%!";
   let keys = map_keys imap in
   let rec aux models displayed iteration dm =
@@ -118,7 +122,7 @@ let solve_all cmd bound (dimacs, _, imap, hide) =
       | Some model ->
          if iteration = 0 then printf "SAT\n%!";
          let next = next_instance dm model in
-         let fmodel = filtered_model model hide in
+         let fmodel = filtered_model show_default model hide show in
          if ModelSet.mem fmodel models then aux models displayed (iteration+1) next
          else
            (eprintf "Model %d: %s\n%!" (iteration+1) (print_all_models imap fmodel);

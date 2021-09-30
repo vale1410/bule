@@ -73,9 +73,10 @@ struct
     let svs = Print.list' "" ", " "" searchd vars in
     sprintf "#%s[%s]%s :: %s?" quant (expr depth) gls svs
   let clause_decl (gls, hyps, ccls) = sprintf "%s :: %s -> %s." (glits gls) (Print.list' "" " & " "" literals hyps) (Print.list' "" " | " "" literals ccls)
-  let hide_decl (gls, lits) =
+  let hide_decl (gls, hide, lits) =
     let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in
-    sprintf "%%#hide %s :: %s." gls (Print.list' "" ", " "" literal lits)
+    let h = if hide then "hide" else "show" in
+    sprintf "%%#%s %s :: %s." h gls (Print.list' "" ", " "" literal lits)
   let decl = function
     | G gd -> ground_decl gd
     | S sd -> search_decl sd

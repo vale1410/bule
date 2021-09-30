@@ -3,7 +3,7 @@
 %token <int> INT
 %token UNDERSCORE
 %token NOT
-%token CLAUSE EXISTS FORALL GROUND HIDE (*QMARK*)
+%token CLAUSE EXISTS FORALL GROUND HIDE SHOW (*QMARK*)
 %token CONJ DISJ
 %token LPAREN RPAREN LBRACKET RBRACKET
 %token DEFINE DCOLON COLON IMPLIED IMPLIES COMMA DOT RANGE
@@ -28,7 +28,7 @@ let add_list l = function
   | Ast.T.G (l', ts) -> Ast.T.G (l @ l', ts)
   | Ast.T.S (l', b, e, a) -> Ast.T.S (l @ l', b, e, a)
   | Ast.T.C (l', hyps, ccls) -> Ast.T.C (l @ l', hyps, ccls)
-  | Ast.T.H (l', a) -> Ast.T.H (l @ l', a)
+  | Ast.T.H (l', h, a) -> Ast.T.H (l @ l', h, a)
 
 let make_var =
   let counter = ref 0 in
@@ -130,7 +130,8 @@ pre_decl:
 | GROUND gd = co_list(ground_atomd) { Ast.T.G ([], gd) }
 | qb = quantifier_block vars = co_list(search_atomd) { Ast.T.S ([], fst qb, snd qb, vars) }
 | cd = clause_part { (Ast.T.C cd) }
-| HIDE hd = co_list(literal) { Ast.T.H ([], hd) }
+| HIDE hd = co_list(literal) { Ast.T.H ([], true, hd) }
+| SHOW hd = co_list(literal) { Ast.T.H ([], false, hd) }
 
 decl:
 | gp = grounding_prefix DCOLON d = pre_decl DOT { add_list gp d }

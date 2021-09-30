@@ -13,6 +13,7 @@ let get () =
     ] in*)
   let input_names = ref [] in
   let dimacs = ref false in
+  let default_show = ref true in
   let models = ref 1 in
   let solver = ref "none" in
   let solve = ref false in
@@ -23,7 +24,8 @@ let get () =
                   ("--solver", Arg.Set_string solver, "Set the solver to be used. If \"none\" then Minisat 1.14 is used. Example \"depqbf --no-dynamic-nenofex --qdo\". The option has no effect if \"solve\" is set to \"false\". Default: \"none\"");
                   ("--dimacs", Arg.Bool (update dimacs), "Output DIMACS format rather than BULE. The option has no effect if \"solve\" is set to \"true\". Default \"false\".");
                   ("--facts",  Arg.Set facts, "Enable printing of grounding facts. The option has no effect if \"solve\" is set to \"true\". Default: \"false\".");
-] in
+                  ("--default_show", Arg.Bool (update default_show), "Default showing behaviour for literals. The option has no effect if \"solve\" is set to \"false\". Default \"true\".");
+                 ] in
   let usage_msg = "BULE Grounder. Options available:" in
   let add_name s = input_names := s :: !input_names in
   Arg.parse speclist add_name usage_msg;
@@ -31,18 +33,16 @@ let get () =
   | [] -> failwith "Wrong number of arguments. Usage: bule2 file"
   | _ :: _ as names -> names in
   let solver = if !solver = "none" then None else Some !solver in
-  let mode = if !solve then Either.Right (solver, !models) else Either.Left (!facts, !dimacs) in
+  let mode = if !solve then Either.Right (solver, !default_show, !models) else Either.Left (!facts, !dimacs) in
   (mode, files)
 
-let solve models dim command = Solve.solve_all command models dim
-
-let solve_mode file (solver, models) =
+let solve_mode file solve_options =
   let circuit = Circuit.file false file in
   let file = Dimacs.ground circuit in
-  Solve.solve_all solver models file
+  Solve.solve_all solve_options file
 let ground_mode file (facts, dimacs) =
   let circuit = Circuit.file facts file in
-  let (d, _, _, _) = Dimacs.ground circuit in
+  let d = Dimacs.file circuit in
   let output = if dimacs then Dimacs.Print.file d else Circuit.Print.file circuit in
   printf "%s\n" output
 
