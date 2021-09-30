@@ -1,8 +1,9 @@
 %token <string> VNAME
 %token <string> CNAME
 %token <int> INT
+%token UNDERSCORE
 %token NOT
-%token FORALL EXISTS HIDE (*QMARK*)
+%token CLAUSE EXISTS FORALL GROUND HIDE (*QMARK*)
 %token CONJ DISJ
 %token LPAREN RPAREN LBRACKET RBRACKET
 %token DEFINE DCOLON COLON IMPLIED IMPLIES COMMA DOT RANGE
@@ -24,14 +25,19 @@ let unroll_comparion_chain t l =
   fst (List.fold_left aux ([], t) l)
 
 let add_list l = function
-  | Ast.T.G (l', c, ts) -> Ast.T.G (l @ l', c, ts)
+  | Ast.T.G (l', ts) -> Ast.T.G (l @ l', ts)
   | Ast.T.S (l', b, e, a) -> Ast.T.S (l @ l', b, e, a)
   | Ast.T.C (l', hyps, ccls) -> Ast.T.C (l @ l', hyps, ccls)
   | Ast.T.H (l', a) -> Ast.T.H (l @ l', a)
+
+let make_var =
+  let counter = ref 0 in
+  (fun () -> incr counter; Printf.sprintf "__v%d" (!counter))
 %}
+
 (*%type <(Ast.keyword, Ast.free) Ast.atomic> keyword_atomic*)
 %type <Ast.T.ground_literal list> ground_literal
-%type <Ast.T.search_decl> search_decl
+(*%type <Ast.T.search_decl> search_decl*)
 %type <Ast.T.file> file
 %start file
 %%
@@ -65,10 +71,12 @@ expr:
 
 term:
 | name = CNAME ts = pr_list(term) { Ast.T.Fun (name, ts)  }
+| UNDERSCORE { Ast.T.Exp (Ast.T.VarE (make_var ())) }
 | e = expr { Ast.T.Exp e }
 
-%inline tuple:
-| t = term { Ast.T.Term t }
+tuple:
+| name = CNAME ts = pr_list(tuple) { Ast.T.FunTu (name, ts)  }
+| e = expr { Ast.T.ExpTu e }
 | e1 = expr RANGE e2 = expr { Ast.T.Range (e1, e2) }
 
 atom:
@@ -77,8 +85,10 @@ atom:
 | pol = iboption(NOT) a = atom { (not pol, a) }
 %inline ground_atom:
 | n = CNAME ts = br_list(term) { (n, ts) }
-%inline ground_head:
-| n = CNAME ts = br_list(tuple) { ([], n, ts) }
+%inline ground_atomd:
+| n = CNAME ts = br_list(tuple) { (n, ts) }
+%inline search_atomd:
+| n = CNAME ts = pr_list(tuple) { (n, ts) }
 ground_literal:
 | ga = ground_atom { [Ast.T.In ga] }
 | NOT ga = ground_atom { [Ast.T.Notin ga] }
@@ -90,13 +100,15 @@ chain:
 | t = term l = nonempty_list(pair(goperator,term)) { unroll_comparion_chain t l }
 
 grounding_prefix:
+gls = separated_list(COMMA, ground_literal) { List.flatten gls }
+nonempty_grounding_prefix:
 gls = separated_nonempty_list(COMMA, ground_literal) { List.flatten gls }
 
 %inline quantifier: | EXISTS { true } | FORALL { false }
-%inline search_decl:
-| b = quantifier LBRACKET e = expr RBRACKET vars = co_list(atom) { ([], b, e, vars) }
-%inline literals:
-| COLON gp = grounding_prefix COLON pa = literal { let (pol, a) = pa in (gp, pol, a) }
+quantifier_block:
+| b = quantifier LBRACKET e = expr RBRACKET { (b, e) }
+literals:
+| gp = nonempty_grounding_prefix COLON pa = literal { let (pol, a) = pa in (gp, pol, a) }
 | pa = literal { let (pol, a) = pa in ([], pol, a) }
 clause_body:
 hyps = separated_list(CONJ, literals) { hyps }
@@ -106,16 +118,22 @@ clause_part:
 | hyps = clause_body IMPLIES ccls = clause_head { ([], hyps, ccls) }
 | ccls = clause_head IMPLIED hyps = clause_body { ([], hyps, ccls) }
 | ccls = clause_head { ([], [], ccls) }
-hide_decl:
-| HIDE l = co_list(literal) { ([], l) }
-pre_decl:
+(*pre_decl:
 | gd = ground_head { Ast.T.G gd }
 | sd = search_decl { Ast.T.S sd }
 | cd = clause_part { Ast.T.C cd }
 | hd = hide_decl { Ast.T.H hd }
 
 decl:
-| DCOLON gp = grounding_prefix DCOLON d = pre_decl DOT { add_list gp d }
+| gp = grounding_prefix DCOLON d = pre_decl DOT { add_list gp d }*)
+pre_decl:
+| GROUND gd = co_list(ground_atomd) { Ast.T.G ([], gd) }
+| qb = quantifier_block vars = co_list(search_atomd) { Ast.T.S ([], fst qb, snd qb, vars) }
+| cd = clause_part { (Ast.T.C cd) }
+| HIDE hd = co_list(literal) { Ast.T.H ([], hd) }
+
+decl:
+| gp = grounding_prefix DCOLON d = pre_decl DOT { add_list gp d }
 | d = pre_decl DOT { d }
 
 file:

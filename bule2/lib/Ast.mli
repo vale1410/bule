@@ -4,6 +4,7 @@ module Print :
 sig
   val cname : T.cname -> string
   val term : T.term -> string
+  val tuple : T.tuple -> string
   val atom : T.atom -> string
   val eoperator : T.eoperator -> string
   val decl : T.decl -> string

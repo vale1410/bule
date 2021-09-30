@@ -168,28 +168,56 @@ let glits gmap vmap l =
   let aux vmaps lit = List.concat_map (fun m -> ground_literal gmap m lit) vmaps in
   List.fold_left aux [vmap] l
 
-let tuple vmap : Ast.T.tuple -> ground_term list  = function
+(*let tuple vmap : Ast.T.tuple -> ground_term list  = function
   | Ast.T.Term t -> [term vmap t]
   | Ast.T.Range (e1, e2) ->
      let i1, i2 = expr vmap e1, expr vmap e2 in
      let make_int i = Fun (string_of_int i, []) in
+     List.map make_int (Misc.range i1 (i2+1))*)
+
+let rec tuple_aux vmap = function
+  | Ast.T.FunTu (c, ts) ->
+     let ls = tuple' vmap ts in
+     List.map (fun l -> Fun (c, l)) ls
+  | Ast.T.Range (e1, e2) ->
+     let i1, i2 = expr vmap e1, expr vmap e2 in
+     let make_int i = Fun (string_of_int i, []) in
      List.map make_int (Misc.range i1 (i2+1))
+  | Ast.T.ExpTu (Ast.T.VarE v) -> [find_gt v vmap]
+  | Ast.T.ExpTu e -> let c = string_of_int (expr vmap e) in [Fun (c, [])]
+and tuple' vmap ts =
+  let tss = List.map (tuple_aux vmap) ts in
+  Misc.cross_products tss
+let tuple vmap t =
+  try tuple_aux vmap t with
+  | UnboundVar v -> failwith (sprintf "Unbound variable %s in tuple %s" v (Ast.Print.tuple t))
 
-let tuple_list vmap l = Misc.cross_products (List.map (tuple vmap) l)
+let atomd_aux vmap l =
+  tuple' vmap l
+let atomd vmap (n, l) = tuple vmap (Ast.T.FunTu (n, l))
 
-let ground_decl_aux gmap (gls, n, ts) =
+let ground_decl_aux gmap (gls, n, l) =
   let maps = glits gmap SMap.empty gls in
-  let g = find_default n gmap GTermSet.empty in
-  let aux gm m =
-    let l = tuple_list m ts in
-    GTermSet.union gm (GTermSet.of_list l) in
-  let set = List.fold_left aux g maps in
-  (*eprintf "gmap=%s\nname=%s\nset=%s\n%!" (print_smap print_gtset gmap) n (print_gtset set);*)
+  let set = find_default n gmap GTermSet.empty in
+  let aux set m = List.fold_right GTermSet.add (atomd_aux m l) set in
+  let set = List.fold_left aux set maps in
   SMap.add n set gmap
+
+ (*    let atoms m = List.concat_map (atomd m) ts in
+  * (n, l)
+  *  let g n = find_default n gmap GTermSet.empty in
+  *    let l = tuple_list m ts in
+  *    GTermSet.union gm (GTermSet.of_list l) in
+  *  let set = List.fold_left aux g maps in
+  *  (\*eprintf "gmap=%s\nname=%s\nset=%s\n%!" (print_smap print_gtset gmap) n (print_gtset set);*\)
+  *  SMap.add n set gmap *)
 
 let ground_decl gmap decl =
   try ground_decl_aux gmap decl with
-  | NonInt (n, g) -> failwith (sprintf "Variable %s ground to a non-int %s in declaration \"%s\"" n (Print.ground_term g) (Ast.Print.decl (Ast.T.G decl)))
+  | NonInt (n, g) ->
+     let glits, name, ts = decl in
+     let d = (glits, [(name, ts)]) in
+     failwith (sprintf "Variable %s ground to a non-int %s in declaration \"%s\"" n (Print.ground_term g) (Ast.Print.decl (Ast.T.G d)))
 
 let rec ground_decl_component gmap comp =
   let map = List.fold_left ground_decl gmap comp in
@@ -229,7 +257,8 @@ let compute_recursive_components decls =
     | _ :: _ :: _ as comp -> Either.Left comp in
   List.map is_rec sccs
 
-let all_ground decls =
+let all_ground decls : GTermSet.t SMap.t =
+  let decls = List.concat_map (fun (glits, atomds) -> List.map (fun (n, atomd) -> (glits, n, atomd)) atomds) decls in
   let sccs = compute_recursive_components decls in
   let left comp = List.filter (fun (_, n, _) -> List.mem n comp) decls
   and right name = List.filter (fun (_, n, _) -> n = name) decls in
@@ -245,13 +274,13 @@ let search_lits lits vmap = List.map (search_lit vmap) lits
 let search_decl gmap qmap ((gls, b, e, vars) : Ast.T.search_decl) =
   let maps = glits gmap SMap.empty gls in
   let parity = if b then 1 else 0 in
-  let update qm i var =
+  let update i qm var =
     let f = function | None -> Some [var] | Some l -> Some (var :: l) in
     IMap.update (2 * i + parity) f qm in
-  let treat_one_var vmap qm v =
+  let treat_one_var vmap qm (n, args) =
     let i = expr vmap e in
-    let var = search_var v vmap in
-    update qm i var in
+    let vars : search_var list = List.map (fun args -> (n, args)) (tuple' vmap args) in
+    List.fold_left (update i) qm vars in
   let treat_one qm vmap =
     List.fold_left (treat_one_var vmap) qm vars in
   List.fold_left treat_one qmap maps

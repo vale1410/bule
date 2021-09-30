@@ -36,21 +36,25 @@ struct
     | VarE n -> n
     | Int i -> Print.int i
     | BinE _ as e -> sprintf "(%s)" (expr e)
-  let rec atom (name, terms) = sprintf "%s[%s]" name (Print.list' "" ", " "" term terms)
-  and ground_literal = function
+  let rec term : term -> string = function
+    | Exp e -> expr e
+    | Fun (c, ts) -> sprintf "%s%s" c (list_tuple term ts)
+  let atom (name, terms) = sprintf "%s[%s]" name (Print.list' "" ", " "" term terms)
+  let rec tuple = function
+    | ExpTu e -> expr e
+    | FunTu (c, ts) -> sprintf "%s%s" c (list_tuple tuple ts)
+    | Range (e1, e2) -> sprintf "%s..%s" (expr e1) (expr e2)
+  let atomd (name, tuples) = sprintf "%s[%s]" name (Print.list' "" ", " "" tuple tuples)
+  let search_var (name, terms) = sprintf "%s(%s)" name (Print.list' "" ", " "" term terms)
+  let searchd (name, tuples) = sprintf "%s(%s)" name (Print.list' "" ", " "" tuple tuples)
+
+  let ground_literal = function
     | In ga -> atom ga
     | Notin ga -> sprintf "~%s" (atom ga)
     | Comparison (t1, c, t2) -> sprintf "%s %s %s" (term t1) (comparison_operator c) (term t2)
     | Set (v, t) -> sprintf "%s := %s" v (term t)
-  and term : term -> string = function
-    | Exp e -> expr e
-    | Fun (c, ts) -> sprintf "%s%s" c (list_tuple term ts)
-  let tuple = function
-    | Term t -> term t
-    | Range (e1, e2) -> sprintf "%s..%s" (expr e1) (expr e2)
 
   let glits gls = Print.list' "" ", " "" ground_literal gls
-  let search_var (name, terms) = sprintf "%s(%s)" name (Print.list' "" ", " "" term terms)
   let literal (pol, var) =
     let pol = if pol then "" else "~" in
     let var = search_var var in
@@ -62,11 +66,11 @@ struct
     | _ :: _ -> glits gls ^ " : " in
     gls ^ literal (pol, var)
 
-  let ground_decl (gls, name, tuples) = sprintf "%s :: %s[%s]" (glits gls) name (Print.list' "" ", " "" tuple tuples)
+  let ground_decl (gls, ats) = sprintf "%s :: %s." (glits gls) (Print.list' "" ", " "" atomd ats)
   let search_decl (gls, exi, depth, vars) =
     let quant = if exi then "exists" else "forall" in
     let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in
-    let svs = Print.list' "" ", " "" search_var vars in
+    let svs = Print.list' "" ", " "" searchd vars in
     sprintf "#%s[%s]%s :: %s?" quant (expr depth) gls svs
   let clause_decl (gls, hyps, ccls) = sprintf "%s :: %s -> %s." (glits gls) (Print.list' "" " & " "" literals hyps) (Print.list' "" " | " "" literals ccls)
   let hide_decl (gls, lits) =
