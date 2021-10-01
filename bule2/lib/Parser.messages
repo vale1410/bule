@@ -1,6 +1,6 @@
 file: CNAME CONJ CNAME DOT
 ##
-## Ends in an error in state: 156.
+## Ends in an error in state: 171.
 ##
 ## clause_part -> clause_body . IMPLIES clause_head [ DOT ]
 ##
@@ -11,19 +11,20 @@ file: CNAME CONJ CNAME DOT
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 81, spurious reduction of production atom -> CNAME
-## In state 142, spurious reduction of production literals -> atom
-## In state 145, spurious reduction of production separated_nonempty_list(CONJ,literals) -> literals
-## In state 144, spurious reduction of production separated_nonempty_list(CONJ,literals) -> literals CONJ separated_nonempty_list(CONJ,literals)
-## In state 108, spurious reduction of production loption(separated_nonempty_list(CONJ,literals)) -> separated_nonempty_list(CONJ,literals)
-## In state 128, spurious reduction of production clause_body -> loption(separated_nonempty_list(CONJ,literals))
+## In state 91, spurious reduction of production atom -> CNAME
+## In state 46, spurious reduction of production literal -> atom
+## In state 146, spurious reduction of production literals -> literal
+## In state 160, spurious reduction of production separated_nonempty_list(CONJ,literals) -> literals
+## In state 159, spurious reduction of production separated_nonempty_list(CONJ,literals) -> literals CONJ separated_nonempty_list(CONJ,literals)
+## In state 135, spurious reduction of production loption(separated_nonempty_list(CONJ,literals)) -> separated_nonempty_list(CONJ,literals)
+## In state 140, spurious reduction of production clause_body -> loption(separated_nonempty_list(CONJ,literals))
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: CNAME CONJ RPAREN
+file: CNAME CONJ SHOW
 ##
-## Ends in an error in state: 143.
+## Ends in an error in state: 158.
 ##
 ## separated_nonempty_list(CONJ,literals) -> literals CONJ . separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
 ##
@@ -33,9 +34,9 @@ file: CNAME CONJ RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: CNAME DISJ RPAREN
+file: CNAME DISJ SHOW
 ##
-## Ends in an error in state: 131.
+## Ends in an error in state: 143.
 ##
 ## separated_nonempty_list(DISJ,literals) -> literals DISJ . separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
 ##
@@ -45,11 +46,11 @@ file: CNAME DISJ RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: CNAME LBRACKET RPAREN
+file: CNAME LBRACKET SHOW
 ##
-## Ends in an error in state: 85.
+## Ends in an error in state: 49.
 ##
-## ground_literal -> CNAME LBRACKET . loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
+## ground_atom -> CNAME LBRACKET . loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME LBRACKET
@@ -59,9 +60,9 @@ file: CNAME LBRACKET RPAREN
 
 file: CNAME LBRACKET VNAME RPAREN
 ##
-## Ends in an error in state: 86.
+## Ends in an error in state: 50.
 ##
-## ground_literal -> CNAME LBRACKET loption(separated_nonempty_list(COMMA,term)) . RBRACKET [ DCOLON COMMA COLON ]
+## ground_atom -> CNAME LBRACKET loption(separated_nonempty_list(COMMA,term)) . RBRACKET [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME LBRACKET loption(separated_nonempty_list(COMMA,term))
@@ -77,28 +78,28 @@ file: CNAME LBRACKET VNAME RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: CNAME LPAREN RBRACKET
-##
-## Ends in an error in state: 82.
-##
-## atom -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES IMPLIED DOT DISJ CONJ ]
-## term -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ NEQ LT LEQ GT GEQ EQ ]
-##
-## The known suffix of the stack is as follows:
-## CNAME LPAREN
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
 file: CNAME LPAREN RPAREN VNAME
 ##
-## Ends in an error in state: 84.
+## Ends in an error in state: 94.
 ##
 ## atom -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ IMPLIES IMPLIED DOT DISJ CONJ ]
 ## term -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN . [ NEQ LT LEQ GT GEQ EQ ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: CNAME LPAREN SHOW
+##
+## Ends in an error in state: 92.
+##
+## atom -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES IMPLIED DOT DISJ CONJ ]
+## term -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ NEQ LT LEQ GT GEQ EQ ]
+##
+## The known suffix of the stack is as follows:
+## CNAME LPAREN
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
@@ -116,7 +117,7 @@ file: CNAME LPAREN UNDERSCORE VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: CNAME LPAREN VNAME COMMA RPAREN
+file: CNAME LPAREN VNAME COMMA SHOW
 ##
 ## Ends in an error in state: 28.
 ##
@@ -130,7 +131,7 @@ file: CNAME LPAREN VNAME COMMA RPAREN
 
 file: CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 83.
+## Ends in an error in state: 93.
 ##
 ## atom -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES IMPLIED DOT DISJ CONJ ]
 ## term -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ NEQ LT LEQ GT GEQ EQ ]
@@ -151,11 +152,11 @@ file: CNAME LPAREN VNAME RBRACKET
 
 file: CNAME VNAME
 ##
-## Ends in an error in state: 81.
+## Ends in an error in state: 91.
 ##
 ## atom -> CNAME . [ IMPLIES IMPLIED DOT DISJ CONJ ]
 ## atom -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES IMPLIED DOT DISJ CONJ ]
-## ground_literal -> CNAME . LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
+## ground_atom -> CNAME . LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ## term -> CNAME . [ NEQ LT LEQ GT GEQ EQ ]
 ## term -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ NEQ LT LEQ GT GEQ EQ ]
 ##
@@ -165,11 +166,46 @@ file: CNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
+file: COLON CNAME COMMA
+##
+## Ends in an error in state: 142.
+##
+## separated_nonempty_list(CONJ,literals) -> literals . [ IMPLIES ]
+## separated_nonempty_list(CONJ,literals) -> literals . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
+## separated_nonempty_list(DISJ,literals) -> literals . [ IMPLIED DOT ]
+## separated_nonempty_list(DISJ,literals) -> literals . DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
+##
+## The known suffix of the stack is as follows:
+## literals
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 37, spurious reduction of production atom -> CNAME
+## In state 46, spurious reduction of production literal -> atom
+## In state 149, spurious reduction of production literals -> grounding_prefix COLON literal
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: COLON VNAME
+##
+## Ends in an error in state: 148.
+##
+## literals -> grounding_prefix COLON . literal [ IMPLIES IMPLIED DOT DISJ CONJ ]
+##
+## The known suffix of the stack is as follows:
+## grounding_prefix COLON
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
 file: DCOLON IMPLIES CNAME IMPLIED
 ##
-## Ends in an error in state: 150.
+## Ends in an error in state: 165.
 ##
-## decl -> grounding_prefix DCOLON pre_decl . DOT [ VNAME UNDERSCORE NOT MINUS LPAREN INT IMPLIES IMPLIED HIDE GROUND FORALL EXISTS EOF DOT DCOLON CNAME ]
+## decl -> grounding_prefix DCOLON pre_decl . DOT [ VNAME UNDERSCORE SHOW NOT MINUS LPAREN INT IMPLIES IMPLIED HIDE GROUND FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
 ##
 ## The known suffix of the stack is as follows:
 ## grounding_prefix DCOLON pre_decl
@@ -178,22 +214,23 @@ file: DCOLON IMPLIES CNAME IMPLIED
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 81, spurious reduction of production atom -> CNAME
-## In state 142, spurious reduction of production literals -> atom
-## In state 134, spurious reduction of production separated_nonempty_list(DISJ,literals) -> literals
-## In state 107, spurious reduction of production loption(separated_nonempty_list(DISJ,literals)) -> separated_nonempty_list(DISJ,literals)
-## In state 127, spurious reduction of production clause_head -> loption(separated_nonempty_list(DISJ,literals))
-## In state 158, spurious reduction of production clause_part -> clause_body IMPLIES clause_head
-## In state 152, spurious reduction of production pre_decl -> clause_part
+## In state 91, spurious reduction of production atom -> CNAME
+## In state 46, spurious reduction of production literal -> atom
+## In state 146, spurious reduction of production literals -> literal
+## In state 145, spurious reduction of production separated_nonempty_list(DISJ,literals) -> literals
+## In state 134, spurious reduction of production loption(separated_nonempty_list(DISJ,literals)) -> separated_nonempty_list(DISJ,literals)
+## In state 139, spurious reduction of production clause_head -> loption(separated_nonempty_list(DISJ,literals))
+## In state 173, spurious reduction of production clause_part -> clause_body IMPLIES clause_head
+## In state 167, spurious reduction of production pre_decl -> clause_part
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: DCOLON RPAREN
 ##
-## Ends in an error in state: 149.
+## Ends in an error in state: 164.
 ##
-## decl -> grounding_prefix DCOLON . pre_decl DOT [ VNAME UNDERSCORE NOT MINUS LPAREN INT IMPLIES IMPLIED HIDE GROUND FORALL EXISTS EOF DOT DCOLON CNAME ]
+## decl -> grounding_prefix DCOLON . pre_decl DOT [ VNAME UNDERSCORE SHOW NOT MINUS LPAREN INT IMPLIES IMPLIED HIDE GROUND FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
 ##
 ## The known suffix of the stack is as follows:
 ## grounding_prefix DCOLON
@@ -203,7 +240,7 @@ file: DCOLON RPAREN
 
 file: DOT RPAREN
 ##
-## Ends in an error in state: 160.
+## Ends in an error in state: 175.
 ##
 ## list(decl) -> decl . list(decl) [ EOF ]
 ##
@@ -213,42 +250,23 @@ file: DOT RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: EXISTS LBRACKET UNDERSCORE
+file: EXISTS LBRACKET INT RBRACKET VNAME
 ##
-## Ends in an error in state: 78.
+## Ends in an error in state: 89.
 ##
-## quantifier_block -> EXISTS LBRACKET . expr RBRACKET [ CNAME ]
-##
-## The known suffix of the stack is as follows:
-## EXISTS LBRACKET
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: EXISTS LBRACKET VNAME VNAME
-##
-## Ends in an error in state: 79.
-##
-## expr -> expr . DIV expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
-## expr -> expr . LOG expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
-## expr -> expr . MOD expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
-## expr -> expr . MULT expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
-## expr -> expr . POW expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
-## expr -> expr . PLUS expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
-## expr -> expr . MINUS expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
-## quantifier_block -> EXISTS LBRACKET expr . RBRACKET [ CNAME ]
+## pre_decl -> EXISTS quantifier_block . separated_nonempty_list(COMMA,search_atomd) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## EXISTS LBRACKET expr
+## EXISTS quantifier_block
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: EXISTS VNAME
 ##
-## Ends in an error in state: 77.
+## Ends in an error in state: 88.
 ##
-## quantifier_block -> EXISTS . LBRACKET expr RBRACKET [ CNAME ]
+## pre_decl -> EXISTS . quantifier_block separated_nonempty_list(COMMA,search_atomd) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## EXISTS
@@ -256,49 +274,48 @@ file: EXISTS VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: FORALL LBRACKET INT RBRACKET CNAME COMMA VNAME
+file: FORALL LBRACKET UNDERSCORE
 ##
-## Ends in an error in state: 117.
+## Ends in an error in state: 76.
 ##
-## separated_nonempty_list(COMMA,search_atomd) -> CNAME COMMA . separated_nonempty_list(COMMA,search_atomd) [ DOT ]
+## quantifier_block -> LBRACKET . expr RBRACKET [ CNAME ]
 ##
 ## The known suffix of the stack is as follows:
-## CNAME COMMA
+## LBRACKET
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: FORALL LBRACKET INT RBRACKET CNAME LPAREN RPAREN COMMA VNAME
+file: FORALL LBRACKET VNAME RBRACKET CNAME COMMA VNAME
 ##
-## Ends in an error in state: 115.
+## Ends in an error in state: 86.
 ##
-## separated_nonempty_list(COMMA,search_atomd) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,tuple)) RPAREN COMMA . separated_nonempty_list(COMMA,search_atomd) [ DOT ]
+## separated_nonempty_list(COMMA,search_atomd) -> search_atomd COMMA . separated_nonempty_list(COMMA,search_atomd) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## CNAME LPAREN loption(separated_nonempty_list(COMMA,tuple)) RPAREN COMMA
+## search_atomd COMMA
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: FORALL LBRACKET INT RBRACKET CNAME LPAREN RPAREN VNAME
+file: FORALL LBRACKET VNAME RBRACKET CNAME LPAREN RPAREN VNAME
 ##
-## Ends in an error in state: 114.
+## Ends in an error in state: 85.
 ##
-## separated_nonempty_list(COMMA,search_atomd) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,tuple)) RPAREN . [ DOT ]
-## separated_nonempty_list(COMMA,search_atomd) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,tuple)) RPAREN . COMMA separated_nonempty_list(COMMA,search_atomd) [ DOT ]
+## separated_nonempty_list(COMMA,search_atomd) -> search_atomd . [ DOT ]
+## separated_nonempty_list(COMMA,search_atomd) -> search_atomd . COMMA separated_nonempty_list(COMMA,search_atomd) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## CNAME LPAREN loption(separated_nonempty_list(COMMA,tuple)) RPAREN
+## search_atomd
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: FORALL LBRACKET INT RBRACKET CNAME LPAREN UNDERSCORE
+file: FORALL LBRACKET VNAME RBRACKET CNAME LPAREN UNDERSCORE
 ##
-## Ends in an error in state: 112.
+## Ends in an error in state: 81.
 ##
-## separated_nonempty_list(COMMA,search_atomd) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,tuple)) RPAREN [ DOT ]
-## separated_nonempty_list(COMMA,search_atomd) -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,tuple)) RPAREN COMMA separated_nonempty_list(COMMA,search_atomd) [ DOT ]
+## search_atomd -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,tuple)) RPAREN [ DOT COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME LPAREN
@@ -306,12 +323,11 @@ file: FORALL LBRACKET INT RBRACKET CNAME LPAREN UNDERSCORE
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: FORALL LBRACKET INT RBRACKET CNAME LPAREN VNAME RBRACKET
+file: FORALL LBRACKET VNAME RBRACKET CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 113.
+## Ends in an error in state: 82.
 ##
-## separated_nonempty_list(COMMA,search_atomd) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,tuple)) . RPAREN [ DOT ]
-## separated_nonempty_list(COMMA,search_atomd) -> CNAME LPAREN loption(separated_nonempty_list(COMMA,tuple)) . RPAREN COMMA separated_nonempty_list(COMMA,search_atomd) [ DOT ]
+## search_atomd -> CNAME LPAREN loption(separated_nonempty_list(COMMA,tuple)) . RPAREN [ DOT COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME LPAREN loption(separated_nonempty_list(COMMA,tuple))
@@ -320,21 +336,19 @@ file: FORALL LBRACKET INT RBRACKET CNAME LPAREN VNAME RBRACKET
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 62, spurious reduction of production tuple -> expr
-## In state 59, spurious reduction of production separated_nonempty_list(COMMA,tuple) -> tuple
-## In state 65, spurious reduction of production loption(separated_nonempty_list(COMMA,tuple)) -> separated_nonempty_list(COMMA,tuple)
+## In state 63, spurious reduction of production tuple -> expr
+## In state 60, spurious reduction of production separated_nonempty_list(COMMA,tuple) -> tuple
+## In state 66, spurious reduction of production loption(separated_nonempty_list(COMMA,tuple)) -> separated_nonempty_list(COMMA,tuple)
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: FORALL LBRACKET INT RBRACKET CNAME VNAME
+file: FORALL LBRACKET VNAME RBRACKET CNAME VNAME
 ##
-## Ends in an error in state: 111.
+## Ends in an error in state: 80.
 ##
-## separated_nonempty_list(COMMA,search_atomd) -> CNAME . [ DOT ]
-## separated_nonempty_list(COMMA,search_atomd) -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,tuple)) RPAREN [ DOT ]
-## separated_nonempty_list(COMMA,search_atomd) -> CNAME . COMMA separated_nonempty_list(COMMA,search_atomd) [ DOT ]
-## separated_nonempty_list(COMMA,search_atomd) -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,tuple)) RPAREN COMMA separated_nonempty_list(COMMA,search_atomd) [ DOT ]
+## search_atomd -> CNAME . [ DOT COMMA ]
+## search_atomd -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,tuple)) RPAREN [ DOT COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME
@@ -342,33 +356,21 @@ file: FORALL LBRACKET INT RBRACKET CNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: FORALL LBRACKET INT RBRACKET VNAME
+file: FORALL LBRACKET VNAME RBRACKET VNAME
 ##
-## Ends in an error in state: 110.
+## Ends in an error in state: 79.
 ##
-## pre_decl -> quantifier_block . separated_nonempty_list(COMMA,search_atomd) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## quantifier_block
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: FORALL LBRACKET UNDERSCORE
-##
-## Ends in an error in state: 74.
-##
-## quantifier_block -> FORALL LBRACKET . expr RBRACKET [ CNAME ]
+## pre_decl -> FORALL quantifier_block . separated_nonempty_list(COMMA,search_atomd) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## FORALL LBRACKET
+## FORALL quantifier_block
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: FORALL LBRACKET VNAME VNAME
 ##
-## Ends in an error in state: 75.
+## Ends in an error in state: 77.
 ##
 ## expr -> expr . DIV expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
 ## expr -> expr . LOG expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
@@ -377,19 +379,19 @@ file: FORALL LBRACKET VNAME VNAME
 ## expr -> expr . POW expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
 ## expr -> expr . PLUS expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
 ## expr -> expr . MINUS expr [ RBRACKET POW PLUS MULT MOD MINUS LOG DIV ]
-## quantifier_block -> FORALL LBRACKET expr . RBRACKET [ CNAME ]
+## quantifier_block -> LBRACKET expr . RBRACKET [ CNAME ]
 ##
 ## The known suffix of the stack is as follows:
-## FORALL LBRACKET expr
+## LBRACKET expr
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: FORALL VNAME
 ##
-## Ends in an error in state: 73.
+## Ends in an error in state: 75.
 ##
-## quantifier_block -> FORALL . LBRACKET expr RBRACKET [ CNAME ]
+## pre_decl -> FORALL . quantifier_block separated_nonempty_list(COMMA,search_atomd) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
 ## FORALL
@@ -399,7 +401,7 @@ file: FORALL VNAME
 
 file: GROUND CNAME LBRACKET CNAME LPAREN RPAREN VNAME
 ##
-## Ends in an error in state: 59.
+## Ends in an error in state: 60.
 ##
 ## separated_nonempty_list(COMMA,tuple) -> tuple . [ RPAREN RBRACKET ]
 ## separated_nonempty_list(COMMA,tuple) -> tuple . COMMA separated_nonempty_list(COMMA,tuple) [ RPAREN RBRACKET ]
@@ -412,7 +414,7 @@ file: GROUND CNAME LBRACKET CNAME LPAREN RPAREN VNAME
 
 file: GROUND CNAME LBRACKET CNAME LPAREN UNDERSCORE
 ##
-## Ends in an error in state: 58.
+## Ends in an error in state: 59.
 ##
 ## tuple -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,tuple)) RPAREN [ RPAREN RBRACKET COMMA ]
 ##
@@ -424,7 +426,7 @@ file: GROUND CNAME LBRACKET CNAME LPAREN UNDERSCORE
 
 file: GROUND CNAME LBRACKET CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 66.
+## Ends in an error in state: 67.
 ##
 ## tuple -> CNAME LPAREN loption(separated_nonempty_list(COMMA,tuple)) . RPAREN [ RPAREN RBRACKET COMMA ]
 ##
@@ -435,16 +437,16 @@ file: GROUND CNAME LBRACKET CNAME LPAREN VNAME RBRACKET
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 62, spurious reduction of production tuple -> expr
-## In state 59, spurious reduction of production separated_nonempty_list(COMMA,tuple) -> tuple
-## In state 65, spurious reduction of production loption(separated_nonempty_list(COMMA,tuple)) -> separated_nonempty_list(COMMA,tuple)
+## In state 63, spurious reduction of production tuple -> expr
+## In state 60, spurious reduction of production separated_nonempty_list(COMMA,tuple) -> tuple
+## In state 66, spurious reduction of production loption(separated_nonempty_list(COMMA,tuple)) -> separated_nonempty_list(COMMA,tuple)
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: GROUND CNAME LBRACKET CNAME VNAME
 ##
-## Ends in an error in state: 57.
+## Ends in an error in state: 58.
 ##
 ## tuple -> CNAME . [ RPAREN RBRACKET COMMA ]
 ## tuple -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,tuple)) RPAREN [ RPAREN RBRACKET COMMA ]
@@ -457,35 +459,34 @@ file: GROUND CNAME LBRACKET CNAME VNAME
 
 file: GROUND CNAME LBRACKET RBRACKET COMMA VNAME
 ##
-## Ends in an error in state: 70.
+## Ends in an error in state: 73.
 ##
-## separated_nonempty_list(COMMA,ground_atomd) -> CNAME LBRACKET loption(separated_nonempty_list(COMMA,tuple)) RBRACKET COMMA . separated_nonempty_list(COMMA,ground_atomd) [ DOT ]
+## separated_nonempty_list(COMMA,ground_atomd) -> ground_atomd COMMA . separated_nonempty_list(COMMA,ground_atomd) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## CNAME LBRACKET loption(separated_nonempty_list(COMMA,tuple)) RBRACKET COMMA
+## ground_atomd COMMA
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: GROUND CNAME LBRACKET RBRACKET VNAME
 ##
-## Ends in an error in state: 69.
+## Ends in an error in state: 72.
 ##
-## separated_nonempty_list(COMMA,ground_atomd) -> CNAME LBRACKET loption(separated_nonempty_list(COMMA,tuple)) RBRACKET . [ DOT ]
-## separated_nonempty_list(COMMA,ground_atomd) -> CNAME LBRACKET loption(separated_nonempty_list(COMMA,tuple)) RBRACKET . COMMA separated_nonempty_list(COMMA,ground_atomd) [ DOT ]
+## separated_nonempty_list(COMMA,ground_atomd) -> ground_atomd . [ DOT ]
+## separated_nonempty_list(COMMA,ground_atomd) -> ground_atomd . COMMA separated_nonempty_list(COMMA,ground_atomd) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## CNAME LBRACKET loption(separated_nonempty_list(COMMA,tuple)) RBRACKET
+## ground_atomd
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: GROUND CNAME LBRACKET UNDERSCORE
 ##
-## Ends in an error in state: 56.
+## Ends in an error in state: 57.
 ##
-## separated_nonempty_list(COMMA,ground_atomd) -> CNAME LBRACKET . loption(separated_nonempty_list(COMMA,tuple)) RBRACKET [ DOT ]
-## separated_nonempty_list(COMMA,ground_atomd) -> CNAME LBRACKET . loption(separated_nonempty_list(COMMA,tuple)) RBRACKET COMMA separated_nonempty_list(COMMA,ground_atomd) [ DOT ]
+## ground_atomd -> CNAME LBRACKET . loption(separated_nonempty_list(COMMA,tuple)) RBRACKET [ DOT COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME LBRACKET
@@ -495,7 +496,7 @@ file: GROUND CNAME LBRACKET UNDERSCORE
 
 file: GROUND CNAME LBRACKET VNAME COMMA UNDERSCORE
 ##
-## Ends in an error in state: 60.
+## Ends in an error in state: 61.
 ##
 ## separated_nonempty_list(COMMA,tuple) -> tuple COMMA . separated_nonempty_list(COMMA,tuple) [ RPAREN RBRACKET ]
 ##
@@ -507,7 +508,7 @@ file: GROUND CNAME LBRACKET VNAME COMMA UNDERSCORE
 
 file: GROUND CNAME LBRACKET VNAME RANGE UNDERSCORE
 ##
-## Ends in an error in state: 63.
+## Ends in an error in state: 64.
 ##
 ## tuple -> expr RANGE . expr [ RPAREN RBRACKET COMMA ]
 ##
@@ -519,7 +520,7 @@ file: GROUND CNAME LBRACKET VNAME RANGE UNDERSCORE
 
 file: GROUND CNAME LBRACKET VNAME RANGE VNAME VNAME
 ##
-## Ends in an error in state: 64.
+## Ends in an error in state: 65.
 ##
 ## expr -> expr . DIV expr [ RPAREN RBRACKET POW PLUS MULT MOD MINUS LOG DIV COMMA ]
 ## expr -> expr . LOG expr [ RPAREN RBRACKET POW PLUS MULT MOD MINUS LOG DIV COMMA ]
@@ -538,10 +539,9 @@ file: GROUND CNAME LBRACKET VNAME RANGE VNAME VNAME
 
 file: GROUND CNAME LBRACKET VNAME RPAREN
 ##
-## Ends in an error in state: 68.
+## Ends in an error in state: 69.
 ##
-## separated_nonempty_list(COMMA,ground_atomd) -> CNAME LBRACKET loption(separated_nonempty_list(COMMA,tuple)) . RBRACKET [ DOT ]
-## separated_nonempty_list(COMMA,ground_atomd) -> CNAME LBRACKET loption(separated_nonempty_list(COMMA,tuple)) . RBRACKET COMMA separated_nonempty_list(COMMA,ground_atomd) [ DOT ]
+## ground_atomd -> CNAME LBRACKET loption(separated_nonempty_list(COMMA,tuple)) . RBRACKET [ DOT COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME LBRACKET loption(separated_nonempty_list(COMMA,tuple))
@@ -550,16 +550,16 @@ file: GROUND CNAME LBRACKET VNAME RPAREN
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 62, spurious reduction of production tuple -> expr
-## In state 59, spurious reduction of production separated_nonempty_list(COMMA,tuple) -> tuple
-## In state 65, spurious reduction of production loption(separated_nonempty_list(COMMA,tuple)) -> separated_nonempty_list(COMMA,tuple)
+## In state 63, spurious reduction of production tuple -> expr
+## In state 60, spurious reduction of production separated_nonempty_list(COMMA,tuple) -> tuple
+## In state 66, spurious reduction of production loption(separated_nonempty_list(COMMA,tuple)) -> separated_nonempty_list(COMMA,tuple)
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: GROUND CNAME LBRACKET VNAME VNAME
 ##
-## Ends in an error in state: 62.
+## Ends in an error in state: 63.
 ##
 ## expr -> expr . DIV expr [ RPAREN RBRACKET RANGE POW PLUS MULT MOD MINUS LOG DIV COMMA ]
 ## expr -> expr . LOG expr [ RPAREN RBRACKET RANGE POW PLUS MULT MOD MINUS LOG DIV COMMA ]
@@ -579,10 +579,9 @@ file: GROUND CNAME LBRACKET VNAME VNAME
 
 file: GROUND CNAME VNAME
 ##
-## Ends in an error in state: 55.
+## Ends in an error in state: 56.
 ##
-## separated_nonempty_list(COMMA,ground_atomd) -> CNAME . LBRACKET loption(separated_nonempty_list(COMMA,tuple)) RBRACKET [ DOT ]
-## separated_nonempty_list(COMMA,ground_atomd) -> CNAME . LBRACKET loption(separated_nonempty_list(COMMA,tuple)) RBRACKET COMMA separated_nonempty_list(COMMA,ground_atomd) [ DOT ]
+## ground_atomd -> CNAME . LBRACKET loption(separated_nonempty_list(COMMA,tuple)) RBRACKET [ DOT COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME
@@ -592,7 +591,7 @@ file: GROUND CNAME VNAME
 
 file: GROUND VNAME
 ##
-## Ends in an error in state: 54.
+## Ends in an error in state: 55.
 ##
 ## pre_decl -> GROUND . separated_nonempty_list(COMMA,ground_atomd) [ DOT ]
 ##
@@ -604,38 +603,39 @@ file: GROUND VNAME
 
 file: HIDE CNAME COMMA VNAME
 ##
-## Ends in an error in state: 51.
+## Ends in an error in state: 44.
 ##
-## separated_nonempty_list(COMMA,literal) -> atom COMMA . separated_nonempty_list(COMMA,literal) [ DOT ]
+## separated_nonempty_list(COMMA,literal) -> literal COMMA . separated_nonempty_list(COMMA,literal) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## atom COMMA
+## literal COMMA
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: HIDE CNAME IMPLIES
 ##
-## Ends in an error in state: 50.
+## Ends in an error in state: 43.
 ##
-## separated_nonempty_list(COMMA,literal) -> atom . [ DOT ]
-## separated_nonempty_list(COMMA,literal) -> atom . COMMA separated_nonempty_list(COMMA,literal) [ DOT ]
+## separated_nonempty_list(COMMA,literal) -> literal . [ DOT ]
+## separated_nonempty_list(COMMA,literal) -> literal . COMMA separated_nonempty_list(COMMA,literal) [ DOT ]
 ##
 ## The known suffix of the stack is as follows:
-## atom
+## literal
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 46, spurious reduction of production atom -> CNAME
+## In state 37, spurious reduction of production atom -> CNAME
+## In state 46, spurious reduction of production literal -> atom
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: HIDE CNAME LPAREN RBRACKET
+file: HIDE CNAME LPAREN SHOW
 ##
-## Ends in an error in state: 37.
+## Ends in an error in state: 38.
 ##
 ## atom -> CNAME LPAREN . loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES IMPLIED DOT DISJ CONJ COMMA ]
 ##
@@ -647,7 +647,7 @@ file: HIDE CNAME LPAREN RBRACKET
 
 file: HIDE CNAME LPAREN VNAME RBRACKET
 ##
-## Ends in an error in state: 38.
+## Ends in an error in state: 39.
 ##
 ## atom -> CNAME LPAREN loption(separated_nonempty_list(COMMA,term)) . RPAREN [ IMPLIES IMPLIED DOT DISJ CONJ COMMA ]
 ##
@@ -667,7 +667,7 @@ file: HIDE CNAME LPAREN VNAME RBRACKET
 
 file: HIDE CNAME VNAME
 ##
-## Ends in an error in state: 46.
+## Ends in an error in state: 37.
 ##
 ## atom -> CNAME . [ IMPLIES IMPLIED DOT DISJ CONJ COMMA ]
 ## atom -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES IMPLIED DOT DISJ CONJ COMMA ]
@@ -678,43 +678,11 @@ file: HIDE CNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: HIDE NOT CNAME COMMA VNAME
-##
-## Ends in an error in state: 48.
-##
-## separated_nonempty_list(COMMA,literal) -> NOT atom COMMA . separated_nonempty_list(COMMA,literal) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## NOT atom COMMA
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: HIDE NOT CNAME IMPLIES
-##
-## Ends in an error in state: 47.
-##
-## separated_nonempty_list(COMMA,literal) -> NOT atom . [ DOT ]
-## separated_nonempty_list(COMMA,literal) -> NOT atom . COMMA separated_nonempty_list(COMMA,literal) [ DOT ]
-##
-## The known suffix of the stack is as follows:
-## NOT atom
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 46, spurious reduction of production atom -> CNAME
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
 file: HIDE NOT VNAME
 ##
-## Ends in an error in state: 45.
+## Ends in an error in state: 36.
 ##
-## separated_nonempty_list(COMMA,literal) -> NOT . atom [ DOT ]
-## separated_nonempty_list(COMMA,literal) -> NOT . atom COMMA separated_nonempty_list(COMMA,literal) [ DOT ]
+## literal -> NOT . atom [ IMPLIES IMPLIED DOT DISJ CONJ COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## NOT
@@ -724,7 +692,7 @@ file: HIDE NOT VNAME
 
 file: HIDE VNAME
 ##
-## Ends in an error in state: 44.
+## Ends in an error in state: 53.
 ##
 ## pre_decl -> HIDE . separated_nonempty_list(COMMA,literal) [ DOT ]
 ##
@@ -736,7 +704,7 @@ file: HIDE VNAME
 
 file: IMPLIED CNAME IMPLIED
 ##
-## Ends in an error in state: 145.
+## Ends in an error in state: 160.
 ##
 ## separated_nonempty_list(CONJ,literals) -> literals . [ IMPLIES DOT ]
 ## separated_nonempty_list(CONJ,literals) -> literals . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES DOT ]
@@ -748,17 +716,18 @@ file: IMPLIED CNAME IMPLIED
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 81, spurious reduction of production atom -> CNAME
-## In state 142, spurious reduction of production literals -> atom
+## In state 91, spurious reduction of production atom -> CNAME
+## In state 46, spurious reduction of production literal -> atom
+## In state 146, spurious reduction of production literals -> literal
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: IMPLIED CNAME IMPLIES
 ##
-## Ends in an error in state: 120.
+## Ends in an error in state: 137.
 ##
-## decl -> pre_decl . DOT [ VNAME UNDERSCORE NOT MINUS LPAREN INT IMPLIES IMPLIED HIDE GROUND FORALL EXISTS EOF DOT DCOLON CNAME ]
+## decl -> pre_decl . DOT [ VNAME UNDERSCORE SHOW NOT MINUS LPAREN INT IMPLIES IMPLIED HIDE GROUND FORALL EXISTS EOF DOT DCOLON COLON CNAME ]
 ##
 ## The known suffix of the stack is as follows:
 ## pre_decl
@@ -767,20 +736,21 @@ file: IMPLIED CNAME IMPLIES
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 81, spurious reduction of production atom -> CNAME
-## In state 142, spurious reduction of production literals -> atom
-## In state 145, spurious reduction of production separated_nonempty_list(CONJ,literals) -> literals
-## In state 108, spurious reduction of production loption(separated_nonempty_list(CONJ,literals)) -> separated_nonempty_list(CONJ,literals)
-## In state 128, spurious reduction of production clause_body -> loption(separated_nonempty_list(CONJ,literals))
-## In state 155, spurious reduction of production clause_part -> clause_head IMPLIED clause_body
-## In state 152, spurious reduction of production pre_decl -> clause_part
+## In state 91, spurious reduction of production atom -> CNAME
+## In state 46, spurious reduction of production literal -> atom
+## In state 146, spurious reduction of production literals -> literal
+## In state 160, spurious reduction of production separated_nonempty_list(CONJ,literals) -> literals
+## In state 135, spurious reduction of production loption(separated_nonempty_list(CONJ,literals)) -> separated_nonempty_list(CONJ,literals)
+## In state 140, spurious reduction of production clause_body -> loption(separated_nonempty_list(CONJ,literals))
+## In state 170, spurious reduction of production clause_part -> clause_head IMPLIED clause_body
+## In state 167, spurious reduction of production pre_decl -> clause_part
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIED RPAREN
+file: IMPLIED SHOW
 ##
-## Ends in an error in state: 154.
+## Ends in an error in state: 169.
 ##
 ## clause_part -> clause_head IMPLIED . clause_body [ DOT ]
 ##
@@ -792,7 +762,7 @@ file: IMPLIED RPAREN
 
 file: IMPLIES CNAME IMPLIES
 ##
-## Ends in an error in state: 134.
+## Ends in an error in state: 145.
 ##
 ## separated_nonempty_list(DISJ,literals) -> literals . [ IMPLIED DOT ]
 ## separated_nonempty_list(DISJ,literals) -> literals . DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
@@ -804,15 +774,16 @@ file: IMPLIES CNAME IMPLIES
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 81, spurious reduction of production atom -> CNAME
-## In state 142, spurious reduction of production literals -> atom
+## In state 91, spurious reduction of production atom -> CNAME
+## In state 46, spurious reduction of production literal -> atom
+## In state 146, spurious reduction of production literals -> literal
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES RPAREN
+file: IMPLIES SHOW
 ##
-## Ends in an error in state: 157.
+## Ends in an error in state: 172.
 ##
 ## clause_part -> clause_body IMPLIES . clause_head [ DOT ]
 ##
@@ -822,26 +793,26 @@ file: IMPLIES RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: IMPLIES VNAME LT VNAME DCOLON
+file: IMPLIES VNAME EQ VNAME DCOLON
 ##
-## Ends in an error in state: 122.
+## Ends in an error in state: 147.
 ##
-## literals -> nonempty_grounding_prefix . COLON atom [ IMPLIES IMPLIED DOT DISJ CONJ ]
-## literals -> nonempty_grounding_prefix . COLON NOT atom [ IMPLIES IMPLIED DOT DISJ CONJ ]
+## literals -> grounding_prefix . COLON literal [ IMPLIES IMPLIED DOT DISJ CONJ ]
 ##
 ## The known suffix of the stack is as follows:
-## nonempty_grounding_prefix
+## grounding_prefix
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
 ## accurate view of the past (what has been recognized so far), they
 ## may provide an INCOMPLETE view of the future (what was expected next).
 ## In state 30, spurious reduction of production term -> expr
-## In state 92, spurious reduction of production nonempty_list(pair(loperator,term)) -> LT term
-## In state 105, spurious reduction of production chain -> term nonempty_list(pair(loperator,term))
-## In state 141, spurious reduction of production ground_literal -> chain
-## In state 135, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
-## In state 133, spurious reduction of production nonempty_grounding_prefix -> separated_nonempty_list(COMMA,ground_literal)
+## In state 99, spurious reduction of production nonempty_list(pair(c_eoperator,term)) -> EQ term
+## In state 102, spurious reduction of production chain -> term nonempty_list(pair(c_eoperator,term))
+## In state 157, spurious reduction of production ground_literal -> chain
+## In state 150, spurious reduction of production separated_nonempty_list(COMMA,ground_literal) -> ground_literal
+## In state 136, spurious reduction of production loption(separated_nonempty_list(COMMA,ground_literal)) -> separated_nonempty_list(COMMA,ground_literal)
+## In state 141, spurious reduction of production grounding_prefix -> loption(separated_nonempty_list(COMMA,ground_literal))
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
@@ -927,73 +898,26 @@ file: MINUS VNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: NOT CNAME LBRACKET RPAREN
-##
-## Ends in an error in state: 40.
-##
-## ground_literal -> NOT CNAME LBRACKET . loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME LBRACKET
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: NOT CNAME LBRACKET VNAME RPAREN
-##
-## Ends in an error in state: 41.
-##
-## ground_literal -> NOT CNAME LBRACKET loption(separated_nonempty_list(COMMA,term)) . RBRACKET [ DCOLON COMMA COLON ]
-##
-## The known suffix of the stack is as follows:
-## NOT CNAME LBRACKET loption(separated_nonempty_list(COMMA,term))
-##
-## WARNING: This example involves spurious reductions.
-## This implies that, although the LR(1) items shown above provide an
-## accurate view of the past (what has been recognized so far), they
-## may provide an INCOMPLETE view of the future (what was expected next).
-## In state 30, spurious reduction of production term -> expr
-## In state 27, spurious reduction of production separated_nonempty_list(COMMA,term) -> term
-## In state 31, spurious reduction of production loption(separated_nonempty_list(COMMA,term)) -> separated_nonempty_list(COMMA,term)
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: NOT CNAME LPAREN RPAREN VNAME
-##
-## Ends in an error in state: 130.
-##
-## separated_nonempty_list(CONJ,literals) -> literals . [ IMPLIES ]
-## separated_nonempty_list(CONJ,literals) -> literals . CONJ separated_nonempty_list(CONJ,literals) [ IMPLIES ]
-## separated_nonempty_list(DISJ,literals) -> literals . [ IMPLIED DOT ]
-## separated_nonempty_list(DISJ,literals) -> literals . DISJ separated_nonempty_list(DISJ,literals) [ IMPLIED DOT ]
-##
-## The known suffix of the stack is as follows:
-## literals
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
 file: NOT CNAME VNAME
 ##
-## Ends in an error in state: 36.
+## Ends in an error in state: 48.
 ##
 ## atom -> CNAME . [ IMPLIES IMPLIED DOT DISJ CONJ ]
 ## atom -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ IMPLIES IMPLIED DOT DISJ CONJ ]
-## ground_literal -> NOT CNAME . LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
+## ground_atom -> CNAME . LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
-## NOT CNAME
+## CNAME
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: NOT VNAME
 ##
-## Ends in an error in state: 35.
+## Ends in an error in state: 47.
 ##
-## ground_literal -> NOT . CNAME LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
-## literals -> NOT . atom [ IMPLIES IMPLIED DOT DISJ CONJ ]
+## ground_literal -> NOT . ground_atom [ DCOLON COMMA COLON ]
+## literal -> NOT . atom [ IMPLIES IMPLIED DOT DISJ CONJ ]
 ##
 ## The known suffix of the stack is as follows:
 ## NOT
@@ -1013,13 +937,27 @@ file: RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
+file: SHOW VNAME
+##
+## Ends in an error in state: 35.
+##
+## pre_decl -> SHOW . separated_nonempty_list(COMMA,literal) [ DOT ]
+##
+## The known suffix of the stack is as follows:
+## SHOW
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
 file: UNDERSCORE VNAME
 ##
-## Ends in an error in state: 88.
+## Ends in an error in state: 95.
 ##
-## chain -> term . nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
-## chain -> term . nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
-## ground_literal -> term . EQ term [ DCOLON COMMA COLON ]
+## chain -> term . list(pair(c_eoperator,term)) LT term list(pair(c_eloperator,term)) [ DCOLON COMMA COLON ]
+## chain -> term . list(pair(c_eoperator,term)) LEQ term list(pair(c_eloperator,term)) [ DCOLON COMMA COLON ]
+## chain -> term . list(pair(c_eoperator,term)) GT term list(pair(c_egoperator,term)) [ DCOLON COMMA COLON ]
+## chain -> term . list(pair(c_eoperator,term)) GEQ term list(pair(c_egoperator,term)) [ DCOLON COMMA COLON ]
+## chain -> term . nonempty_list(pair(c_eoperator,term)) [ DCOLON COMMA COLON ]
 ## ground_literal -> term . NEQ term [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
@@ -1028,36 +966,11 @@ file: UNDERSCORE VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: VNAME DEFINE CNAME COLON NOT VNAME
-##
-## Ends in an error in state: 124.
-##
-## literals -> nonempty_grounding_prefix COLON NOT . atom [ IMPLIES IMPLIED DOT DISJ CONJ ]
-##
-## The known suffix of the stack is as follows:
-## nonempty_grounding_prefix COLON NOT
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
-file: VNAME DEFINE CNAME COLON VNAME
-##
-## Ends in an error in state: 123.
-##
-## literals -> nonempty_grounding_prefix COLON . atom [ IMPLIES IMPLIED DOT DISJ CONJ ]
-## literals -> nonempty_grounding_prefix COLON . NOT atom [ IMPLIES IMPLIED DOT DISJ CONJ ]
-##
-## The known suffix of the stack is as follows:
-## nonempty_grounding_prefix COLON
-##
-
-<YOUR SYNTAX ERROR MESSAGE HERE>
-
 file: VNAME DEFINE CNAME COMMA CNAME VNAME
 ##
-## Ends in an error in state: 139.
+## Ends in an error in state: 154.
 ##
-## ground_literal -> CNAME . LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
+## ground_atom -> CNAME . LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ## term -> CNAME . [ NEQ LT LEQ GT GEQ EQ ]
 ## term -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ NEQ LT LEQ GT GEQ EQ ]
 ##
@@ -1069,21 +982,21 @@ file: VNAME DEFINE CNAME COMMA CNAME VNAME
 
 file: VNAME DEFINE CNAME COMMA NOT CNAME VNAME
 ##
-## Ends in an error in state: 138.
+## Ends in an error in state: 153.
 ##
-## ground_literal -> NOT CNAME . LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
+## ground_atom -> CNAME . LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
-## NOT CNAME
+## CNAME
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: VNAME DEFINE CNAME COMMA NOT VNAME
 ##
-## Ends in an error in state: 137.
+## Ends in an error in state: 152.
 ##
-## ground_literal -> NOT . CNAME LBRACKET loption(separated_nonempty_list(COMMA,term)) RBRACKET [ DCOLON COMMA COLON ]
+## ground_literal -> NOT . ground_atom [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## NOT
@@ -1091,9 +1004,9 @@ file: VNAME DEFINE CNAME COMMA NOT VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: VNAME DEFINE CNAME COMMA RPAREN
+file: VNAME DEFINE CNAME COMMA SHOW
 ##
-## Ends in an error in state: 136.
+## Ends in an error in state: 151.
 ##
 ## separated_nonempty_list(COMMA,ground_literal) -> ground_literal COMMA . separated_nonempty_list(COMMA,ground_literal) [ DCOLON COLON ]
 ##
@@ -1103,7 +1016,7 @@ file: VNAME DEFINE CNAME COMMA RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: VNAME DEFINE CNAME LPAREN RBRACKET
+file: VNAME DEFINE CNAME LPAREN SHOW
 ##
 ## Ends in an error in state: 26.
 ##
@@ -1139,8 +1052,8 @@ file: VNAME DEFINE CNAME VNAME
 ##
 ## Ends in an error in state: 25.
 ##
-## term -> CNAME . [ RPAREN RBRACKET LT LEQ GT GEQ DCOLON COMMA COLON ]
-## term -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ RPAREN RBRACKET LT LEQ GT GEQ DCOLON COMMA COLON ]
+## term -> CNAME . [ RPAREN RBRACKET LT LEQ GT GEQ EQ DCOLON COMMA COLON ]
+## term -> CNAME . LPAREN loption(separated_nonempty_list(COMMA,term)) RPAREN [ RPAREN RBRACKET LT LEQ GT GEQ EQ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## CNAME
@@ -1148,7 +1061,7 @@ file: VNAME DEFINE CNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: VNAME DEFINE RPAREN
+file: VNAME DEFINE SHOW
 ##
 ## Ends in an error in state: 2.
 ##
@@ -1162,7 +1075,7 @@ file: VNAME DEFINE RPAREN
 
 file: VNAME DEFINE UNDERSCORE VNAME
 ##
-## Ends in an error in state: 135.
+## Ends in an error in state: 150.
 ##
 ## separated_nonempty_list(COMMA,ground_literal) -> ground_literal . [ DCOLON COLON ]
 ## separated_nonempty_list(COMMA,ground_literal) -> ground_literal . COMMA separated_nonempty_list(COMMA,ground_literal) [ DCOLON COLON ]
@@ -1204,24 +1117,117 @@ file: VNAME DIV VNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: VNAME EQ RPAREN
+file: VNAME EQ SHOW
 ##
-## Ends in an error in state: 103.
+## Ends in an error in state: 98.
 ##
-## ground_literal -> term EQ . term [ DCOLON COMMA COLON ]
+## list(pair(c_eoperator,term)) -> EQ . term list(pair(c_eoperator,term)) [ LT LEQ GT GEQ ]
+## nonempty_list(pair(c_eoperator,term)) -> EQ . term [ DCOLON COMMA COLON ]
+## nonempty_list(pair(c_eoperator,term)) -> EQ . term nonempty_list(pair(c_eoperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
-## term EQ
+## EQ
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: VNAME GEQ RPAREN
+file: VNAME EQ VNAME RPAREN
 ##
 ## Ends in an error in state: 99.
 ##
-## nonempty_list(pair(goperator,term)) -> GEQ . term [ DCOLON COMMA COLON ]
-## nonempty_list(pair(goperator,term)) -> GEQ . term nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
+## list(pair(c_eoperator,term)) -> EQ term . list(pair(c_eoperator,term)) [ LT LEQ GT GEQ ]
+## nonempty_list(pair(c_eoperator,term)) -> EQ term . [ DCOLON COMMA COLON ]
+## nonempty_list(pair(c_eoperator,term)) -> EQ term . nonempty_list(pair(c_eoperator,term)) [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## EQ term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 30, spurious reduction of production term -> expr
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: VNAME GEQ SHOW
+##
+## Ends in an error in state: 131.
+##
+## chain -> term list(pair(c_eoperator,term)) GEQ . term list(pair(c_egoperator,term)) [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## term list(pair(c_eoperator,term)) GEQ
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: VNAME GEQ VNAME RPAREN
+##
+## Ends in an error in state: 132.
+##
+## chain -> term list(pair(c_eoperator,term)) GEQ term . list(pair(c_egoperator,term)) [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## term list(pair(c_eoperator,term)) GEQ term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 30, spurious reduction of production term -> expr
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: VNAME GT SHOW
+##
+## Ends in an error in state: 119.
+##
+## chain -> term list(pair(c_eoperator,term)) GT . term list(pair(c_egoperator,term)) [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## term list(pair(c_eoperator,term)) GT
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: VNAME GT VNAME EQ SHOW
+##
+## Ends in an error in state: 125.
+##
+## list(pair(c_egoperator,term)) -> EQ . term list(pair(c_egoperator,term)) [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## EQ
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: VNAME GT VNAME EQ VNAME RPAREN
+##
+## Ends in an error in state: 126.
+##
+## list(pair(c_egoperator,term)) -> EQ term . list(pair(c_egoperator,term)) [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## EQ term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 30, spurious reduction of production term -> expr
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: VNAME GT VNAME GEQ SHOW
+##
+## Ends in an error in state: 123.
+##
+## list(pair(c_egoperator,term)) -> GEQ . term list(pair(c_egoperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## GEQ
@@ -1229,12 +1235,11 @@ file: VNAME GEQ RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: VNAME GEQ VNAME RPAREN
+file: VNAME GT VNAME GEQ VNAME RPAREN
 ##
-## Ends in an error in state: 100.
+## Ends in an error in state: 124.
 ##
-## nonempty_list(pair(goperator,term)) -> GEQ term . [ DCOLON COMMA COLON ]
-## nonempty_list(pair(goperator,term)) -> GEQ term . nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
+## list(pair(c_egoperator,term)) -> GEQ term . list(pair(c_egoperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## GEQ term
@@ -1248,12 +1253,11 @@ file: VNAME GEQ VNAME RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: VNAME GT RPAREN
+file: VNAME GT VNAME GT SHOW
 ##
-## Ends in an error in state: 97.
+## Ends in an error in state: 121.
 ##
-## nonempty_list(pair(goperator,term)) -> GT . term [ DCOLON COMMA COLON ]
-## nonempty_list(pair(goperator,term)) -> GT . term nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
+## list(pair(c_egoperator,term)) -> GT . term list(pair(c_egoperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## GT
@@ -1261,12 +1265,11 @@ file: VNAME GT RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: VNAME GT VNAME RPAREN
+file: VNAME GT VNAME GT VNAME RPAREN
 ##
-## Ends in an error in state: 98.
+## Ends in an error in state: 122.
 ##
-## nonempty_list(pair(goperator,term)) -> GT term . [ DCOLON COMMA COLON ]
-## nonempty_list(pair(goperator,term)) -> GT term . nonempty_list(pair(goperator,term)) [ DCOLON COMMA COLON ]
+## list(pair(c_egoperator,term)) -> GT term . list(pair(c_egoperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## GT term
@@ -1280,28 +1283,44 @@ file: VNAME GT VNAME RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: VNAME LEQ RPAREN
+file: VNAME GT VNAME RPAREN
 ##
-## Ends in an error in state: 93.
+## Ends in an error in state: 120.
 ##
-## nonempty_list(pair(loperator,term)) -> LEQ . term [ DCOLON COMMA COLON ]
-## nonempty_list(pair(loperator,term)) -> LEQ . term nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
+## chain -> term list(pair(c_eoperator,term)) GT term . list(pair(c_egoperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
-## LEQ
+## term list(pair(c_eoperator,term)) GT term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 30, spurious reduction of production term -> expr
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: VNAME LEQ SHOW
+##
+## Ends in an error in state: 116.
+##
+## chain -> term list(pair(c_eoperator,term)) LEQ . term list(pair(c_eloperator,term)) [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## term list(pair(c_eoperator,term)) LEQ
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 file: VNAME LEQ VNAME RPAREN
 ##
-## Ends in an error in state: 94.
+## Ends in an error in state: 117.
 ##
-## nonempty_list(pair(loperator,term)) -> LEQ term . [ DCOLON COMMA COLON ]
-## nonempty_list(pair(loperator,term)) -> LEQ term . nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
+## chain -> term list(pair(c_eoperator,term)) LEQ term . list(pair(c_eloperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
-## LEQ term
+## term list(pair(c_eoperator,term)) LEQ term
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
@@ -1343,12 +1362,83 @@ file: VNAME LOG VNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: VNAME LT RPAREN
+file: VNAME LT SHOW
 ##
-## Ends in an error in state: 91.
+## Ends in an error in state: 104.
 ##
-## nonempty_list(pair(loperator,term)) -> LT . term [ DCOLON COMMA COLON ]
-## nonempty_list(pair(loperator,term)) -> LT . term nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
+## chain -> term list(pair(c_eoperator,term)) LT . term list(pair(c_eloperator,term)) [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## term list(pair(c_eoperator,term)) LT
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: VNAME LT VNAME EQ SHOW
+##
+## Ends in an error in state: 110.
+##
+## list(pair(c_eloperator,term)) -> EQ . term list(pair(c_eloperator,term)) [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## EQ
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: VNAME LT VNAME EQ VNAME RPAREN
+##
+## Ends in an error in state: 111.
+##
+## list(pair(c_eloperator,term)) -> EQ term . list(pair(c_eloperator,term)) [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## EQ term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 30, spurious reduction of production term -> expr
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: VNAME LT VNAME LEQ SHOW
+##
+## Ends in an error in state: 108.
+##
+## list(pair(c_eloperator,term)) -> LEQ . term list(pair(c_eloperator,term)) [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## LEQ
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: VNAME LT VNAME LEQ VNAME RPAREN
+##
+## Ends in an error in state: 109.
+##
+## list(pair(c_eloperator,term)) -> LEQ term . list(pair(c_eloperator,term)) [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## LEQ term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 30, spurious reduction of production term -> expr
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: VNAME LT VNAME LT SHOW
+##
+## Ends in an error in state: 106.
+##
+## list(pair(c_eloperator,term)) -> LT . term list(pair(c_eloperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## LT
@@ -1356,15 +1446,32 @@ file: VNAME LT RPAREN
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: VNAME LT VNAME RPAREN
+file: VNAME LT VNAME LT VNAME RPAREN
 ##
-## Ends in an error in state: 92.
+## Ends in an error in state: 107.
 ##
-## nonempty_list(pair(loperator,term)) -> LT term . [ DCOLON COMMA COLON ]
-## nonempty_list(pair(loperator,term)) -> LT term . nonempty_list(pair(loperator,term)) [ DCOLON COMMA COLON ]
+## list(pair(c_eloperator,term)) -> LT term . list(pair(c_eloperator,term)) [ DCOLON COMMA COLON ]
 ##
 ## The known suffix of the stack is as follows:
 ## LT term
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 30, spurious reduction of production term -> expr
+##
+
+<YOUR SYNTAX ERROR MESSAGE HERE>
+
+file: VNAME LT VNAME RPAREN
+##
+## Ends in an error in state: 105.
+##
+## chain -> term list(pair(c_eoperator,term)) LT term . list(pair(c_eloperator,term)) [ DCOLON COMMA COLON ]
+##
+## The known suffix of the stack is as follows:
+## term list(pair(c_eoperator,term)) LT term
 ##
 ## WARNING: This example involves spurious reductions.
 ## This implies that, although the LR(1) items shown above provide an
@@ -1468,9 +1575,9 @@ file: VNAME MULT VNAME VNAME
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
-file: VNAME NEQ RPAREN
+file: VNAME NEQ SHOW
 ##
-## Ends in an error in state: 89.
+## Ends in an error in state: 96.
 ##
 ## ground_literal -> term NEQ . term [ DCOLON COMMA COLON ]
 ##

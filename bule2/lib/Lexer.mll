@@ -46,7 +46,7 @@ and token = parse
   | vname as n { P.VNAME n }
   | cname as n { P.CNAME n }
   | '_' { P.UNDERSCORE }
-  | "#clause" { P.CLAUSE } | "#exists" { P.EXISTS } | "#forall" { P.FORALL } | "#ground" { P.GROUND } | "#hide" { P.HIDE } | "#show" { P.SHOW }
+  | "#exists" { P.EXISTS } | "#forall" { P.FORALL } | "#ground" { P.GROUND } | "#hide" { P.HIDE } | "#show" { P.SHOW }
   | "|" { P.DISJ } | "&" { P.CONJ }
   | integer as i { P.INT (int_of_string i) }
   | eof  { P.EOF }

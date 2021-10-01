@@ -78,7 +78,7 @@ let perform_eop v1 v2 = function
   | Ast.T.Sub -> v1 - v2
 
 let int_of_gt = function
-  | T.Fun (name, []) as gt -> (try Either.Right (int_of_string name) with Failure "int_of_string" -> Either.Left gt)
+  | T.Fun (name, []) as gt -> (match int_of_string_opt name with Some i -> Either.Right i | None -> Either.Left gt)
   | T.Fun (_, _ :: _) as gt -> Either.Left gt
 
 let perform_cop_aux v1 v2 = function
@@ -94,7 +94,7 @@ let perform_cop v1 v2 cop = perform_cop_aux (int_of_gt v1) (int_of_gt v2) cop
 exception UnboundVar of Ast.T.vname
 exception NonInt of (Ast.T.vname * ground_term)
 
-let int_of_string_opt s = try Some (int_of_string s) with Failure "int_of_string" -> None
+(*let int_of_string_opt s = try Some (int_of_string s) with Failure "int_of_string" -> None*)
 
 let find_gt v map = match SMap.find_opt v map with
   | None -> raise (UnboundVar v)
@@ -219,7 +219,7 @@ let ground_decl gmap decl =
   | NonInt (n, g) ->
      let glits, name, ts = decl in
      let d = (glits, [(name, ts)]) in
-     failwith (sprintf "Variable %s ground to a non-int %s in declaration \"%s\"" n (Print.ground_term g) (Ast.Print.decl (Ast.T.G d)))
+     failwith (sprintf "Variable %s ground to a non-int %s in declaration \"%s\"" n (Print.ground_term g) (Ast.Print.ground_decl d))
 
 let rec ground_decl_component gmap comp =
   let map = List.fold_left ground_decl gmap comp in
@@ -273,7 +273,7 @@ let all_ground decls : GTermSet.t SMap.t =
 let search_var ((cname, terms) : Ast.T.atom) vmap = (cname, List.map (term vmap) terms)
 let search_lit vmap ((pol, var) : Ast.T.literal) = (pol, search_var var vmap)
 let search_lits lits vmap = List.map (search_lit vmap) lits
-let search_decl gmap qmap ((gls, b, e, vars) : Ast.T.search_decl) =
+let search_decl gmap qmap (gls, ((b, e, vars) : Ast.T.search_decl)) =
   let maps = glits gmap SMap.empty gls in
   let parity = if b then 1 else 0 in
   let update i qm var =
@@ -287,7 +287,7 @@ let search_decl gmap qmap ((gls, b, e, vars) : Ast.T.search_decl) =
     List.fold_left (treat_one_var vmap) qm vars in
   List.fold_left treat_one qmap maps
 
-let all_search gmap (decls : Ast.T.search_decl list) =
+let all_search gmap decls =
   let qmap = List.fold_left (search_decl gmap) IMap.empty decls in
   if IMap.is_empty qmap then []
   else
@@ -295,8 +295,8 @@ let all_search gmap (decls : Ast.T.search_decl list) =
     let f (i, l) = (i mod 2 = 1, l) in
     List.map f blocks
 
-let all_hide gmap (decls : Ast.T.hide_decl list) : (bool * T.literal) list =
-  let hide_decl ((gls, hide, lits) : Ast.T.hide_decl) =
+let all_hide gmap decls : (bool * T.literal) list =
+  let hide_decl (gls, ((hide, lits) : Ast.T.hide_decl)) =
     let maps = glits gmap SMap.empty gls in
     let all_lits = List.concat_map (search_lits lits) maps in
     List.map (fun lit -> hide, lit) all_lits in
@@ -306,7 +306,7 @@ let literals gmap vmap (gls, pol, ga) =
   let maps = glits gmap vmap gls in
   List.map (fun m -> (pol, search_var ga m)) maps
 
-let clause_decl gmap (gls, hyps, ccls) =
+let clause_decl gmap (gls, (hyps, ccls)) =
   let maps = glits gmap SMap.empty gls in
   let make_clause vmap =
     let hyps = List.concat_map (literals gmap vmap) hyps in
@@ -315,16 +315,6 @@ let clause_decl gmap (gls, hyps, ccls) =
   Misc.map make_clause maps
 
 let all_clause gmap decls = List.concat_map (clause_decl gmap) decls
-
-(*let clause_decl gmap accu (gls, hyps, ccls) =
-  let maps = glits gmap SMap.empty gls in
-  let make_clause acc vmap =
-    let hyps = List.concat_map (literals gmap vmap) hyps in
-    let ccls = List.concat_map (literals gmap vmap) ccls in
-    (hyps, ccls) :: acc in
-  List.fold_left make_clause accu maps
-
-let all_clause gmap decls = List.fold_left (clause_decl gmap) [] decls*)
 
 let print_facts facts gmap =
   let pr_one (key, set) =
@@ -335,18 +325,12 @@ let print_facts facts gmap =
   if facts then eprintf "%s\n%!" (P.unlines pr_one (SMap.bindings gmap))
 
 let file facts (decls : Ast.T.file) : T.file =
-  let aux (gs, ss, cs, hs) = function
-    | Ast.T.G gd -> (gd :: gs, ss, cs, hs)
-    | S sd -> (gs, sd :: ss, cs, hs)
-    | C cd -> (gs, ss, cd :: cs, hs)
-    | H hd -> (gs, ss, cs, hd :: hs) in
-  let gs, ss, cs, hs = List.fold_left aux ([], [], [], []) decls in
-  let gs, ss, cs, hs = List.rev gs, List.rev ss, List.rev cs, List.rev hs in
-  let gmap = all_ground gs in
+  let { Ast.T.ground; prefix; matrix; hide } = decls in
+  let gmap = all_ground ground in
   print_facts facts gmap;
-  let prefix = all_search gmap ss in
-  let matrix = all_clause gmap cs in
-  let hide_st = all_hide gmap hs in
+  let prefix = all_search gmap prefix in
+  let matrix = all_clause gmap matrix in
+  let hide_st = all_hide gmap hide in
   let hide, show = List.partition_map (fun (h, lit) -> if h then Either.Right lit else Either.Left lit) hide_st in
   { prefix;
     matrix;

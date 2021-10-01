@@ -1,5 +1,6 @@
 (ocamllex Lexer)
 (menhir
+ (infer false)
  (flags --table --explain)
  (modules Parser))
 

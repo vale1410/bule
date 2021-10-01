@@ -48,8 +48,8 @@ let ground_mode file (facts, dimacs) =
 
 let start () =
   let mode, fs = get () in
-  let ps = List.map (Parse.from_file ()) fs in
-  let file = List.flatten ps in
+  let file = List.concat_map (Parse.from_file ()) fs in
+  let file = Ast.file file in
   (*printf "%s\n\n" (Ast.Print.file p);*)
   match mode with
   | Either.Right comm -> solve_mode file comm(*solve models (d, vm, im, hs) comm*)
