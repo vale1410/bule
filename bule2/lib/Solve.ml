@@ -28,7 +28,7 @@ module CL = struct
 
   let run_process cmd dimacs =
     let inp, out = Unix.open_process cmd in
-    fprintf out "%s%!" (Dimacs.Print.file dimacs);
+    fprintf out "%s%!" (Dimacs.Print.qbf_file dimacs);
     close_out out;
     let lines = input_lines inp in
     close_in inp;

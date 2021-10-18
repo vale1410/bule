@@ -9,8 +9,11 @@ struct
   let literal (pol, v) = if pol then sprintf "%d" v else  sprintf "-%d" v
   let clause lits = sprintf "%s 0" (Print.unspaces literal lits)
   let quantifier_block (exist, vars) = sprintf "%s %s 0" (if exist then "e" else "a") (Print.unspaces search_var vars)
-  let file (vmax, cmax, blocks, clauses) =
+  let qbf_file (vmax, cmax, blocks, clauses) =
     sprintf "p cnf %d %d\n%s\n%s\n" vmax cmax (Print.unlines quantifier_block blocks) (Print.unlines clause clauses)
+  let sat_file (vmax, cmax, blocks, clauses) =
+    if List.length blocks > 1 then eprintf "Warning, SAT printing of a QBf file.";
+    sprintf "p cnf %d %d\n%s\n" vmax cmax (Print.unlines clause clauses)
 end
 
 
@@ -51,6 +54,7 @@ let ground { Circuit.T.prefix; matrix; hide; show } : T.file * int T.VMap.t * Ci
   let hide = hide_vars "Hiding" vmap hide in
   let show = hide_vars "Showin" vmap show in
   ((nvar, nbcls, qbs, cls), vmap, imap, show, hide)
+
 let file (args : Circuit.T.file) : T.file =
   let (dimacs, _, _, _, _) = ground args in
   dimacs
