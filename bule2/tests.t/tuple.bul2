@@ -1,0 +1,8 @@
+:: #ground dom[0..2].
+
+dom[I] :: #ground ddom[I,square(0..I*I),t(r(i(I*I..I*I+2),p),l,e)].
+
+ddom[X,Y,Z] :: #exists[0] var(X,Y,Z).
+
+ddom[X,Y,Z] :: var(X,Y,Z).
+

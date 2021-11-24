@@ -9,8 +9,11 @@ struct
   let literal (pol, v) = if pol then sprintf "%d" v else  sprintf "-%d" v
   let clause lits = sprintf "%s 0" (Print.unspaces literal lits)
   let quantifier_block (exist, vars) = sprintf "%s %s 0" (if exist then "e" else "a") (Print.unspaces search_var vars)
-  let file (vmax, cmax, blocks, clauses) =
+  let qbf_file (vmax, cmax, blocks, clauses) =
     sprintf "p cnf %d %d\n%s\n%s\n" vmax cmax (Print.unlines quantifier_block blocks) (Print.unlines clause clauses)
+  let sat_file (vmax, cmax, blocks, clauses) =
+    if List.length blocks > 1 then eprintf "Warning, SAT printing of a QBf file.";
+    sprintf "p cnf %d %d\n%s\n" vmax cmax (Print.unlines clause clauses)
 end
 
 
@@ -28,26 +31,30 @@ let clause (accu, nbcls) (hyps, ccls) =
   let (naccu, cls) = List.fold_left_map literal accu lits in
   ((naccu, nbcls+1), cls)
 
-let hide_vars vmap hide =
-  let hide_one sv = match T.VMap.find_opt sv vmap with
-    | None -> Either.Left sv
-    | Some i -> Either.Right i in
+let hide_vars message vmap hide =
+  let hide_one (pol, sv) = match T.VMap.find_opt sv vmap with
+    | None -> Either.Left (pol, sv)
+    | Some i -> Either.Right (if pol then i else -i) in
   let (undeclared, hide) = List.partition_map hide_one hide in
-  if undeclared <> [] then eprintf "Warning. Hiding undeclared variables: %s\n" (P.unspaces Circuit.Print.search_var undeclared);
+  if undeclared <> [] then eprintf "Warning. %s undeclared variables: %s\n%!" message (P.unspaces Circuit.Print.literal undeclared);
   T.ISet.of_list hide
 
 let compute_new_vars (_, _, nb) cl_map =
   let vars = T.VMap.bindings cl_map in
   let filter (f, i) = if i > nb then Some f else None in
   List.filter_map filter vars
-let ground (qbs, cls, hide) :  T.file * int T.VMap.t * Circuit.T.search_var T.IMap.t * T.ISet.t =
+let ground { Circuit.T.prefix; matrix; hide; show } : T.file * int T.VMap.t * Circuit.T.search_var T.IMap.t * T.ISet.t * T.ISet.t =
   let accu = (T.VMap.empty, T.IMap.empty, 0) in
-  let (naccu, qbs) = List.fold_left_map quantifier_block accu qbs in
-  let (((vmap, imap, nvar), nbcls), cls) = List.fold_left_map clause (naccu, 0) cls in
+  let (naccu, qbs) = List.fold_left_map quantifier_block accu prefix in
+  let (((vmap, imap, nvar), nbcls), cls) = List.fold_left_map clause (naccu, 0) matrix in
+  let both = List.filter (fun x -> List.mem x show) hide in
+  if both <> [] then eprintf "Warning. The following literals are both shown and hidden: %s\n%!" (P.unspaces Circuit.Print.literal both);
   let nvars = compute_new_vars naccu vmap in
   if nvars <> [] then eprintf "Warning. Undeclared variables: %s\n%!" (P.unspaces Circuit.Print.search_var nvars);
-  let hide = hide_vars vmap hide in
-  ((nvar, nbcls, qbs, cls), vmap, imap, hide)
-let file args =
-  let (dimacs, _, _, _) = ground args in
+  let hide = hide_vars "Hiding" vmap hide in
+  let show = hide_vars "Showin" vmap show in
+  ((nvar, nbcls, qbs, cls), vmap, imap, show, hide)
+
+let file (args : Circuit.T.file) : T.file =
+  let (dimacs, _, _, _, _) = ground args in
   dimacs

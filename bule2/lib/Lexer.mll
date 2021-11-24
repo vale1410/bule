@@ -45,7 +45,8 @@ and token = parse
   | linefeed   { incr_linenum lexbuf; token lexbuf }
   | vname as n { P.VNAME n }
   | cname as n { P.CNAME n }
-  | "#exists" { P.EXISTS } | "#forall" { P.FORALL } | "#hide" { P.HIDE }
+  | '_' { P.UNDERSCORE }
+  | "#exists" { P.EXISTS } | "#forall" { P.FORALL } | "#ground" { P.GROUND } | "#hide" { P.HIDE } | "#show" { P.SHOW }
   | "|" { P.DISJ } | "&" { P.CONJ }
   | integer as i { P.INT (int_of_string i) }
   | eof  { P.EOF }
