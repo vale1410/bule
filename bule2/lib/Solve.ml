@@ -1,5 +1,7 @@
 open Printf
 
+type solver = CommandLine of string | Minisat | Quantor
+
 module IntSet = Set.Make (Int)
 module ModelSet = Set.Make (struct type t = (bool * int) list let compare = compare end)
 
@@ -73,9 +75,47 @@ module MS = struct
        Option.map (extract_model keys) solver
 end
 
+module QT = struct
+
+  let literal (p, i) = if p then Qbf.Lit.make i else Qbf.Lit.neg (Qbf.Lit.make i)
+  let clause lits = List.map literal lits
+  let qcnf (_, _, prefix, matrix) =
+    let matrix = Qbf.QCNF.prop (List.map clause matrix) in
+    let aux (q, block) f =
+      let block = List.map Qbf.Lit.make block in
+      if q then Qbf.QCNF.exists block f else Qbf.QCNF.forall block f in
+    List.fold_right aux prefix matrix
+
+  let assignment a var =
+    let l = Qbf.Lit.make var in
+    match a l with
+    | Qbf.True -> (true, var)
+    | Qbf.False -> (false, var)
+    | Qbf.Undef -> (false, var)
+
+  let extract_model = function
+    | Qbf.Unsat -> None
+    | Qbf.Timeout  -> failwith "timeout in qbf solver"
+    | Qbf.Spaceout -> failwith "spaceout in qbf solver"
+    | Qbf.Unknown  -> failwith "unknown error in qbf solver"
+    | Qbf.Sat a -> Some a
+
+  let run_solver keys (file : Dimacs.T.file) =
+    let f = qcnf file in
+    let r = Qbf.solve ~solver:Quantor.solver f in
+    let m = extract_model r in
+    match m with
+    | Some a ->
+       let model = IntSet.fold (fun var l -> assignment a var :: l) keys [] in
+       Some (List.sort compare_literals model)
+    | None -> None
+
+end
+
 let run_solver keys dimacs = function
-  | None -> MS.run_solver keys dimacs
-  | Some cmd -> CL.run_solver keys dimacs cmd
+  | CommandLine cmd -> CL.run_solver keys dimacs cmd
+  | Minisat -> MS.run_solver keys dimacs
+  | Quantor -> QT.run_solver keys dimacs
 
 let print_literal imap (pol, var) =
   let tilde = if pol then " " else "~" in

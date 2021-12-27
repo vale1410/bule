@@ -22,7 +22,7 @@ let get () =
   let input_names = ref [] in
   let default_show = ref true in
   let models = ref 1 in
-  let solver = ref "none" in
+  let solver = ref "quantor" in
   let solve = ref false in
   let facts = ref false in
   let print_mode = ref Bule in
@@ -31,7 +31,7 @@ let get () =
   let speclist = [("-",        Arg.Unit (fun () -> update input_names ("-" :: !input_names)), "Read the BULE code from the standard input.");
                   ("--solve",  Arg.Set solve, "Enable solving. Default: \"false\"");
                   ("--models", Arg.Set_int models, "Number of models to generate. The option has no effect if \"solve\" is set to \"false\". Default: 1.");
-                  ("--solver", Arg.Set_string solver, "Set the solver to be used. If \"none\" then Minisat 1.14 is used. Example \"depqbf --no-dynamic-nenofex --qdo\". The option has no effect if \"solve\" is set to \"false\". Default: \"none\"");
+                  ("--solver", Arg.Set_string solver, "Set the solver to be used. If \"quantor\" then Quantor 3.2 is used, if \"minisat\" then Minisat 1.14 is used, otherwise the argument is assumed to be a command-line tool. Example \"depqbf --no-dynamic-nenofex --qdo\". The option has no effect if \"solve\" is set to \"false\". Default: \"quantor\"");
                   ("--output", Arg.Symbol (output_symbols, output_treat), "Output format (QDIMACS, DIMACS, or BULE. The option has no effect if \"solve\" is set to \"true\". Default \"bule\".");
                   ("--facts",  Arg.Set facts, "Enable printing of grounding facts. The option has no effect if \"solve\" is set to \"true\". Default: \"false\".");
                   ("--default_show", Arg.Bool (update default_show), "Default showing behaviour for literals. The option has no effect if \"solve\" is set to \"false\". Default \"true\".");
@@ -42,7 +42,10 @@ let get () =
   let files = match List.rev !input_names with
   | [] -> failwith "Wrong number of arguments. Usage: bule2 file"
   | _ :: _ as names -> names in
-  let solver = if !solver = "none" then None else Some !solver in
+  let solver = match !solver with
+    | "quantor" -> Solve.Quantor
+    | "minisat" -> Solve.Minisat
+    | _ -> Solve.CommandLine !solver in
   let mode = if !solve then Either.Right (solver, !default_show, !models) else Either.Left (!facts, !print_mode) in
   (mode, files)
 
