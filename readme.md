@@ -183,15 +183,15 @@ Say we want to define a domain `dom` on set `{1,2,3}`.\
 We can achieve this with range expression (both brackets are inclusive):
 
 ```prolog
-dom[1..3].
+#ground dom[1..3].
 ```
 
 Will translate to:
 
 ```prolog
-dom[1].
-dom[2].
-dom[3].
+#ground dom[1].
+#ground dom[2].
+#ground dom[3].
 ```
 
 Let us have a 1-arity literal `p(X)`
@@ -234,33 +234,39 @@ Note that adding the rule `Y < 3` skips last iteration step `~q(9)` as `3 < 3` <
 Let's have a domain for single row / single column indexing
 
 ```prolog
-dom[1..9].
+#ground dom[1..9].
 ```
 
 Similarly, let's define a 2D domain for our `X, Y` coordinates:
 
 ```prolog
-domCoords[1..9,1..9].
+#ground domCoords[1..9,1..9].
 ```
 
 Also, let's define a 2D domain for inner-box starting coords:
 
 ```prolog
-boxBegin[1,1].
-boxBegin[1,4].
-boxBegin[1,7].
-boxBegin[4,1].
-boxBegin[4,4].
-boxBegin[4,7].
-boxBegin[7,1].
-boxBegin[7,4].
-boxBegin[7,7].
+#ground boxBegin[1,1].
+#ground boxBegin[1,4].
+#ground boxBegin[1,7].
+#ground boxBegin[4,1].
+#ground boxBegin[4,4].
+#ground boxBegin[4,7].
+#ground boxBegin[7,1].
+#ground boxBegin[7,4].
+#ground boxBegin[7,7].
 ```
 
-Lastly, let's define a 2D domain for coordinates offset within a box:
+Next, let's define a 2D domain for coordinates offset within a box:
 
 ```prolog
-boxOffset[0..2,0..2].
+#ground boxOffset[0..2,0..2].
+```
+
+Lastly, let's declare variables to represent if a value is at a coordinate:
+
+```prolog
+domCoords[X,Y], dom[Z] :: #exists[0] q(X,Y,Z).
 ```
 
 Now, we can start applying Sudoku rules in Bule!
