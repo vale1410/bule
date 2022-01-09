@@ -1,24 +1,26 @@
 % Bule rules for Sudoku game
-dom[1..9].
-delta[0..2,0..2].
-start[1].
-start[4].
-start[7].
+#ground dom[1..9].
+#ground delta[0..2,0..2].
+#ground start[1].
+#ground start[4].
+#ground start[7].
+
+dom[X], dom[Y], dom[Z] :: #exists[0] q(X,Y,Z).
 
 % in every cell at least 1 val
-dom[X], dom[Y] :: q(X,Y,Z) : dom[Z].
+dom[X], dom[Y] :: dom[Z] : q(X,Y,Z).
 
 % each cell contains no more than 1 val
-dom[X],dom[Y], dom[Z1], dom[Z2], Z1 < Z2 :: ~q(X,Y,Z1), ~q(X,Y,Z2). 
+dom[X], dom[Y], dom[Z1], dom[Z2], Z1 < Z2 :: ~q(X,Y,Z1) | ~q(X,Y,Z2). 
 
 % in each row (column) each value exists at least once 
-dom[Z],dom[X] :: q(X,Y,Z) : dom[Y].
-dom[Z],dom[Y] :: q(X,Y,Z) : dom[X].
+dom[Z], dom[X] :: dom[Y] : q(X,Y,Z).
+dom[Z], dom[Y] :: dom[X] : q(X,Y,Z).
 
 % no two same vals in a row (column)
-dom[X1], dom[X2], X1 < X2 :: ~q(X1,Y,Z), ~q(X2,Y,Z).
-dom[Y1], dom[Y2], Y1 < Y2 :: ~q(X,Y1,Z), ~q(X,Y2,Z).
+dom[Y], dom[Z], dom[X1], dom[X2], X1 < X2 :: ~q(X1,Y,Z) | ~q(X2,Y,Z).
+dom[X], dom[Z], dom[Y1], dom[Y2], Y1 < Y2 :: ~q(X,Y1,Z) | ~q(X,Y2,Z).
 
 % no two same vals in a single box
-start[RX], start[RY], delta[X1,Y1], delta[X2,Y2], X1<X2, Y1<Y2
-	:: ~q(RX+X1,RY+Y1,Z), ~q(RX+X2,RY+Y2,Z).
+start[RX], start[RY], delta[X1,Y1], delta[X2,Y2], X1<X2, Y1<Y2, dom[Z]
+	:: ~q(RX+X1,RY+Y1,Z) | ~q(RX+X2,RY+Y2,Z).

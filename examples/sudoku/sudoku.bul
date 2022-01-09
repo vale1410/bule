@@ -1,36 +1,38 @@
 % Bule rules for Sudoku game
 
-dom[1..9].
-boxOffset[0..2,0..2].
+#ground dom[1..9].
+#ground boxOffset[0..2,0..2].
 
-boxBegin[1,1].
-boxBegin[1,4].
-boxBegin[1,7].
-boxBegin[4,1].
-boxBegin[4,4].
-boxBegin[4,7].
-boxBegin[7,1].
-boxBegin[7,4].
-boxBegin[7,7].
+#ground boxBegin[1,1].
+#ground boxBegin[1,4].
+#ground boxBegin[1,7].
+#ground boxBegin[4,1].
+#ground boxBegin[4,4].
+#ground boxBegin[4,7].
+#ground boxBegin[7,1].
+#ground boxBegin[7,4].
+#ground boxBegin[7,7].
+
+dom[X], dom[Y], dom[Z] :: #exists[0] q(X,Y,Z).
 
 % Rules
 % in every cell at least 1 val
-dom[X], dom[Y] :: q(X,Y,Z) : dom[Z].
+dom[X], dom[Y] :: dom[Z] : q(X,Y,Z).
 
 % each val in at least 1 cell
-dom[Z] :: q(X,Y,Z) : dom[X] : dom[Y].
+dom[Z] :: dom[X], dom[Y] : q(X,Y,Z).
 
 % each cell contains no more than 1 val
-dom[X],dom[Y], dom[Z1], dom[Z2], Z1 < Z2 :: ~q(X,Y,Z1), ~q(X,Y,Z2). 
+dom[X], dom[Y], dom[Z1], dom[Z2], Z1 < Z2 :: ~q(X,Y,Z1) | ~q(X,Y,Z2). 
 
 % no two same vals in a column
-dom[X1], dom[X2], X1 < X2 :: ~q(X1,Y,Z), ~q(X2,Y,Z).
+dom[Y], dom[Z], dom[X1], dom[X2], X1 < X2 :: ~q(X1,Y,Z) | ~q(X2,Y,Z).
 
 % no two same vals in a row
-dom[Y1], dom[Y2], Y1 < Y2 :: ~q(X,Y1,Z), ~q(X,Y2,Z).
+dom[X], dom[Z], dom[Y1], dom[Y2], Y1 < Y2 :: ~q(X,Y1,Z) | ~q(X,Y2,Z).
 
 % no two same vals in a single box
 %% note that we do not need the rules for X1==X2 (or Y1==Y2) because they are
 %% implied by 30 (or 27 respectively)
-boxBegin[ROOTX,ROOTY], boxOffset[X1,Y1], boxOffset[X2,Y2], X1<X2, Y1!=Y2
-	:: ~q(ROOTX+X1,ROOTY+Y1,Z), ~q(ROOTX+X2,ROOTY+Y2,Z).
+boxBegin[ROOTX,ROOTY], boxOffset[X1,Y1], boxOffset[X2,Y2], X1<X2, Y1!=Y2, dom[Z]
+	:: ~q(ROOTX+X1,ROOTY+Y1,Z) | ~q(ROOTX+X2,ROOTY+Y2,Z).

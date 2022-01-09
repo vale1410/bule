@@ -263,8 +263,9 @@ Next, let's define a 2D domain for coordinates offset within a box:
 #ground boxOffset[0..2,0..2].
 ```
 
-Lastly, let's declare variables to represent if a value is at a coordinate
-```
+Lastly, let's declare variables to represent if a value is at a coordinate:
+
+```prolog
 domCoords[X,Y], dom[Z] :: #exists[0] q(X,Y,Z).
 ```
 
