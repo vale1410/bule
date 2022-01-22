@@ -1,0 +1,20 @@
+% Alternative SAT encoding for the graph colouring problem
+
+colour[C1], colour[C2], C1 != C2 :: #ground edge_type[t(C1,C2)].
+edge[V1, V2], edge_type[T] :: #exists[0] set(V1,V2,T).
+edge[V1, V2], edge_type[T] :: #hide ~set(V1,V2,T).
+
+% If we have edges with a common vertex, that vertex needs to have the same colour
+
+% Same starting edge, diff ending edge, the starting colour has to be the same
+edge[V1,V2], edge[V1,V3], V2 < V3, edge_type[t(C1,C2)], edge_type[t(C1P, C3)], C1 != C1P :: ~set(V1,V2,t(C1,C2)) | ~set(V1,V3,t(C1P,C3)).
+% Same ending edge, diff starting edge, the ending colour has to be the same
+edge[V2,V1], edge[V3,V1], V2 < V3, edge_type[t(C2,C1)], edge_type[t(C3, C1P)], C1 != C1P :: ~set(V2,V1,t(C2,C1)) | ~set(V3,V1,t(C3,C1P)).
+% Edges "meet" at the same vertex, that vertex has the same colour
+edge[V2,V1], edge[V1,V3], edge_type[t(C2,C1)], edge_type[t(C1P, C3)], C1 != C1P :: ~set(V2,V1,t(C2,C1)) | ~set(V1,V3,t(C1P,C3)).
+
+% Every edge has to be at least one type
+edge[V1,V2] :: edge_type[T] : set(V1,V2,T).
+
+% Every edge cannot be more than 1 type
+edge[V1,V2], edge_type[T1], edge_type[T2], T1 < T2 :: ~set(V1,V2,T1) | ~set(V1,V2,T2).

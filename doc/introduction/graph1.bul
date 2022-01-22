@@ -1,0 +1,17 @@
+#ground vertex[a].
+#ground vertex[b].
+#ground vertex[c].
+#ground vertex[d].
+#ground vertex[e].
+
+#ground colour[blue].
+#ground colour[green].
+#ground colour[red].
+
+#ground edge[a,c].
+#ground edge[a,e].
+#ground edge[b,c].
+#ground edge[b,d].
+#ground edge[b,e].
+#ground edge[c,d].
+#ground edge[d,e].

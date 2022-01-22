@@ -1,0 +1,21 @@
+% Same model as graph1 except with edges bewteen a and b, a and d
+
+#ground vertex[a].
+#ground vertex[b].
+#ground vertex[c].
+#ground vertex[d].
+#ground vertex[e].
+
+#ground colour[blue].
+#ground colour[green].
+#ground colour[red].
+
+#ground edge[a,b].
+#ground edge[a,c].
+#ground edge[a,d].
+#ground edge[a,e].
+#ground edge[b,c].
+#ground edge[b,d].
+#ground edge[b,e].
+#ground edge[c,d].
+#ground edge[d,e].

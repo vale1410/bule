@@ -1,0 +1,26 @@
+% Basic example of a graph with A and E
+
+% We have vertices A and E, and colours, Red, Green, Blue
+
+#exists[0] set_a_blue, set_a_green, set_a_red.
+% #hide ~set_a_blue, ~set_a_green, ~set_a_red.
+#exists[0] set_e_blue, set_e_green, set_e_red.
+% #hide ~set_e_blue, ~set_e_green, ~set_e_red.
+
+% Vertex a and e are at least one colour
+set_a_blue | set_a_green | set_a_red.
+set_e_blue | set_e_green | set_e_red.
+
+% If a is one colour, it cannot be the other colours
+~set_a_blue  | ~set_a_green.
+~set_a_blue  | ~set_a_red.
+~set_a_green | ~set_a_red.
+
+~set_e_blue  | ~set_e_green.
+~set_e_blue  | ~set_e_red.
+~set_e_green | ~set_e_red.
+
+% A vertex cannot be the same colour as an adjacent vertex
+~set_a_blue  | ~set_e_blue.
+~set_a_green | ~set_e_green.
+~set_a_red   | ~set_e_red.
