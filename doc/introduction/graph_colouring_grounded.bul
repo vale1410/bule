@@ -1,0 +1,14 @@
+% File containing the rules to enforce graphc colouring
+
+vertex[V], colour[C] :: #exists[0] set(V,C).
+vertex[V], colour[C] :: #hide ~set(V,C).
+
+% All the vertices have to be at least one colour
+vertex[V] :: colour[C] : set(V,C).
+
+% All the vertices are at max one colour
+vertex[V], colour[C1], colour[C2], C1 < C2 :: ~set(V,C1) | ~set(V,C2).
+
+
+% Ajacent vertices cannot have the same colour
+edge[V1,V2], colour[C] :: ~set(V1,C) | ~set(V2,C).

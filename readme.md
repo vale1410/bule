@@ -321,7 +321,7 @@ q(1,1,9) | q(1,2,9) | .. | q(1,9,9) | q(2,1,9) | q(2,2,9) | .. | q(2,9,9) | .. .
 **Rule 3**: no two same values in a column
 
 ```prolog
-dom[X1], dom[X2], X1 < X2 :: ~q(X1,Y,Z) | ~q(X2,Y,Z).
+dom[Y], dom[Z], dom[X1], dom[X2], X1 < X2 :: ~q(X1,Y,Z) | ~q(X2,Y,Z).
 ```
 
 Here, we bind `X1, X2` and generate clauses for all `X1, X2` pairs, where `X1 < X2` holds.\
@@ -336,7 +336,7 @@ We can't ever satisfy this clause with two same values `Z` in different rows in 
 **Rule 4**: no two same values in a row
 
 ```prolog
-dom[Y1], dom[Y2], Y1 < Y2 :: ~q(X,Y1,Z) | ~q(X,Y2,Z).
+dom[X], dom[Z], dom[Y1], dom[Y2], Y1 < Y2 :: ~q(X,Y1,Z) | ~q(X,Y2,Z).
 ```
 
 Here, we follow the same logic as in **rule 3**, but for rows.
@@ -347,7 +347,7 @@ Here, we follow the same logic as in **rule 3**, but for rows.
 
 ```prolog
 boxBegin[ROOTX,ROOTY],
-boxOffset[X1,Y1], box[X2,Y2],X1 <= X2, Y1 != Y2
+boxOffset[X1,Y1], box[X2,Y2],X1 <= X2, Y1 != Y2, dom[Z]
 		:: ~q(ROOTX + X1,ROOTY + Y1,Z) | ~q(ROOTX + X2,ROOTY + Y2,Z).
 ```
 
