@@ -27,6 +27,9 @@ module CL = struct
        while true do l := input_line inp :: !l done
      with End_of_file -> ());
     List.rev !l
+  
+  let isnt_comment line = 
+    String.length line > 0 && line.[0] <> 'c'
 
   let run_process cmd dimacs =
     let inp, out = Unix.open_process cmd in
@@ -34,6 +37,7 @@ module CL = struct
     close_out out;
     let lines = input_lines inp in
     close_in inp;
+    let lines = List.filter isnt_comment lines in 
     parse_output lines
 
   let run_solver keys dimacs cmd =
