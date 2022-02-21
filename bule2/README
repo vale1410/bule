@@ -1,3 +1,30 @@
 * To compile run
 * `opam install dune menhir minisat qbf tsort`
 * `make install`
+
+In case there are problems of the type: 
+`
+^^^^^^^^^^^^^^^
+Error: Unbound value List.concat_map
+`
+
+Then check the version of opam: 
+```
+opam --version 
+```
+
+if too old, then update to (for example 4.13.1)
+
+```
+opam switch create 4.13.1
+```
+
+update terminal: 
+
+```
+eval $(opam env)
+```
+
+and check again the version. 
+
+
