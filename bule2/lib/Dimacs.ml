@@ -53,7 +53,7 @@ let ground { Circuit.T.prefix; matrix; hide; show } : T.file * int T.VMap.t * Ci
   if nvars <> [] then eprintf "Warning. Undeclared variables: %s\n%!" (P.unspaces Circuit.Print.search_var nvars);
   let hide = hide_vars "Hiding" vmap hide in
   let show = hide_vars "Showin" vmap show in
-  ((nvar, nbcls, qbs, cls), vmap, imap, show, hide)
+  ((nvar, nbcls, qbs, cls), vmap, imap, hide, show)
 
 let file (args : Circuit.T.file) : T.file =
   let (dimacs, _, _, _, _) = ground args in

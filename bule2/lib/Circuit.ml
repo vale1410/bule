@@ -8,17 +8,19 @@ open T
 module P = Print
 module Print =
 struct
+  let comma_list p l = Print.list' "" "," "" p l
+  let comma_s_list p l = Print.list' "" ", " "" p l
   let rec ground_term = function
     | Fun (c, []) -> sprintf "%s" c
-    | Fun (c, (_ :: _ as ts)) -> sprintf "%s(%s)" c (Print.list' "" "," "" ground_term ts)
+    | Fun (c, (_ :: _ as ts)) -> sprintf "%s(%s)" c (comma_list ground_term ts)
   let ground_fact (n, cs) = match cs with
     | [] -> Ast.Print.cname n
-    | _ :: _ -> sprintf "%s[%s]" (Ast.Print.cname n) (Print.list' "" "," "" ground_term cs)
+    | _ :: _ -> sprintf "%s[%s]" (Ast.Print.cname n) (comma_list ground_term cs)
   let search_var (n, cs) = match cs with
     | [] -> Ast.Print.cname n
-    | _ :: _ -> sprintf "%s(%s)" (Ast.Print.cname n) (Print.list' "" "," "" ground_term cs)
+    | _ :: _ -> sprintf "%s(%s)" (Ast.Print.cname n) (comma_list ground_term cs)
 
-  let literal (b, var) = (if b then "" else "~") ^ search_var var
+  let literal (b, var) = (if b then " " else "~") ^ search_var var
   let clause (hyps, ccls) =
     let hs = Print.list' "" " & " "" literal hyps in
     let cs = Print.list' "" " | " "." literal ccls in
@@ -28,13 +30,12 @@ struct
   let quantifier b = if b then "exists" else "forall"
   let blocks l =
     let f (i, s) (b, vars) =
-      let pr_one var = sprintf "#%s[%d] :: %s?" (quantifier b) i (search_var var) in
-      let s' = Print.unlines pr_one vars in
+      let s' = sprintf "#%s[%d] %s." (quantifier b) i (comma_s_list search_var vars) in
       (i+1, s ^ "\n" ^ s') in
     snd (List.fold_left f (0, "") l)
   let file { prefix; matrix; hide; show } =
-    let h = if hide <> [] then sprintf "\n%%#hide %s." (Print.list' "" ", " "" literal hide) else ""
-    and s = if show <> [] then sprintf "\n%%#show %s." (Print.list' "" ", " "" literal show) else "" in
+    let h = if hide <> [] then sprintf "\n#hide %s." (comma_s_list literal hide) else ""
+    and s = if show <> [] then sprintf "\n#show %s." (comma_s_list literal show) else "" in
     sprintf "%s\n%s%s%s" (blocks prefix) (Print.unlines clause matrix) h s
 end
 
@@ -331,7 +332,7 @@ let file facts (decls : Ast.T.file) : T.file =
   let prefix = all_search gmap prefix in
   let matrix = all_clause gmap matrix in
   let hide_st = all_hide gmap hide in
-  let hide, show = List.partition_map (fun (h, lit) -> if h then Either.Right lit else Either.Left lit) hide_st in
+  let show, hide = List.partition_map (fun (h, lit) -> if h then Either.Right lit else Either.Left lit) hide_st in
   { prefix;
     matrix;
     hide;

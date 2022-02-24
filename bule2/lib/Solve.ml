@@ -134,7 +134,7 @@ let filtered_model show_default model hide show =
     (show_default && not hidden) || (not show_default && force_shown) in
   List.filter printed_lit model
 let print_one_model imap = Print.unlines (print_literal imap)
-let print_all_models imap = Print.unspaces (print_literal imap)
+let print_all_models imap model = Print.unspaces Fun.id (List.sort compare (List.map (print_literal imap) model))
 
 let map_keys map =
   let add k _ set = IntSet.add k set in
