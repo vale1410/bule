@@ -2,7 +2,22 @@
 * `opam install dune menhir minisat qbf tsort`
 * `make install`
 
-In case there are problems of the type: 
+
+If there are problems of the type: 
+```
+<><> Error report <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+┌─ The following actions failed
+│ λ build qbf 0.3
+└─ 
+╶─ No changes have been performed
+```
+
+C++ compiler should be set to gcc with (does not work with CLION) : 
+```
+export CC=gcc
+```
+
+If there are problems of the type: 
 `
 ^^^^^^^^^^^^^^^
 Error: Unbound value List.concat_map
@@ -23,6 +38,8 @@ update terminal:
 
 ```
 eval $(opam env)
+opam update
+opam upgrade
 ```
 
 and check again the version. 
