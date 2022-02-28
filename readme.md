@@ -12,12 +12,24 @@ The program `bule` is a sophisticated grounder for the modelling language Bule t
 * Various encodings for cardinality constraints and Pseudo Boolean constaints. 
 * Multiple cardinality encodings
 
+## Tutorial 
+
+A tutorial can be found in [tutorial](doc/tutorial) : 
+
+
+## Syntax Highlighting 
+
+* Vscode: https://marketplace.visualstudio.com/items?itemName=seanskggo.bule-syntax-highlighting
+* VIM: https://github.com/vale1410/vim-minizinc
+
+
 Related Links
 -----
 
-* http://www.satlive.org/ 
 * http://www.cs.utexas.edu/users/vl/tag/SAT-grounders
-* http://minisat.se/MiniSat+.html
+* http://www.satlive.org/ 
+* https://pysathq.github.io/
+* http://picat-lang.org/
 * http://potassco.sourceforge.net/
 * http://bach.istc.kobe-u.ac.jp/sugar/
 * https://accu.org/journals/overload/27/150/horenovsky_2640/
