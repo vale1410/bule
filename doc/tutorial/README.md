@@ -41,17 +41,17 @@ Representation of `(x1 OR NOT x2) AND (NOT x1 OR x2 OR x3) AND NOT x1` in Bule:
 
 To solve an formula:
 ```
-bule2 --solve basic.bul
+bule --solve basic.bul
 ```
 
 To show all models (all assignments that can be True):
 ```
-bule2 --solve --models 0 basic.bul
+bule --solve --models 0 basic.bul
 ```
 
 To show the first `x` satisfying models
 ```
-bule2 --solve --models x basic.bul
+bule --solve --models x basic.bul
 ```
 
 ## Encoding Problems
@@ -84,7 +84,7 @@ We have to determine the rules:
 
 [Bule file containing the rules for A and E](graph_colouring_basic.bul).
 
-Running `bule2 --solve --models 0 graph_colouring_basic.bul` should show all valid colour assignments.
+Running `bule --solve --models 0 graph_colouring_basic.bul` should show all valid colour assignments.
 
 Output:
 ```
@@ -230,7 +230,7 @@ Currently there is a lot of copy and pasting, but using bule we can perform grou
    ~set(a,red) | ~set(e,red).
    ```
    which introduces a new variable, but can make it easier to determine what clauses are being generated.
-   A useful tip is to pipe the output through `grep`, i.e. `bule2 graph_colouring_basic.bul | grep debug` to see only the clauses that have `debug` in it.
+   A useful tip is to pipe the output through `grep`, i.e. `bule graph_colouring_basic.bul | grep debug` to see only the clauses that have `debug` in it.
    
    Here we can see that there are unnecessary clauses being generated, i.e. below, the 2nd clause below is the same as the 1st
    ```
@@ -269,7 +269,7 @@ Currently there is a lot of copy and pasting, but using bule we can perform grou
    It helps the split the file into 2, i.e. [graph_colouring_grounded.bul](graph_colouring_grounded.bul) (which represents the graph colouring problem) and [graph1.bul](graph1.bul) (which represents the graph in the image above).
    Then we can run the command
    ```
-   bule2 --solve --models 0 graph_colouring_grounded.bul graph1.bul
+   bule --solve --models 0 graph_colouring_grounded.bul graph1.bul
    ```
    to find all the valid instances of colour assignments for graph1.
    
