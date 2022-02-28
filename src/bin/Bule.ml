@@ -1,5 +1,5 @@
 open Printf
-open Bule2
+open Bule
 
 type output_format = Bule | Dimacs | Qdimacs
 
@@ -36,11 +36,12 @@ let get () =
                   ("--facts",  Arg.Set facts, "Enable printing of grounding facts. The option has no effect if \"solve\" is set to \"true\". Default: \"false\".");
                   ("--default_show", Arg.Bool (update default_show), "Default showing behaviour for literals. The option has no effect if \"solve\" is set to \"false\". Default \"true\".");
                  ] in
-  let usage_msg = "BULE Grounder. Options available:" in
+  let usage_msg = "BULE Grounder <development>. Options available:" in
+(*  let usage_msg = "BULE Grounder Version 4.0.0. Options available:" in*)
   let add_name s = input_names := s :: !input_names in
   Arg.parse speclist add_name usage_msg;
   let files = match List.rev !input_names with
-  | [] -> failwith "Wrong number of arguments. Usage: bule2 file"
+  | [] -> failwith "Wrong number of arguments. Usage: bule file"
   | _ :: _ as names -> names in
   let solver = match !solver with
     | "quantor" -> Solve.Quantor

@@ -1,4 +1,4 @@
-all: dlpag
+all: bule
 
 .PHONY: clean dlpag
 
@@ -6,8 +6,8 @@ clean:
 	rm -f *~ -r __pycache__
 	dune clean
 
-dlpag:
-	dune build bin/Bule2.exe
+bule:
+	dune build bin/Bule.exe
 
 install:
 	dune build @install

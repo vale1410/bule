@@ -1,4 +1,0 @@
-(executable
- (name Bule2)
- (public_name bule2)
- (libraries bule2))
