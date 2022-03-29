@@ -3,6 +3,9 @@ open Bule
 
 type output_format = Bule | Dimacs | Qdimacs
 
+let version_string = "<development>"
+(*let version_string = "4.0.0"*)
+
 let read_output_format = function
   | "bule" -> Bule
   | "dimacs" -> Dimacs
@@ -26,6 +29,7 @@ let get () =
   let solve = ref false in
   let facts = ref false in
   let print_mode = ref Bule in
+  let print_version () = eprintf "BULE Grounder, version %s.\n" version_string; exit 0 in
   let output_symbols = ["qdimacs"; "dimacs"; "bule"]
   and output_treat s = print_mode := read_output_format s in
   let speclist = [("-",        Arg.Unit (fun () -> update input_names ("-" :: !input_names)), "Read the BULE code from the standard input.");
@@ -35,9 +39,9 @@ let get () =
                   ("--output", Arg.Symbol (output_symbols, output_treat), "Output format (QDIMACS, DIMACS, or BULE. The option has no effect if \"solve\" is set to \"true\". Default \"bule\".");
                   ("--facts",  Arg.Set facts, "Enable printing of grounding facts. The option has no effect if \"solve\" is set to \"true\". Default: \"false\".");
                   ("--default_show", Arg.Bool (update default_show), "Default showing behaviour for literals. The option has no effect if \"solve\" is set to \"false\". Default \"true\".");
+                  ("--version", Arg.Unit print_version, "Display the version number.")
                  ] in
-  let usage_msg = "BULE Grounder <development>. Options available:" in
-(*  let usage_msg = "BULE Grounder Version 4.0.0. Options available:" in*)
+  let usage_msg = sprintf "BULE Grounder %s. Options available:" version_string in
   let add_name s = input_names := s :: !input_names in
   Arg.parse speclist add_name usage_msg;
   let files = match List.rev !input_names with
