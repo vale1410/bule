@@ -1,0 +1,240 @@
+instance,Abox,vars,clauses,grounding (ms),result,solving caqe (1000s timeout)
+A-1-admbuster_1000.bul ,2499,7499,15492,522, , 1000100ms
+A-1-admbuster_2000.bul ,4999,14999,30992,2204,0, 223ms
+A-1-admbuster_4000.bul ,9999,29999,61992,19063,0, 735ms
+A-1-admbuster_6000.bul ,14999,44999,92992,47877, , 1000202ms
+A-1-afinput_exp_acyclic_depvary_step3_batch_yyy01.bul ,1529,1779,7792,71,0, 12ms
+A-1-afinput_exp_acyclic_indvary1_step5_batch_yyy04.bul ,117,247,660,10,1, 16ms
+A-1-afinput_exp_acyclic_indvary1_step5_batch_yyy09.bul ,585,790,3045,23,1, 66ms
+A-1-afinput_exp_acyclic_indvary3_step1_batch_yyy10.bul ,116,266,667,8,1, 18ms
+A-1-BA_180_10_2.bul ,381,1286,2445,25, , 1000027ms
+A-1-BA_200_10_5.bul ,423,1428,2715,28, , 1000032ms
+A-1-BA_40_80_5.bul ,115,320,695,10,1, 103538ms
+A-1-BA_60_70_3.bul ,164,469,1000,10, , 1000017ms
+A-1-brookings-or-us.gml.50.bul ,31,91,188,6,1, 12ms
+A-1-caravan-or-us.gml.80.bul ,57,152,339,7,1, 1385ms
+A-1-ER_100_100_1.bul ,5197,5707,26288,440,0, 45ms
+A-1-ferry2.pfile-L2-C1-05.pddl.3.cnf.bul ,540,1565,3312,63, , 1000026ms
+A-1-ferry2.pfile-L2-C1-08.pddl.1.cnf.bul ,223,653,1370,13, , 1000023ms
+A-1-ferry2.pfile-L3-C1-04.pddl.2.cnf.bul ,781,2146,4721,86,0, 13ms
+A-1-grd_2065_1_8.bul ,23251,33576,122447,45615,0, 684ms
+A-1-grd_418_2_9.bul ,2166,4256,12081,317,0, 27ms
+A-1-grd_489_5_8.bul ,6434,8879,33634,2084,0, 76ms
+A-1-rockland-county-department-of-public-transportation_20121220_2018.gml.20.bul ,47,127,280,6,0, 6ms
+A-1-stb_190_70.bul ,1012,1962,5627,76, , 1000083ms
+A-1-stb_291_2.bul ,3653,5108,19135,458, , 1000069ms
+A-1-stb_389_42.bul ,2042,3987,11374,254,0, 30ms
+A-1-stb_437_137.bul ,1977,4162,11193,263,0, 28ms
+A-2-admbuster_8000.bul ,19999,59999,123992,89322,0, 2698ms
+A-2-BA_180_20_1.bul ,399,1304,2535,27, , 1000022ms
+A-2-BA_200_30_2.bul ,463,1468,2915,31, , 1000032ms
+A-2-ferry2.pfile-L3-C4-09.pddl.2.cnf.bul ,3598,9633,21608,1084, , 1000038ms
+A-2-stb_422_250.bul ,5103,7213,26778,1078, , 1000060ms
+A-2-stb_428_430.bul ,4131,6271,21936,713, , 1000074ms
+A-2-stb_547_485.bul ,3988,6723,21578,851, , 1000126ms
+A-2-WS_300_16_70_30.bul ,2701,4201,14402,306,0, 1152ms
+A-2-WS_300_16_90_30.bul ,2701,4201,14402,308, , 1000106ms
+A-3-bw2.pfile-4-02.pddl.2.cnf.bul ,6248,16208,37213,4469,0, 256ms
+B-1-admbuster_1000.bul ,2499,7499,15492,550,0, 78ms
+B-1-admbuster_2000.bul ,4999,14999,30992,2227, , 1000105ms
+B-1-afinput_exp_acyclic_indvary1_step3_batch_yyy06.bul ,3502,3872,17729,211,0, 21ms
+B-1-afinput_exp_cycles_indvary1_step8_batch_yyy08.bul ,258,463,1410,12,1, 56ms
+B-1-BA_100_20_1.bul ,223,728,1415,17, , 1000021ms
+B-1-BA_120_20_2.bul ,267,872,1695,15, , 1000025ms
+B-1-BA_40_30_3.bul ,95,300,595,9,0, 6ms
+B-1-BA_40_60_2.bul ,107,312,655,10,1, 1190ms
+B-1-BA_40_80_4.bul ,115,320,695,11,0, 6ms
+B-1-ferry2.pfile-L2-C1-02.pddl.2.cnf.bul ,440,1240,2677,28,0, 10ms
+B-1-ferry2.pfile-L2-C2-06.pddl.2.cnf.bul ,672,1867,4074,55,0, 12ms
+B-1-grd_156_3_6.bul ,566,1346,3295,59, , 1000032ms
+B-1-grd_1892_1_3.bul ,19666,29126,104003,33729,0, 555ms
+B-1-massachusetts-archiver_20090912_0208.gml.50.bul ,93,263,564,9, , 1000019ms
+B-1-stb_138_162.bul ,1530,2220,8061,104, , 1000044ms
+B-1-stb_161_74.bul ,1562,2367,8290,134,0, 15ms
+B-1-stb_199_128.bul ,642,1637,3804,49,0, 11ms
+B-1-university-of-pretoria_20150805_1406.normalized.gml.80.bul ,31,96,191,5,1, 16ms
+B-2-BA_140_30_5.bul ,325,1030,2045,32, , 1000027ms
+B-2-comune-di-castellanza_20151218_2338.gml.80.bul ,132,307,762,11, , 1000018ms
+B-2-stb_287_202.bul ,3098,4533,16348,368,0, 173ms
+B-2-stb_291_2.bul ,3653,5108,19135,455,0, 32ms
+B-2-stb_330_291.bul ,3545,5195,18712,482, , 1000068ms
+B-2-stb_410_118.bul ,4131,6181,21882,739,0, 254ms
+B-2-stb_625_161.bul ,3379,6504,18767,791,0, 182ms
+B-2-WS_200_20_90_50.bul ,2201,3201,11602,236,0, 520ms
+B-3-stb_327_100.bul ,3488,5123,18418,465,0, 5223ms
+B-3-stb_339_393.bul ,4714,6409,24584,790, , 1000068ms
+B-3-stb_380_405.bul ,4884,6784,25557,937,0, 64ms
+B-3-stb_390_450.bul ,3236,5186,17347,528,0, 2484ms
+B-3-stb_428_430.bul ,4131,6271,21936,704, , 1000062ms
+B-3-stb_430_209.bul ,3129,5279,16932,523,0, 6850ms
+B-3-stb_457_193.bul ,5532,7817,29028,1417,0, 63ms
+B-3-stb_522_11.bul ,3524,6134,19183,731, , 1000095ms
+B-3-stb_590_330.bul ,4034,6984,21937,877, , 1000113ms
+B-3-stb_696_368.bul ,3825,7305,21210,905,0, 98ms
+B-3-stb_696_412.bul ,4092,7572,22545,1008,0, 389ms
+B-3-stb_763_492.bul ,4538,8353,24976,1346,0, 99ms
+B-3-stb_767_429.bul ,4183,8018,23213,1111, , 1000102ms
+B-3-WS_300_16_70_30.bul ,2701,4201,14402,311, , 1000089ms
+B-3-WS_300_16_90_30.bul ,2701,4201,14402,334,0, 664ms
+B-4-stb_547_485.bul ,3988,6723,21578,838,0, 940ms
+C-1-admbuster_10000.bul ,24999,74999,154992,142277,0, 3815ms
+C-1-admbuster_1000.bul ,2499,7499,15492,526,0, 81ms
+C-1-admbuster_6000.bul ,14999,44999,92992,47741,0, 1375ms
+C-1-admbuster_8000.bul ,19999,59999,123992,91844,0, 2676ms
+C-1-afinput_exp_acyclic_indvary1_step1_batch_yyy08.bul ,909,1104,4659,37,0, 13ms
+C-1-afinput_exp_acyclic_indvary1_step5_batch_yyy07.bul ,54,184,345,7,1, 23ms
+C-1-afinput_exp_cycles_indvary1_step6_batch_yyy02.bul ,926,1166,4771,39,0, 12ms
+C-1-BA_120_20_5.bul ,267,872,1695,16, , 1000021ms
+C-1-BA_60_60_2.bul ,159,464,975,9, , 1000019ms
+C-1-BA_80_20_4.bul ,179,584,1135,11, , 1000018ms
+C-1-bluestar-or-us.gml.20.bul ,54,174,339,6,0, 6ms
+C-1-calaveras-transit_20151216_1707.gml.50.bul ,115,275,668,10, , 1000017ms
+C-1-ER_100_100_3.bul ,5204,5714,26323,421,0, 43ms
+C-1-grd_489_5_8.bul ,6434,8879,33634,2334,0, 93ms
+C-1-stb_234_487.bul ,1641,2811,8904,168,0, 19ms
+C-1-stb_373_251.bul ,2865,4730,15441,425, , 1000189ms
+C-1-stb_463_93.bul ,2541,4856,14091,415,0, 75ms
+C-1-WS_200_28_70_10.bul ,3001,4001,15602,296,0, 91ms
+C-2-stb_304_352.bul ,2992,4512,15869,392,0, 3184ms
+n100p3q34ve.bul ,2126,2626,10927,128, , 1000113ms
+n100p5q2.bul ,3160,3660,16097,221,0, 34ms
+n128p5q2_ve.bul ,4866,5506,24711,399, , 1000096ms
+n160p3q24e.bul ,4819,5619,24572,446, , 1000061ms
+n160p5q2_ve.bul ,7787,8587,39412,905, , 1000062ms
+n192p5q2_ve.bul ,11254,12214,56843,1768,0, 119ms
+n224p5q2_ve.bul ,15433,16553,77834,2789,0, 156ms
+n256p3q08n.bul ,10952,12232,55525,2125,0, 4982ms
+n256p5q2_e.bul ,19779,21059,99660,4145,0, 345ms
+Small-result-b100.bul ,1069,1459,5576,89,1, 874ms
+Small-result-b101.bul ,2164,2659,11114,129,1, 2216ms
+Small-result-b102.bul ,2452,2947,12554,145,1, 2508ms
+Small-result-b103.bul ,2038,2518,10475,155,1, 2077ms
+Small-result-b104.bul ,1297,1687,6716,76,1, 1083ms
+Small-result-b105.bul ,1411,1801,7286,71,1, 1183ms
+Small-result-b106.bul ,1192,1582,6191,59,1, 976ms
+Small-result-b107.bul ,1480,1870,7631,77,1, 1208ms
+Small-result-b108.bul ,1624,2014,8351,107,1, 1348ms
+Small-result-b10.bul ,19,49,110,5,1, 6ms
+Small-result-b11.bul ,71,141,394,7,1, 7ms
+Small-result-b12.bul ,271,421,1442,18,1, 29ms
+Small-result-b13.bul ,25,55,140,5,1, 6ms
+Small-result-b14.bul ,113,183,604,9,1, 11ms
+Small-result-b15.bul ,481,631,2492,20,1, 45ms
+Small-result-b16.bul ,22,52,125,5,1, 6ms
+Small-result-b17.bul ,92,162,499,7,1, 7ms
+Small-result-b18.bul ,376,526,1967,15,1, 38ms
+Small-result-b19.bul ,44,99,250,7,1, 7ms
+Small-result-b20.bul ,152,267,826,8,1, 22ms
+Small-result-b21.bul ,152,267,826,8,1, 17ms
+Small-result-b22.bul ,560,795,2938,39,1, 141ms
+Small-result-b23.bul ,560,795,2938,24,1, 147ms
+Small-result-b24.bul ,2144,2619,11002,127,1, 2254ms
+Small-result-b25.bul ,2144,2619,11002,147,1, 2123ms
+Small-result-b26.bul ,8384,9339,42490,1152,1, 36292ms
+Small-result-b27.bul ,8384,9339,42490,1219,1, 36733ms
+Small-result-b29.bul ,44,124,265,6,1, 9ms
+Small-result-b2.bul ,14,39,82,4,1, 7ms
+Small-result-b30.bul ,46,126,275,7,1, 9ms
+Small-result-b31.bul ,47,127,280,7,1, 10ms
+Small-result-b33.bul ,34,79,194,4,1, 8ms
+Small-result-b34.bul ,41,81,226,6,1, 7ms
+Small-result-b35.bul ,32,67,178,5,1, 6ms
+Small-result-b36.bul ,116,211,634,10,1, 19ms
+Small-result-b37.bul ,146,231,778,7,1, 12ms
+Small-result-b38.bul ,107,177,574,9,1, 7ms
+Small-result-b39.bul ,74,159,418,8,1, 8ms
+Small-result-b3.bul ,44,99,250,5,1, 7ms
+Small-result-b40.bul ,112,187,602,6,1, 12ms
+Small-result-b41.bul ,16,46,95,4,1, 6ms
+Small-result-b42.bul ,50,115,286,5,1, 9ms
+Small-result-b43.bul ,52,112,293,6,1, 9ms
+Small-result-b44.bul ,172,307,938,9,1, 36ms
+Small-result-b45.bul ,182,307,982,8,1, 23ms
+Small-result-b46.bul ,200,320,1069,10,1, 30ms
+Small-result-b47.bul ,207,317,1098,10,1, 17ms
+Small-result-b48.bul ,188,303,1006,9,1, 13ms
+Small-result-b49.bul ,632,907,3322,43,1, 178ms
+Small-result-b4.bul ,152,267,826,8,1, 17ms
+Small-result-b50.bul ,676,931,3530,29,1, 175ms
+Small-result-b51.bul ,750,995,3894,37,1, 108ms
+Small-result-b52.bul ,850,1090,4391,38,1, 108ms
+Small-result-b53.bul ,638,883,3334,45,1, 207ms
+Small-result-b54.bul ,704,939,3658,51,1, 90ms
+Small-result-b55.bul ,798,1023,4122,43,1, 139ms
+Small-result-b56.bul ,698,928,3625,30,1, 179ms
+Small-result-b57.bul ,22,62,131,5,1, 7ms
+Small-result-b58.bul ,23,63,136,5,1, 5ms
+Small-result-b59.bul ,532,867,2858,40,1, 406ms
+Small-result-b5.bul ,560,795,2938,23,1, 139ms
+Small-result-b60.bul ,499,659,2588,30,1, 58ms
+Small-result-b61.bul ,506,666,2623,21,1, 54ms
+Small-result-b62.bul ,548,708,2833,28,1, 49ms
+Small-result-b63.bul ,569,729,2938,37,1, 54ms
+Small-result-b64.bul ,520,680,2693,20,1, 40ms
+Small-result-b65.bul ,968,1323,5050,66,1, 178ms
+Small-result-b66.bul ,548,883,2938,34,1, 418ms
+Small-result-b67.bul ,294,419,1542,12,1, 16ms
+Small-result-b68.bul ,322,447,1682,20,1, 31ms
+Small-result-b69.bul ,309,434,1617,19,1, 32ms
+Small-result-b6.bul ,2144,2619,11002,130,1, 2162ms
+Small-result-b70.bul ,337,462,1757,13,1, 32ms
+Small-result-b71.bul ,270,395,1422,17,1, 26ms
+Small-result-b72.bul ,298,423,1562,19,1, 30ms
+Small-result-b73.bul ,188,508,1129,16,1, 157ms
+Small-result-b74.bul ,190,510,1139,16,1, 157ms
+Small-result-b75.bul ,636,851,3306,28,1, 43ms
+Small-result-b76.bul ,700,915,3626,28,1, 85ms
+Small-result-b77.bul ,322,447,1682,21,1, 29ms
+Small-result-b78.bul ,322,447,1682,13,1, 36ms
+Small-result-b79.bul ,337,462,1757,13,1, 21ms
+Small-result-b80.bul ,309,434,1617,20,1, 20ms
+Small-result-b81.bul ,192,302,1023,9,1, 19ms
+Small-result-b82.bul ,298,423,1562,13,1, 43ms
+Small-result-b83.bul ,42,102,243,5,1, 8ms
+Small-result-b84.bul ,52,112,293,7,1, 6ms
+Small-result-b85.bul ,154,274,839,8,1, 18ms
+Small-result-b86.bul ,118,238,659,10,1, 8ms
+Small-result-b87.bul ,172,292,929,12,1, 18ms
+Small-result-b88.bul ,1588,2083,8234,92,1, 1617ms
+Small-result-b89.bul ,1960,2475,10106,117,1, 2054ms
+Small-result-b8.bul ,20,60,121,5,1, 6ms
+Small-result-b90.bul ,1150,1575,6002,108,1, 1133ms
+Small-result-b91.bul ,2164,2659,11114,183,1, 2262ms
+Small-result-b92.bul ,2452,2947,12554,145,1, 2545ms
+Small-result-b93.bul ,2600,3115,13306,156,1, 2755ms
+Small-result-b94.bul ,1542,1967,7962,113,1, 1348ms
+Small-result-b95.bul ,1738,2163,8942,95,1, 770ms
+Small-result-b96.bul ,1466,1891,7582,112,1, 631ms
+Small-result-b97.bul ,1946,2371,9982,105,1, 1799ms
+Small-result-b98.bul ,2186,2611,11182,118,1, 984ms
+Small-result-b99.bul ,1774,2254,9155,118,1, 1864ms
+Small-result-b9.bul ,40,120,245,6,1, 8ms
+T-1-admbuster_1000.bul ,2499,7499,15492,522,0, 67ms
+T-1-admbuster_2000.bul ,4999,14999,30992,2194, , 1000099ms
+T-1-admbuster_4000.bul ,9999,29999,61992,19099,0, 735ms
+T-1-admbuster_6000.bul ,14999,44999,92992,47548,0, 1356ms
+T-1-afinput_exp_acyclic_indvary1_step3_batch_yyy03.bul ,4194,4589,21204,277,0, 37ms
+T-1-afinput_exp_acyclic_indvary1_step3_batch_yyy10.bul ,844,1074,4355,58,0, 9ms
+T-1-afinput_exp_acyclic_indvary1_step5_batch_yyy10.bul ,310,505,1664,22,0, 6ms
+T-1-BA_100_10_3.bul ,213,718,1365,19,0, 7ms
+T-1-BA_100_10_5.bul ,213,718,1365,20, , 1000023ms
+T-1-BA_20_60_3.bul ,55,160,335,7,1, 296ms
+T-1-BA_40_50_2.bul ,103,308,635,10, , 1000046ms
+T-1-BA_80_30_3.bul ,187,592,1175,17, , 1000062ms
+T-1-caravan-airport-transportation_20151216_1604.gml.20.bul ,46,141,284,7,1, 1127ms
+T-1-cascadespoint-or-us.gml.20.bul ,17,52,103,5,0, 64ms
+T-1-ER_100_30_5.bul ,1604,2109,8320,93, , 1000072ms
+T-1-ferry2.pfile-L2-C4-06.pddl.2.cnf.bul ,1538,4203,9286,217,0, 160ms
+T-1-ferry2.pfile-L2-C4-07.pddl.2.cnf.bul ,1538,4203,9286,200,0, 136ms
+T-1-ferry2.pfile-L3-C1-04.pddl.2.cnf.bul ,781,2146,4721,66, , 1000065ms
+T-1-grd_156_3_6.bul ,566,1346,3295,36, , 1000062ms
+T-1-grd_1892_1_3.bul ,19666,29126,104003,33806, , 1000074ms
+T-1-stb_127_253.bul ,957,1592,5163,100,0, 17ms
+T-1-stb_192_170.bul ,1966,2926,10403,166, , 1000059ms
+T-1-stb_218_401.bul ,3052,4142,15911,298,0, 25ms
+T-1-stb_280_229.bul ,1494,2894,8307,176,0, 26ms
+T-2-admbuster_10000.bul ,24999,74999,154992,145773, , 1000222ms
+T-2-admbuster_8000.bul ,19999,59999,123992,91133,0, 2720ms
+T-2-ferry2.pfile-L3-C3-03.pddl.2.cnf.bul ,2772,7437,16656,640, , 1000062ms
+T-2-stb_265_466.bul ,3618,4943,18882,419,0, 1551ms
+T-2-stb_339_81.bul ,4032,5727,21174,623,, 208ms

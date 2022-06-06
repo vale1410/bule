@@ -1,0 +1,11 @@
+#ground element[a], element[b], element[c], element[d], element[e], element[f].
+element[X] :: #exists[0] var(X).
+
+element[X] :: #ground cardinality_var[ex1,X].
+#ground cardinality_constraint[ex1,leq,1,adder]. 
+%
+%element[X] :: #ground cardinality_var[ex2,X].
+%#ground cardinality_constraint[ex2,eq,4,adder]. 
+%
+%element[X] :: #ground cardinality_var[ex3,X].
+%#ground cardinality_constraint[ex3,eq,4,total]. 

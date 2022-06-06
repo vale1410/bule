@@ -1,0 +1,41 @@
+% Quantifier Declaration
+arg[X]   :: #exists[1] e(X).
+arg[X]   :: #exists[1] attacked(X).
+arg[X]   :: #forall[2] f(X).
+arg[X]   :: #exists[3] attackedF(X).
+arg[X]   :: #exists[3] cheatCF(X).
+att[X,Y] :: #exists[3] cheatA(X,Y).
+arg[X]   :: #exists[3] cheatM(X).
+         :: #exists[3] cheat.
+
+% Clauses
+target[X] :: e(X).
+
+att[X,Y] :: e(X) -> attacked(Y).
+arg[Y] :: attacked(Y) -> att[X,Y] : e(X).
+
+% conflict free
+arg[X] :: e(X) -> ~attacked(X).
+
+% acceptable
+att[X,Y] :: e(Y) -> attacked(X).
+
+% Now for f
+att[X,Y] :: f(X) -> attackedF(Y).
+arg[Y] :: attackedF(Y) -> att[X,Y] : f(X).
+
+% conflict free
+arg[X] :: cheatCF(X) -> f(X).
+arg[X] :: cheatCF(X) -> attackedF(X).
+
+% acceptable
+att[X,Y] :: cheatA(X,Y) -> f(Y).
+att[X,Y] :: cheatA(X,Y) -> ~attackedF(X).
+
+% missing
+arg[X] :: cheatM(X) -> e(X).
+arg[X] :: cheatM(X) -> ~f(X).
+
+cheat -> arg[X] : cheatCF(X) | arg[X] : cheatM(X) | att[X,Y] : cheatA(X,Y).
+arg[X] :: ~cheat & f(X) -> e(X).
+

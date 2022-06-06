@@ -1,0 +1,158 @@
+%translation from generated input to stdlib
+predicate[F]     :: #ground fluent[F]. 
+timebudget[Tmax] :: #ground maxtime[Tmax]. 
+
+
+fluent[F]  :: #ground reach_fluent[id,F].
+maxtime[T] :: #ground reach_length[id,T].
+              #ground reach_choose[id,binary]. % other option is "binary"
+% the reachability library outputs reach_init[ID,Q,T], reach_goal[ID,Q,T], reach_succ[ID,Q,U,T], 
+%    and generates the intensional atoms accordingly 
+
+reach_init[ID,_,T], fluent[F],  init[F] :: reach_test(ID,init(T)) ->  reach_state(ID,T,F).
+reach_init[ID,_,T], fluent[F], ~init[F] :: reach_test(ID,init(T)) -> ~reach_state(ID,T,F).
+
+reach_goal[ID,_,T], goal[F] :: reach_test(ID,goal(T)) -> reach_state(ID,T,F).
+
+reach_succ[ID,Q,T,U], action[A] :: #exists[Q] do(T,A).
+
+reach_succ[ID,_,T,U] :: action[A] : do(T,A).
+reach_succ[ID,_,T,U], action[A1], action[A2], A1 < A2 :: ~do(T,A1) | ~do(T,A2).
+
+reach_succ[ID,_,T,U], pre[A,F] :: reach_test(ID,succ(T,U)) & do(T,A) ->  reach_state(ID,T,F).
+reach_succ[ID,_,T,U], neg[A,F] :: reach_test(ID,succ(T,U)) & do(T,A) -> ~reach_state(ID,U,F).
+reach_succ[ID,_,T,U], pos[A,F] :: reach_test(ID,succ(T,U)) & do(T,A) ->  reach_state(ID,U,F).
+reach_succ[ID,_,T,U], action[A], fluent[F], ~neg[A,F], ~pos[A,F] ::
+reach_test(ID,succ(T,U)) & do(T,A) &  reach_state(ID,T,F) ->  reach_state(ID,U,F).
+reach_succ[ID,_,T,U], action[A], fluent[F], ~neg[A,F], ~pos[A,F] ::
+reach_test(ID,succ(T,U)) & do(T,A) & ~reach_state(ID,T,F) -> ~reach_state(ID,U,F).
+
+reach_succ[ID,_,T,U], fluent[F], action[A] :: #hide ~do(T,A).
+reach_time[ID,_,T], fluent[F] :: #hide ~reach_state(ID,T,F), reach_state(ID,T,F).
+
+
+
+%% STD LIB INDEX
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%% Bule Standard Library 1.0                                            %%%%%%%%%%%%%%
+%%%%%%%%%%%%%% Bule Version 4.0.0                                                   %%%%%%%%%%%%%%
+%%%%%%%%%%%%%% 2022-02-28                                                           %%%%%%%%%%%%%%
+%%%%%%%%%%%%%% Jean Christoph Jung, Valentin Mayer-Eichberger, Abdallah Saffidine   %%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% INDEX                %%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Input:  `index_input[ID,X]` a set `ID` containing elements `X`.
+%%% Output: `index[ID,X,I]` `X` is the `I`th element in set `ID` (the first element is numbered `0`th).
+%%% Output: `index_last[ID,N]` there are `N+1` elements in set `ID`.
+%%% Output: `index_range[ID,I]` there is an element numbered `I` in set `ID`.
+
+index_input[ID,X], index_input[ID,Y], Y<X  :: #ground index_prec[ID,X].
+index_input[ID,X], ~index_prec[ID,X]       :: #ground index[ID,X,0].
+index_input[ID,X], index_input[ID,Y], X<Y, index_input[ID,Z], Y<Z :: #ground index_split[ID,X,Z].
+index_input[ID,X], index_input[ID,Y], X<Y, ~index_split[ID,X,Y], index[ID,X,I] :: #ground index[ID,Y,I+1].
+index_input[ID,X], index_input[ID,Y], X<Y :: #ground index_succ[ID,X].
+index_input[ID,X], ~index_succ[ID,X], index[ID,X,N] :: #ground index_last[ID,N].
+index[ID,X,I] :: #ground index_range[ID,I].
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% LOG                  %%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Input:  `log_input[ID,N]` where `N` is an integer to be encoded in binary.
+%%% Output: `log_binary[ID,N,I,B]` indicates that in the binary encoding of the number `N` in bit position `I` is B (0 or 1).
+%%% Output: `log_position[ID,I]` I has a bit position, I being number of bits needed for the largest integer for ID
+%%% Output: `log_highest[ID,H]`    H is the highest bit position from the largest integer in set ID
+
+log_input[ID,N]                                :: #ground log_aux[ID,N,N,0].
+log_aux[ID,X,N,I], N > 1                       :: #ground log_aux[ID,X,N/2,I+1].
+log_aux[ID,X,N,I]                              :: #ground log_binary[ID,X,I,N #mod 2].
+log_aux[ID,_,_,I]                              :: #ground log_position[ID,I]. 
+log_aux[ID,_,_,I], ~log_aux[ID,_,_,I+1]        :: #ground log_bits[ID,I+1]. 
+log_input[ID,X], log_position[ID,I],  2**I > X :: #ground log_binary[ID,X,I,0].
+
+%% INPUT: reach_fluent[ID,F].
+%% INPUT: reach_length[ID,MAXD].
+%% INPUT: reach_choose[ID,Type]. % Type is direct or binary
+%% OUTPUT: reach_time[ID,QD,T] reach_init[ID,QD,T],   reach_goal[ID,QD,T],   reach_succ[ID,QD,FR,TO]
+%% OUTPUT: reach_state(ID,T,F) reach_test(ID,init(T)) reach_test(ID,goal(T)) reach_test(ID,succ(T,U))
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% %%%%%%% REACHABILITY DIRECT  %%%%%%%%%%%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+reach_choose[ID,direct], reach_length[ID,L]    :: #ground reach1_length[ID,L].
+
+reach1_length[ID,MAXD] :: #ground reach1_time[ID,0,0..MAXD].
+reach1_length[ID,_]    :: #ground reach1_init[ID,0,0].
+reach1_length[ID,MAXD] :: #ground reach1_goal[ID,0,MAXD].
+
+reach1_time[ID,Q,T], reach1_time[ID,Q,T+1] :: #ground reach1_succ[ID,Q,T,T+1].
+
+reach_choose[ID,direct], reach1_time[ID,Q,T]   :: #ground reach_time[ID,Q,T].
+reach_choose[ID,direct], reach1_init[ID,Q,T]   :: #ground reach_init[ID,Q,T].
+reach_choose[ID,direct], reach1_goal[ID,Q,T]   :: #ground reach_goal[ID,Q,T].
+reach_choose[ID,direct], reach1_succ[ID,Q,T,U] :: #ground reach_succ[ID,Q,T,U].
+
+reach_choose[ID,direct], reach_fluent[ID,F]    :: #ground reach1_fluent[ID,F].
+
+reach1_time[ID,_,T], reach1_fluent[ID,F] :: #exists[0] reach_state(ID,T,F).
+reach1_init[ID,_,T]                    :: #exists[0] reach_test(ID,init(T)).
+reach1_goal[ID,_,U]                    :: #exists[0] reach_test(ID,goal(U)).
+reach1_succ[ID,_,T,U]                  :: #exists[0] reach_test(ID,succ(T,U)).
+reach1_init[ID,_,T] :: reach_test(ID,init(T)).
+reach1_goal[ID,_,U] :: reach_test(ID,goal(U)).
+reach1_succ[ID,_,T,U] :: reach_test(ID,succ(T,U)).
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% %%%%%%% REACHABILITY BINARY  %%%%%%%%%%%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+reach_choose[ID,binary], reach2_succ[ID,Q,T,U] :: #ground reach_succ[ID,Q,T,U].
+reach_choose[ID,binary], reach_fluent[ID,F]    :: #ground reach2_fluent[ID,F].
+reach_choose[ID,binary], reach_length[ID,L]    :: #ground reach2_length[ID,L-1]. %% of by 1 error wrt direct encoding above
+reach_choose[ID,binary], reach2_time[ID,Q,T]   :: #ground reach_time[ID,Q,T].
+reach_choose[ID,binary], reach2_init[ID,Q,T]   :: #ground reach_init[ID,Q,T].
+reach_choose[ID,binary], reach2_goal[ID,Q,T]   :: #ground reach_goal[ID,Q,T].
+reach_succ[ID,_,T,U] :: #ground time_point[ID,T].
+
+reach2_length[ID,MAXD], MAXD > 0 :: #ground reach2_highest[ID,(2 // MAXD)].
+reach2_highest[ID,H]   :: #ground reach2_depth[ID,0..H].
+
+reach2_highest[ID,H] :: #ground reach2_quantifier[ID,2*H+2].
+
+reach2_quantifier[ID,Q] :: #ground reach2_init[ID,Q,fr].
+reach2_quantifier[ID,Q] :: #ground reach2_goal[ID,Q,to].
+reach2_quantifier[ID,Q] :: #ground reach2_succ[ID,Q,fr,to].
+reach2_quantifier[ID,Q] :: #ground reach2_time[ID,Q,fr], reach2_time[ID,Q,to].
+
+reach2_highest[ID,H], reach2_fluent[ID,F], reach2_depth[ID,D] :: #exists[2*H-2*D]   promise(ID,D,F).
+reach2_highest[ID,H],                      reach2_depth[ID,D] :: #forall[2*H-2*D+1] toggle(ID,D).
+
+reach2_time[ID,Q,T], reach2_fluent[ID,F] :: #exists[Q] reach_state(ID,T,F).
+reach2_init[ID,Q,T]                      :: #exists[Q] reach_test(ID,init(T)).
+reach2_goal[ID,Q,T]                      :: #exists[Q] reach_test(ID,goal(T)).
+reach2_succ[ID,Q,T,U]                    :: #exists[Q] reach_test(ID,succ(T,U)).
+
+reach2_depth[ID,D], reach2_fluent[ID,F] :: reach2_depth[ID,T], T<D : ~toggle(ID,T) &  toggle(ID,D) & ~promise(ID,D,F) -> ~reach_state(ID,fr,F).
+reach2_depth[ID,D], reach2_fluent[ID,F] :: reach2_depth[ID,T], T<D : ~toggle(ID,T) &  toggle(ID,D) &  promise(ID,D,F) ->  reach_state(ID,fr,F).
+reach2_depth[ID,D], reach2_fluent[ID,F] :: reach2_depth[ID,T], T<D :  toggle(ID,T) & ~toggle(ID,D) & ~promise(ID,D,F) -> ~reach_state(ID,to,F).
+reach2_depth[ID,D], reach2_fluent[ID,F] :: reach2_depth[ID,T], T<D :  toggle(ID,T) & ~toggle(ID,D) &  promise(ID,D,F) ->  reach_state(ID,to,F).
+
+reach2_succ[ID,_,_,_] :: reach2_depth[ID,T] : ~toggle(ID,T) ->  reach_test(ID,init(fr)).
+reach2_succ[ID,_,_,_],  reach2_depth[ID,T] ::  toggle(ID,T) -> ~reach_test(ID,init(fr)).
+
+reach2_length[ID,N] :: #ground log_input[ID,N]. 
+reach2_length[ID,N], log_binary[ID,N,I,0]  :: ~toggle(ID,I) | ~reach_test(ID,goal(to)).
+reach2_length[ID,N], log_binary[ID,N,I,1]  ::  toggle(ID,I) | ~reach_test(ID,goal(to)).
+reach2_length[ID,N] :: log_binary[ID,N,I,0] : toggle(ID,I) | log_binary[ID,N,I,1] : ~toggle(ID,I) | reach_test(ID,goal(to)).
+
+reach2_succ[ID,_,_,_] :: reach_test(ID,succ(fr,to)). %% TODO: check if this can be removed from the API because both direct and binary it's set to true
+
+
+

@@ -1,0 +1,285 @@
+:: #ground turnN[ 1 , black , 1 ].
+:: #ground turn1[ 1 , black ].
+:: #ground turnN[ 2 , white , 1 ].
+:: #ground turn1[ 2 , white ].
+:: #ground turnN[ 3 , black , 1 ].
+:: #ground turn1[ 3 , black ].
+:: #ground turnN[ 4 , white , 1 ].
+:: #ground turn1[ 4 , white ].
+:: #ground turnN[ 5 , black , 1 ].
+:: #ground turn1[ 5 , black ].
+:: #ground turnN[ 6 , white , 1 ].
+:: #ground turn1[ 6 , white ].
+:: #ground turnN[ 7 , black , 1 ].
+:: #ground turn1[ 7 , black ].
+:: #ground turnN[ 8 , white , 1 ].
+:: #ground turn1[ 8 , white ].
+:: #ground turnN[ 9 , black , 1 ].
+:: #ground turn1[ 9 , black ].
+:: #ground final[ 9 ].
+:: #ground finalN[ 9 ].
+:: #ground vertexLast[ 17 ].
+:: #ground edge[ black , 0 , 0 ].
+:: #ground edge[ black , 0 , 1 ].
+:: #ground edge[ black , 0 , 2 ].
+:: #ground edge[ black , 0 , 3 ].
+:: #ground edge[ black , 0 , 4 ].
+:: #ground edge[ black , 1 , 0 ].
+:: #ground edge[ black , 1 , 1 ].
+:: #ground edge[ black , 1 , 2 ].
+:: #ground edge[ black , 1 , 3 ].
+:: #ground edge[ black , 1 , 7 ].
+:: #ground edge[ black , 2 , 0 ].
+:: #ground edge[ black , 2 , 1 ].
+:: #ground edge[ black , 2 , 2 ].
+:: #ground edge[ black , 2 , 3 ].
+:: #ground edge[ black , 2 , 9 ].
+:: #ground edge[ black , 2 , 13 ].
+:: #ground edge[ black , 2 , 16 ].
+:: #ground edge[ black , 2 , 14 ].
+:: #ground edge[ black , 2 , 11 ].
+:: #ground edge[ black , 3 , 0 ].
+:: #ground edge[ black , 3 , 1 ].
+:: #ground edge[ black , 3 , 2 ].
+:: #ground edge[ black , 3 , 3 ].
+:: #ground edge[ black , 3 , 9 ].
+:: #ground edge[ black , 3 , 13 ].
+:: #ground edge[ black , 3 , 16 ].
+:: #ground edge[ black , 3 , 17 ].
+:: #ground edge[ black , 4 , 0 ].
+:: #ground edge[ black , 4 , 1 ].
+:: #ground edge[ black , 4 , 2 ].
+:: #ground edge[ black , 4 , 3 ].
+:: #ground edge[ black , 4 , 10 ].
+:: #ground edge[ black , 4 , 11 ].
+:: #ground edge[ black , 5 , 0 ].
+:: #ground edge[ black , 5 , 1 ].
+:: #ground edge[ black , 5 , 2 ].
+:: #ground edge[ black , 5 , 3 ].
+:: #ground edge[ black , 5 , 10 ].
+:: #ground edge[ black , 5 , 14 ].
+:: #ground edge[ black , 5 , 17 ].
+:: #ground edge[ black , 6 , 5 ].
+:: #ground edge[ black , 6 , 1 ].
+:: #ground edge[ black , 6 , 2 ].
+:: #ground edge[ black , 6 , 3 ].
+:: #ground edge[ black , 6 , 4 ].
+:: #ground edge[ black , 7 , 5 ].
+:: #ground edge[ black , 7 , 1 ].
+:: #ground edge[ black , 7 , 2 ].
+:: #ground edge[ black , 7 , 3 ].
+:: #ground edge[ black , 7 , 7 ].
+:: #ground edge[ black , 8 , 5 ].
+:: #ground edge[ black , 8 , 1 ].
+:: #ground edge[ black , 8 , 2 ].
+:: #ground edge[ black , 8 , 3 ].
+:: #ground edge[ black , 8 , 9 ].
+:: #ground edge[ black , 8 , 13 ].
+:: #ground edge[ black , 8 , 16 ].
+:: #ground edge[ black , 8 , 14 ].
+:: #ground edge[ black , 8 , 11 ].
+:: #ground edge[ black , 9 , 5 ].
+:: #ground edge[ black , 9 , 1 ].
+:: #ground edge[ black , 9 , 2 ].
+:: #ground edge[ black , 9 , 3 ].
+:: #ground edge[ black , 9 , 9 ].
+:: #ground edge[ black , 9 , 13 ].
+:: #ground edge[ black , 9 , 16 ].
+:: #ground edge[ black , 9 , 17 ].
+:: #ground edge[ black , 10 , 5 ].
+:: #ground edge[ black , 10 , 1 ].
+:: #ground edge[ black , 10 , 2 ].
+:: #ground edge[ black , 10 , 3 ].
+:: #ground edge[ black , 10 , 10 ].
+:: #ground edge[ black , 10 , 11 ].
+:: #ground edge[ black , 11 , 5 ].
+:: #ground edge[ black , 11 , 1 ].
+:: #ground edge[ black , 11 , 2 ].
+:: #ground edge[ black , 11 , 3 ].
+:: #ground edge[ black , 11 , 10 ].
+:: #ground edge[ black , 11 , 14 ].
+:: #ground edge[ black , 11 , 17 ].
+:: #ground edge[ black , 12 , 5 ].
+:: #ground edge[ black , 12 , 6 ].
+:: #ground edge[ black , 12 , 2 ].
+:: #ground edge[ black , 12 , 3 ].
+:: #ground edge[ black , 12 , 4 ].
+:: #ground edge[ black , 13 , 5 ].
+:: #ground edge[ black , 13 , 6 ].
+:: #ground edge[ black , 13 , 2 ].
+:: #ground edge[ black , 13 , 3 ].
+:: #ground edge[ black , 13 , 7 ].
+:: #ground edge[ black , 14 , 5 ].
+:: #ground edge[ black , 14 , 6 ].
+:: #ground edge[ black , 14 , 2 ].
+:: #ground edge[ black , 14 , 3 ].
+:: #ground edge[ black , 14 , 9 ].
+:: #ground edge[ black , 14 , 13 ].
+:: #ground edge[ black , 14 , 16 ].
+:: #ground edge[ black , 14 , 14 ].
+:: #ground edge[ black , 14 , 11 ].
+:: #ground edge[ black , 15 , 5 ].
+:: #ground edge[ black , 15 , 6 ].
+:: #ground edge[ black , 15 , 2 ].
+:: #ground edge[ black , 15 , 3 ].
+:: #ground edge[ black , 15 , 9 ].
+:: #ground edge[ black , 15 , 13 ].
+:: #ground edge[ black , 15 , 16 ].
+:: #ground edge[ black , 15 , 17 ].
+:: #ground edge[ black , 16 , 5 ].
+:: #ground edge[ black , 16 , 6 ].
+:: #ground edge[ black , 16 , 2 ].
+:: #ground edge[ black , 16 , 3 ].
+:: #ground edge[ black , 16 , 10 ].
+:: #ground edge[ black , 16 , 11 ].
+:: #ground edge[ black , 17 , 5 ].
+:: #ground edge[ black , 17 , 6 ].
+:: #ground edge[ black , 17 , 2 ].
+:: #ground edge[ black , 17 , 3 ].
+:: #ground edge[ black , 17 , 10 ].
+:: #ground edge[ black , 17 , 14 ].
+:: #ground edge[ black , 17 , 17 ].
+:: #ground edge[ black , 18 , 8 ].
+:: #ground edge[ black , 18 , 6 ].
+:: #ground edge[ black , 18 , 2 ].
+:: #ground edge[ black , 18 , 3 ].
+:: #ground edge[ black , 18 , 4 ].
+:: #ground edge[ black , 19 , 8 ].
+:: #ground edge[ black , 19 , 6 ].
+:: #ground edge[ black , 19 , 2 ].
+:: #ground edge[ black , 19 , 3 ].
+:: #ground edge[ black , 19 , 7 ].
+:: #ground edge[ black , 20 , 8 ].
+:: #ground edge[ black , 20 , 6 ].
+:: #ground edge[ black , 20 , 2 ].
+:: #ground edge[ black , 20 , 3 ].
+:: #ground edge[ black , 20 , 9 ].
+:: #ground edge[ black , 20 , 13 ].
+:: #ground edge[ black , 20 , 16 ].
+:: #ground edge[ black , 20 , 14 ].
+:: #ground edge[ black , 20 , 11 ].
+:: #ground edge[ black , 21 , 8 ].
+:: #ground edge[ black , 21 , 6 ].
+:: #ground edge[ black , 21 , 2 ].
+:: #ground edge[ black , 21 , 3 ].
+:: #ground edge[ black , 21 , 9 ].
+:: #ground edge[ black , 21 , 13 ].
+:: #ground edge[ black , 21 , 16 ].
+:: #ground edge[ black , 21 , 17 ].
+:: #ground edge[ black , 22 , 8 ].
+:: #ground edge[ black , 22 , 6 ].
+:: #ground edge[ black , 22 , 2 ].
+:: #ground edge[ black , 22 , 3 ].
+:: #ground edge[ black , 22 , 10 ].
+:: #ground edge[ black , 22 , 11 ].
+:: #ground edge[ black , 23 , 8 ].
+:: #ground edge[ black , 23 , 6 ].
+:: #ground edge[ black , 23 , 2 ].
+:: #ground edge[ black , 23 , 3 ].
+:: #ground edge[ black , 23 , 10 ].
+:: #ground edge[ black , 23 , 14 ].
+:: #ground edge[ black , 23 , 17 ].
+:: #ground edge[ black , 24 , 12 ].
+:: #ground edge[ black , 24 , 13 ].
+:: #ground edge[ black , 24 , 9 ].
+:: #ground edge[ black , 24 , 4 ].
+:: #ground edge[ black , 25 , 12 ].
+:: #ground edge[ black , 25 , 13 ].
+:: #ground edge[ black , 25 , 9 ].
+:: #ground edge[ black , 25 , 7 ].
+:: #ground edge[ black , 26 , 12 ].
+:: #ground edge[ black , 26 , 13 ].
+:: #ground edge[ black , 26 , 9 ].
+:: #ground edge[ black , 26 , 10 ].
+:: #ground edge[ black , 26 , 7 ].
+:: #ground edge[ black , 27 , 12 ].
+:: #ground edge[ black , 27 , 13 ].
+:: #ground edge[ black , 27 , 9 ].
+:: #ground edge[ black , 27 , 10 ].
+:: #ground edge[ black , 27 , 11 ].
+:: #ground edge[ black , 28 , 12 ].
+:: #ground edge[ black , 28 , 13 ].
+:: #ground edge[ black , 28 , 9 ].
+:: #ground edge[ black , 28 , 10 ].
+:: #ground edge[ black , 28 , 14 ].
+:: #ground edge[ black , 28 , 17 ].
+:: #ground edge[ black , 29 , 12 ].
+:: #ground edge[ black , 29 , 13 ].
+:: #ground edge[ black , 29 , 16 ].
+:: #ground edge[ black , 29 , 14 ].
+:: #ground edge[ black , 29 , 10 ].
+:: #ground edge[ black , 29 , 4 ].
+:: #ground edge[ black , 30 , 12 ].
+:: #ground edge[ black , 30 , 13 ].
+:: #ground edge[ black , 30 , 16 ].
+:: #ground edge[ black , 30 , 14 ].
+:: #ground edge[ black , 30 , 10 ].
+:: #ground edge[ black , 30 , 7 ].
+:: #ground edge[ black , 31 , 12 ].
+:: #ground edge[ black , 31 , 13 ].
+:: #ground edge[ black , 31 , 16 ].
+:: #ground edge[ black , 31 , 14 ].
+:: #ground edge[ black , 31 , 11 ].
+:: #ground edge[ black , 32 , 12 ].
+:: #ground edge[ black , 32 , 13 ].
+:: #ground edge[ black , 32 , 16 ].
+:: #ground edge[ black , 32 , 17 ].
+:: #ground edge[ black , 33 , 15 ].
+:: #ground edge[ black , 33 , 13 ].
+:: #ground edge[ black , 33 , 9 ].
+:: #ground edge[ black , 33 , 4 ].
+:: #ground edge[ black , 34 , 15 ].
+:: #ground edge[ black , 34 , 13 ].
+:: #ground edge[ black , 34 , 9 ].
+:: #ground edge[ black , 34 , 7 ].
+:: #ground edge[ black , 35 , 15 ].
+:: #ground edge[ black , 35 , 13 ].
+:: #ground edge[ black , 35 , 9 ].
+:: #ground edge[ black , 35 , 10 ].
+:: #ground edge[ black , 35 , 7 ].
+:: #ground edge[ black , 36 , 15 ].
+:: #ground edge[ black , 36 , 13 ].
+:: #ground edge[ black , 36 , 9 ].
+:: #ground edge[ black , 36 , 10 ].
+:: #ground edge[ black , 36 , 11 ].
+:: #ground edge[ black , 37 , 15 ].
+:: #ground edge[ black , 37 , 13 ].
+:: #ground edge[ black , 37 , 9 ].
+:: #ground edge[ black , 37 , 10 ].
+:: #ground edge[ black , 37 , 14 ].
+:: #ground edge[ black , 37 , 17 ].
+:: #ground edge[ black , 38 , 15 ].
+:: #ground edge[ black , 38 , 16 ].
+:: #ground edge[ black , 38 , 14 ].
+:: #ground edge[ black , 38 , 10 ].
+:: #ground edge[ black , 38 , 4 ].
+:: #ground edge[ black , 39 , 15 ].
+:: #ground edge[ black , 39 , 16 ].
+:: #ground edge[ black , 39 , 14 ].
+:: #ground edge[ black , 39 , 10 ].
+:: #ground edge[ black , 39 , 7 ].
+:: #ground edge[ black , 40 , 15 ].
+:: #ground edge[ black , 40 , 16 ].
+:: #ground edge[ black , 40 , 14 ].
+:: #ground edge[ black , 40 , 11 ].
+:: #ground edge[ black , 41 , 15 ].
+:: #ground edge[ black , 41 , 16 ].
+:: #ground edge[ black , 41 , 17 ].
+:: #ground firstMove[ 0 ].
+:: #ground firstMove[ 1 ].
+:: #ground firstMove[ 2 ].
+:: #ground firstMove[ 3 ].
+:: #ground firstMove[ 4 ].
+:: #ground firstMove[ 5 ].
+:: #ground firstMove[ 6 ].
+:: #ground firstMove[ 7 ].
+:: #ground firstMove[ 8 ].
+:: #ground firstMove[ 9 ].
+:: #ground firstMove[ 10 ].
+:: #ground firstMove[ 11 ].
+:: #ground firstMove[ 12 ].
+:: #ground firstMove[ 13 ].
+:: #ground firstMove[ 14 ].
+:: #ground firstMove[ 15 ].
+:: #ground firstMove[ 16 ].
+:: #ground firstMove[ 17 ].

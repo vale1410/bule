@@ -1,0 +1,106 @@
+%---------------------------------------
+% domain
+%---------------------------------------
+
+% types
+
+% variables
+objects[X1, block], objects[X2, block] :: #ground predicate[on(X1,X2)].
+
+objects[X1, block] :: #ground predicate[ontable(X1)].
+
+objects[X1, block] :: #ground predicate[clear(X1)].
+
+#ground predicate[handempty].
+objects[X1, block] :: #ground predicate[holding(X1)].
+
+% actions
+objects[X1, block] :: #ground
+action[pick_up(X1)],
+pre[pick_up(X1), clear(X1)],
+pre[pick_up(X1), ontable(X1)],
+pre[pick_up(X1), handempty],
+
+neg[pick_up(X1), ontable(X1)],
+neg[pick_up(X1), clear(X1)],
+neg[pick_up(X1), handempty],
+pos[pick_up(X1), holding(X1)].
+
+
+objects[X1, block] :: #ground
+action[put_down(X1)],
+pre[put_down(X1), holding(X1)],
+neg[put_down(X1), holding(X1)],
+pos[put_down(X1), clear(X1)],
+pos[put_down(X1), handempty],
+pos[put_down(X1), ontable(X1)].
+
+
+objects[X1, block], objects[X2, block] :: #ground
+action[stack(X1,X2)],
+pre[stack(X1,X2), holding(X1)],
+pre[stack(X1,X2), clear(X2)],
+
+neg[stack(X1,X2), holding(X1)],
+neg[stack(X1,X2), clear(X2)],
+pos[stack(X1,X2), clear(X1)],
+pos[stack(X1,X2), handempty],
+pos[stack(X1,X2), on(X1,X2)].
+
+
+objects[X1, block], objects[X2, block] :: #ground
+action[unstack(X1,X2)],
+pre[unstack(X1,X2), on(X1,X2)],
+pre[unstack(X1,X2), clear(X1)],
+pre[unstack(X1,X2), handempty],
+
+pos[unstack(X1,X2), holding(X1)],
+pos[unstack(X1,X2), clear(X2)],
+neg[unstack(X1,X2), clear(X1)],
+neg[unstack(X1,X2), handempty],
+neg[unstack(X1,X2), on(X1,X2)].
+
+
+%---------------------------------------
+% problem
+%---------------------------------------
+
+% objects
+#ground objects[e,block].
+#ground objects[j,block].
+#ground objects[d,block].
+#ground objects[c,block].
+#ground objects[f,block].
+#ground objects[k,block].
+#ground objects[h,block].
+#ground objects[g,block].
+#ground objects[a,block].
+#ground objects[i,block].
+#ground objects[b,block].
+
+% initial state
+#ground init[clear(b)].
+#ground init[clear(i)].
+#ground init[ontable(a)].
+#ground init[ontable(g)].
+#ground init[on(b,h)].
+#ground init[on(h,k)].
+#ground init[on(k,f)].
+#ground init[on(f,c)].
+#ground init[on(c,d)].
+#ground init[on(d,j)].
+#ground init[on(j,a)].
+#ground init[on(i,e)].
+#ground init[on(e,g)].
+#ground init[handempty].
+% goal
+#ground goal[on(i,g)].
+#ground goal[on(g,c)].
+#ground goal[on(c,d)].
+#ground goal[on(d,e)].
+#ground goal[on(e,j)].
+#ground goal[on(j,b)].
+#ground goal[on(b,h)].
+#ground goal[on(h,a)].
+#ground goal[on(a,f)].
+#ground goal[on(f,k)].

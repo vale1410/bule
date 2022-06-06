@@ -1,0 +1,29 @@
+:: #ground turnN[ 1 , black , 1 ].
+:: #ground turn1[ 1 , black ].
+:: #ground turnN[ 2 , white , 1 ].
+:: #ground turn1[ 2 , white ].
+:: #ground turnN[ 3 , black , 1 ].
+:: #ground turn1[ 3 , black ].
+:: #ground turnN[ 4 , white , 1 ].
+:: #ground turn1[ 4 , white ].
+:: #ground turnN[ 5 , black , 1 ].
+:: #ground turn1[ 5 , black ].
+:: #ground final[ 5 ].
+:: #ground finalN[ 5 ].
+:: #ground vertexLast[ 4 ].
+:: #ground edge[ black , 0 , 0 ].
+:: #ground edge[ black , 0 , 1 ].
+:: #ground edge[ black , 1 , 0 ].
+:: #ground edge[ black , 1 , 2 ].
+:: #ground edge[ black , 1 , 3 ].
+:: #ground edge[ black , 2 , 4 ].
+:: #ground edge[ black , 2 , 2 ].
+:: #ground edge[ black , 2 , 1 ].
+:: #ground edge[ black , 3 , 4 ].
+:: #ground edge[ black , 3 , 2 ].
+:: #ground edge[ black , 3 , 3 ].
+:: #ground firstMove[ 0 ].
+:: #ground firstMove[ 1 ].
+:: #ground firstMove[ 2 ].
+:: #ground firstMove[ 3 ].
+:: #ground firstMove[ 4 ].

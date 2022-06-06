@@ -1,0 +1,52 @@
+%% based on 202 
+%% Clause IDs referencing AMAI paper
+%% no symmetrie breaking 
+%% difference to 202: has empty board at time point 0 
+
+% input edge[A,E,V]: A in {black,white} has winning hyperedge E with vertex V 
+% input turn1[T,A]: A in {black,white} makes a move at timepoint T
+
+#ground player[white], player[black].
+#ground opponent[black,white], opponent[white,black].
+edge[A,E,_] :: #ground edgeId[A,E].
+edge[_,_,V] :: #ground vertex[V].
+
+%vertices going from 0..v-1, such that the bit addressing works properly .
+vertexLast[VV], vertex[V], vertex[I], 2**I <= VV :: #ground choose[V,I,(V/(2**I))#mod2].
+choose[_,I,_] :: #ground bit[I].
+
+
+% Quantification declarations
+turn1[T,_]                 :: #exists[T-1] time(T). 
+turn1[T,white], bit[I]     :: #forall[T]   move(I,T).
+turn1[T,black], bit[I]     :: #exists[T]   move(I,T).
+vertex[V], player[A]             :: #exists[0]   board(A,V,0). 
+vertex[V], player[A], turn1[T,_] :: #exists[T]   board(A,V,T). 
+final[F], edgeId[black,E]  :: #exists[F]   win(E). 
+
+% Time handling
+turn1[T,_], turn1[T-1,_] :: time(T-1) | ~time(T).  % (1)
+
+% Structure of the board
+player[A], vertex[V] :: ~board(A,V,0).                                      % (2)
+vertex[V], turn1[T,_]             :: ~board(black,V,T) | ~board(white,V,T). % (3) 
+vertex[V], player[A], turn1[T,_]  :: ~board(A,V,T-1)     |  board(A,V,T).   % (4)
+
+% Frame Axioms
+vertex[V], turn1[T,A], opponent[A,B] :: board(B,V,T-1) | ~board(B,V,T).            % (5)
+vertex[V], player[A], turn1[T,_]       :: time(T) | board(A,V,T-1) | ~board(A,V,T).  % (6)
+
+% White's Choice
+turn1[T,white], vertex[V] ::
+    choose[V,I,0] :  move(I,T)  | choose[V,I,1] : ~move(I,T)  | 
+    ~time(T)                    | board(black,V,T-1)          | board(white,V,T).     % (7)
+
+% Restricting Black
+turn1[T,black], vertex[V], choose[V,I,1] :: board(black,V,T-1) | ~board(black,V,T) |  move(I,T). % (8) 
+turn1[T,black], vertex[V], choose[V,I,0] :: board(black,V,T-1) | ~board(black,V,T) | ~move(I,T). % (9) 
+
+% Winning Configurations
+:: edgeId[black,E] : win(E). % (10) 
+final[T], edge[black,E,V] :: ~win(E) | board(black,V,T).  % (11) 
+final[T], edgeId[white,E] :: edge[white,E,V] : ~board(white,V,T). % (12)
+final[T], edgeId[black,E] ::  win(E) | edge[black,E,V] : ~board(black,V,T). % (13)

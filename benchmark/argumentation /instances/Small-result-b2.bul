@@ -1,0 +1,14 @@
+#ground arg[a0_0].
+#ground arg[a1_0].
+#ground arg[a2_0].
+#ground arg[a3_2].
+#ground arg[a4_2].
+#ground att[a0_0,a1_0].
+#ground att[a0_0,a4_2].
+#ground att[a1_0,a0_0].
+#ground att[a1_0,a3_2].
+#ground att[a3_2,a1_0].
+#ground att[a3_2,a4_2].
+#ground att[a4_2,a0_0].
+#ground att[a4_2,a3_2].
+#ground target[a3_2].

@@ -1,0 +1,41 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%% Bule Standard Library 1.0                                            %%%%%%%%%%%%%%
+%%%%%%%%%%%%%% Bule Version 4.0.0                                                   %%%%%%%%%%%%%%
+%%%%%%%%%%%%%% 2022-02-28                                                           %%%%%%%%%%%%%%
+%%%%%%%%%%%%%% Jean Christoph Jung, Valentin Mayer-Eichberger, Abdallah Saffidine   %%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% INDEX                %%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Input:  `index_input[ID,X]` a set `ID` containing elements `X`.
+%%% Output: `index[ID,X,I]` `X` is the `I`th element in set `ID` (the first element is numbered `0`th).
+%%% Output: `index_last[ID,N]` there are `N+1` elements in set `ID`.
+%%% Output: `index_range[ID,I]` there is an element numbered `I` in set `ID`.
+
+index_input[ID,X], index_input[ID,Y], Y<X  :: #ground index_prec[ID,X].
+index_input[ID,X], ~index_prec[ID,X]       :: #ground index[ID,X,0].
+index_input[ID,X], index_input[ID,Y], X<Y, index_input[ID,Z], Y<Z :: #ground index_split[ID,X,Z].
+index_input[ID,X], index_input[ID,Y], X<Y, ~index_split[ID,X,Y], index[ID,X,I] :: #ground index[ID,Y,I+1].
+index_input[ID,X], index_input[ID,Y], X<Y :: #ground index_succ[ID,X].
+index_input[ID,X], ~index_succ[ID,X], index[ID,X,N] :: #ground index_last[ID,N].
+index[ID,X,I] :: #ground index_range[ID,I].
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% LOG                  %%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Input:  `log_input[ID,N]` where `N` is an integer to be encoded in binary.
+%%% Output: `log_binary[ID,N,I,B]` indicates that in the binary encoding of the number `N` in bit position `I` is B (0 or 1).
+%%% Output: `log_position[ID,I]` I has a bit position, I being number of bits needed for the largest integer for ID
+%%% Output: `log_highest[ID,H]`    H is the highest bit position from the largest integer in set ID
+
+log_input[ID,N]                                :: #ground log_aux[ID,N,N,0].
+log_aux[ID,X,N,I], N > 1                       :: #ground log_aux[ID,X,N/2,I+1].
+log_aux[ID,X,N,I]                              :: #ground log_binary[ID,X,I,N #mod 2].
+log_aux[ID,_,_,I]                              :: #ground log_position[ID,I]. 
+log_aux[ID,_,_,I], ~log_aux[ID,_,_,I+1]        :: #ground log_bits[ID,I+1]. 
+log_input[ID,X], log_position[ID,I],  2**I > X :: #ground log_binary[ID,X,I,0].

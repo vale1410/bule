@@ -1,0 +1,45 @@
+%% INPUT: reach_fluent[ID,F].
+%% INPUT: reach_length[ID,MAXD].
+%% INPUT: reach_choose[ID,Type]. % Type is direct or binary
+%% OUTPUT: reach_time[ID,QD,T] reach_init[ID,QD,T],   reach_goal[ID,QD,T],   reach_succ[ID,QD,FR,TO]
+%% OUTPUT: reach_state(ID,T,F) reach_test(ID,init(T)) reach_test(ID,goal(T)) reach_test(ID,succ(T,U))
+
+% #ground edge[a,b], edge[b,c], edge[c,a].
+% #ground edge[c,e].
+% #ground edge[d,e], edge[e,f], edge[f,d].
+
+%#ground edge[a,b], edge[b,c], edge[c,d].
+%#ground edge[d,e], edge[e,f], edge[f,g].
+%#ground source[a].
+%#ground target[g].
+
+
+num[X], num[X+1] :: #ground  edge[X,X+1]. 
+
+#ground num[0..8]. 
+#ground source[0].
+#ground target[8].
+
+edge[X,Y] :: #ground vertex[X], vertex[Y].
+
+vertex[F] :: #ground reach_fluent[id,F].
+#ground reach_length[id,8].
+%#ground reach_choose[id,direct].
+#ground reach_choose[id,binary].
+
+source[A], reach_init[id,Q,T] :: reach_test(id,init(T)) -> reach_state(id,T,A). 
+vertex[A], ~source[A], reach_init[id,Q,T] :: reach_test(id,init(T)) -> ~reach_state(id,T,A). 
+
+target[B], reach_goal[id,Q,T] :: reach_test(id,goal(T)) -> reach_state(id,T,B). 
+vertex[B], ~target[B], reach_goal[id,Q,T] :: reach_test(id,goal(T)) -> ~reach_state(id,T,B). 
+
+vertex[A], reach_succ[id,Q,T,U] :: reach_test(id,succ(T,U)) & reach_state(id,T,A) -> edge[A,B] : reach_state(id,U,B) | target[A] : reach_state(id,U,A). 
+
+% no two 
+vertex[A], vertex[B], A<B,  reach_succ[id,Q,T,U] :: reach_test(id,succ(T,U)) -> ~reach_state(id,U,A) | ~reach_state(id,U,B). 
+
+
+vertex[F], reach_time[id,_,T] :: #hide ~reach_state(id,T,F).
+reach_init[id,_,T] :: #hide ~reach_test(id,init(T)).
+reach_goal[id,_,T] :: #hide ~reach_test(id,goal(T)).
+reach_succ[id,_,T,U] :: #hide ~reach_test(id,succ(T,U)).

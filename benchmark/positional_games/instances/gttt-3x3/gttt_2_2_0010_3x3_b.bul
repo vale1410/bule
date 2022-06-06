@@ -1,0 +1,68 @@
+:: #ground turnN[ 1 , black , 2 ].
+:: #ground turn1[ 1 , black ].
+:: #ground turn1[ 2 , black ].
+:: #ground turnN[ 2 , white , 2 ].
+:: #ground turn1[ 3 , white ].
+:: #ground turn1[ 4 , white ].
+:: #ground turnN[ 3 , black , 2 ].
+:: #ground turn1[ 5 , black ].
+:: #ground turn1[ 6 , black ].
+:: #ground turnN[ 4 , white , 2 ].
+:: #ground turn1[ 7 , white ].
+:: #ground turn1[ 8 , white ].
+:: #ground turnN[ 5 , black , 1 ].
+:: #ground turn1[ 9 , black ].
+:: #ground final[ 9 ].
+:: #ground finalN[ 5 ].
+:: #ground vertexLast[ 8 ].
+:: #ground edge[ black , 0 , 0 ].
+:: #ground edge[ black , 0 , 3 ].
+:: #ground edge[ black , 1 , 0 ].
+:: #ground edge[ black , 1 , 1 ].
+:: #ground edge[ black , 2 , 1 ].
+:: #ground edge[ black , 2 , 4 ].
+:: #ground edge[ black , 3 , 1 ].
+:: #ground edge[ black , 3 , 2 ].
+:: #ground edge[ black , 4 , 2 ].
+:: #ground edge[ black , 4 , 5 ].
+:: #ground edge[ black , 5 , 3 ].
+:: #ground edge[ black , 5 , 6 ].
+:: #ground edge[ black , 6 , 3 ].
+:: #ground edge[ black , 6 , 4 ].
+:: #ground edge[ black , 7 , 4 ].
+:: #ground edge[ black , 7 , 7 ].
+:: #ground edge[ black , 8 , 4 ].
+:: #ground edge[ black , 8 , 5 ].
+:: #ground edge[ black , 9 , 5 ].
+:: #ground edge[ black , 9 , 8 ].
+:: #ground edge[ black , 10 , 6 ].
+:: #ground edge[ black , 10 , 7 ].
+:: #ground edge[ black , 11 , 7 ].
+:: #ground edge[ black , 11 , 8 ].
+:: #ground edge[ white , 0 , 0 ].
+:: #ground edge[ white , 0 , 3 ].
+:: #ground edge[ white , 1 , 0 ].
+:: #ground edge[ white , 1 , 1 ].
+:: #ground edge[ white , 2 , 1 ].
+:: #ground edge[ white , 2 , 4 ].
+:: #ground edge[ white , 3 , 1 ].
+:: #ground edge[ white , 3 , 2 ].
+:: #ground edge[ white , 4 , 2 ].
+:: #ground edge[ white , 4 , 5 ].
+:: #ground edge[ white , 5 , 3 ].
+:: #ground edge[ white , 5 , 6 ].
+:: #ground edge[ white , 6 , 3 ].
+:: #ground edge[ white , 6 , 4 ].
+:: #ground edge[ white , 7 , 4 ].
+:: #ground edge[ white , 7 , 7 ].
+:: #ground edge[ white , 8 , 4 ].
+:: #ground edge[ white , 8 , 5 ].
+:: #ground edge[ white , 9 , 5 ].
+:: #ground edge[ white , 9 , 8 ].
+:: #ground edge[ white , 10 , 6 ].
+:: #ground edge[ white , 10 , 7 ].
+:: #ground edge[ white , 11 , 7 ].
+:: #ground edge[ white , 11 , 8 ].
+:: #ground firstMove[ 0 ].
+:: #ground firstMove[ 1 ].
+:: #ground firstMove[ 4 ].
