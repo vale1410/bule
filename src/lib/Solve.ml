@@ -5,6 +5,9 @@ type solver = CommandLine of string | Minisat | Quantor
 module IntSet = Set.Make (Int)
 module ModelSet = Set.Make (struct type t = (bool * int) list let compare = compare end)
 
+let debug = false
+let deprintf fmt = if debug then eprintf fmt else ifprintf stderr fmt
+
 let compare_literals (px, x) (py, y) = -(compare (x, px) (y, py))
 
 module CL = struct
@@ -27,8 +30,8 @@ module CL = struct
        while true do l := input_line inp :: !l done
      with End_of_file -> ());
     List.rev !l
-  
-  let isnt_comment line = 
+
+  let isnt_comment line =
     String.length line > 0 && line.[0] <> 'c'
 
   let run_process cmd dimacs =
@@ -37,17 +40,20 @@ module CL = struct
     close_out out;
     let lines = input_lines inp in
     close_in inp;
-    let lines = List.filter isnt_comment lines in 
+    let lines = List.filter isnt_comment lines in
     parse_output lines
 
-  let run_solver keys dimacs cmd =
+  let run_solver _keys dimacs cmd =
     match run_process cmd dimacs with
     | None -> None
     | Some model ->
-       let assigned = List.fold_left (fun accu (_, x) -> IntSet.add x accu) IntSet.empty model in
-       let missing = IntSet.diff keys assigned in
+       (*let assigned = List.fold_left (fun accu (_, x) -> IntSet.add x accu) IntSet.empty model in
+       let missing = IntSet.diff _keys assigned in
        let actual_model = IntSet.fold (fun x l -> (false, x) :: l) missing model in
-       let sorted_model = List.sort compare_literals actual_model in
+       deprintf "model: %s\n" (Print.list (Print.couple Print.bool Print.int) model);
+       deprintf "actual model: %s\n" (Print.list (Print.couple Print.bool Print.int) actual_model);
+       let sorted_model = List.sort compare_literals actual_model in*)
+       let sorted_model = List.sort compare_literals model in
        Some sorted_model
 end
 
@@ -84,7 +90,8 @@ module QT = struct
   let literal (p, i) = if p then Qbf.Lit.make i else Qbf.Lit.neg (Qbf.Lit.make i)
   let clause lits = List.map literal lits
   let qcnf (_, _, prefix, matrix) =
-    let matrix = Qbf.QCNF.prop (List.map clause matrix) in
+    let cnf = List.map clause matrix in
+    let matrix = Qbf.QCNF.prop cnf in
     let aux (q, block) f =
       let block = List.map Qbf.Lit.make block in
       if q then Qbf.QCNF.exists block f else Qbf.QCNF.forall block f in
@@ -93,26 +100,39 @@ module QT = struct
   let assignment a var =
     let l = Qbf.Lit.make var in
     match a l with
-    | Qbf.True -> (true, var)
-    | Qbf.False -> (false, var)
-    | Qbf.Undef -> (false, var)
+    | Qbf.True  -> deprintf "true %d " var; Some (true,  var)
+    | Qbf.False -> deprintf "fals %d " var; Some (false, var)
+    | Qbf.Undef -> deprintf "unde %d " var; Some (false, var)
 
-  let extract_model = function
+  let extract_model keys = function
     | Qbf.Unsat -> None
     | Qbf.Timeout  -> failwith "timeout in qbf solver"
     | Qbf.Spaceout -> failwith "spaceout in qbf solver"
     | Qbf.Unknown  -> failwith "unknown error in qbf solver"
-    | Qbf.Sat a -> Some a
+    | Qbf.Sat a ->
+       let add var l = match assignment a var with
+         | None -> l
+         | Some ass -> ass :: l in
+       let model = IntSet.fold add keys [] in
+       Some (List.sort compare_literals model)
 
+  let first_block (_,_,blocks,_) = match blocks with
+    | [] -> failwith "no blocks"
+    | (true, vars) :: _ -> vars
+    | (false, _) :: _ -> [] (*failwith "can't start with univ block"*)
   let run_solver keys (file : Dimacs.T.file) =
     let f = qcnf file in
+    deprintf "file0: %s\n" (Dimacs.Print.qbf_file file);
+    deprintf "file:%!"; if debug then (Qbf.QCNF.print Format.err_formatter f; Format.print_flush ());
+    let relevant_vars = first_block file in
+    if false then eprintf "\n\n\n\nrelevant: %s\n%!" (Print.unspaces Print.int relevant_vars);
     let r = Qbf.solve ~solver:Quantor.solver f in
-    let m = extract_model r in
-    match m with
-    | Some a ->
-       let model = IntSet.fold (fun var l -> assignment a var :: l) keys [] in
-       Some (List.sort compare_literals model)
-    | None -> None
+    if false then (Qbf.pp_result Format.err_formatter r; Format.print_flush ();
+                   Format.pp_print_flush Format.err_formatter ());
+    deprintf "res\n%!";
+    let keys = IntSet.filter (fun v -> List.mem v relevant_vars) keys in
+    let model = extract_model keys r in
+    model
 
 end
 
@@ -162,7 +182,7 @@ let solve_all (cmd, show_default, bound) (dimacs, _, imap, hide, show) =
   let (_, _, prefix, _) = dimacs in
   let keys = map_keys imap in
   let rec aux models displayed iteration dm =
-    if iteration >= bound && bound > 0 then ()
+    if iteration >= bound && bound > 0 then eprintf "Total: %d displayed models out of at least %d models.\n%!" displayed iteration
     else
       match run_solver keys dm cmd with
       | None ->
