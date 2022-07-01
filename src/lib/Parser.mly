@@ -111,8 +111,9 @@ quantifier_block:
 | LBRACKET e = expr RBRACKET { e }
 pre_decl:
 | GROUND gd = co_list(ground_atomd) { Types.PARSE.T.G gd }
-| EXISTS qb = quantifier_block vars = co_list(search_atomd) { Types.PARSE.T.S (true, qb, vars) }
-| FORALL qb = quantifier_block vars = co_list(search_atomd) { Types.PARSE.T.S (false, qb, vars) }
+| EXISTS                       vars = co_list(search_atomd) { Types.PARSE.T.S (Ast.T.ExistentialInnerMost vars) }
+| EXISTS qb = quantifier_block vars = co_list(search_atomd) { Types.PARSE.T.S (Ast.T.Level (true,  qb, vars)) }
+| FORALL qb = quantifier_block vars = co_list(search_atomd) { Types.PARSE.T.S (Ast.T.Level (false, qb, vars)) }
 | cd = clause_part { (Types.PARSE.T.C cd) }
 | HIDE hd = co_list(literal) { Types.PARSE.T.H (true, hd) }
 | SHOW hd = co_list(literal) { Types.PARSE.T.H (false, hd) }

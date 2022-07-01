@@ -1,6 +1,6 @@
 % File containing the rules to enforce graphc colouring
 
-vertex[V], colour[C] :: #exists[0] set(V,C).
+vertex[V], colour[C] :: #exists set(V,C).
 vertex[V], colour[C] :: #hide ~set(V,C).
 
 % All the vertices have to be at least one colour

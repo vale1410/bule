@@ -17,7 +17,7 @@ type glits = ground_literal list
 type literal = bool * atom
 type literals = glits * bool * atom
 type ground_decl = atomd list
-type search_decl = bool * expr * atomd list
+type search_decl = Level of (bool * expr * atomd list) | ExistentialInnerMost of atomd list
 type clause_decl = literals list * literals list
 type hide_decl = bool * literal list
 

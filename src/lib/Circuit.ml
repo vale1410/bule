@@ -191,13 +191,12 @@ let rec tuple_aux vmap = function
 and tuple' vmap ts =
   let tss = List.map (tuple_aux vmap) ts in
   Misc.cross_products tss
-let tuple vmap t =
+(*let tuple vmap t =
   try tuple_aux vmap t with
   | UnboundVar v -> failwith (sprintf "Unbound variable %s in tuple %s" v (Ast.Print.tuple t))
+let atomd vmap (n, l) = tuple vmap (Ast.T.FunTu (n, l))*)
 
-let atomd_aux vmap l =
-  tuple' vmap l
-let atomd vmap (n, l) = tuple vmap (Ast.T.FunTu (n, l))
+let atomd_aux vmap l = tuple' vmap l
 
 let ground_decl_aux gmap (gls, n, l) =
   let maps = glits gmap SMap.empty gls in
@@ -274,9 +273,33 @@ let all_ground decls : GTermSet.t SMap.t =
 let search_var ((cname, terms) : Ast.T.atom) vmap = (cname, List.map (term vmap) terms)
 let search_lit vmap ((pol, var) : Ast.T.literal) = (pol, search_var var vmap)
 let search_lits lits vmap = List.map (search_lit vmap) lits
-let search_decl gmap qmap (gls, ((b, e, vars) : Ast.T.search_decl)) =
-  let maps = glits gmap SMap.empty gls in
+let search_level vmap (b, e, vars) =
   let parity = if b then 1 else 0 in
+  let i = expr vmap e in
+  let level = 2 * i + parity in
+  let treat_one (n, args) : (int * search_var) list =
+    List.rev_map (fun args -> (level, (n, args))) (tuple' vmap args) in
+  List.concat_map treat_one vars
+let search_exists_inner vmap vars =
+  let treat_one (n, args) : search_var list =
+    List.rev_map (fun args -> (n, args)) (tuple' vmap args) in
+  List.concat_map treat_one vars
+
+let search_decl gmap (qmap, inner) (gls, (decl : Ast.T.search_decl)) =
+  let maps = glits gmap SMap.empty gls in
+  match decl with
+  | Ast.T.Level level ->
+     let f var = function | None -> Some [var] | Some l -> Some (var :: l) in
+     let update qm (i, var) = IMap.update i (f var) qm in
+     let treat_vmap qm vmap = List.fold_left update qm (search_level vmap level) in
+     let qm = List.fold_left treat_vmap qmap maps in
+     (qm, inner)
+  | Ast.T.ExistentialInnerMost vars ->
+     let treat_vmap inn vmap =
+       let new_inner = search_exists_inner vmap vars in
+       List.rev_append new_inner inn in
+     (qmap, List.fold_left treat_vmap inner maps)
+(*  let parity = if b then 1 else 0 in
   let update i qm var =
     let f = function | None -> Some [var] | Some l -> Some (var :: l) in
     IMap.update (2 * i + parity) f qm in
@@ -286,15 +309,17 @@ let search_decl gmap qmap (gls, ((b, e, vars) : Ast.T.search_decl)) =
     List.fold_left (update i) qm vars in
   let treat_one qm vmap =
     List.fold_left (treat_one_var vmap) qm vars in
-  List.fold_left treat_one qmap maps
+  List.fold_left treat_one qmap maps*)
 
 let all_search gmap decls =
-  let qmap = List.fold_left (search_decl gmap) IMap.empty decls in
-  if IMap.is_empty qmap then []
+  let (qmap, inner) = List.fold_left (search_decl gmap) (IMap.empty, []) decls in
+  let inner = if inner <> [] then [(true, inner)] else [] in
+  if IMap.is_empty qmap then inner
   else
     let blocks = IMap.bindings qmap in
     let f (i, l) = (i mod 2 = 1, l) in
-    List.map f blocks
+    let prefix = List.rev_map f blocks in
+    List.rev_append prefix inner
 
 let all_hide gmap decls : (bool * T.literal) list =
   let hide_decl (gls, ((hide, lits) : Ast.T.hide_decl)) =
@@ -337,3 +362,5 @@ let file facts (decls : Ast.T.file) : T.file =
     matrix;
     hide;
     show }
+
+let _ = ignore (print_smap, print_gtset, unions)

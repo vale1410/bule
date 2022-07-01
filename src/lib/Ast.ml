@@ -67,11 +67,16 @@ struct
     gls ^ literal (pol, var)
 
   let ground_decl (gls, ats) = sprintf "%s :: %s." (glits gls) (Print.list' "" ", " "" atomd ats)
-  let search_decl (gls, (exi, depth, vars)) =
+  let search_decl_level (exi, depth, vars) =
     let quant = if exi then "exists" else "forall" in
-    let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in
     let svs = Print.list' "" ", " "" searchd vars in
-    sprintf "#%s[%s]%s :: %s?" quant (expr depth) gls svs
+    sprintf "#%s[%s] %s." quant (expr depth) svs
+  let search_decl (gls, decl) =
+    let decl = match decl with
+      | Level x -> search_decl_level x
+      | ExistentialInnerMost vars -> sprintf "#exists %s" (Print.list' "" ", " "" searchd vars) in
+    let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in
+    sprintf "#%s :: %s." gls decl
   let clause_decl (gls, (hyps, ccls)) = sprintf "%s :: %s -> %s." (glits gls) (Print.list' "" " & " "" literals hyps) (Print.list' "" " | " "" literals ccls)
   let hide_decl (gls, (hide, lits)) =
     let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in

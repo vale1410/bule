@@ -1,7 +1,7 @@
 % Alternative SAT encoding for the graph colouring problem
 
 colour[C1], colour[C2], C1 != C2 :: #ground edge_type[t(C1,C2)].
-edge[V1, V2], edge_type[T] :: #exists[0] set(V1,V2,T).
+edge[V1, V2], edge_type[T] :: #exists set(V1,V2,T).
 edge[V1, V2], edge_type[T] :: #hide ~set(V1,V2,T).
 
 % If we have edges with a common vertex, that vertex needs to have the same colour

@@ -5,7 +5,7 @@
 Bule is a tool used to create CNF (conjunctive normal form) encodings for SAT solving.
 
 - SAT (Boolean Satisfiability) is the problem of determining if there exists an assignment of `True` or `False` to the variables of a boolean formula such that the formula evaluates to `True`.
-- A formula consists of 
+- A formula consists of
   - **Variables**: Variables that can either be `True` or `False`
   - **Parentheses**: Things in parentheses are evaluated first
   - **Conjunction**: AND operator (`||`)
@@ -22,7 +22,7 @@ You can then use a SAT solver to solve these formulas (find an assignment of `Tr
 
 ## Formula Representation
 
-Representation of `(x1 OR NOT x2) AND (NOT x1 OR x2 OR x3) AND NOT x1` in Bule: 
+Representation of `(x1 OR NOT x2) AND (NOT x1 OR x2 OR x3) AND NOT x1` in Bule:
 
 ```
  x1 | ~x2.
@@ -34,7 +34,7 @@ Representation of `(x1 OR NOT x2) AND (NOT x1 OR x2 OR x3) AND NOT x1` in Bule:
 **Note:**
 - Each clause is on a different line, OR is done through `|` and NOT is done through `~`.
 - A line ends with a `.` (similar to semicolon in most programming languages).
-- Formula (AKA search) variables have to be declared with `#exists[0]`
+- Formula (AKA search) variables have to be declared with `#exists`
 - Lines that begin with `%` are comments
 
 > How many different assignments of Trues and Falses will evaluate to True for this formula (solve manually)?
@@ -172,12 +172,12 @@ Currently there is a lot of copy and pasting, but using bule we can perform grou
    ```
    Running `bule graph_colouring_basic.bul` however produces the set of clauses 
    ```
-   #exists[0] :: set(e,red)?
-   #exists[0] :: set(e,green)?
-   #exists[0] :: set(e,blue)?
-   #exists[0] :: set(a,red)?
-   #exists[0] :: set(a,green)?
-   #exists[0] :: set(a,blue)?
+   #exists[0] set(e,red).
+   #exists[0] set(e,green).
+   #exists[0] set(e,blue).
+   #exists[0] set(a,red).
+   #exists[0] set(a,green).
+   #exists[0] set(a,blue).
    set(a,blue) | set(a,green) | set(a,red).
    set(e,blue) | set(e,green) | set(e,red).
    ~set(a,blue) | ~set(a,green).
@@ -197,20 +197,20 @@ Currently there is a lot of copy and pasting, but using bule we can perform grou
    ~set(a,red) | ~set(e,red).
    ```
    At the moment it is hard to discern where our clauses are.
-   If we add something like `| debug.` or `| <line_number>.` at the end of the line, i.e. 
+   If we add something like `| debug.` or `| <line_number>.` at the end of the line, i.e.
    ```
    vertex[V], colour[C1], colour[C2], C1 != C2 :: ~set(V,C1) | ~set(V,C2) | debug.
    ```
    we get the following output after running the grounding
    ```
    Warning. Undeclared variables: debug
-   
-   #exists[0] :: set(e,red)?
-   #exists[0] :: set(e,green)?
-   #exists[0] :: set(e,blue)?
-   #exists[0] :: set(a,red)?
-   #exists[0] :: set(a,green)?
-   #exists[0] :: set(a,blue)?
+
+   #exists[0] set(e,red).
+   #exists[0] set(e,green).
+   #exists[0] set(e,blue).
+   #exists[0] set(a,red).
+   #exists[0] set(a,green).
+   #exists[0] set(a,blue).
    set(a,blue) | set(a,green) | set(a,red).
    set(e,blue) | set(e,green) | set(e,red).
    ~set(a,blue) | ~set(a,green) | debug.
@@ -231,7 +231,7 @@ Currently there is a lot of copy and pasting, but using bule we can perform grou
    ```
    which introduces a new variable, but can make it easier to determine what clauses are being generated.
    A useful tip is to pipe the output through `grep`, i.e. `bule graph_colouring_basic.bul | grep debug` to see only the clauses that have `debug` in it.
-   
+
    Here we can see that there are unnecessary clauses being generated, i.e. below, the 2nd clause below is the same as the 1st
    ```
    ~set(a,blue) | ~set(a,green).
@@ -265,16 +265,16 @@ Currently there is a lot of copy and pasting, but using bule we can perform grou
 6. Finally, it helps to split up our "models" and "rules".
    We have a lot of `#ground x[y]` variables at the top, which encodes a graph of edges, and vertices, along with colours.
    We also have the clauses below which encode the graph colouring problem.
-   
+
    It helps the split the file into 2, i.e. [graph_colouring_grounded.bul](graph_colouring_grounded.bul) (which represents the graph colouring problem) and [graph1.bul](graph1.bul) (which represents the graph in the image above).
    Then we can run the command
    ```
    bule --solve --models 0 graph_colouring_grounded.bul graph1.bul
    ```
    to find all the valid instances of colour assignments for graph1.
-   
+
    The benefit of this is that we can now make different graph models in their own files and then solve them by adding the file as a command line argument in bule.
-   
+
    [graph2.bul](graph2.bul) introduces a new edge between a and b, and the number of models compared to [graph1](graph1.bul) goes down from 12 to 6.
    [graph3.bul](graph3.bul) is extended off [graph2.bul](graph2.bul) and introduces a new edge between a and d.
    Solving for graph3 produces the output

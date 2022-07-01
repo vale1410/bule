@@ -2,9 +2,9 @@
 
 % We have vertices A and E, and colours, Red, Green, Blue
 
-#exists[0] set_a_blue, set_a_green, set_a_red.
+#exists set_a_blue, set_a_green, set_a_red.
 % #hide ~set_a_blue, ~set_a_green, ~set_a_red.
-#exists[0] set_e_blue, set_e_green, set_e_red.
+#exists set_e_blue, set_e_green, set_e_red.
 % #hide ~set_e_blue, ~set_e_green, ~set_e_red.
 
 % Vertex a and e are at least one colour
