@@ -30,7 +30,7 @@ struct
   let quantifier b = if b then "exists" else "forall"
   let blocks l =
     let f (i, s) (b, vars) =
-      let s' = sprintf "#%s[%d] %s." (quantifier b) i (comma_s_list search_var vars) in
+      let s' = sprintf "#%s[%d] %s." (quantifier b) i (comma_s_list search_var (VSet.elements vars)) in
       (i+1, s ^ "\n" ^ s') in
     snd (List.fold_left f (0, "") l)
   let file { prefix; matrix; hide; show } =
@@ -289,7 +289,7 @@ let search_decl gmap (qmap, inner) (gls, (decl : Ast.T.search_decl)) =
   let maps = glits gmap SMap.empty gls in
   match decl with
   | Ast.T.Level level ->
-     let f var = function | None -> Some [var] | Some l -> Some (var :: l) in
+     let f var = function | None -> Some (VSet.singleton var)(*[var]*) | Some l -> Some (VSet.add var l) (*(var :: l)*) in
      let update qm (i, var) = IMap.update i (f var) qm in
      let treat_vmap qm vmap = List.fold_left update qm (search_level vmap level) in
      let qm = List.fold_left treat_vmap qmap maps in
@@ -312,8 +312,9 @@ let search_decl gmap (qmap, inner) (gls, (decl : Ast.T.search_decl)) =
   List.fold_left treat_one qmap maps*)
 
 let all_search gmap decls =
+  let make_set l = VSet.of_seq (List.to_seq l) in
   let (qmap, inner) = List.fold_left (search_decl gmap) (IMap.empty, []) decls in
-  let inner = if inner <> [] then [(true, inner)] else [] in
+  let inner = if inner <> [] then [(true, make_set inner)] else [] in
   if IMap.is_empty qmap then inner
   else
     let blocks = IMap.bindings qmap in

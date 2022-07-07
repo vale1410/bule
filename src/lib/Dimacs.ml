@@ -45,6 +45,7 @@ let compute_new_vars (_, _, nb) cl_map =
   List.filter_map filter vars
 let ground { Circuit.T.prefix; matrix; hide; show } : T.file * int T.VMap.t * Circuit.T.search_var T.IMap.t * T.ISet.t * T.ISet.t =
   let accu = (T.VMap.empty, T.IMap.empty, 0) in
+  let prefix = Misc.map (fun (b, s) -> (b, Circuit.T.VSet.elements s)) prefix in
   let (naccu, qbs) = List.fold_left_map quantifier_block accu prefix in
   let (((vmap, imap, nvar), nbcls), cls) = List.fold_left_map clause (naccu, 0) matrix in
   let both = List.filter (fun x -> List.mem x show) hide in

@@ -42,7 +42,8 @@ end end
 module CIRCUIT = struct module T = struct
 type ground_term = Fun of (AST.T.cname * ground_term list)
 type search_var = AST.T.cname * ground_term list
-type quantifier_block = bool * search_var list
+module VSet = Set.Make (struct type t = search_var let compare = compare end)
+type quantifier_block = bool * VSet.t
 type literal = bool * search_var
 type clause = literal list * literal list
 type file =
