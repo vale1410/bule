@@ -1,0 +1,4 @@
+#ground p[x], p[y].
+p[A] :: #exists v.
+v.
+~v.
