@@ -71,7 +71,7 @@ let ground_mode grounder file (facts, format) =
   | Bule -> Circuit.Print.file circuit
   | Dimacs -> Dimacs.Print.sat_file d
   | Qdimacs ->  Dimacs.Print.qbf_file d in
-  printf "%s" output
+  if output <> "" then printf "%s\n" output else printf "%s" output
 
 let start () =
   let mode, grounder, fs = get () in

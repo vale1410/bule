@@ -119,8 +119,9 @@ let match_term pterm gterm vmap =
     let (c', gts) = match gt with Fun g -> g in
     match t with
     | Ast.T.Fun (c, ts) -> if c <> c' || List.length ts <> List.length gts then raise Exit else List.iter2 aux ts gts
-    | Ast.T.Exp (Ast.T.VarE v) -> (match SMap.find_opt v !map with | Some gt -> if gt <> gterm then raise Exit
-                                                      | None -> map := SMap.add v gt !map)
+    | Ast.T.Exp (Ast.T.VarE v) ->
+       (match SMap.find_opt v !map with | Some g -> if gt <> g then raise Exit
+                                        | None -> map := SMap.add v gt !map)
     | Ast.T.Exp e -> let c = string_of_int (expr !map e) in if c <> c' || gts <> [] then raise Exit in
   try aux pterm gterm; Some !map with
   | Exit -> None
@@ -133,16 +134,6 @@ let term vmap t =
 (*  | Ast.T.Var v -> find_gt v vmap in*)
   try aux t with
   | UnboundVar v -> failwith (sprintf "Unbound variable %s in term %s" v (Ast.Print.term t))
-(*let atom gmap vmap (cname, terms) =
-  let instances = match SMap.find_opt cname gmap with
-    | None -> GTermSet.empty
-    | Some set -> set in
-  let f m t gt = Option.bind m (match_term t gt) in
-  let aux ts gts =
-    if List.length ts <> List.length gts then failwith (sprintf "Error: term list %s incompatible with %s" (P.list Ast.Print.term ts) (P.list Print.ground_term gts));
-    List.fold_left2 f (Some vmap) ts gts in
-  try List.filter_map (aux terms) (GTermSet.elements instances) with
-  | UnboundVar n -> failwith (sprintf "Error: variable %s is unbound in an arithmetical expression when grounding %s." n (Ast.Print.atom (cname, terms)))*)
 
 let atom gmap vmap (cname, terms) =
   let instances = find_default cname gmap GTermSet.empty in
@@ -153,7 +144,8 @@ let atom gmap vmap (cname, terms) =
         let aux ts gts =
           if List.length ts <> List.length gts then failwith (sprintf "Error: term list %s incompatible with %s" (P.list Ast.Print.term ts) (P.list Print.ground_term gts));
           List.fold_left2 f (Some vmap) ts gts in
-        try List.filter_map (aux terms) (GTermSet.elements instances) with
+        let elements = GTermSet.elements instances in
+        try List.filter_map (aux terms) elements with
         | UnboundVar n -> failwith (sprintf "Error: variable %s is unbound in an arithmetical expression when grounding %s." n (Ast.Print.atom (cname, terms)))
 
 let ground_literal gmap vmap = function
@@ -172,7 +164,8 @@ let ground_literal gmap vmap = function
 
 let glits gmap vmap l =
   let aux vmaps lit = List.concat_map (fun m -> ground_literal gmap m lit) vmaps in
-  List.fold_left aux [vmap] l
+  let maps = List.fold_left aux [vmap] l in
+  maps
 
 (*let tuple vmap : Ast.T.tuple -> ground_term list  = function
   | Ast.T.Term t -> [term vmap t]
@@ -311,17 +304,6 @@ let search_decl gmap (qmap, inner) (gls, (decl : Ast.T.search_decl)) =
        let new_inner = search_exists_inner vmap vars in
        List.rev_append new_inner inn in
      (qmap, List.fold_left treat_vmap inner maps)
-(*  let parity = if b then 1 else 0 in
-  let update i qm var =
-    let f = function | None -> Some [var] | Some l -> Some (var :: l) in
-    IMap.update (2 * i + parity) f qm in
-  let treat_one_var vmap qm (n, args) =
-    let i = expr vmap e in
-    let vars : search_var list = List.map (fun args -> (n, args)) (tuple' vmap args) in
-    List.fold_left (update i) qm vars in
-  let treat_one qm vmap =
-    List.fold_left (treat_one_var vmap) qm vars in
-  List.fold_left treat_one qmap maps*)
 
 let all_search gmap decls =
   let make_set l = VSet.of_seq (List.to_seq l) in
