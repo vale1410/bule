@@ -26,6 +26,7 @@ let get () =
   let default_show = ref true in
   let models = ref 1 in
   let solver = ref "quantor" in
+  let grounder = ref "native" in
   let solve = ref false in
   let facts = ref false in
   let print_mode = ref Bule in
@@ -36,6 +37,7 @@ let get () =
                   ("--solve",  Arg.Set solve, "Enable solving. Default: \"false\"");
                   ("--models", Arg.Set_int models, "Number of models to generate. The option has no effect if \"solve\" is set to \"false\". Default: 1.");
                   ("--solver", Arg.Set_string solver, "Set the solver to be used. If \"quantor\" then Quantor 3.2 is used, if \"minisat\" then Minisat 1.14 is used, otherwise the argument is assumed to be a command-line tool. Example \"depqbf --no-dynamic-nenofex --qdo\". The option has no effect if \"solve\" is set to \"false\". Default: \"quantor\"");
+                  ("--grounder", Arg.Set_string grounder, "Set the grounder to be used. If \"native\" then the default embedded grounder is used, if \"gringo\" then the Potassco grounder gringo is used with suitable options. Otherwise the argument is assumed to be a command-line tool. Default: \"native\"");
                   ("--output", Arg.Symbol (output_symbols, output_treat), "Output format (QDIMACS, DIMACS, or BULE. The option has no effect if \"solve\" is set to \"true\". Default \"bule\".");
                   ("--facts",  Arg.Set facts, "Enable printing of grounding facts. The option has no effect if \"solve\" is set to \"true\". Default: \"false\".");
                   ("--default_show", Arg.Bool (update default_show), "Default showing behaviour for literals. The option has no effect if \"solve\" is set to \"false\". Default \"true\".");
@@ -51,15 +53,19 @@ let get () =
     | "quantor" -> Solve.Quantor
     | "minisat" -> Solve.Minisat
     | _ -> Solve.CommandLine !solver in
+  let grounder = match !grounder with
+    | "native" -> Circuit.Native
+    | "gringo" -> Circuit.CommandLine "gringo --text"
+    | _ -> Circuit.CommandLine !grounder in
   let mode = if !solve then Either.Right (solver, !default_show, !models) else Either.Left (!facts, !print_mode) in
-  (mode, files)
+  (mode, grounder, files)
 
-let solve_mode file solve_options =
-  let circuit = Circuit.file false file in
+let solve_mode grounder file solve_options =
+  let circuit = Circuit.file false grounder file in
   let file = Dimacs.ground circuit in
   Solve.solve_all solve_options file
-let ground_mode file (facts, format) =
-  let circuit = Circuit.file facts file in
+let ground_mode grounder file (facts, format) =
+  let circuit = Circuit.file facts grounder file in
   let d = Dimacs.file circuit in
   let output = match format with
   | Bule -> Circuit.Print.file circuit
@@ -68,13 +74,13 @@ let ground_mode file (facts, format) =
   printf "%s\n" output
 
 let start () =
-  let mode, fs = get () in
+  let mode, grounder, fs = get () in
   let file = List.concat_map (Parse.from_file ()) fs in
   let file = Ast.file file in
   (*printf "%s\n\n" (Ast.Print.file p);*)
   match mode with
-  | Either.Right comm -> solve_mode file comm(*solve models (d, vm, im, hs) comm*)
-  | Either.Left comm -> ground_mode file comm
+  | Either.Right comm -> solve_mode grounder file comm(*solve models (d, vm, im, hs) comm*)
+  | Either.Left comm -> ground_mode grounder file comm
 
 let _ = start ()
 

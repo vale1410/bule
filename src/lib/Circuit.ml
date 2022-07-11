@@ -4,6 +4,7 @@ include Types.CIRCUIT
 open T
 
 (*type pre_ground_term = Ground of ground_term | Int of int*)
+type grounder = Native | CommandLine of string
 
 module P = Print
 module Print =
@@ -259,7 +260,7 @@ let compute_recursive_components decls =
     | _ :: _ :: _ as comp -> Either.Left comp in
   List.map is_rec sccs
 
-let all_ground decls : GTermSet.t SMap.t =
+let naive decls : GTermSet.t SMap.t =
   let decls = List.concat_map (fun (glits, atomds) -> List.map (fun (n, atomd) -> (glits, n, atomd)) atomds) decls in
   let sccs = compute_recursive_components decls in
   let left comp = List.filter (fun (_, n, _) -> List.mem n comp) decls
@@ -269,6 +270,15 @@ let all_ground decls : GTermSet.t SMap.t =
     | Either.Left recurs -> ground_decl_component gmap recurs
     | Either.Right simple -> List.fold_left ground_decl gmap simple in
   List.fold_left aux SMap.empty grouped_decls
+
+let all_ground cmd decls = match cmd with
+  | Native -> naive decls
+  | CommandLine cmd ->
+     let facts = Ground.all_ground cmd decls in
+     let up element = function | None -> Some (GTermSet.singleton element)
+                               | Some set -> Some (GTermSet.add element set) in
+     let aux map (key, args) = SMap.update key (up args) map in
+     List.fold_left aux SMap.empty facts
 
 let search_var ((cname, terms) : Ast.T.atom) vmap = (cname, List.map (term vmap) terms)
 let search_lit vmap ((pol, var) : Ast.T.literal) = (pol, search_var var vmap)
@@ -351,9 +361,9 @@ let print_facts facts gmap =
     else P.unspaces pr_tuple elements in
   if facts then eprintf "%s\n%!" (P.unlines pr_one (SMap.bindings gmap))
 
-let file facts (decls : Ast.T.file) : T.file =
+let file facts cmd (decls : Ast.T.file) : T.file =
   let { Ast.T.ground; prefix; matrix; hide } = decls in
-  let gmap = all_ground ground in
+  let gmap = all_ground cmd ground in
   print_facts facts gmap;
   let prefix = all_search gmap prefix in
   let matrix = all_clause gmap matrix in

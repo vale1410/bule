@@ -20,12 +20,15 @@
 %{
 let make_var =
   let counter = ref 0 in
-  (fun () -> incr counter; Printf.sprintf "__v%d" (!counter))
+  (fun () -> incr counter; Printf.sprintf "__V%d" (!counter))
+
+open Types
 %}
 
 (*%type <Types.PARSE.T.search_decl> search_decl*)
 %type <Types.PARSE.T.file> file
-%start file
+%type <(Types.AST.T.cname * Types.CIRCUIT.T.search_var list) list> ground_gringo
+%start file ground_gringo
 %%
 
 %public %inline iboption(X):
@@ -43,48 +46,48 @@ separated_many_slist(Sep, Sub):
 %inline br_list(X):
 | LBRACKET l = separated_list(COMMA, X) RBRACKET { l }
 
-%inline eoperator: | DIV { Ast.T.Div } | LOG { Ast.T.Log } | MOD { Ast.T.Mod } | MULT { Ast.T.Mult } | POW { Ast.T.Pow } | PLUS { Ast.T.Add } | MINUS { Ast.T.Sub }
+%inline eoperator: | DIV { AST.T.Div } | LOG { AST.T.Log } | MOD { AST.T.Mod } | MULT { AST.T.Mult } | POW { AST.T.Pow } | PLUS { AST.T.Add } | MINUS { AST.T.Sub }
 
-%inline c_loperator: | LT { Ast.T.Lt } | LEQ { Ast.T.Leq }
-%inline c_goperator: | GT { Ast.T.Gt } | GEQ { Ast.T.Geq }
-%inline c_eloperator: | EQ { Ast.T.Eq } | LT { Ast.T.Lt } | LEQ { Ast.T.Leq }
-%inline c_egoperator: | EQ { Ast.T.Eq } | GT { Ast.T.Gt } | GEQ { Ast.T.Geq }
-%inline c_eoperator: | EQ { Ast.T.Eq }
-%inline c_noperator: | NEQ { Ast.T.Neq }
+%inline c_loperator:  | LT  { AST.T.Lt } | LEQ { AST.T.Leq }
+%inline c_goperator:  | GT  { AST.T.Gt } | GEQ { AST.T.Geq }
+%inline c_eloperator: | EQ  { AST.T.Eq } | LT  { AST.T.Lt } | LEQ { AST.T.Leq }
+%inline c_egoperator: | EQ  { AST.T.Eq } | GT  { AST.T.Gt } | GEQ { AST.T.Geq }
+%inline c_eoperator:  | EQ  { AST.T.Eq }
+%inline c_noperator:  | NEQ { AST.T.Neq }
 
 expr:
-| e1 = expr bo = eoperator e2 = expr { Ast.T.BinE (e1, bo, e2) }
+| e1 = expr bo = eoperator e2 = expr { AST.T.BinE (e1, bo, e2) }
 | LPAREN e = expr RPAREN { e }
-| n = VNAME { Ast.T.VarE n }
-| i = INT { Ast.T.Int i }
-| MINUS e = expr { Ast.T.BinE (Ast.T.Int 0, Ast.T.Sub, e) }
+| n = VNAME { AST.T.VarE n }
+| i = INT   { AST.T.Int i }
+| MINUS e = expr { AST.T.BinE (AST.T.Int 0, AST.T.Sub, e) }
 
 term:
-| name = CNAME ts = pr_list(term) { Ast.T.Fun (name, ts)  }
-| UNDERSCORE { Ast.T.Exp (Ast.T.VarE (make_var ())) }
-| e = expr { Ast.T.Exp e }
+| name = CNAME ts = pr_list(term) { AST.T.Fun (name, ts)  }
+| UNDERSCORE { AST.T.Exp (AST.T.VarE (make_var ())) }
+| e = expr { AST.T.Exp e }
 
 tuple:
-| name = CNAME ts = pr_list(tuple) { Ast.T.FunTu (name, ts)  }
-| e = expr { Ast.T.ExpTu e }
-| e1 = expr RANGE e2 = expr { Ast.T.Range (e1, e2) }
+| name = CNAME ts = pr_list(tuple) { AST.T.FunTu (name, ts)  }
+| e = expr { AST.T.ExpTu e }
+| e1 = expr RANGE e2 = expr { AST.T.Range (e1, e2) }
 
 atom:
 | n = CNAME ts = pr_list(term) { (n, ts) }
 literal:
 | pol = iboption(NOT) a = atom { (not pol, a) }
-ground_atom:
+grounding_atom:
 | n = CNAME ts = br_list(term) { (n, ts) }
 ground_atomd:
 | n = CNAME ts = br_list(tuple) { (n, ts) }
 search_atomd:
 | n = CNAME ts = pr_list(tuple) { (n, ts) }
 ground_literal:
-| ga = ground_atom { Types.PARSE.T.In ga }
-| NOT ga = ground_atom { Types.PARSE.T.Notin ga }
-| ch = chain { Types.PARSE.T.Chain ch }
-| e1 = term o = c_noperator e2 = term { Types.PARSE.T.Chain (e1, [o, e2]) }
-| v = VNAME DEFINE t = term { Types.PARSE.T.Set (v, t) }
+| ga = grounding_atom { PARSE.T.In ga }
+| NOT ga = grounding_atom { PARSE.T.Notin ga }
+| ch = chain { PARSE.T.Chain ch }
+| e1 = term o = c_noperator e2 = term { PARSE.T.Chain (e1, [o, e2]) }
+| v = VNAME DEFINE t = term { PARSE.T.Set (v, t) }
 chain:
 (*| t = term l = nonempty_list(pair(loperator,term)) { (t, l) }
 | t = term l = nonempty_list(pair(goperator,term)) { (t, l) }*)
@@ -110,13 +113,13 @@ clause_part:
 quantifier_block:
 | LBRACKET e = expr RBRACKET { e }
 pre_decl:
-| GROUND gd = co_list(ground_atomd) { Types.PARSE.T.G gd }
-| EXISTS                       vars = co_list(search_atomd) { Types.PARSE.T.S (Ast.T.ExistentialInnerMost vars) }
-| EXISTS qb = quantifier_block vars = co_list(search_atomd) { Types.PARSE.T.S (Ast.T.Level (true,  qb, vars)) }
-| FORALL qb = quantifier_block vars = co_list(search_atomd) { Types.PARSE.T.S (Ast.T.Level (false, qb, vars)) }
-| cd = clause_part { (Types.PARSE.T.C cd) }
-| HIDE hd = co_list(literal) { Types.PARSE.T.H (true, hd) }
-| SHOW hd = co_list(literal) { Types.PARSE.T.H (false, hd) }
+| GROUND gd = co_list(ground_atomd) { PARSE.T.G gd }
+| EXISTS                       vars = co_list(search_atomd) { PARSE.T.S (AST.T.ExistentialInnerMost vars) }
+| EXISTS qb = quantifier_block vars = co_list(search_atomd) { PARSE.T.S (AST.T.Level (true,  qb, vars)) }
+| FORALL qb = quantifier_block vars = co_list(search_atomd) { PARSE.T.S (AST.T.Level (false, qb, vars)) }
+| cd = clause_part { PARSE.T.C cd }
+| HIDE hd = co_list(literal) { PARSE.T.H (true, hd) }
+| SHOW hd = co_list(literal) { PARSE.T.H (false, hd) }
 
 decl:
 | gp = grounding_prefix DCOLON d = pre_decl DOT { (gp, d) }
@@ -125,3 +128,15 @@ decl:
 file:
 | l = list(decl) EOF { l }
 
+ground_term:
+| i = INT { CIRCUIT.T.Fun (string_of_int i, []) }
+| name = CNAME ts = pr_list(ground_term) { CIRCUIT.T.Fun (name, ts) }
+ground_atom:
+| name = CNAME ts = pr_list(ground_term) { (name, ts) }
+fact:
+| ground = CNAME LPAREN a = ground_atom RPAREN DOT { (ground, [a]) }
+| quanti = CNAME LPAREN d = INT COMMA a = ground_atom RPAREN DOT { (quanti, [(string_of_int d, []); a]) }
+| hidesh = CNAME LPAREN s = CNAME COMMA a = ground_atom RPAREN DOT { (hidesh, [(s, []); a]) }
+
+ground_gringo:
+| l = list(fact) EOF { l }

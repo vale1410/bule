@@ -6,11 +6,14 @@ let print_error lexer =
   and char = position.Lexing.pos_cnum - position.Lexing.pos_bol in
   sprintf "at line %d, column %d: syntax error." line char
 
-let input_channel name =
+let lexer_from_channel name =
   let input = if name <> "-" then open_in name else stdin in
   let close = if name <> "-" then (fun () -> close_in input) else (fun () -> ()) in
   let lexer = Lexing.from_channel input in
   lexer, close
+
+let lexer_from_string input =
+  (Lexing.from_string input, (fun () -> ()))
 
 module TableBased =
 struct
@@ -44,15 +47,22 @@ let loop lexbuf result =
   let supplier = I.lexer_lexbuf_to_supplier Lexer.token lexbuf in
   I.loop_handle succeed (fail lexbuf) supplier result
 
-let from_file () name =
-  let (lexer, close) = input_channel name in
+let parse f name lexer close =
   let reduc =
-    try loop lexer (Parser.Incremental.file lexer.Lexing.lex_curr_p) with
+    try loop lexer (f lexer.Lexing.lex_curr_p) with
     | Lexer.Error msg -> close (); invalid_arg (sprintf "Lexer error. In file %s, %s" name msg)
     | ParserError msg -> close (); invalid_arg (sprintf "Parser error. In file %s, %s" name msg)
     | exn -> close (); eprintf "The error message file might be outdated.\nIn file %s, %s\n" name (print_error lexer); raise exn in
   close ();
   reduc
+
+let from_file () name =
+  let (lexer, close) = lexer_from_channel name in
+  parse Parser.Incremental.file name lexer close
+
+let facts input =
+  let (lexer, close) = lexer_from_string input in
+  parse Parser.Incremental.ground_gringo "gringo-output" lexer close
 end
 
 include TableBased
