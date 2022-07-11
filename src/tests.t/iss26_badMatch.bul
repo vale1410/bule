@@ -1,0 +1,5 @@
+#ground d_colored[va].
+#ground d_colored[vb].
+#ground d_colored1[color(va, red)].
+#ground d_colored1[color(vb, red)].
+d_colored[Vv] :: colored(Vv) -> d_colored1[color(Vv, Vc)] : colored1(color(Vv, Vc)).

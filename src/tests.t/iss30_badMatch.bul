@@ -1,0 +1,4 @@
+#ground d_t[a, f(a)].
+#ground d_t[b, f(b)].
+
+d_t[X, f(X)] :: m(X).
