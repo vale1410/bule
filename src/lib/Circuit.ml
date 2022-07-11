@@ -35,9 +35,11 @@ struct
       (i+1, s ^ "\n" ^ s') in
     snd (List.fold_left f (0, "") l)
   let file { prefix; matrix; hide; show } =
-    let h = if hide <> [] then sprintf "\n#hide %s." (comma_s_list literal hide) else ""
+    let p = if prefix <> [] then blocks prefix else ""
+    and c = if matrix <> [] then Print.unlines clause matrix else ""
+    and h = if hide <> [] then sprintf "\n#hide %s." (comma_s_list literal hide) else ""
     and s = if show <> [] then sprintf "\n#show %s." (comma_s_list literal show) else "" in
-    sprintf "%s\n%s%s%s" (blocks prefix) (Print.unlines clause matrix) h s
+    sprintf "%s%s%s%s" p c h s
 end
 
 module SMap = Map.Make (String)

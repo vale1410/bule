@@ -1,0 +1,2 @@
+#ground p[1..600].
+p[X], p[Y] :: #ground q[X,Y,X+Y].
