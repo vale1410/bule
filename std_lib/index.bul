@@ -31,11 +31,12 @@ index[ID,X,I] :: #ground index_range[ID,I].
 %%% Input:  `log_input[ID,N]` where `N` is an integer to be encoded in binary.
 %%% Output: `log_binary[ID,N,I,B]` indicates that in the binary encoding of the number `N` in bit position `I` is B (0 or 1).
 %%% Output: `log_position[ID,I]` I has a bit position, I being number of bits needed for the largest integer for ID
+%%% Output: `log_bits[ID,L]` L bit positions are used for ID
 %%% Output: `log_highest[ID,H]`    H is the highest bit position from the largest integer in set ID
 
 log_input[ID,N]                                :: #ground log_aux[ID,N,N,0].
 log_aux[ID,X,N,I], N > 1                       :: #ground log_aux[ID,X,N/2,I+1].
 log_aux[ID,X,N,I]                              :: #ground log_binary[ID,X,I,N #mod 2].
-log_aux[ID,_,_,I]                              :: #ground log_position[ID,I]. 
-log_aux[ID,_,_,I], ~log_aux[ID,_,_,I+1]        :: #ground log_bits[ID,I+1]. 
+log_aux[ID,_,_,I]                              :: #ground log_position[ID,I].
+log_position[ID,I], ~log_position[ID,I+1]      :: #ground log_bits[ID,I+1].
 log_input[ID,X], log_position[ID,I],  2**I > X :: #ground log_binary[ID,X,I,0].
