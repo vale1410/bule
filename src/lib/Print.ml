@@ -1,7 +1,7 @@
 open Printf
 
 let rec pow x n = if n <= 0 then 1 else x * pow x (n - 1)
-let bits b = 
+let bits b =
   let s = ref "" in
   for i = 0 to 8 do
     s := sprintf "%s%d" !s ((b / pow 2 i) mod 2)

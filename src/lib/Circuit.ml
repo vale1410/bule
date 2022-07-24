@@ -5,6 +5,10 @@ open T
 
 (*type pre_ground_term = Ground of ground_term | Int of int*)
 type grounder = Native | CommandLine of string
+type show = ShowAll | ShowNone
+type option = { facts: bool;
+                tool: grounder;
+                show: show }
 
 module P = Print
 module Print =
@@ -32,19 +36,20 @@ struct
   let blocks l =
     let f (i, s) (b, vars) =
       let s' = sprintf "#%s[%d] %s." (quantifier b) i (comma_s_list search_var (VSet.elements vars)) in
-      (i+1, s ^ "\n" ^ s') in
+      (i+1, sprintf "%s%s\n" s s') in
     snd (List.fold_left f (0, "") l)
-  let file { prefix; matrix; hide; show } =
+  let file { prefix; matrix; show } =
     let p = if prefix <> [] then blocks prefix else ""
     and c = if matrix <> [] then Print.unlines clause matrix else ""
-    and h = if hide <> [] then sprintf "\n#hide %s." (comma_s_list literal hide) else ""
     and s = if show <> [] then sprintf "\n#show %s." (comma_s_list literal show) else "" in
-    sprintf "%s%s%s%s" p c h s
+    sprintf "%s%s%s" p c s
 end
 
 module SMap = Map.Make (String)
 module IMap = Map.Make (Int)
 module GTermSet = Set.Make (struct type t = ground_term list let compare = compare end)
+module LitSet = Set.Make (struct type t = literal let compare = compare end)
+
 let find_default key map d = match SMap.find_opt key map with
   | None -> d
   | Some v -> v
@@ -345,17 +350,32 @@ let print_facts facts gmap =
     else P.unspaces pr_tuple elements in
   if facts then eprintf "%s\n%!" (P.unlines pr_one (SMap.bindings gmap))
 
-let file facts cmd (decls : Ast.T.file) : T.file =
+let identify_show show_mode hide_st = function
+  | [] -> []
+  | (false, _) :: _ -> if hide_st <> [] then eprintf "Warning: show/hide declarations but the first block is universal."; []
+  | (true, vars) :: _ ->
+     let bad_decl = List.filter (fun (_, (_, var)) -> not (VSet.mem var vars)) hide_st in
+     if bad_decl <> [] then eprintf "Warning: the following literals were declared shown/hidden but they are not in the first block: %s\n" (P.unspaces Print.literal (List.rev_map snd bad_decl));
+     let show, hide = List.partition_map (fun (h, lit) -> if h then Either.Right lit else Either.Left lit) hide_st in
+     let both = List.filter (fun x -> List.mem x show) hide in
+     if both <> [] then eprintf "Warning. The following literals are both shown and hidden: %s\n%!" (P.unspaces Print.literal both);
+     let lits = match show_mode with | ShowAll  -> LitSet.of_seq (Seq.flat_map (fun v -> List.to_seq [(true, v); (false, v)]) (VSet.to_seq vars))
+                                     | ShowNone -> LitSet.empty in
+     let show = LitSet.of_list show
+     and hide = LitSet.of_list hide in
+     let lits = LitSet.diff (LitSet.union lits show) hide in
+     LitSet.elements lits
+
+let file options (decls : Ast.T.file) : T.file =
   let { Ast.T.ground; prefix; matrix; hide } = decls in
-  let gmap = all_ground cmd ground in
-  print_facts facts gmap;
+  let gmap = all_ground options.tool ground in
+  print_facts options.facts gmap;
   let prefix = all_search gmap prefix in
   let matrix = all_clause gmap matrix in
   let hide_st = all_hide gmap hide in
-  let show, hide = List.partition_map (fun (h, lit) -> if h then Either.Right lit else Either.Left lit) hide_st in
+  let show = identify_show options.show hide_st prefix in
   { prefix;
     matrix;
-    hide;
     show }
 
 let _ = ignore (print_smap, print_gtset, unions)

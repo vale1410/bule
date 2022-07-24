@@ -8,5 +8,9 @@ module Print : sig
 end
 
 type grounder = Native | CommandLine of string
+type show = ShowAll | ShowNone
+type option = { facts: bool;
+                tool: grounder;
+                show: show }
 
-val file : bool -> grounder -> Ast.T.file -> T.file
+val file : option -> Ast.T.file -> T.file

@@ -57,15 +57,19 @@ let get () =
     | "native" -> Circuit.Native
     | "gringo" -> Circuit.CommandLine "gringo --text"
     | _ -> Circuit.CommandLine !grounder in
-  let mode = if !solve then Either.Right (solver, !default_show, !models) else Either.Left (!facts, !print_mode) in
-  (mode, grounder, files)
+  let default_show = match !default_show with
+    | true  -> Circuit.ShowAll
+    | false -> Circuit.ShowNone in
+  let goptions = { Circuit.facts = !facts; tool = grounder; show = default_show } in
+  let mode = if !solve then Either.Right (solver, !models) else Either.Left !print_mode in
+  (mode, goptions, files)
 
-let solve_mode grounder file solve_options =
-  let circuit = Circuit.file false grounder file in
+let solve_mode goptions file solve_options =
+  let circuit = Circuit.file goptions file in
   let file = Dimacs.ground circuit in
   Solve.solve_all solve_options file
-let ground_mode grounder file (facts, format) =
-  let circuit = Circuit.file facts grounder file in
+let ground_mode goptions file format =
+  let circuit = Circuit.file goptions file in
   let d = Dimacs.file circuit in
   let output = match format with
   | Bule -> Circuit.Print.file circuit
@@ -74,13 +78,13 @@ let ground_mode grounder file (facts, format) =
   if output <> "" then printf "%s\n" output else printf "%s" output
 
 let start () =
-  let mode, grounder, fs = get () in
+  let mode, goptions, fs = get () in
   let file = List.concat_map (Parse.from_file ()) fs in
   let file = Ast.file file in
   (*printf "%s\n\n" (Ast.Print.file p);*)
   match mode with
-  | Either.Right comm -> solve_mode grounder file comm(*solve models (d, vm, im, hs) comm*)
-  | Either.Left comm -> ground_mode grounder file comm
+  | Either.Right comm -> solve_mode goptions file comm(*solve models (d, vm, im, hs) comm*)
+  | Either.Left comm -> ground_mode goptions file comm
 
 let _ = start ()
 

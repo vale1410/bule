@@ -49,7 +49,6 @@ type clause = literal list * literal list
 type file =
   { prefix: quantifier_block list;
     matrix: clause list;
-    hide: literal list;
     show: literal list }
 end end
 

@@ -6,5 +6,5 @@ module Print : sig
   val qbf_file : T.file -> string
 end
 
-val ground : Circuit.T.file -> T.file * int T.VMap.t * Circuit.T.search_var T.IMap.t * T.ISet.t * T.ISet.t
+val ground : Circuit.T.file -> T.file * int T.VMap.t * Circuit.T.search_var T.IMap.t * T.ISet.t
 val file : Circuit.T.file -> T.file
