@@ -8,7 +8,7 @@ module Print : sig
 end
 
 type grounder = Native | CommandLine of string
-type show = ShowAll | ShowNone
+type show = ShowAll | Positive | ShowNone
 type option = { facts: bool;
                 tool: grounder;
                 show: show }

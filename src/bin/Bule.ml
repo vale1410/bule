@@ -11,6 +11,11 @@ let read_output_format = function
   | "dimacs" -> Dimacs
   | "qdimacs" -> Qdimacs
   | _ -> assert false
+let read_show_format = function
+  | "all" -> Circuit.ShowAll
+  | "positive" -> Positive
+  | "none" -> Circuit.ShowNone
+  | _ -> assert false
 
 let update reference value = reference := value
 let get () =
@@ -23,24 +28,26 @@ let get () =
      ("--asp",            Arg.Bool (update asp), "Output ASP instead of FOL.", sprintf "%B" !asp);
     ] in*)
   let input_names = ref [] in
-  let default_show = ref true in
   let models = ref 1 in
   let solver = ref "quantor" in
   let grounder = ref "native" in
   let solve = ref false in
   let facts = ref false in
-  let print_mode = ref Bule in
   let print_version () = eprintf "BULE Grounder, version %s.\n" version_string; exit 0 in
+  let print_mode = ref Bule in
   let output_symbols = ["qdimacs"; "dimacs"; "bule"]
   and output_treat s = print_mode := read_output_format s in
+  let default_show = ref Circuit.Positive in
+  let show_symbols = ["all"; "positive"; "none"]
+  and show_treat s = default_show := read_show_format s in
   let speclist = [("-",        Arg.Unit (fun () -> update input_names ("-" :: !input_names)), "Read the BULE code from the standard input.");
                   ("--solve",  Arg.Set solve, "Enable solving. Default: \"false\"");
                   ("--models", Arg.Set_int models, "Number of models to generate. The option has no effect if \"solve\" is set to \"false\". Default: 1.");
                   ("--solver", Arg.Set_string solver, "Set the solver to be used. If \"quantor\" then Quantor 3.2 is used, if \"minisat\" then Minisat 1.14 is used, otherwise the argument is assumed to be a command-line tool. Example \"depqbf --no-dynamic-nenofex --qdo\". The option has no effect if \"solve\" is set to \"false\". Default: \"quantor\"");
                   ("--grounder", Arg.Set_string grounder, "Set the grounder to be used. If \"native\" then the default embedded grounder is used, if \"gringo\" then the Potassco grounder gringo is used with suitable options. Otherwise the argument is assumed to be a command-line tool. Default: \"native\"");
-                  ("--output", Arg.Symbol (output_symbols, output_treat), "Output format (QDIMACS, DIMACS, or BULE. The option has no effect if \"solve\" is set to \"true\". Default \"bule\".");
+                  ("--output", Arg.Symbol (output_symbols, output_treat), " Output format (QDIMACS, DIMACS, or BULE). The option has no effect if \"solve\" is set to \"true\". Default \"bule\".");
                   ("--facts",  Arg.Set facts, "Enable printing of grounding facts. The option has no effect if \"solve\" is set to \"true\". Default: \"false\".");
-                  ("--default_show", Arg.Bool (update default_show), "Default showing behaviour for literals. The option has no effect if \"solve\" is set to \"false\". Default \"true\".");
+                  ("--default_show", Arg.Symbol (show_symbols, show_treat), " Default showing behaviour for literals. The option has no effect if \"solve\" is set to \"false\". Default \"positive\".");
                   ("--version", Arg.Unit print_version, "Display the version number.")
                  ] in
   let usage_msg = sprintf "BULE Grounder %s. Options available:" version_string in
@@ -57,10 +64,7 @@ let get () =
     | "native" -> Circuit.Native
     | "gringo" -> Circuit.CommandLine "gringo --text"
     | _ -> Circuit.CommandLine !grounder in
-  let default_show = match !default_show with
-    | true  -> Circuit.ShowAll
-    | false -> Circuit.ShowNone in
-  let goptions = { Circuit.facts = !facts; tool = grounder; show = default_show } in
+  let goptions = { Circuit.facts = !facts; tool = grounder; show = !default_show } in
   let mode = if !solve then Either.Right (solver, !models) else Either.Left !print_mode in
   (mode, goptions, files)
 

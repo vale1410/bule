@@ -5,7 +5,7 @@ open T
 
 (*type pre_ground_term = Ground of ground_term | Int of int*)
 type grounder = Native | CommandLine of string
-type show = ShowAll | ShowNone
+type show = ShowAll | Positive | ShowNone
 type option = { facts: bool;
                 tool: grounder;
                 show: show }
@@ -360,6 +360,7 @@ let identify_show show_mode hide_st = function
      let both = List.filter (fun x -> List.mem x show) hide in
      if both <> [] then eprintf "Warning. The following literals are both shown and hidden: %s\n%!" (P.unspaces Print.literal both);
      let lits = match show_mode with | ShowAll  -> LitSet.of_seq (Seq.flat_map (fun v -> List.to_seq [(true, v); (false, v)]) (VSet.to_seq vars))
+                                     | Positive -> LitSet.of_seq (Seq.map (fun v -> (true, v)) (VSet.to_seq vars))
                                      | ShowNone -> LitSet.empty in
      let show = LitSet.of_list show
      and hide = LitSet.of_list hide in
