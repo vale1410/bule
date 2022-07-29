@@ -318,7 +318,7 @@ let all_search gmap decls =
   if IMap.is_empty qmap then inner
   else
     let blocks = IMap.bindings qmap in
-    let f (i, l) = (i mod 2 = 1, l) in
+    let f (i, l) = (i mod 2 <> 0, l) in
     let prefix = List.rev_map f blocks in
     List.rev_append prefix inner
 
