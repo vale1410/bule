@@ -34,10 +34,9 @@ struct
     | _ :: _ -> hs ^ " -> " ^ cs
   let quantifier b = if b then "exists" else "forall"
   let blocks l =
-    let f (i, s) (b, vars) =
-      let s' = sprintf "#%s[%d] %s." (quantifier b) i (comma_s_list search_var (VSet.elements vars)) in
-      (i+1, s ^ s') in
-    snd (List.fold_left f (0, "") l)
+    let f i (b, vars) =
+      sprintf "#%s[%d] %s." (quantifier b) i (comma_s_list search_var (VSet.elements vars)) in
+    P.unlines Fun.id (List.mapi f l)
   let file { prefix; matrix; show } =
     let p, c, s = blocks prefix, Print.unlines clause matrix, sprintf "#show %s." (comma_s_list literal show) in
     let p = if prefix <> [] then p ^ "\n" else ""
