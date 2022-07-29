@@ -36,12 +36,13 @@ struct
   let blocks l =
     let f (i, s) (b, vars) =
       let s' = sprintf "#%s[%d] %s." (quantifier b) i (comma_s_list search_var (VSet.elements vars)) in
-      (i+1, sprintf "%s%s\n" s s') in
+      (i+1, s ^ s') in
     snd (List.fold_left f (0, "") l)
   let file { prefix; matrix; show } =
-    let p = if prefix <> [] then blocks prefix else ""
-    and c = if matrix <> [] then Print.unlines clause matrix else ""
-    and s = if show <> [] then sprintf "\n#show %s." (comma_s_list literal show) else "" in
+    let p, c, s = blocks prefix, Print.unlines clause matrix, sprintf "#show %s." (comma_s_list literal show) in
+    let p = if prefix <> [] then p ^ "\n" else ""
+    and c = if matrix <> [] then c ^ "\n" else ""
+    and s = if show <> [] then s ^ "\n" else "" in
     sprintf "%s%s%s" p c s
 end
 

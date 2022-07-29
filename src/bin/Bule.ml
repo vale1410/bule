@@ -79,7 +79,8 @@ let ground_mode goptions file format =
   | Bule -> Circuit.Print.file circuit
   | Dimacs -> Dimacs.Print.sat_file d
   | Qdimacs ->  Dimacs.Print.qbf_file d in
-  if output <> "" then printf "%s\n" output else printf "%s" output
+(*  if output <> "" then printf "%s\n" output else printf "%s" output*)
+  printf "%s" output
 
 let start () =
   let mode, goptions, fs = get () in
