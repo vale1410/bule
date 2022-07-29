@@ -1,0 +1,23 @@
+#ground height[2], width[5], makespan[5].
+#ground wall[c(1,2)], wall[c(2,2)], wall[c(4,2)], wall[c(5,2)].
+#ground task[a1, c(4,1), c(2,1)], task[a2, c(5,1), c(1,1)]. % task[AGENT,START,TARGET]
+%%% ##_##
+%%% BA_ab
+
+task[A,_,_] ::#ground agent[A].
+height[H], width[W] ::#ground grid[c(1..W, 1..H)].
+grid[V], ~wall[V] ::#ground location[V].
+makespan[T] ::#ground time[1..T].
+location[c(X,Y)], location[c(X+1,Y)] ::#ground adjacent[c(X,Y), c(X+1,Y)].
+location[c(X,Y)], location[c(X,Y+1)] ::#ground adjacent[c(X,Y), c(X,Y+1)].
+adjacent[U,V] ::#ground adjacent[V,U].
+location[V] ::#ground adjacent[V,V].
+
+agent[A], time[T], location[V] ::#exists at(A,T,V).
+agent[A], agent[B], time[T], location[V], A<B :: ~at(A,T,V) | ~at(B,T,V).
+agent[A], time[T] :: location[V]:at(A,T,V).
+task[A,V,_] :: at(A,1,V).
+task[A,_,V], makespan[T] :: at(A,T,V).
+agent[A], time[T], location[U], location[V], U<V :: at(A,T,U) -> ~at(A,T,V).
+agent[A], time[T], time[T+1], location[V] :: at(A,T,V) -> adjacent[V,U]:at(A,T+1,U).
+agent[A], agent[B], time[T], time[T+1], adjacent[U,V], A<B :: at(A,T,U) & at(B,T,V) -> ~at(A,T+1,V) | ~at(B,T+1,U).
