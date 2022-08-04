@@ -19,7 +19,7 @@ module CL = struct
     Scanf.sscanf line "V %d 0" abs
 
   let parse_output = function
-    | [] -> assert false
+    | [] -> eprintf "Error: no output.\n"; assert false
     | status :: rest ->
        let sat = parse_status status in
        if sat then Some (List.map parse_line rest) else None
