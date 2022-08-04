@@ -44,7 +44,7 @@ reach1_succ[ID,_,T,U] :: reach_test(ID,succ(T,U)).
 
 reach_choose[ID,binary], reach2_succ[ID,Q,T,U] :: #ground reach_succ[ID,Q,T,U].
 reach_choose[ID,binary], reach_fluent[ID,F]    :: #ground reach2_fluent[ID,F].
-reach_choose[ID,binary], reach_length[ID,L]    :: #ground reach2_length[ID,L-1]. %% of by 1 error wrt direct encoding above
+reach_choose[ID,binary], reach_length[ID,L]    :: #ground reach2_length[ID,L-1].
 reach_choose[ID,binary], reach2_time[ID,Q,T]   :: #ground reach_time[ID,Q,T].
 reach_choose[ID,binary], reach2_init[ID,Q,T]   :: #ground reach_init[ID,Q,T].
 reach_choose[ID,binary], reach2_goal[ID,Q,T]   :: #ground reach_goal[ID,Q,T].
@@ -53,7 +53,6 @@ reach_succ[ID,_,T,U] :: #ground time_point[ID,T].
 reach2_length[ID,MAXD], MAXD > 0 :: #ground reach2_highest[ID,(2 // MAXD)].
 reach2_highest[ID,H]   :: #ground reach2_depth[ID,0..H].
 
-%% Maybe H+1?
 reach2_highest[ID,H] :: #ground reach2_quantifier[ID,2*H+2].
 
 reach2_quantifier[ID,Q] :: #ground reach2_init[ID,Q,fr].
@@ -82,6 +81,5 @@ reach2_length[ID,N], log_binary[ID,N,I,0]  :: ~toggle(ID,I) | ~reach_test(ID,goa
 reach2_length[ID,N], log_binary[ID,N,I,1]  ::  toggle(ID,I) | ~reach_test(ID,goal(to)).
 reach2_length[ID,N] :: log_binary[ID,N,I,0] : toggle(ID,I) | log_binary[ID,N,I,1] : ~toggle(ID,I) | reach_test(ID,goal(to)).
 
-reach2_succ[ID,_,_,_] :: reach_test(ID,succ(fr,to)). %% TODO: check if this can be removed from the API because both direct and binary it's set to true
 
 
