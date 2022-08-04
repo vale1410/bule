@@ -21,13 +21,13 @@ An introduction to the language can be found in this [tutorial](doc/tutorial) en
     * VIM: https://github.com/vale1410/vim-minizinc
 
 
-Related Links
+Related Tools and Discussions
 -----
 
-* http://www.satlive.org/ 
+* https://potassco.org/
 * https://pysathq.github.io/
 * http://bach.istc.kobe-u.ac.jp/sugar/
 * http://picat-lang.org/
-* http://potassco.sourceforge.net/
+* http://www.satlive.org/ 
 * https://accu.org/journals/overload/27/150/horenovsky_2640/
 * http://www.cs.utexas.edu/users/vl/tag/SAT-grounders
