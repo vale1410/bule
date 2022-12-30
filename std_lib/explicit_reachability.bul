@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%% Bule Standard Library 1.0                                            %%%%%%%%%%%%%%
-%%%%%%%%%%%%%% Bule Version 4.0.0                                                   %%%%%%%%%%%%%%
-%%%%%%%%%%%%%% 2022-02-28                                                           %%%%%%%%%%%%%%
+%%%%%%%%%%%%%% Bule Version 4.0.4                                                   %%%%%%%%%%%%%%
+%%%%%%%%%%%%%% 2022-12-30                                                           %%%%%%%%%%%%%%
 %%%%%%%%%%%%%% Jean Christoph Jung, Valentin Mayer-Eichberger, Abdallah Saffidine   %%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -22,24 +22,24 @@
 
 reach1_edge[ID,_,_] :: #ground reach1_id[ID].
 reach1_edge[ID,A,B] :: #ground reach1_vertex[ID,A], reach1_vertex[ID,B].
-reach1_vertex[ID,V] :: #ground index_input[ID,V].
+reach1_vertex[ID,V] :: #ground std_index_input[ID,V].
 
-index_range[ID,N], reach1_vertex[ID,V] :: #exists[0] reach_direct(ID,V,N).
-%index_range[ID,N], reach1_vertex[ID,V] :: #hide reach_direct(ID,V,N), ~reach_direct(ID,V,N).
-index_range[ID,N], reach1_vertex[ID,V] :: #hide ~reach_direct(ID,V,N).
+std_index_range[ID,N], reach1_vertex[ID,V] :: #exists[0] reach_direct(ID,V,N).
+%std_index_range[ID,N], reach1_vertex[ID,V] :: #hide reach_direct(ID,V,N), ~reach_direct(ID,V,N).
+std_index_range[ID,N], reach1_vertex[ID,V] :: #hide ~reach_direct(ID,V,N).
 reach1_id[ID] :: #exists[0] connected(ID).
 
 reach1_source[ID,S] :: reach_direct(ID,S,0).
 reach1_vertex[ID,A], ~reach1_source[ID,A] :: ~reach_direct(ID,A,0).
 
-reach1_vertex[ID,A], index_range[ID,I], index_range[ID,I+1] :: ~reach_direct(ID,A,I) | reach_direct(ID,A,I+1).
+reach1_vertex[ID,A], std_index_range[ID,I], std_index_range[ID,I+1] :: ~reach_direct(ID,A,I) | reach_direct(ID,A,I+1).
 
-reach1_edge[ID,A,B], index_range[ID,I], index_range[ID,I+1] :: ~reach_direct(ID,A,I) | reach_direct(ID,B,I+1).
+reach1_edge[ID,A,B], std_index_range[ID,I], std_index_range[ID,I+1] :: ~reach_direct(ID,A,I) | reach_direct(ID,B,I+1).
 
-reach1_vertex[ID,B], index_range[ID,K], index_range[ID,K-1] :: reach_direct(ID,B,K-1) | ~reach_direct(ID,B,K) | reach1_edge[ID,A,B] : reach_direct(ID,A,K-1).
+reach1_vertex[ID,B], std_index_range[ID,K], std_index_range[ID,K-1] :: reach_direct(ID,B,K-1) | ~reach_direct(ID,B,K) | reach1_edge[ID,A,B] : reach_direct(ID,A,K-1).
 
-reach1_target[ID,T], index_last[ID,N] :: ~connected(ID) |  reach_direct(ID,T,N).
-reach1_target[ID,T], index_last[ID,N] ::  connected(ID) | ~reach_direct(ID,T,N).
+reach1_target[ID,T], std_index_last[ID,N] :: ~connected(ID) |  reach_direct(ID,T,N).
+reach1_target[ID,T], std_index_last[ID,N] ::  connected(ID) | ~reach_direct(ID,T,N).
 
 
 
@@ -52,40 +52,40 @@ reach1_target[ID,T], index_last[ID,N] ::  connected(ID) | ~reach_direct(ID,T,N).
 
 reach2_edge[ID,_,_] :: #ground reach2_id[ID]. 
 reach2_edge[ID,A,B] :: #ground reach2_vertex[ID,A], reach2_vertex[ID,B].
-reach2_vertex[ID,V] :: #ground index_input[ID,V].  % -> index_range/2, index_last/2
+reach2_vertex[ID,V] :: #ground std_index_input[ID,V].  % -> std_index_range/2, std_index_last/2
 
-index_last[ID,N] :: #ground log_input[ID,0..2**(2//N+1)-1]. % -> log_binary/4, log_position/2, log_bits/2
+std_index_last[ID,N] :: #ground std_log_input[ID,0..2**(2//N+1)-1]. % -> std_log_binary/4, std_log/2, log_bits/2
 
 ground succ[curr].
 ground succ[next].
 
-log_bits[ID,H], log_position[ID,I], log_position[ID,D] :: #exists[H-D-1] promise(ID,I,D).
-log_bits[ID,H], log_position[ID,D]                     :: #forall[H-D]   toggle(ID,D).
-log_bits[ID,H], log_position[ID,I], succ[X]            :: #exists[H+1]   transition(ID,I,X).
+log_bits[ID,H], std_log[ID,I], std_log[ID,D] :: #exists[H-D-1] promise(ID,I,D).
+log_bits[ID,H], std_log[ID,D]                     :: #forall[H-D]   toggle(ID,D).
+log_bits[ID,H], std_log[ID,I], succ[X]            :: #exists[H+1]   transition(ID,I,X).
 
 % dont select non-nodes (X)
-log_position[ID,D], log_input[ID,X], ~index_range[ID,X] ::
-  log_binary[ID,X,I,1] : ~promise(ID,I,D) |
-  log_binary[ID,X,I,0] :  promise(ID,I,D).
+std_log[ID,D], log_input[ID,X], ~std_index_range[ID,X] ::
+  std_log_binary[ID,X,I,1] : ~promise(ID,I,D) |
+  std_log_binary[ID,X,I,0] :  promise(ID,I,D).
 
-log_position[ID,D], log_position[ID,I] ::  ~toggle(ID,D) |  log_position[ID,T], T<D :  toggle(ID,T) |  promise(ID,I,D) | ~transition(ID,I,curr).
-log_position[ID,D], log_position[ID,I] ::  ~toggle(ID,D) |  log_position[ID,T], T<D :  toggle(ID,T) | ~promise(ID,I,D) |  transition(ID,I,curr).
-log_position[ID,D], log_position[ID,I] ::   toggle(ID,D) |  log_position[ID,T], T<D : ~toggle(ID,T) |  promise(ID,I,D) | ~transition(ID,I,next).
-log_position[ID,D], log_position[ID,I] ::   toggle(ID,D) |  log_position[ID,T], T<D : ~toggle(ID,T) | ~promise(ID,I,D) |  transition(ID,I,next).
+std_log[ID,D], std_log[ID,I] ::  ~toggle(ID,D) |  std_log[ID,T], T<D :  toggle(ID,T) |  promise(ID,I,D) | ~transition(ID,I,curr).
+std_log[ID,D], std_log[ID,I] ::  ~toggle(ID,D) |  std_log[ID,T], T<D :  toggle(ID,T) | ~promise(ID,I,D) |  transition(ID,I,curr).
+std_log[ID,D], std_log[ID,I] ::   toggle(ID,D) |  std_log[ID,T], T<D : ~toggle(ID,T) |  promise(ID,I,D) | ~transition(ID,I,next).
+std_log[ID,D], std_log[ID,I] ::   toggle(ID,D) |  std_log[ID,T], T<D : ~toggle(ID,T) | ~promise(ID,I,D) |  transition(ID,I,next).
 
 % curr->next is not an non-edge A->B
-index[ID,A,A1], index[ID,B,B1], ~reach2_edge[ID,A,B], A != B :: 
-  log_binary[ID,A1,I,1] : ~transition(ID,I,curr) |
-  log_binary[ID,A1,I,0] :  transition(ID,I,curr) |
-  log_binary[ID,B1,I,1] : ~transition(ID,I,next) |
-  log_binary[ID,B1,I,0] :  transition(ID,I,next).
+std_index[ID,A,A1], std_index[ID,B,B1], ~reach2_edge[ID,A,B], A != B :: 
+  std_log_binary[ID,A1,I,1] : ~transition(ID,I,curr) |
+  std_log_binary[ID,A1,I,0] :  transition(ID,I,curr) |
+  std_log_binary[ID,B1,I,1] : ~transition(ID,I,next) |
+  std_log_binary[ID,B1,I,0] :  transition(ID,I,next).
  
 % if start 
 % /\ T =>  curr <=> source
-reach2_source[ID,A], index[ID,A,X], log_binary[ID,X,I,0]  :: log_position[ID,T] :  toggle(ID,T) | ~transition(ID,I,curr).
-reach2_source[ID,A], index[ID,A,X], log_binary[ID,X,I,1]  :: log_position[ID,T] :  toggle(ID,T) |  transition(ID,I,curr).
+reach2_source[ID,A], std_index[ID,A,X], std_log_binary[ID,X,I,0]  :: std_log[ID,T] :  toggle(ID,T) | ~transition(ID,I,curr).
+reach2_source[ID,A], std_index[ID,A,X], std_log_binary[ID,X,I,1]  :: std_log[ID,T] :  toggle(ID,T) |  transition(ID,I,curr).
 % if end
 % /\ T =>  curr <=> target
-reach2_target[ID,B], index[ID,B,X], log_binary[ID,X,I,0]  :: log_position[ID,T] : ~toggle(ID,T) | ~transition(ID,I,next).
-reach2_target[ID,B], index[ID,B,X], log_binary[ID,X,I,1]  :: log_position[ID,T] : ~toggle(ID,T) |  transition(ID,I,next).
+reach2_target[ID,B], std_index[ID,B,X], std_log_binary[ID,X,I,0]  :: std_log[ID,T] : ~toggle(ID,T) | ~transition(ID,I,next).
+reach2_target[ID,B], std_index[ID,B,X], std_log_binary[ID,X,I,1]  :: std_log[ID,T] : ~toggle(ID,T) |  transition(ID,I,next).
 
