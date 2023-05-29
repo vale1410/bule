@@ -164,12 +164,11 @@ let map_keys map =
 let solve_one cmd (dimacs, _, imap, show) =
   let (_, _, prefix, _) = dimacs in
   let keys = map_keys imap in
-  match CL.run_solver keys dimacs cmd with
-  | None -> printf "UNSAT\n"
-  | Some model ->
-     printf "SAT\n";
-     let fmodel = filtered_model prefix model show in
-     eprintf "%s\n" (print_one_model imap fmodel)
+  match run_solver keys dimacs cmd with
+  | None -> printf "UNSAT\n";
+  | Some model -> printf "SAT\n";
+                  let fmodel = filtered_model prefix model show in
+                  eprintf "%s\n" (print_one_model imap fmodel)
 
 let next_instance (nbvar, nbcls, blocks, cls) model =
   let flip_literal (pol, var) = (not pol, var) in
