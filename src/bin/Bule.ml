@@ -54,7 +54,7 @@ let get () =
      ("--models", Arg.Set_int models, "Number of models to generate. The option has no effect if \"mode\" is not set to \"enumerate\". \"0\" generates all models. Default: 1.");
      ("--solver", Arg.Set_string solver, "Set the solver to be used. If \"quantor\" then Quantor 3.2 is used, if \"minisat\" then Minisat 1.14 is used, otherwise the argument is assumed to be a command-line tool. Example \"depqbf --no-dynamic-nenofex --qdo\". The option has no effect if \"mode\" is set to \"ground\". Default: \"quantor\"");
      ("--grounder", Arg.Set_string grounder, "Set the grounder to be used. If \"native\" then the default embedded grounder is used, if \"gringo\" then the Potassco grounder gringo is used with suitable options. Otherwise the argument is assumed to be a command-line tool. Default: \"native\"");
-     ("--output", Arg.Symbol (output_symbols, output_treat), " Output format (QDIMACS, DIMACS, or BULE). The option has no effect if \"mode\" is not set to \"ground\". Default \"bule\".");
+     ("--output", Arg.Symbol (output_symbols, output_treat), " Output format (QDIMACS, DIMACS, or BULE). Default \"bule\".");
      ("--facts",  Arg.Set facts, "Enable printing of grounding facts. The option has no effect if \"solve\" is set to \"true\". Default: \"false\".");
      ("--default_show", Arg.Symbol (show_symbols, show_treat), " Default showing behaviour for literals. The option has no effect if \"mode\" is set to \"ground\". Default \"positive\".");
      ("--version", Arg.Unit print_version, "Display the version number.")
