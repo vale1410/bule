@@ -13,7 +13,7 @@
   (name bule)
   (public_name bule)
   (synopsis "A library for parsing and solving BULE programs")
-  (libraries menhirLib minisat qbf qbf.quantor tsort unix)
+  (libraries menhirLib minisat qbf qbf.quantor str tsort unix)
   (flags :standard -color always -safe-string -warn-error -a+8 -w -50))
 
 ;(rule

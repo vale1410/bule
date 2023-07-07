@@ -79,11 +79,11 @@ let get () =
 let enumerate_mode options file =
   let circuit = B.Circuit.file options.ground_options file in
   let file = B.Dimacs.ground circuit in
-  B.Solve.solve_all (options.solver, options.models) file
+  B.Solve.solve_all ((options.solver, options.output_format = Dimacs), options.models) file
 let solve_mode options file =
   let circuit = B.Circuit.file options.ground_options file in
   let file = B.Dimacs.ground circuit in
-  B.Solve.solve_one options.solver file
+  B.Solve.solve_one (options.solver, options.output_format = Dimacs) file
 let ground_mode options file =
   let circuit = B.Circuit.file options.ground_options file in
   let d = B.Dimacs.file circuit in

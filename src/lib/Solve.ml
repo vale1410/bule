@@ -11,18 +11,41 @@ let deprintf fmt = if debug then eprintf fmt else ifprintf stderr fmt
 let compare_literals (px, x) (py, y) = -(compare (x, px) (y, py))
 
 module CL = struct
-  let parse_status line =
-    Scanf.sscanf line "s cnf %d %d %d" (fun p _ _ -> p = 1)
-
   let abs x = assert (x <> 0); if x < 0 then (false, -x) else (true, x)
-  let parse_line line =
-    Scanf.sscanf line "V %d 0" abs
 
-  let parse_output = function
+  let parse_s_status line =
+    Scanf.sscanf line "s %s" (fun p -> p = "SATISFIABLE")
+
+  let parse_s_line line =
+    let tokens = Str.split (Str.regexp "[ ]+") line in
+    match tokens with
+    | [] -> assert false
+    | first :: rest ->
+       assert (first = "v");
+       let ints = List.rev_map int_of_string rest in
+       match ints with
+       | 0 :: mid -> List.rev_map abs mid
+       | _ -> assert false
+
+  let parse_s_output = function
     | [] -> eprintf "Error: no output.\n"; assert false
     | status :: rest ->
-       let sat = parse_status status in
-       if sat then Some (List.map parse_line rest) else None
+       let sat = parse_s_status status in
+       if sat then
+         match rest with [] | _ :: _ :: _ -> assert false | assign :: [] -> Some (parse_s_line assign)
+       else None
+
+  let parse_q_status line =
+    Scanf.sscanf line "s cnf %d %d %d" (fun p _ _ -> p = 1)
+
+  let parse_q_line line =
+    Scanf.sscanf line "V %d 0" abs
+
+  let parse_q_output = function
+    | [] -> eprintf "Error: no output.\n"; assert false
+    | status :: rest ->
+       let sat = parse_q_status status in
+       if sat then Some (List.map parse_q_line rest) else None
 
   let input_lines inp =
     let l = ref [] in
@@ -34,14 +57,16 @@ module CL = struct
   let isnt_comment line =
     String.length line > 0 && line.[0] <> 'c'
 
-  let run_process cmd dimacs =
+  let run_process (cmd, use_dimacs) dimacs =
     let inp, out = Unix.open_process cmd in
-    fprintf out "%s%!" (Dimacs.Print.qbf_file dimacs);
+    if use_dimacs then fprintf out "%s%!" (Dimacs.Print.sat_file dimacs)
+    else               fprintf out "%s%!" (Dimacs.Print.qbf_file dimacs);
     close_out out;
     let lines = input_lines inp in
     close_in inp;
     let lines = List.filter isnt_comment lines in
-    parse_output lines
+    if use_dimacs then parse_s_output lines
+    else parse_q_output lines
 
   let run_solver _keys dimacs cmd =
     match run_process cmd dimacs with
@@ -137,9 +162,9 @@ module QT = struct
 end
 
 let run_solver keys dimacs = function
-  | CommandLine cmd -> CL.run_solver keys dimacs cmd
-  | Minisat -> MS.run_solver keys dimacs
-  | Quantor -> QT.run_solver keys dimacs
+  | (CommandLine cmd, use_dimacs) -> CL.run_solver keys dimacs (cmd, use_dimacs)
+  | (Minisat, _) -> MS.run_solver keys dimacs
+  | (Quantor, _) -> QT.run_solver keys dimacs
 
 let print_literal imap (pol, var) =
   let tilde = if pol then " " else "~" in
