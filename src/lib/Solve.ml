@@ -25,14 +25,14 @@ module CL = struct
        let ints = List.rev_map int_of_string rest in
        match ints with
        | 0 :: mid -> List.rev_map abs mid
-       | _ -> assert false
+       | _ -> List.rev_map abs ints
 
   let parse_s_output = function
     | [] -> eprintf "Error: no output.\n"; assert false
     | status :: rest ->
        let sat = parse_s_status status in
-       if sat then
-         match rest with [] | _ :: _ :: _ -> assert false | assign :: [] -> Some (parse_s_line assign)
+       if sat then Some (List.concat_map parse_s_line rest)
+(*         match rest with [] | _ :: _ :: _ -> eprintf "confusing output:\n%s\n%!" (Print.list Print.string rest); assert false | assign :: [] -> Some (parse_s_line assign)*)
        else None
 
   let parse_q_status line =
