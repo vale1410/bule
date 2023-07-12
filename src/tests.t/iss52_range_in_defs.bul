@@ -1,0 +1,4 @@
+Q:=1..4 :: #ground dom[Q].
+
+dom[Q] :: #exists x(Q).
+dom[Q] :: x(Q).
