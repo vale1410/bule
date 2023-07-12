@@ -117,7 +117,7 @@ pre_decl:
 | EXISTS                       vars = co_list(search_atomd) { PARSE.T.S (AST.T.ExistentialInnerMost vars) }
 | EXISTS qb = quantifier_block vars = co_list(search_atomd) { PARSE.T.S (AST.T.Level (true,  qb, vars)) }
 | FORALL qb = quantifier_block vars = co_list(search_atomd) { PARSE.T.S (AST.T.Level (false, qb, vars)) }
-| cd = clause_part { PARSE.T.C cd }
+| cd = co_list(clause_part) { PARSE.T.C cd }
 | HIDE hd = co_list(literal) { PARSE.T.H (true, hd) }
 | SHOW hd = co_list(literal) { PARSE.T.H (false, hd) }
 

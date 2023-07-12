@@ -18,7 +18,7 @@ type literal = bool * atom
 type literals = glits * bool * atom
 type ground_decl = atomd list
 type search_decl = Level of (bool * expr * atomd list) | ExistentialInnerMost of atomd list
-type clause_decl = literals list * literals list
+type clause_decl = (literals list * literals list) list
 type hide_decl = bool * literal list
 
 type file =
@@ -33,7 +33,7 @@ type ground_literal = In of AST.T.atom | Notin of AST.T.atom | Chain of (AST.T.t
 
 type glits = ground_literal list
 type literals = glits * bool * AST.T.atom
-type clause_decl = literals list * literals list
+type clause_decl = (literals list * literals list) list
 
 type decl = G of AST.T.ground_decl | S of AST.T.search_decl | C of clause_decl | H of AST.T.hide_decl
 type file = (glits * decl) list

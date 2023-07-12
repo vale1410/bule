@@ -332,13 +332,14 @@ let literals gmap vmap (gls, pol, ga) =
   let maps = glits gmap vmap gls in
   List.map (fun m -> (pol, search_var ga m)) maps
 
-let clause_decl gmap (gls, (hyps, ccls)) =
+let clause_decl gmap (gls, clauses) =
   let maps = glits gmap SMap.empty gls in
-  let make_clause vmap =
+  let make_clause vmap (hyps, ccls) =
     let hyps = List.concat_map (literals gmap vmap) hyps in
     let ccls = List.concat_map (literals gmap vmap) ccls in
     (hyps, ccls) in
-  Misc.map make_clause maps
+  let make_clauses vmap = Misc.map (make_clause vmap) clauses in
+  List.concat_map make_clauses maps
 
 let all_clause gmap decls = List.concat_map (clause_decl gmap) decls
 
