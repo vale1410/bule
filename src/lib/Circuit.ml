@@ -153,25 +153,6 @@ let atom gmap vmap (cname, terms) =
         try List.filter_map (aux terms) elements with
         | UnboundVar n -> failwith (sprintf "Error: variable %s is unbound in an arithmetical expression when grounding %s." n (Ast.Print.atom (cname, terms)))
 
-let ground_literal gmap vmap = function
-  | Ast.T.In ga -> atom gmap vmap ga
-  | Ast.T.Notin ga ->
-     let maps = atom gmap vmap ga in
-     if maps = [] then [vmap] else []
-  | Ast.T.Comparison (t1, c, t2) ->
-     let t1 = term vmap t1
-     and t2 = term vmap t2 in
-     if perform_cop t1 t2 c then [vmap] else []
-  | Ast.T.Set (v, t) ->
-     if SMap.mem v vmap then failwith (sprintf "Error: variable %s is already bound and cannot be assign %s." v (Ast.Print.term t));
-     let t = term vmap t in
-     [SMap.add v t vmap]
-
-let glits gmap vmap l =
-  let aux vmaps lit = List.concat_map (fun m -> ground_literal gmap m lit) vmaps in
-  let maps = List.fold_left aux [vmap] l in
-  maps
-
 (*let tuple vmap : Ast.T.tuple -> ground_term list  = function
   | Ast.T.Term t -> [term vmap t]
   | Ast.T.Range (e1, e2) ->
@@ -198,6 +179,25 @@ and tuple' vmap ts =
 let atomd vmap (n, l) = tuple vmap (Ast.T.FunTu (n, l))*)
 
 let atomd_aux vmap l = tuple' vmap l
+
+let ground_literal gmap vmap = function
+  | Ast.T.In ga -> atom gmap vmap ga
+  | Ast.T.Notin ga ->
+     let maps = atom gmap vmap ga in
+     if maps = [] then [vmap] else []
+  | Ast.T.Comparison (t1, c, t2) ->
+     let t1 = term vmap t1
+     and t2 = term vmap t2 in
+     if perform_cop t1 t2 c then [vmap] else []
+  | Ast.T.Set (v, t) ->
+     if SMap.mem v vmap then failwith (sprintf "Error: variable %s is already bound and cannot be assign %s." v (Ast.Print.tuple t));
+     let ts = tuple_aux vmap t in
+     List.map (fun t -> SMap.add v t vmap) ts
+
+let glits gmap vmap l =
+  let aux vmaps lit = List.concat_map (fun m -> ground_literal gmap m lit) vmaps in
+  let maps = List.fold_left aux [vmap] l in
+  maps
 
 let ground_decl_aux gmap (gls, n, l) =
   let maps = glits gmap SMap.empty gls in

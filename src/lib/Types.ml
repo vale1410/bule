@@ -10,7 +10,7 @@ type term = Exp of expr | Fun of (cname * term list)
 type atom = cname * term list
 type tuple = ExpTu of expr | FunTu of (cname * tuple list) | Range of (expr * expr)
 type atomd = cname * tuple list
-type ground_literal = In of atom | Notin of atom | Comparison of (term * comparison_operator * term) | Set of (vname * term)
+type ground_literal = In of atom | Notin of atom | Comparison of (term * comparison_operator * term) | Set of (vname * tuple)
 
 type glits = ground_literal list
 
@@ -29,7 +29,7 @@ type file =
 end end
 
 module PARSE = struct module T = struct
-type ground_literal = In of AST.T.atom | Notin of AST.T.atom | Chain of (AST.T.term * (AST.T.comparison_operator * AST.T.term) list) | Set of (AST.T.vname * AST.T.term)
+type ground_literal = In of AST.T.atom | Notin of AST.T.atom | Chain of (AST.T.term * (AST.T.comparison_operator * AST.T.term) list) | Set of (AST.T.vname * AST.T.tuple)
 
 type glits = ground_literal list
 type literals = glits * bool * AST.T.atom

@@ -53,7 +53,7 @@ struct
     | In ga -> atom ga
     | Notin ga -> sprintf "~%s" (atom ga)
     | Comparison (t1, c, t2) -> sprintf "%s %s %s" (term t1) (comparison_operator c) (term t2)
-    | Set (v, t) -> sprintf "%s := %s" v (term t)
+    | Set (v, t) -> sprintf "%s := %s" v (tuple t)
 
   let glits gls = list_comma ground_literal gls
   let literal (pol, var) =

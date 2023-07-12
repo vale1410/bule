@@ -87,7 +87,7 @@ ground_literal:
 | NOT ga = grounding_atom { PARSE.T.Notin ga }
 | ch = chain { PARSE.T.Chain ch }
 | e1 = term o = c_noperator e2 = term { PARSE.T.Chain (e1, [o, e2]) }
-| v = VNAME DEFINE t = term { PARSE.T.Set (v, t) }
+| v = VNAME DEFINE t = tuple { PARSE.T.Set (v, t) }
 chain:
 (*| t = term l = nonempty_list(pair(loperator,term)) { (t, l) }
 | t = term l = nonempty_list(pair(goperator,term)) { (t, l) }*)

@@ -52,7 +52,7 @@ struct
     | In ga -> sprintf "ground(%s)" (atom ga)
     | Notin ga -> sprintf "not ground(%s)" (atom ga)
     | Comparison (t1, c, t2) -> sprintf "%s %s %s" (term t1) (comparison_operator c) (term t2)
-    | Set (v, t) -> failwith (sprintf "'%s := %s' not implemented yet for gringo" v (term t))
+    | Set (v, t) -> failwith (sprintf "'%s := %s' not implemented yet for gringo" v (tuple t))
 
   let glits gls =
     if gls = [] then "."
