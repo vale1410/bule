@@ -9,3 +9,4 @@
   UNSAT
   $ ../bin/Bule.exe iss54_negativeBlock.bul 2> /dev/null
   #exists[0] a.
+  $ ../bin/Bule.exe --mode ground --output bule iss61_shared_grounding_prefix.bul | diff iss61_shared_grounding_prefix.target.bul -

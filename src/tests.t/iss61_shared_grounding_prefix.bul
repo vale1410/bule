@@ -1,0 +1,8 @@
+#ground domain[a], domain[b].
+domain[X] :: #exists x(X), y(X).
+domain[X] :: #exists[0] z(X), t(X), u(X), v(X).
+domain[X] :: #forall[1] a(X), b(X).
+
+domain[X] :: x(X) | a(X), ~x(X) | ~a(X).
+domain[X] :: #show z(X), t(X).
+domain[X] :: #hide u(X), v(X).

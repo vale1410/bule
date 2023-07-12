@@ -1,0 +1,8 @@
+#exists[0] t(a), t(b), u(a), u(b), v(a), v(b), z(a), z(b).
+#forall[1] a(a), a(b), b(a), b(b).
+#exists[2] x(a), x(b), y(a), y(b).
+ x(a) |  a(a).
+ x(b) |  a(b).
+~x(a) | ~a(a).
+~x(b) | ~a(b).
+#show  t(a),  t(b),  z(a),  z(b).
