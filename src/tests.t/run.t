@@ -12,3 +12,5 @@
   #exists[0] a.
   $ ../bin/Bule.exe --mode solve --solver "depqbf --no-dynamic-nenofex --qdo" iss59_display_counterexample.bul | diff iss59_display_counterexample.target.out -
   $ ../bin/Bule.exe --mode ground --output bule iss61_shared_grounding_prefix.bul | diff iss61_shared_grounding_prefix.target.bul -
+  $ ../bin/Bule.exe --mode enumerate --solver "depqbf --no-dynamic-nenofex --qdo" --models 0 iss62_enumerate_counterexamples.bul 2>&1 | diff iss62_enumerate_counterexamples.target.out -
+  $ ../bin/Bule.exe --mode enumerate --solver minisat --models 0 iss62_enumerate_models.bul 2>&1 | diff iss62_enumerate_models.target.out -

@@ -1,0 +1,5 @@
+Instance ground. Starts solving
+UNSAT
+Counterexample 1: ~x
+Counterexample 2: ~x  y
+No more counterexamples. Total: 2 displayed counterexamples out of 2 counterexamples.
