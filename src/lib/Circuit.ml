@@ -353,8 +353,7 @@ let print_facts facts gmap =
 
 let identify_show show_mode hide_st = function
   | [] -> []
-  | (false, _) :: _ -> if hide_st <> [] then eprintf "Warning: show/hide declarations but the first block is universal."; []
-  | (true, vars) :: _ ->
+  | (_, vars) :: _ ->
      let bad_decl = List.filter (fun (_, (_, var)) -> not (VSet.mem var vars)) hide_st in
      if bad_decl <> [] then eprintf "Warning: the following literals were declared shown/hidden but they are not in the first block: %s\n" (P.unspaces Print.literal (List.rev_map snd bad_decl));
      let show, hide = List.partition_map (fun (h, lit) -> if h then Either.Right lit else Either.Left lit) hide_st in
