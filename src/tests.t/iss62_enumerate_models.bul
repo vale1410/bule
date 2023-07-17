@@ -1,2 +1,7 @@
-#exists[0] x, y.
+#exists[0] x, y, z, t.
 x.
+y | t.
+
+#show  x,  y.
+#hide ~x, ~y.
+#hide  t, ~t,  z, ~z.

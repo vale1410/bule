@@ -1,0 +1,5 @@
+Instance ground. Starts solving
+INVALID
+Counterexample 1: ~x
+Counterexample 2:  y ~x
+All 4 counterexamples identified, 2 displayed. Computed: 2, inferred: 2.

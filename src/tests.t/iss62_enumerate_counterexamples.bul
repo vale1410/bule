@@ -1,2 +1,5 @@
-#forall[0] x, y.
+#forall[0] x, y, z.
 x.
+
+#show  x, ~x,  y.
+#hide ~y,  z, ~z.

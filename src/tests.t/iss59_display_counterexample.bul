@@ -1,2 +1,4 @@
 #forall[0] x.
 x.
+
+#show x, ~x.
