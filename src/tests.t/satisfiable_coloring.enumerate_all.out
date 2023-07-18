@@ -1,0 +1,9 @@
+Instance ground. Starts solving
+SAT
+Model 1:  set(a,red)  set(b,blue)  set(c,green)  set(d,blue)
+Model 2:  set(a,green)  set(b,blue)  set(c,red)  set(d,blue)
+Model 3:  set(a,red)  set(b,green)  set(c,blue)  set(d,green)
+Model 4:  set(a,blue)  set(b,green)  set(c,red)  set(d,green)
+Model 5:  set(a,blue)  set(b,red)  set(c,green)  set(d,red)
+Model 6:  set(a,green)  set(b,red)  set(c,blue)  set(d,red)
+All models identified, 6 displayed. Computed: 6, inferred: 0.

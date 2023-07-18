@@ -15,3 +15,6 @@
   $ ../bin/Bule.exe --mode enumerate --solver "depqbf --no-dynamic-nenofex --qdo" --models 0 iss62_enumerate_counterexamples.bul 2>&1 | diff iss62_enumerate_counterexamples.depqbf.target.out -
   $ ../bin/Bule.exe --mode enumerate --solver "depqbf --no-dynamic-nenofex --qdo" --models 0 iss62_enumerate_models.bul 2>&1 | diff iss62_enumerate_models.depqbf.target.out -
   $ ../bin/Bule.exe --mode enumerate --solver minisat --models 0 iss62_enumerate_models.bul 2>&1 | diff iss62_enumerate_models.minisat.target.out -
+  $ ../bin/Bule.exe --mode solve --solver minisat satisfiable_coloring.bul 2>&1 | diff satisfiable_coloring.solve.out -
+  $ ../bin/Bule.exe --mode enumerate --models 2 --solver minisat satisfiable_coloring.bul 2>&1 | diff satisfiable_coloring.enumerate_2.out -
+  $ ../bin/Bule.exe --mode enumerate --models 0 --solver minisat satisfiable_coloring.bul 2>&1 | diff satisfiable_coloring.enumerate_all.out -

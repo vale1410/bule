@@ -1,0 +1,5 @@
+Instance ground. Starts solving
+SAT
+Model 1:  set(a,red)  set(b,blue)  set(c,green)  set(d,blue)
+Model 2:  set(a,green)  set(b,blue)  set(c,red)  set(d,blue)
+Total: 2 displayed models out of at least 2 models. Computed: 2, inferred: 0.

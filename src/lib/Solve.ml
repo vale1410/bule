@@ -15,7 +15,7 @@ let sscanf_int_opt string arg x =
   try Some (Scanf.sscanf string arg x) with
   | Scanf.Scan_failure _ -> None
 
-let compare_literals (px, x) (py, y) = -(compare (x, px) (y, py))
+let compare_literals (px, x) (py, y) = compare (x, px) (y, py)
 
 module CL = struct
   let abs x =
@@ -72,9 +72,6 @@ module CL = struct
       | hd :: tl -> (hd, tl) in
     let cmd = Filename.quote_command cmd ~stdin:stdin_name ~stdout:stdout_name ~stderr:stderr_name args in
     Print.to_file stdin_name question;
-    (*let stdin_f = open_out stdin_name in
-    fprintf stdin_f "%s%!" question;
-    close_out stdin_f;*)
     deprintf "cmd: %s\n%!" cmd;
     let status = Unix.system cmd in
     let stdout_f = open_in stdout_name
@@ -89,10 +86,9 @@ module CL = struct
       | Unix.WEXITED 20 -> Some false
       | Unix.WEXITED code -> eprintf "Unknown solver exit code: %d\n%!" code; None
       | _ -> assert false in
-    (*eprintf "Answer:\n%s\n" (Print.list Fun.id lines);*)
     (answer, out_lines, err_lines)
 
-  let run_solver _keys formula (cmd, use_dimacs) =
+  let run_solver formula (cmd, use_dimacs) =
     let input = if use_dimacs then Dimacs.Print.sat_file formula else Dimacs.Print.qbf_file formula in
     let (answer, out_lines, err_lines) = run_process cmd input in
     deprintf "%s\n%!" (Print.unlines Fun.id err_lines);
@@ -111,28 +107,24 @@ module MS = struct
   let extract_model keys solver =
     let extract_var var =
       let lit = Minisat.Lit.make var in
-      let polarity = match Minisat.value solver lit with | Minisat.V_true -> true | Minisat.V_false -> false | Minisat.V_undef -> false in
-      (polarity, var) in
-    let model = IntSet.fold (fun var l -> extract_var var :: l) keys [] in
+      match Minisat.value solver lit with | Minisat.V_true -> Some (true, var) | Minisat.V_false -> Some (false, var) | Minisat.V_undef -> None in
+    let model = Misc.filter_map extract_var keys in
     model
 
   let literal (sign, var) =
     (if sign then Fun.id else Minisat.Lit.neg) (Minisat.Lit.make var)
   let clause lits = List.map literal lits
-  let clauses keys list =
+  let clauses vars list =
     let solver = Minisat.create () in
     try List.iter (fun c -> Minisat.add_clause_l solver (clause c)) list;
         Minisat.solve solver;
-        let solution = extract_model keys solver in
+        let solution = extract_model vars solver in
         Some (true, Some solution)
     with Minisat.Unsat -> Some (false, None)
 
-  let run_solver keys (_, _, blocks, cls) =
-    match blocks with
-    | [] -> failwith "no blocks"
-    | _ :: _ :: _ | (false, _) :: _ -> failwith (sprintf "Minisat cannot handle the quantifier structures %s." (Print.list Dimacs.Print.quantifier_block blocks))
-    | (true, _) :: [] ->
-       clauses keys cls
+  let run_solver (sat, vars) (_, _, blocks, cls) =
+    if not sat || List.length blocks > 1 then failwith (sprintf "Minisat cannot handle the quantifier structures %s." (Print.list Dimacs.Print.quantifier_block blocks));
+    clauses vars cls
 end
 
 module QT = struct
@@ -160,36 +152,28 @@ module QT = struct
     | Qbf.Spaceout -> failwith "spaceout in qbf solver"
     | Qbf.Unknown  -> failwith "unknown error in qbf solver"
     | Qbf.Sat a ->
-       let add var l = match assignment a var with
-         | None -> l
-         | Some ass -> ass :: l in
-       let model = IntSet.fold add keys [] in
+       let model = Misc.filter_map (assignment a) keys in
        true, Some model
 
-  let first_block (_,_,blocks,_) = match blocks with
-    | [] -> failwith "no blocks"
-    | (_, vars) :: _ -> vars
-  let run_solver keys (file : Dimacs.T.file) =
+  let run_solver (_, surface_vars) (file : Dimacs.T.file) =
     let f = qcnf file in
     deprintf "file0: %s\n" (Dimacs.Print.qbf_file file);
     deprintf "file:%!"; if debug then (Qbf.QCNF.print Format.err_formatter f; Format.print_flush ());
-    let relevant_vars = first_block file in
-    if false then eprintf "\n\n\n\nrelevant: %s\n%!" (Print.unspaces Print.int relevant_vars);
+    if false then eprintf "\n\n\n\nrelevant: %s\n%!" (Print.unspaces Print.int surface_vars);
     let r = Qbf.solve ~solver:Quantor.solver f in
     if false then (Qbf.pp_result Format.err_formatter r; Format.print_flush ();
                    Format.pp_print_flush Format.err_formatter ());
     deprintf "res\n%!";
-    let keys = IntSet.filter (fun v -> List.mem v relevant_vars) keys in
-    let model = extract_model keys r in
+    let model = extract_model surface_vars r in
     Some model
 
 end
 
-let run_solver keys dimacs solver =
+let run_solver objective dimacs solver =
   let solver_output = match solver with
-    | (CommandLine cmd, use_dimacs) -> CL.run_solver keys dimacs (cmd, use_dimacs)
-    | (Minisat, _) -> MS.run_solver keys dimacs
-    | (Quantor, _) -> QT.run_solver keys dimacs in
+    | (CommandLine cmd, use_dimacs) -> CL.run_solver dimacs (cmd, use_dimacs)
+    | (Minisat, _) -> MS.run_solver objective dimacs
+    | (Quantor, _) -> QT.run_solver objective dimacs in
   match solver_output with
   | None -> None
   | Some (solution, values) ->
@@ -214,10 +198,10 @@ let filtered_model surface_vars show values =
   let is_flexible var = not (List.mem (true, var) values) && not (List.mem (false, var) values) in
   let is_shown (pol, var) = Dimacs.T.ISet.mem (if pol then var else -var) show in
   let assign_arbitrary var = match is_shown (true, var), is_shown (false, var) with
-    | true,  true  -> Either.Left (true, var)
+    | true,  true  -> Either.Left  (true,  var)
     | true,  false -> Either.Right (false, var)
-    | false, true  -> Either.Right (true, var)
-    | false, false -> Either.Right (true, var) in
+    | false, true  -> Either.Right (true,  var)
+    | false, false -> Either.Right (true,  var) in
   let flexible_vars = List.filter is_flexible surface_vars in
   let arbitrary_vars, free_vars = List.partition is_external flexible_vars in
   let external_lits, internal_lits = List.partition is_external_lit values in
@@ -227,32 +211,8 @@ let filtered_model surface_vars show values =
   and omit_lits = Misc.flatten [omit_forced; omit_arbitrary] in
   (show_lits, omit_lits, internal_lits, free_vars)
 
-let filtered_model2 surface_vars show values =
-  let is_shown (pol, var) = Dimacs.T.ISet.mem (if pol then var else -var) show in
-  let is_committed var = is_shown (true, var) || is_shown (false, var) in
-  let has_fixed_value var =
-    let plit, nlit = (true, var), (false, var) in
-    if List.mem plit values then Either.Left plit
-    else if List.mem nlit values then Either.Left nlit
-    else Either.Right var in
-  let fixed, flexible = List.partition_map has_fixed_value surface_vars in
-  let show_fixed, hide_fixed = List.partition is_shown fixed in
-  let committed, free = List.partition is_committed flexible in
-  let show_committed, hide_committed = List.partition is_shown (List.map (fun var -> (true, var)) committed) in
-  (*eprintf "show %s\n%!" (Print.list Print.int (IntSet.elements show));
-  eprintf "show fixed %s, hide fixed %s\n%!" (Print.list (Print.couple Print.bool Print.int) show_fixed) (Print.list (Print.couple Print.bool Print.int) hide_fixed);
-  eprintf "committed %s, free %s\n%!" (Print.list Print.int committed) (Print.list Print.int free);
-  eprintf "show committed %s, hide committed %s\n%!" (Print.list (Print.couple Print.bool Print.int) show_committed) (Print.list (Print.couple Print.bool Print.int) hide_committed);*)
-  let show_all = List.rev_append show_committed show_fixed
-  and hide_all = List.rev_append hide_committed hide_fixed in
-  (show_all, hide_all, [], free)
-
-let print_one_model imap = Print.unlines (print_literal imap)
-let print_enumerate_model imap model = Print.unspaces Fun.id (List.sort compare (List.map (print_literal imap) model))
-
-let map_keys map =
-  let add k _ set = IntSet.add k set in
-  Dimacs.T.IMap.fold add map IntSet.empty
+let print_one_model imap values = Print.unlines (print_literal imap) (List.sort compare_literals values)
+let print_enumerate_model imap model = Print.unspaces (print_literal imap) (List.sort compare_literals model)
 
 let next_sat_instance (nbvar, nbcls, blocks, cls) model =
   let flip_literal (pol, var) = (not pol, var) in
@@ -269,44 +229,67 @@ let extract_objective (_, _, prefix, _) = match prefix with
   | head :: _ -> Some head
 
 let vocabulary = function
-  | true  -> "SAT", "UNSAT", "model"
-  | false -> "VALID", "INVALID", "counterexample"
+  | true  -> "SAT", "UNSAT"
+  | false -> "VALID", "INVALID"
+let solution_name = function
+  | true  -> "model"
+  | false -> "counterexample"
+
+type stats =
+  { already_displayed : bool;
+    displayed : int;
+    computed : int;
+    inferred : int; }
+let init_stats = { already_displayed = false; displayed = 0; computed = 0; inferred = 0 }
+
+let display_result sat answer stats =
+  let success, failure = vocabulary sat in
+  if stats.computed = 0 then if answer then printf "%s\n%!" success else printf "%s\n%!" failure
+let display_all_solutions_found sat stats =
+  let values_name = solution_name sat in
+  eprintf "All %ss identified, %d displayed. Computed: %d, inferred: %d.\n%!" values_name stats.displayed stats.computed stats.inferred
+let display_no_more_solutions_found sat stats =
+  let values_name = solution_name sat in
+  eprintf "No more %ss identified, %d displayed. Computed: %d, inferred: %d.\n%!" values_name stats.displayed stats.computed stats.inferred
+let display_budget_over sat stats =
+  let values_name = solution_name sat in
+  let total = stats.computed + stats.inferred in
+  eprintf "Total: %d displayed %ss out of at least %d %ss. Computed: %d, inferred: %d.\n%!" stats.displayed values_name total values_name stats.computed stats.inferred
+let display_solution sat stats imap (shown, _, _, _) =
+  let values_name = solution_name sat in
+  let solution = print_enumerate_model imap shown in
+  if not stats.already_displayed then eprintf "%s %d: %s\n%!" (String.capitalize_ascii values_name) (stats.displayed) solution
 
 let solve_one cmd (dimacs, _, imap, show) =
   match extract_objective dimacs with
   | None -> eprintf "Trivial formula, nothing to solve.\n%!"
   | Some (sat, surface) ->
-  let success, failure, _ = vocabulary sat in
-  let keys = map_keys imap in
-  match run_solver keys dimacs cmd with
+  match run_solver (sat, surface) dimacs cmd with
   | None -> eprintf "Couldn't solve the instance.\n%!"
-  | Some (true,  None) -> printf "%s\n" success
-  | Some (false, None) -> printf "%s\n" failure
-  | Some (solution, Some model) ->
-     if solution then printf "%s\n" success else printf "%s\n" failure;
-     warn_bad_values imap surface model;
-     let (shown, _, _, _) = filtered_model surface show model in
+  | Some (solution, certificate) ->
+     display_result sat solution init_stats;
+     match certificate with
+  | None -> ()
+  | Some values ->
+     warn_bad_values imap surface values;
+     let (shown, _, _, _) = filtered_model surface show values in
      eprintf "%s\n" (print_one_model imap shown)
-
-type stats =
-  { displayed : int;
-    computed : int;
-    inferred : int; }
 
 let update_solutions sat stats shown_solutions formula (show, omit, hide, free) =
   let next_instance = if sat then next_sat_instance else naive_next_taut_instance in
   let relevant = List.sort compare (Misc.flatten [show; omit]) in
 (*  let solution = Misc.flatten [show; omit; hide; Misc.map (fun var -> (false, var)) free] in*)
   let solution = Misc.flatten [show; omit; hide] in
-  let next_formula = next_instance formula solution in
+  let formula = next_instance formula solution in
   let already_displayed = ModelSet.mem relevant shown_solutions in
   deprintf "shown: %s,\nshow: %s, omit: %s, hide: %s, free: %s\n%!" (print_model_set shown_solutions) (Print.unspaces Dimacs.Print.literal show) (Print.unspaces Dimacs.Print.literal omit) (Print.unspaces Dimacs.Print.literal hide) (Print.unspaces Print.int free);
-  (*eprintf "Already %B, Next formula:\n%s\n" already_displayed (Dimacs.Print.qbf_file next_formula);*)
-  let stats = { displayed = if already_displayed then stats.displayed else stats.displayed + 1;
+  (*eprintf "Already %B, Next formula:\n%s\n" already_displayed (Dimacs.Print.qbf_file formula);*)
+  let stats = { already_displayed;
+                displayed = if already_displayed then stats.displayed else stats.displayed + 1;
                 computed = stats.computed + 1;
                 inferred = stats.inferred + Misc.pow 2 (List.length free) - 1} in
   let shown_solutions = if already_displayed then shown_solutions else ModelSet.add relevant shown_solutions in
-  (stats, shown_solutions, next_formula)
+  (stats, shown_solutions, formula)
 
 let solve_all (cmd, bound) (dimacs, _, imap, show) =
   eprintf "Instance ground. Starts solving\n%!";
@@ -314,29 +297,24 @@ let solve_all (cmd, bound) (dimacs, _, imap, show) =
   match extract_objective dimacs with
   | None -> eprintf "Trivial formula, nothing to solve.\n%!"
   | Some (sat, surface) ->
-  let success, failure, values_name = vocabulary sat in
-  let keys = map_keys imap in
-  let init_stats = { displayed = 0; computed = 0; inferred = 0 } in
   let rec aux stats models dm =
     (*eprintf "Current formula:\n%s\n" (Dimacs.Print.qbf_file dm);*)
-    let iteration = stats.computed in
-    let total = stats.computed + stats.inferred in
-    let print_result answer = if stats.computed = 0 then if answer then printf "%s\n%!" success else printf "%s\n%!" failure in
-    if iteration >= bound && bound > 0 then eprintf "Total: %d displayed %ss out of at least %d %ss. Computed: %d, inferred: %d.\n%!" stats.displayed values_name total values_name stats.computed stats.inferred
-    else
-      match run_solver keys dm cmd with
-      | None -> ()
-      | Some (answer, None) ->
-         print_result answer;
-         if answer = sat then eprintf "No more %ss identified. %d %ss displayed. Computed: %d, inferred: %d.\n%!" values_name stats.displayed values_name stats.computed stats.inferred
-         else eprintf "All %d %ss identified, %d displayed. Computed: %d, inferred: %d.\n%!" total values_name stats.displayed stats.computed stats.inferred
-      | Some (answer, Some values) ->
-         print_result answer;
-         warn_bad_values imap surface values;
-         let (shown, _omit, _hidden, _free) as fmodel = filtered_model surface show values in
-         (*eprintf "Output: %s, %s, %s\n%!" (Print.list (print_literal imap) shown) (Print.list (print_literal imap) _hidden) (Print.list (print_variable imap) _free);*)
-         let next_stats, next_shown_solutions, next_formula = update_solutions sat stats models dm fmodel in
-         (*eprintf "Found values %s\nNext formula:\n%s\n" (print_enumerate_model imap values) (Dimacs.Print.qbf_file next_formula);*)
-         if next_stats.displayed <> stats.displayed then eprintf "%s %d: %s\n%!" (String.capitalize_ascii values_name) (next_stats.displayed) (print_enumerate_model imap shown);
-         aux next_stats next_shown_solutions next_formula in
+    match run_solver (sat, surface) dm cmd with
+    | None -> ()
+    | Some (answer, certificate) ->
+       display_result sat answer stats;
+       match certificate with
+       | None ->
+          if answer = sat then display_no_more_solutions_found sat stats
+          else display_all_solutions_found sat stats
+       | Some values ->
+          warn_bad_values imap surface values;
+          let fmodel = filtered_model surface show values in
+          (*eprintf "Output: %s, %s, %s\n%!" (Print.list (print_literal imap) shown) (Print.list (print_literal imap) _hidden) (Print.list (print_variable imap) _free);*)
+          let next_stats, next_shown_solutions, next_formula = update_solutions sat stats models dm fmodel in
+          (*eprintf "Found values %s\nNext formula:\n%s\n" (print_enumerate_model imap values) (Dimacs.Print.qbf_file next_formula);*)
+          display_solution sat next_stats imap fmodel;
+          let budget_over = next_stats.computed >= bound && bound > 0 in
+          if budget_over then display_budget_over sat next_stats
+          else aux next_stats next_shown_solutions next_formula in
   aux init_stats ModelSet.empty dimacs

@@ -1,0 +1,9 @@
+#ground vertex[a], vertex[b], vertex[c], vertex[d].
+#ground edge[a,b], edge[b,c], edge[c,d], edge[d,a], edge[a,c].
+#ground color[red], color[green], color[blue].
+
+vertex[V], color[C] :: #exists set(V,C).
+
+vertex[V] :: color[C] : set(V,C).
+vertex[V], color[C1], color[C2], C1 < C2 :: ~set(V,C1) | ~set(V,C2).
+edge[V1,V2], color[C] :: ~set(V1,C) | ~set(V2,C).

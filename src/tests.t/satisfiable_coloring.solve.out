@@ -1,0 +1,5 @@
+SAT
+ set(a,red)
+ set(b,blue)
+ set(c,green)
+ set(d,blue)

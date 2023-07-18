@@ -2,4 +2,4 @@ Instance ground. Starts solving
 SAT
 Model 1:  x
 Model 2:  x  y
-All 6 models identified, 2 displayed. Computed: 6, inferred: 0.
+All models identified, 2 displayed. Computed: 3, inferred: 3.
