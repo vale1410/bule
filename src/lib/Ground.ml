@@ -35,7 +35,9 @@ struct
     | Int i -> Print.int i
     | BinE _ as e -> sprintf "(%s)" (expr e)
 
-  let paren_list f = Print.list' "(" ", " ")" f
+  let paren_list f = function
+    | [] -> ""
+    | _ :: _ as l -> Print.list' "(" "," ")" f l
 
   let rec term : term -> string = function
     | Exp e -> expr e

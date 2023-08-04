@@ -25,9 +25,12 @@ struct
     | Geq -> ">="
     | Eq -> "=="
     | Neq -> "!="
-  let eoperator o = "\\" ^ eoperator_aux o
+  let eoperator o = eoperator_aux o
 
-  let list_tuple f = Print.list' "(" ", " ")" f
+  let list_tuple f = function
+    | [] -> ""
+    | _ :: _ as l -> Print.list' "(" "," ")" f l
+  let list_square f = Print.list' "[" "," "]" f
   let list_comma f = Print.list' "" ", " "" f
 
   let rec expr = function
@@ -40,14 +43,14 @@ struct
   let rec term : term -> string = function
     | Exp e -> expr e
     | Fun (c, ts) -> sprintf "%s%s" c (list_tuple term ts)
-  let atom (name, terms) = sprintf "%s[%s]" name (list_comma term terms)
+  let atom (name, terms) = sprintf "%s%s" name (list_square term terms)
   let rec tuple = function
     | ExpTu e -> expr e
     | FunTu (c, ts) -> sprintf "%s%s" c (list_tuple tuple ts)
     | Range (e1, e2) -> sprintf "%s..%s" (expr e1) (expr e2)
-  let atomd (name, tuples) = sprintf "%s[%s]" name (list_comma tuple tuples)
-  let search_var (name, terms) = sprintf "%s(%s)" name (list_comma term terms)
-  let searchd (name, tuples) = sprintf "%s(%s)" name (list_comma tuple tuples)
+  let atomd (name, tuples) = sprintf "%s%s" name (list_square tuple tuples)
+  let search_var (name, terms) = sprintf "%s%s" name (list_tuple term terms)
+  let searchd (name, tuples) = sprintf "%s%s" name (list_tuple tuple tuples)
 
   let ground_literal = function
     | In ga -> atom ga
@@ -67,23 +70,22 @@ struct
     | _ :: _ -> glits gls ^ " : " in
     gls ^ literal (pol, var)
 
-  let ground_decl (gls, ats) = sprintf "%s :: %s." (glits gls) (list_comma atomd ats)
+  let prefix gls = if gls = [] then "" else sprintf "%s :: " (glits gls)
+  let ground_decl (gls, ats) = sprintf "%s#ground %s." (prefix gls) (list_comma atomd ats)
   let search_decl_level (exi, depth, vars) =
     let quant = if exi then "exists" else "forall" in
     let svs = list_comma searchd vars in
-    sprintf "#%s[%s] %s." quant (expr depth) svs
+    sprintf "#%s[%s] %s" quant (expr depth) svs
   let search_decl (gls, decl) =
     let decl = match decl with
       | Level x -> search_decl_level x
       | ExistentialInnerMost vars -> sprintf "#exists %s" (list_comma searchd vars) in
-    let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in
-    sprintf "#%s :: %s." gls decl
+    sprintf "%s%s." (prefix gls) decl
   let clause (hyps, ccls) = sprintf "%s -> %s" (Print.list' "" " & " "" literals hyps) (Print.list' "" " | " "" literals ccls)
-  let clause_decl (gls, clauses) = sprintf "%s :: %s." (glits gls) (list_comma clause clauses)
+  let clause_decl (gls, clauses) = sprintf "%s%s." (prefix gls) (list_comma clause clauses)
   let hide_decl (gls, (hide, lits)) =
-    let gls = match gls with [] -> "" | _ :: _ -> ", " ^ glits gls in
     let h = if hide then "hide" else "show" in
-    sprintf "%%#%s %s :: %s." h gls (list_comma literal lits)
+    sprintf "%s#%s %s." (prefix gls) h (list_comma literal lits)
 
   let file { ground; prefix; matrix; hide } =
     sprintf "%s\n%s\n%s\n%s\n"
