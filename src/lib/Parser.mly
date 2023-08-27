@@ -28,7 +28,8 @@ open Types
 (*%type <Types.PARSE.T.search_decl> search_decl*)
 %type <Types.PARSE.T.file> file
 %type <(Types.AST.T.cname * Types.CIRCUIT.T.search_var list) list> ground_gringo
-%start file ground_gringo
+%type <(Types.AST.T.cname * Types.CIRCUIT.T.search_var list) list> clingo_model
+%start file ground_gringo clingo_model
 %%
 
 %public %inline iboption(X):
@@ -134,9 +135,14 @@ ground_term:
 ground_atom:
 | name = CNAME ts = pr_list(ground_term) { (name, ts) }
 fact:
-| ground = CNAME LPAREN a = ground_atom RPAREN DOT { (ground, [a]) }
-| quanti = CNAME LPAREN d = INT COMMA a = ground_atom RPAREN DOT { (quanti, [(string_of_int d, []); a]) }
-| hidesh = CNAME LPAREN s = CNAME COMMA a = ground_atom RPAREN DOT { (hidesh, [(s, []); a]) }
+| ground = CNAME LPAREN a = ground_atom RPAREN { (ground, [a]) }
+| quanti = CNAME LPAREN d = INT COMMA a = ground_atom RPAREN { (quanti, [(string_of_int d, []); a]) }
+| hidesh = CNAME LPAREN s = CNAME COMMA a = ground_atom RPAREN { (hidesh, [(s, []); a]) }
+fact_dot:
+| f = fact DOT { f }
 
 ground_gringo:
+| l = list(fact_dot) EOF { l }
+
+clingo_model:
 | l = list(fact) EOF { l }

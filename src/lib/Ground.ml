@@ -3,6 +3,9 @@ open Printf
 include Types.AST
 open T
 
+let debug = false
+let deprintf format = if debug then eprintf format else ifprintf stderr format
+
 module P = Print
 module Print =
 struct
@@ -66,24 +69,33 @@ struct
 end
 
 let run_gringo cmd input =
-  let (out, inp, err) = Unix.open_process_full cmd [||] in
   eprintf "gringo:\n%s\n" input;
-  fprintf inp "%s" input;
-  flush inp;
-  close_out inp;
-  let out = Misc.read_in_channel out in
-  let err = Misc.read_in_channel err in
-  (out, err)
+  let (_code, out, err) = Misc.run_process cmd input in
+  if err <> [] then eprintf "gringo: %s\n" (P.unlines P.string err);
+  (*eprintf "gringo out:\n%s\n%!" out;*)
+  let facts = Parse.facts (P.unlines P.string out) in
+  facts
+
+let run_clingo input =
+  (*eprintf "clingo:\n%s\n" input;*)
+  let (_code, stdout, _stderr) = Misc.run_process "clingo --verbose=0 --models=2" input in
+  let model = match stdout with
+  | "UNSATISFIABLE" :: [] -> eprintf "Clingo didn't find any model\n"; assert false
+  | m1 :: "SATISFIABLE" :: [] -> Parse.clingo_facts m1
+  | m1 :: m2 :: "SATISFIABLE" :: [] -> eprintf "Clingo found two ground models:\n%s\n%s\n" m1 m2; assert false
+  | _ -> failwith (sprintf "Cannot parse clingo's stdout: %s" (P.list P.string stdout)) in
+  model
 
 let all_ground cmd gs =
   let f (glits, facts) = Misc.map (fun fact -> (glits, fact)) facts in
   let flat = List.concat_map f gs in
-  let out, err = run_gringo cmd (Print.ground flat) in
-  let facts = Parse.facts out in
+  let facts =
+  if cmd = "clingo" then run_clingo (Print.ground flat)
+  else run_gringo cmd (Print.ground flat) in
+  ignore cmd;
   let aux = function
     | ("ground", [g]) -> g
     | _ -> assert false in
   let grounds = List.rev_map aux facts in
-  ignore err;
   grounds
 

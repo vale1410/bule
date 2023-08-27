@@ -63,6 +63,9 @@ let from_file () name =
 let facts input =
   let (lexer, close) = lexer_from_string input in
   parse Parser.Incremental.ground_gringo "gringo-output" lexer close
+let clingo_facts input =
+  let (lexer, close) = lexer_from_string input in
+  parse Parser.Incremental.clingo_model "clingo-output" lexer close
 end
 
 include TableBased

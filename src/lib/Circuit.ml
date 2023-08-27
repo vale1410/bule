@@ -330,7 +330,8 @@ let all_hide gmap decls : (bool * T.literal) list =
 
 let literals gmap vmap (gls, pol, ga) =
   let maps = glits gmap vmap gls in
-  List.map (fun m -> (pol, search_var ga m)) maps
+  try List.map (fun m -> (pol, search_var ga m)) maps with
+  | exn -> eprintf "In literals %s:\n" (Ast.Print.literals (gls, pol, ga)); raise exn
 
 let clause_decl gmap (gls, clauses) =
   let maps = glits gmap SMap.empty gls in

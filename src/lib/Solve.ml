@@ -33,13 +33,6 @@ module CL = struct
     | Some status -> status
     | None -> eprintf "I could not interpret the solver solution line. I read '%s', but I expected 's cnf %%d %%d %%d'\n" line; assert false
 
-  let input_lines inp =
-    let l = ref [] in
-    (try
-       while true do l := input_line inp :: !l done
-     with End_of_file -> ());
-    List.rev !l
-
   let loose_parse_line line =
     let tokens = Str.split (Str.regexp "[ ]+") line in
     let lit_of_string s = Option.bind (int_of_string_opt s) abs in
@@ -64,28 +57,13 @@ module CL = struct
       Some (solution, values)
 
   let run_process cmd question =
-    let stdin_name  = Filename.temp_file "bule." ".in" in
-    let stdout_name = Filename.temp_file "bule." ".out" in
-    let stderr_name = Filename.temp_file "bule." ".err" in
-    let (cmd, args) = match Str.split (Str.regexp "[ ]+") cmd with
-      | [] -> assert false
-      | hd :: tl -> (hd, tl) in
-    let cmd = Filename.quote_command cmd ~stdin:stdin_name ~stdout:stdout_name ~stderr:stderr_name args in
-    Print.to_file stdin_name question;
     deprintf "cmd: %s\n%!" cmd;
-    let status = Unix.system cmd in
-    let stdout_f = open_in stdout_name
-    and stderr_f = open_in stderr_name in
-    let out_lines = input_lines stdout_f
-    and err_lines = input_lines stderr_f in
-    close_in stdout_f;
-    close_in stderr_f;
-    List.iter Sys.remove [stdin_name; stdout_name; stderr_name];
+    let (status, out_lines, err_lines) = Misc.run_process cmd question in
     let answer = match status with
-      | Unix.WEXITED 10 -> Some true
-      | Unix.WEXITED 20 -> Some false
-      | Unix.WEXITED code -> eprintf "Unknown solver exit code: %d\n%!" code; None
-      | _ -> assert false in
+      | Either.Left 10 -> Some true
+      | Either.Left 20 -> Some false
+      | Either.Left code -> eprintf "Unknown solver exit code: %d\n%!" code; None
+      | Either.Right _ -> assert false in
     (answer, out_lines, err_lines)
 
   let run_solver formula (cmd, use_dimacs) =
@@ -108,7 +86,7 @@ module MS = struct
     let extract_var var =
       let lit = Minisat.Lit.make var in
       match Minisat.value solver lit with | Minisat.V_true -> Some (true, var) | Minisat.V_false -> Some (false, var) | Minisat.V_undef -> None in
-    let model = Misc.filter_map extract_var keys in
+    let model = List.filter_map extract_var keys in
     model
 
   let literal (sign, var) =
@@ -144,28 +122,37 @@ module QT = struct
     match a l with
     | Qbf.True  -> deprintf "true %d " var; Some (true,  var)
     | Qbf.False -> deprintf "fals %d " var; Some (false, var)
-    | Qbf.Undef -> deprintf "unde %d " var; Some (false, var)
+    | Qbf.Undef -> deprintf "unde %d " var; None
 
   let extract_model keys = function
-    | Qbf.Unsat -> false, None
+    | Qbf.Unsat -> None
     | Qbf.Timeout  -> failwith "timeout in qbf solver"
     | Qbf.Spaceout -> failwith "spaceout in qbf solver"
     | Qbf.Unknown  -> failwith "unknown error in qbf solver"
     | Qbf.Sat a ->
-       let model = Misc.filter_map (assignment a) keys in
-       true, Some model
+       let model = List.filter_map (assignment a) keys in
+       deprintf "\nkeys: %s\n%!" (Print.unspaces Print.int keys);
+       Some model
 
   let run_solver (_, surface_vars) (file : Dimacs.T.file) =
     let f = qcnf file in
-    deprintf "file0: %s\n" (Dimacs.Print.qbf_file file);
+    eprintf "file0: %s\n" (Dimacs.Print.qbf_file file);
     deprintf "file:%!"; if debug then (Qbf.QCNF.print Format.err_formatter f; Format.print_flush ());
     if false then eprintf "\n\n\n\nrelevant: %s\n%!" (Print.unspaces Print.int surface_vars);
     let r = Qbf.solve ~solver:Quantor.solver f in
     if false then (Qbf.pp_result Format.err_formatter r; Format.print_flush ();
                    Format.pp_print_flush Format.err_formatter ());
     deprintf "res\n%!";
-    let model = extract_model surface_vars r in
-    Some model
+    match extract_model surface_vars r with
+    | None -> Some (false, None)
+    | Some values ->
+    Some (true, Some values)
+(*    match Preprocessing.simplify values file with
+    | None -> assert false
+    | Some (model, _) ->
+     eprintf "QT: return_model %s, UP %s\n%!" (Print.unspaces Dimacs.Print.literal values) (Print.unspaces Dimacs.Print.literal model);
+     Some (true, Some model)
+*)
 
 end
 
@@ -283,7 +270,7 @@ let update_solutions sat stats shown_solutions formula (show, omit, hide, free) 
   let formula = next_instance formula solution in
   let already_displayed = ModelSet.mem relevant shown_solutions in
   deprintf "shown: %s,\nshow: %s, omit: %s, hide: %s, free: %s\n%!" (print_model_set shown_solutions) (Print.unspaces Dimacs.Print.literal show) (Print.unspaces Dimacs.Print.literal omit) (Print.unspaces Dimacs.Print.literal hide) (Print.unspaces Print.int free);
-  (*eprintf "Already %B, Next formula:\n%s\n" already_displayed (Dimacs.Print.qbf_file formula);*)
+  deprintf "sat %B; Already %B, Next formula:\n%s\n" sat already_displayed (Dimacs.Print.qbf_file formula);
   let stats = { already_displayed;
                 displayed = if already_displayed then stats.displayed else stats.displayed + 1;
                 computed = stats.computed + 1;

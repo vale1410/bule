@@ -9,6 +9,7 @@ sig
   val eoperator : T.eoperator -> string
   val ground_literal : T.ground_literal -> string
   val ground_decl : (T.glits * T.ground_decl) -> string
+  val literals : T.literals -> string
   val file : T.file -> string
 end
 
