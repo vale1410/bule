@@ -3,7 +3,7 @@
 * `make install`
 
 
-If there are problems of the type: 
+### If there are problems of the type: 
 ```
 <><> Error report <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 ┌─ The following actions failed
@@ -17,7 +17,7 @@ C++ compiler should be set to gcc with (does not work with CLION) :
 export CC=gcc
 ```
 
-If there are problems of the type: 
+### If there are problems of the type: 
 `
 ^^^^^^^^^^^^^^^
 Error: Unbound value List.concat_map
@@ -34,7 +34,7 @@ if too old, then update to (for example 4.13.1)
 opam switch create 4.13.1
 ```
 
-update terminal: 
+### update terminal: 
 
 ```
 eval $(opam env)
@@ -43,5 +43,21 @@ opam upgrade
 ```
 
 and check again the version. 
+
+### Problems with dune
+
+check version of dune
+```
+dune --version
+```
+
+it should be above 2.8.0. 
+
+maybe remove the one installed by apt (under ubuntu), this one is rather old. and install the newest through opam itself:
+```
+opam install dune
+```
+
+and check for the version you need.
 
 
