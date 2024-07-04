@@ -10,7 +10,7 @@ Bule is a tool used to create CNF (conjunctive normal form) encodings for SAT so
   - **Parentheses**: Things in parentheses are evaluated first
   - **Conjunction**: AND operator (`&`)
   - **Disjunction**: OR operator (`|`)
-  - **Negation**: NOT operator (`!`)
+  - **Negation**: NOT operator (`~`)
 - A formula is in CNF if:
   - It is a conjunction of clause(s), where a clause is a disjunction of literals
   - English form: Everything inside the brackets are "OR"ed together, and all the brackets are "AND"ed together
