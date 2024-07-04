@@ -51,7 +51,7 @@ bule --solve --models 0 basic.bul
 
 To show the first `x` satisfying models
 ```
-bule --solve --models x basic.bul
+bule --solve --models <x> basic.bul
 ```
 
 ## Encoding Problems
