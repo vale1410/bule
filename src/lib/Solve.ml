@@ -42,19 +42,20 @@ module CL = struct
     let one_line line =
       let head, rest = if String.length line <= 1 then ("c ", "") else (String.sub line 0 2, String.sub line 2 (String.length line - 2)) in
       match head with
-      | "c " | "C " -> None
-      | "s " | "S " -> Some (Either.Left rest)
-      | "v " | "V " -> Some (Either.Right rest)
+      | "c " | "C " -> Some (Either.Left rest)
+      | "s " | "S " -> Some (Either.Right (Either.Left rest))
+      | "v " | "V " -> Some (Either.Right (Either.Right rest))
       | _ -> eprintf "Ignoring this line in the solver output '%s'\n" line; None in
     let meaningful_lines = List.filter_map one_line lines in
-    let solutions, values = List.partition_map Fun.id meaningful_lines in
+    let comments, answers = List.partition_map Fun.id meaningful_lines in
+    let solutions, values = List.partition_map Fun.id answers in
     match solutions with
-    | [] -> None
+    | [] -> (comments, None)
     | _ :: _ :: _ -> eprintf "Too many solution lines in the solver output: %s\n" (Print.list Fun.id solutions); assert false
     | solution :: [] ->
       let values = List.concat_map loose_parse_line values in
       let values = if values <> [] then Some values else None in
-      Some (solution, values)
+      (comments, Some (solution, values))
 
   let run_process cmd question =
     deprintf "cmd: %s\n%!" cmd;
@@ -66,17 +67,18 @@ module CL = struct
       | Either.Right _ -> assert false in
     (answer, out_lines, err_lines)
 
-  let run_solver formula (cmd, use_dimacs) =
+  let run_solver formula (cmd, (display_comments, use_dimacs)) =
     let input = if use_dimacs then Dimacs.Print.sat_file formula else Dimacs.Print.qbf_file formula in
     let (answer, out_lines, err_lines) = run_process cmd input in
     deprintf "%s\n%!" (Print.unlines Fun.id err_lines);
-    let certificate = loose_parse_file out_lines in
+    let comments, certificate = loose_parse_file out_lines in
+    if display_comments then List.iter (eprintf "c %s\n") comments;
     match answer, certificate with
     | None, None -> None
     | None, Some _ -> eprintf "Solver outputs a certificate but its output code indicates it was unable to solve the instance.\n%!"; assert false
     | Some answer, None -> Some (answer, None)
     | Some sol1, Some (sol2, values) ->
-       let sol2 =  if use_dimacs then parse_s_solution sol2 else parse_q_solution sol2 in
+       let sol2 = if use_dimacs then parse_s_solution sol2 else parse_q_solution sol2 in
        if sol1 <> sol2 then (eprintf "Solver certificate inconsistent with its output code.\n%!"; assert false);
        Some (sol1, values)
 end

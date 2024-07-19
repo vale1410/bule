@@ -50,6 +50,7 @@ type file =
   { prefix: quantifier_block list;
     matrix: clause list;
     show: literal list }
+(*module LSet = Set.Make (struct type t = literal let compare = compare end)*)
 end end
 
 module DIMACS = struct module T = struct

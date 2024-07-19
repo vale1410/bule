@@ -92,7 +92,6 @@ let all_ground cmd gs =
   let facts =
   if cmd = "clingo" then run_clingo (Print.ground flat)
   else run_gringo cmd (Print.ground flat) in
-  ignore cmd;
   let aux = function
     | ("ground", [g]) -> g
     | _ -> assert false in

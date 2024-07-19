@@ -27,8 +27,10 @@ type options = { mode : mode;
                  output_format : output_format;
                  models : int;
                  solver : B.Solve.solver;
+                 display_comments : bool;
                  ground_options : B.Circuit.option;
                  files : string list }
+
 
 let update reference value = reference := value
 let get () =
@@ -44,12 +46,14 @@ let get () =
   let output_option = ref Bule in
   let output_symbols = ["qdimacs"; "dimacs"; "bule"]
   and output_treat s = output_option := read_output_format s in
+  let display_comments = ref false in
   let show_option = ref B.Circuit.Positive in
   let show_symbols = ["all"; "positive"; "none"]
   and show_treat s = show_option := read_show_format s in
   let speclist =
     [("-",        Arg.Unit (fun () -> update input_names ("-" :: !input_names)), "Read the BULE code from the standard input.");
      ("--solve",  Arg.Unit (fun () -> update mode_option Enumerate), "Set mode to enumerate.");
+     ("--display-comments",  Arg.Bool (update display_comments), "If true then forward solver comments to stderr, else ignore them. Default: \"false\".");
      ("--mode", Arg.Symbol (mode_symbols, mode_treat), " Running mode. Default \"ground\".");
      ("--models", Arg.Set_int models, "Number of models to generate. The option has no effect if \"mode\" is not set to \"enumerate\". \"0\" generates all models. Default: 1.");
      ("--solver", Arg.Set_string solver, "Set the solver to be used. If \"quantor\" then Quantor 3.2 is used, if \"minisat\" then Minisat 1.14 is used, otherwise the argument is assumed to be a command-line tool. Example \"depqbf --no-dynamic-nenofex --qdo\". The option has no effect if \"mode\" is set to \"ground\". Default: \"quantor\"");
@@ -74,16 +78,16 @@ let get () =
     | "gringo" -> B.Circuit.CommandLine "gringo --text"
     | _ -> B.Circuit.CommandLine !grounder in
   let ground_options = { B.Circuit.facts = !facts; tool = grounder; show = !show_option } in
-  { mode = !mode_option; output_format = !output_option; models = !models; solver; ground_options; files }
+  { mode = !mode_option; output_format = !output_option; models = !models; solver; display_comments = !display_comments; ground_options; files }
 
 let enumerate_mode options file =
   let circuit = B.Circuit.file options.ground_options file in
   let file = B.Dimacs.ground circuit in
-  B.Solve.solve_all ((options.solver, options.output_format = Dimacs), options.models) file
+  B.Solve.solve_all ((options.solver, (options.display_comments, options.output_format = Dimacs)), options.models) file
 let solve_mode options file =
   let circuit = B.Circuit.file options.ground_options file in
   let file = B.Dimacs.ground circuit in
-  B.Solve.solve_one (options.solver, options.output_format = Dimacs) file
+  B.Solve.solve_one (options.solver, (options.display_comments, options.output_format = Dimacs)) file
 let ground_mode options file =
   let circuit = B.Circuit.file options.ground_options file in
   let d = B.Dimacs.file circuit in
