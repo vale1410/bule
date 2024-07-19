@@ -1,4 +1,7 @@
+
 <img src="logo.png" class="center" alt="Bule Logo" width="600"/>
+
+# The QBF and SAT Programming Language
 
 Bule helps you to create beautiful CNF and QBF encodings.
 The program `bule` is a sophisticated grounder for the modeling language Bule that support SAT and QBF Solving. 
