@@ -21,18 +21,18 @@ struct
 
 (* A short name for the incremental parser API. *)
 module I = Parser.MenhirInterpreter
-module G = MenhirLib.General
 
 exception ParserError of string
 
-(* Adapted from F.Pottier code in CompCert. *)
-(* Hmm... The parser is in its initial state. Its number is usually 0. This is a BIG HACK. TEMPORARY *)
-let stack = function
-  | I.HandlingError env -> Lazy.force (I.stack env)
+(* Adapted from F.Pottier code in CompCert.
+   MenhirLib.General / I.stack were removed in Menhir 20260112;
+   use current_state_number instead. *)
+let env = function
+  | I.HandlingError env -> env
   | _ -> assert false (* this cannot happen, F. Pottier promises *)
-let state checkpoint : int = match stack checkpoint with
-  | G.Nil -> 0
-  | G.Cons (I.Element (s, _, _, _), _) -> I.number s
+
+let state checkpoint : int =
+  I.current_state_number (env checkpoint)
 
 let succeed v = v
 let fail lexbuf checkpoint =
