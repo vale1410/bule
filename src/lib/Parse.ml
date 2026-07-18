@@ -26,13 +26,10 @@ exception ParserError of string
 
 (* Adapted from F.Pottier code in CompCert.
    MenhirLib.General / I.stack were removed in Menhir 20260112;
-   use current_state_number instead. *)
-let env = function
-  | I.HandlingError env -> env
-  | _ -> assert false (* this cannot happen, F. Pottier promises *)
-
-let state checkpoint : int =
-  I.current_state_number (env checkpoint)
+   use current_state_number instead. *)  
+let state = function
+  | I.HandlingError env -> I.current_state_number env
+  | _ -> assert false (* this should never happen. *)
 
 let succeed v = v
 let fail lexbuf checkpoint =
